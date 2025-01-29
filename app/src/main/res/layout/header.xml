@@ -8,7 +8,7 @@
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="40dp"
-        android:background="@drawable/header_bg"
+        android:background="@drawable/bg_header"
         android:paddingHorizontal="@dimen/horizontal_safe_area"
         android:paddingVertical="@dimen/vertical_safe_area">
 
