@@ -11,4 +11,5 @@
     <string name="item_price_txt">Rp%.1f</string>
     <string name="retry">Coba lagi\n</string>
     <string name="error_loading">Terdapat error...</string>
+    <string name="new_products_text">Produk Terbaru</string>
 </resources>
