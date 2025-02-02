@@ -1,3 +1,14 @@
 <resources>
     <string name="app_name">ecommerce_serang</string>
+
+
+    <!--Placeholder-->
+    <string name="fragment_home_search">Cari produk</string>
+    <string name="fragment_home_categories">Kategori Produk</string>
+    <string name="fragment_home_item_categories">Makanan Ringan</string>
+    <string name="show_all">Lainnya</string>
+
+    <string name="item_price_txt">Rp%.1f</string>
+    <string name="retry">Coba lagi\n</string>
+    <string name="error_loading">Terdapat error...</string>
 </resources>
