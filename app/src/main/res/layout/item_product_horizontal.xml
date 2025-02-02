@@ -30,7 +30,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="17dp"
         android:text="Banana"
-        android:textColor="@color/dark"
+        android:textColor="@color/black"
+        android:fontFamily="@font/dmsans_medium"
         android:textSize="18sp"
         app:layout_constraintTop_toBottomOf="@id/imageLayout" />
 
@@ -39,7 +40,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/item_price_txt"
-        android:textColor="@color/dark"
+        android:textColor="@color/black"
         android:textStyle="bold"
         android:textSize="18sp"
         app:layout_constraintTop_toBottomOf="@id/item_name" />
@@ -54,9 +55,10 @@
         android:paddingTop="5dp"
         android:paddingEnd="11dp"
         android:paddingBottom="3dp"
-        android:text="4.5"
-        android:textColor="@color/dark"
-        android:textSize="10sp"
+        android:text="@string/rating"
+        android:textColor="@color/black"
+        android:fontFamily="@font/dmsans_regular"
+        android:textSize="14sp"
         android:textAlignment="center"
         android:gravity="center"
         app:drawableStartCompat="@drawable/baseline_star_24"

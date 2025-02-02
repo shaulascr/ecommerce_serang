@@ -69,9 +69,6 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
 
-
-
-//    implementation("com.github.zhpanvip:viewpagerindicator:1.2.3")
     implementation("com.github.bumptech.glide:glide:4.16.0")
     implementation("androidx.paging:paging-runtime:3.2.1")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
