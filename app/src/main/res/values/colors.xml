@@ -14,7 +14,7 @@
     <color name="blue_700">#33708d</color>
     <color name="blue_800">#28576d</color>
     <color name="blue_900">#1e4253</color>
-    
+
     <color name="black_50">#ececed</color>
     <color name="black_100">#c4c4c7</color>
     <color name="black_200">#a7a8ac</color>
@@ -25,7 +25,7 @@
     <color name="black_700">#2d2f35</color>
     <color name="black_800">#232429</color>
     <color name="black_900">#1B1C1F</color>
-    
+
     <color name="darkblue_50">#eaebf1</color>
     <color name="darkblue_100">#bdc1d4</color>
     <color name="darkblue_200">#9da3bf</color>
@@ -36,4 +36,8 @@
     <color name="darkblue_700">#1f2652</color>
     <color name="darkblue_800">#181e40</color>
     <color name="darkblue_900">#121731</color>
+
+    <color name="gray_1">#E8ECF2</color>
+    <color name="soft_gray">#7D8FAB</color>
+    <color name="blue1">#489EC6</color>
 </resources>
