@@ -13,4 +13,8 @@
     <string name="error_loading">Terdapat error...</string>
     <string name="new_products_text">Produk Terbaru</string>
     <string name="rating">4.5</string>
+    <string name="open_store">Buka Toko</string>
+    <string name="delivery">Dikirim</string>
+    <string name="packages">Dikemas</string>
+    <string name="waiting_payment">Belum Dibayar</string>
 </resources>
