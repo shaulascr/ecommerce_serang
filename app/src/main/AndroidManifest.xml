@@ -17,6 +17,9 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".ui.profile.mystore.AddProductActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.profile.mystore.EditStoreProfileActivity"
             android:exported="false" />
         <activity

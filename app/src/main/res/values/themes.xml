@@ -127,7 +127,7 @@
     <style name="body_medium">
         <item name="android:textSize">14sp</item>
         <item name="android:lineSpacingExtra">20sp</item>
-        <item name="android:letterSpacing">0.25</item>
+        <item name="android:letterSpacing">0.025</item>
         <item name="android:textColor">@color/black</item>
         <item name="android:fontFamily">@font/dmsans_regular</item>
     </style>
