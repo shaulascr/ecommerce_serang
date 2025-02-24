@@ -149,20 +149,35 @@
 
                 </LinearLayout>
 
-                <EditText
-                    android:id="@+id/KategoriProduk"
+                <!-- Spinner Dropdown dengan Chevron -->
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/border"
-                    android:hint="Masukkan teks..."
-                    android:padding="8dp"
-                    android:textSize="14sp"
-                    android:textColorHint="#C4C4C7"
-                    android:layout_marginTop="@dimen/space_m"/>
+                    android:orientation="horizontal"
+                    android:background="@drawable/bg_text_field"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="10dp">
 
+                    <Spinner
+                        android:id="@+id/spinner_kategori_produk"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:padding="8dp"
+                        style="@style/body_small"
+                        android:background="@null"/>
+
+                    <!-- Chevron Down Icon -->
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_down"
+                        android:contentDescription="Chevron Down" />
+
+                </LinearLayout>
 
             </LinearLayout>
-
 
             <!-- Deskripsi Produk -->
             <LinearLayout
@@ -171,48 +186,42 @@
                 android:orientation="vertical"
                 android:layout_marginBottom="24dp">
 
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
 
-
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Deskripsi Produk"
-                        android:textStyle="bold"
-                        android:layout_marginRight="4dp"/>
-
+                        style="@style/body_medium"
+                        android:layout_marginEnd="4dp"/>
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="*"
-                        android:textColor="@color/red"
+                        style="@style/body_medium"
+                        android:textColor="@color/red_required"
                         android:layout_gravity="end"/>
 
-
                 </LinearLayout>
-
 
                 <EditText
                     android:id="@+id/DeskripsiProduk"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/border"
-                    android:hint="Masukkan teks..."
+                    android:layout_height="70dp"
+                    android:background="@drawable/bg_text_field"
+                    android:hint="Isi deskripsi produk di sini"
                     android:padding="8dp"
-                    android:textSize="14sp"
-                    android:textColorHint="#C4C4C7"
-                    android:layout_marginTop="@dimen/space_m"
-                    />
-
+                    style="@style/body_small"
+                    android:inputType="text|textMultiLine"
+                    android:gravity="top"
+                    android:layout_marginTop="10dp"/>
 
             </LinearLayout>
-
 
             <!-- Harga Produk -->
             <LinearLayout
@@ -221,116 +230,100 @@
                 android:orientation="vertical"
                 android:layout_marginBottom="24dp">
 
-
                 <!-- Label Harga Produk -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
 
-
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Harga Produk"
-                        android:textStyle="bold"
+                        style="@style/body_medium"
                         android:layout_marginRight="4dp"/>
-
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="*"
-                        android:textColor="@color/red"
+                        style="@style/body_medium"
+                        android:textColor="@color/red_required"
                         android:layout_gravity="end"/>
                 </LinearLayout>
-
 
                 <!-- Input Harga dengan Prefix "Rp" -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:background="@drawable/border"
-                    android:layout_marginTop="@dimen/space_m">
-
+                    android:background="@drawable/bg_text_field"
+                    android:layout_marginTop="10dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Rp"
-                        android:textSize="14sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/black_100"
+                        style="@style/label_medium_prominent"
+                        android:textColor="@color/black_300"
                         android:padding="8dp" />
 
-
                     <EditText
-                        android:id="@+id/HargaProduk"
+                        android:id="@+id/edt_harga_produk"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:background="@null"
-                        android:hint="Masukkan harga..."
+                        android:hint="Isi harga produk di sini"
                         android:inputType="number"
                         android:padding="8dp"
-                        android:textColorHint="#C4C4C7"
-                        android:textSize="14sp" />
-
+                        style="@style/body_small" />
 
                 </LinearLayout>
 
-
             </LinearLayout>
-
 
             <!-- Stok Produk -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginBottom="24dp">
-
+                android:layout_marginBottom="24dp"
+                android:orientation="vertical">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
 
-
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginEnd="4dp"
                         android:text="Stok Produk"
-                        android:textStyle="bold"
-                        android:layout_marginRight="4dp"/>
-
+                        style="@style/body_medium" />
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_gravity="end"
                         android:layout_weight="1"
                         android:text="*"
-                        android:textColor="@color/red"
-                        android:layout_gravity="end"/>
-
+                        style="@style/body_medium"
+                        android:textColor="@color/red_required" />
 
                 </LinearLayout>
 
-
                 <EditText
-                    android:id="@+id/StokProduk"
+                    android:id="@+id/edt_stok_produk"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/border"
-                    android:hint="Masukkan teks..."
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/bg_text_field"
+                    android:hint="Isi stok produk di sini"
                     android:padding="8dp"
-                    android:textSize="14sp"
-                    android:textColorHint="#C4C4C7"
-                    android:layout_marginTop="@dimen/space_m"
-                    />
-            </LinearLayout>
+                    style="@style/body_small" />
 
+            </LinearLayout>
 
             <!-- Minimum Pemesanan -->
             <LinearLayout
@@ -339,46 +332,40 @@
                 android:orientation="vertical"
                 android:layout_marginBottom="24dp">
 
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
 
-
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Minimum Pemesanan"
-                        android:textStyle="bold"
-                        android:layout_marginRight="4dp"/>
-
+                        style="@style/body_medium"
+                        android:layout_marginEnd="4dp"/>
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="*"
-                        android:textColor="@color/red"
+                        style="@style/body_medium"
+                        android:textColor="@color/red_required"
                         android:layout_gravity="end"/>
-
 
                 </LinearLayout>
 
-
                 <EditText
-                    android:id="@+id/MinimumPemesanan"
+                    android:id="@+id/edt_min_order"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/border"
-                    android:hint="Masukkan teks..."
+                    android:background="@drawable/bg_text_field"
+                    android:hint="Isi minimum pemesanan produk di sini"
                     android:padding="8dp"
-                    android:textSize="14sp"
-                    android:textColorHint="#C4C4C7"
-                    android:layout_marginTop="@dimen/space_m"
-                    />
-            </LinearLayout>
+                    style="@style/body_small"
+                    android:layout_marginTop="10dp" />
 
+            </LinearLayout>
 
             <!-- Berat Produk -->
             <LinearLayout
@@ -387,20 +374,18 @@
                 android:orientation="vertical"
                 android:layout_marginBottom="24dp">
 
-
                 <!-- Label Berat Produk -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
 
-
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Berat Produk"
-                        android:textStyle="bold"
-                        android:layout_marginRight="4dp"/>
+                        style="@style/body_medium"
+                        android:layout_marginEnd="4dp"/>
 
 
                     <TextView
@@ -408,47 +393,42 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="*"
-                        android:textColor="@color/red"
+                        style="@style/body_medium"
+                        android:textColor="@color/red_required"
                         android:layout_gravity="end"/>
-                </LinearLayout>
 
+                </LinearLayout>
 
                 <!-- Input Berat dengan Suffix "gram" -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:background="@drawable/border">
-
+                    android:background="@drawable/bg_text_field"
+                    android:gravity="center">
 
                     <EditText
-                        android:id="@+id/BeratProduk"
+                        android:id="@+id/edt_berat_produk"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:hint="Masukkan berat..."
+                        android:hint="Isi berat produk di sini"
                         android:inputType="number"
-                        android:textSize="14sp"
-                        android:textColorHint="#C4C4C7"
+                        style="@style/body_small"
                         android:background="@null"
                         android:padding="8dp"/>
-
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="gram"
-                        android:textSize="14sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/black_100"
+                        style="@style/label_medium_prominent"
+                        android:textColor="@color/black_300"
                         android:padding="8dp"/>
-
 
                 </LinearLayout>
 
-
             </LinearLayout>
-
 
             <!-- Kondisi Produk -->
             <LinearLayout
@@ -457,63 +437,59 @@
                 android:orientation="vertical"
                 android:layout_marginBottom="24dp">
 
-
                 <!-- Label Kondisi Produk -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
 
-
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Kondisi Produk"
-                        android:textStyle="bold"
-                        android:layout_marginRight="4dp"/>
-
+                        style="@style/body_medium"
+                        android:layout_marginEnd="4dp"/>
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="*"
-                        android:textColor="@color/red"
+                        style="@style/body_medium"
+                        android:textColor="@color/red_required"
                         android:layout_gravity="end"/>
-                </LinearLayout>
 
+                </LinearLayout>
 
                 <!-- Spinner Dropdown dengan Chevron -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:background="@drawable/border"
+                    android:background="@drawable/bg_text_field"
                     android:gravity="center_vertical"
-                    android:layout_marginTop="@dimen/space_m">
-
+                    android:layout_marginTop="10dp">
 
                     <Spinner
-                        android:id="@+id/KondisiProduk"
+                        android:id="@+id/spinner_kondisi_produk"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:padding="8dp"
+                        style="@style/body_small"
                         android:background="@null"/>
-
 
                     <!-- Chevron Down Icon -->
                     <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
                         android:padding="8dp"
-                        android:src="@drawable/down"
+                        android:src="@drawable/ic_down"
                         android:contentDescription="Chevron Down" />
+
                 </LinearLayout>
 
-
             </LinearLayout>
-
 
             <!-- Produk Aktif -->
             <LinearLayout
@@ -522,52 +498,35 @@
                 android:orientation="vertical"
                 android:layout_marginBottom="24dp">
 
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Produk Aktif"
-                        android:textStyle="bold"
-                        android:layout_marginRight="4dp"/>
-
+                    android:orientation="horizontal"
+                    android:gravity="center">
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="*"
-                        android:layout_gravity="end"/>
-
+                        android:text="Produk Aktif"
+                        style="@style/body_medium"
+                        android:layout_marginEnd="4dp"/>
 
                     <Switch
-                        android:id="@+id/ProdukAktif"
+                        android:id="@+id/switch_is_active"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="end"/>
-
+                        android:layout_gravity="end"
+                        tools:ignore="UseSwitchCompatOrMaterialXml" />
 
                 </LinearLayout>
 
-
             </LinearLayout>
 
-
             <Button
-                android:id="@+id/btnSubmit"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:id="@+id/btn_save_product"
                 android:text="Simpan Produk"
-                android:textColor="@color/white"
-                android:backgroundTint="@color/blue_500"
-                android:padding="8dp"
-                android:textSize="16sp"
-                android:textAllCaps="false"/>
+                style="@style/button.large.disabled.long"/>
 
         </LinearLayout>
 
