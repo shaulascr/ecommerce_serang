@@ -1,6 +1,6 @@
 <resources>
     <!-- Base application theme. -->
-    <style name="Theme.Ecommerce_serang" parent="Theme.Material3.Light.NoActionBar">
+    <style name="Theme.Ecommerce_serang" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your light theme here. -->
         <item name="colorPrimary">@color/blue_500</item>
         <item name="colorPrimaryDark">@color/white</item>
@@ -127,7 +127,7 @@
     <style name="body_medium">
         <item name="android:textSize">14sp</item>
         <item name="android:lineSpacingExtra">20sp</item>
-        <item name="android:letterSpacing">0.25</item>
+        <item name="android:letterSpacing">0.025</item>
         <item name="android:textColor">@color/black</item>
         <item name="android:fontFamily">@font/dmsans_regular</item>
     </style>
@@ -150,6 +150,7 @@
 
         <style name="button.large.active">
             <item name="android:background">@drawable/bg_button_active</item>
+            <item name="android:textColor">@color/white</item>
         </style>
 
             <style name="button.large.active.long">
@@ -170,6 +171,7 @@
 
         <style name="button.large.secondary">
             <item name="android:background">@drawable/bg_button_secondary</item>
+            <item name="android:textColor">@color/blue_500</item>
         </style>
 
             <style name="button.large.secondary.long">
@@ -190,6 +192,7 @@
 
         <style name="button.large.disabled">
             <item name="android:background">@drawable/bg_button_disabled</item>
+            <item name="android:textColor">@color/black_300</item>
         </style>
 
             <style name="button.large.disabled.long">
@@ -216,6 +219,7 @@
 
         <style name="button.small.active">
             <item name="android:background">@drawable/bg_button_active</item>
+            <item name="android:textColor">@color/white</item>
         </style>
 
             <style name="button.small.active.long">
@@ -236,6 +240,7 @@
 
         <style name="button.small.secondary">
             <item name="android:background">@drawable/bg_button_secondary</item>
+            <item name="android:textColor">@color/blue_500</item>
         </style>
 
             <style name="button.small.secondary.long">
@@ -256,6 +261,7 @@
 
         <style name="button.small.disabled">
             <item name="android:background">@drawable/bg_button_disabled</item>
+            <item name="android:textColor">@color/black_300</item>
         </style>
 
             <style name="button.small.disabled.long">
