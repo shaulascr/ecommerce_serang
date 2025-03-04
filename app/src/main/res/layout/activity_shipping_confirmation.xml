@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".ui.profile.mystore.sells.payment.ClaimPaymentActivity">
+    tools:context=".ui.profile.mystore.sells.shipment.ShippingConfirmationActivity">
 
     <include layout="@layout/header" />
 
@@ -49,66 +49,14 @@
 
             </LinearLayout>
 
-            <!-- Metode Pembayaran -->
+            <!-- Kurir Pengiriman -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:layout_marginBottom="24dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Metode Pembayaran"
-                    style="@style/body_medium"
-                    android:layout_marginEnd="4dp"/>
-
-                <EditText
-                    android:id="@+id/edt_metode_bayar"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/bg_text_field_disabled"
-                    android:padding="8dp"
-                    style="@style/body_small"
-                    android:layout_marginTop="4dp"
-                    android:enabled="false"/>
-
-            </LinearLayout>
-
-            <!-- Nomor Rekening -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginBottom="24dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="No. Rekening"
-                    style="@style/body_medium"
-                    android:layout_marginEnd="4dp"/>
-
-                <EditText
-                    android:id="@+id/edt_no_rekening"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/bg_text_field_disabled"
-                    android:padding="8dp"
-                    style="@style/body_small"
-                    android:layout_marginTop="4dp"
-                    android:enabled="false"/>
-
-            </LinearLayout>
-
-            <!-- Jenis Klaim Pembayaran -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginBottom="24dp">
-
-                <!-- Label Kondisi Produk -->
+                <!-- Label Kurir Pengiriman -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -117,7 +65,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Jenis Klaim Pembayaran"
+                        android:text="Kurir Pengiriman"
                         style="@style/body_medium"
                         android:layout_marginEnd="4dp"/>
 
@@ -142,7 +90,7 @@
                     android:layout_marginTop="10dp">
 
                     <Spinner
-                        android:id="@+id/spinner_jenis_klaim"
+                        android:id="@+id/spinner_kurir"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
@@ -162,13 +110,14 @@
 
             </LinearLayout>
 
-            <!-- Nominal Belum Lunas -->
+            <!-- Paket Pengiriman -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:layout_marginBottom="24dp">
 
+                <!-- Label Kondisi Produk -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -177,7 +126,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Nominal Belum Lunas"
+                        android:text="Paket Pengiriman"
                         style="@style/body_medium"
                         android:layout_marginEnd="4dp"/>
 
@@ -192,44 +141,45 @@
 
                 </LinearLayout>
 
-                <!-- Input Harga dengan Prefix "Rp" -->
+                <!-- Spinner Dropdown dengan Chevron -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:background="@drawable/bg_text_field"
+                    android:gravity="center_vertical"
                     android:layout_marginTop="10dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <Spinner
+                        android:id="@+id/spinner_paket_kirim"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="Rp"
-                        style="@style/label_medium_prominent"
-                        android:textColor="@color/black_300"
-                        android:padding="8dp" />
-
-                    <EditText
-                        android:id="@+id/edt_nominal_klaim"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="@null"
-                        android:hint="Isi nominal harga produk yang ingin diklaim di sini"
-                        android:inputType="number"
+                        android:layout_weight="1"
                         android:padding="8dp"
-                        style="@style/body_small" />
+                        style="@style/body_small"
+                        android:background="@null"/>
+
+                    <!-- Chevron Down Icon -->
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@drawable/ic_down"
+                        android:layout_marginEnd="8dp"
+                        android:contentDescription="Chevron Down" />
 
                 </LinearLayout>
 
             </LinearLayout>
 
-            <!-- Mutasi Rekening -->
+
+            <!-- Nomor Resi -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:layout_marginBottom="24dp">
 
-                <!-- Label Foto Mutasi Rekening -->
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -238,7 +188,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Unggah Mutasi Rekening Terkait"
+                        android:text="No. Resi"
                         style="@style/body_medium"
                         android:layout_marginEnd="4dp"/>
 
@@ -251,35 +201,23 @@
                         android:textColor="@color/red_required"
                         android:layout_gravity="end"/>
 
-                    <!-- TextView sebagai link untuk upload gambar -->
-                    <TextView
-                        android:id="@+id/tv_tambah_foto"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Tambah Foto"
-                        style="@style/body_small"
-                        android:textColor="@color/blue_500"
-                        android:padding="4dp"
-                        android:clickable="true"
-                        android:focusable="true"/>
-
                 </LinearLayout>
 
-                <!-- ImageView untuk preview gambar -->
-                <ImageView
-                    android:id="@+id/iv_preview_foto"
-                    android:layout_width="72dp"
-                    android:layout_height="72dp"
-                    android:layout_marginTop="8dp"
-                    android:scaleType="centerCrop"
-                    android:contentDescription="Preview Gambar"
-                    android:src="@drawable/ic_upload"/>
+                <EditText
+                    android:id="@+id/edt_no_resi"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_text_field"
+                    android:hint="Isi nomor resi pengiriman di sini"
+                    android:padding="8dp"
+                    style="@style/body_small"
+                    android:layout_marginTop="4dp"/>
 
             </LinearLayout>
 
             <Button
-                android:id="@+id/btn_submit"
-                android:text="Kirim Pengajuan"
+                android:id="@+id/btn_confirm"
+                android:text="Konfirmasi Pengiriman"
                 style="@style/button.large.disabled.long"/>
 
         </LinearLayout>

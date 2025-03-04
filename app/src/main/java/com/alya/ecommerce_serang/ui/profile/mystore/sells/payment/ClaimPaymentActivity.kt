@@ -1,4 +1,4 @@
-package com.alya.ecommerce_serang.ui.profile.mystore.sells
+package com.alya.ecommerce_serang.ui.profile.mystore.sells.payment
 
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
