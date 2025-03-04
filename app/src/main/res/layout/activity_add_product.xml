@@ -20,14 +20,15 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:paddingVertical="@dimen/vertical_safe_area"
-            android:paddingHorizontal="@dimen/horizontal_safe_area">
+            android:paddingHorizontal="@dimen/horizontal_safe_area"
+            android:layout_marginTop="19dp">
 
             <!-- Foto Produk -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginBottom="24dp">
+                android:layout_marginTop="24dp">
 
                 <!-- Label Foto Produk -->
                 <LinearLayout

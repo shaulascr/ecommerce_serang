@@ -20,7 +20,8 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:paddingVertical="@dimen/vertical_safe_area"
-            android:paddingHorizontal="@dimen/horizontal_safe_area">
+            android:paddingHorizontal="@dimen/horizontal_safe_area"
+            android:layout_marginTop="19dp">
 
             <!-- Foto Produk -->
             <LinearLayout
