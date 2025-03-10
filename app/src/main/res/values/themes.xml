@@ -12,7 +12,7 @@
     <!-- Text Styles -->
     <style name="display_large">
         <item name="android:textSize">57sp</item>
-        <item name="android:lineSpacingExtra">64sp</item>
+        <item name="android:lineSpacingExtra">0.64sp</item>
         <item name="android:letterSpacing">-0.025</item>
         <item name="android:textColor">@color/black</item>
         <item name="android:fontFamily">@font/dmsans_regular</item>
@@ -20,49 +20,49 @@
 
     <style name="display_medium">
         <item name="android:textSize">45sp</item>
-        <item name="android:lineSpacingExtra">52sp</item>
+        <item name="android:lineSpacingExtra">0.52sp</item>
         <item name="android:textColor">@color/black</item>
         <item name="android:fontFamily">@font/dmsans_regular</item>
     </style>
 
     <style name="display_small">
         <item name="android:textSize">36sp</item>
-        <item name="android:lineSpacingExtra">44sp</item>
+        <item name="android:lineSpacingExtra">0.44sp</item>
         <item name="android:textColor">@color/black</item>
         <item name="android:fontFamily">@font/dmsans_regular</item>
     </style>
 
     <style name="headline_large">
         <item name="android:textSize">32sp</item>
-        <item name="android:lineSpacingExtra">40sp</item>
+        <item name="android:lineSpacingExtra">0.40sp</item>
         <item name="android:textColor">@color/black</item>
         <item name="android:fontFamily">@font/dmsans_regular</item>
     </style>
 
     <style name="headline_medium">
         <item name="android:textSize">28sp</item>
-        <item name="android:lineSpacingExtra">36sp</item>
+        <item name="android:lineSpacingExtra">0.36sp</item>
         <item name="android:textColor">@color/black</item>
         <item name="android:fontFamily">@font/dmsans_regular</item>
     </style>
 
     <style name="headline_small">
         <item name="android:textSize">24sp</item>
-        <item name="android:lineSpacingExtra">32sp</item>
+        <item name="android:lineSpacingExtra">0.32sp</item>
         <item name="android:textColor">@color/black</item>
         <item name="android:fontFamily">@font/dmsans_regular</item>
     </style>
 
     <style name="title_large">
         <item name="android:textSize">22sp</item>
-        <item name="android:lineSpacingExtra">28sp</item>
+        <item name="android:lineSpacingExtra">0.28sp</item>
         <item name="android:textColor">@color/black</item>
         <item name="android:fontFamily">@font/dmsans_regular</item>
     </style>
 
     <style name="title_medium">
         <item name="android:textSize">16sp</item>
-        <item name="android:lineSpacingExtra">24sp</item>
+        <item name="android:lineSpacingExtra">0.24sp</item>
         <item name="android:letterSpacing">0.015</item>
         <item name="android:textColor">@color/black</item>
         <item name="android:fontFamily">@font/dmsans_medium</item>
@@ -70,7 +70,7 @@
 
     <style name="title_small">
         <item name="android:textSize">14sp</item>
-        <item name="android:lineSpacingExtra">20sp</item>
+        <item name="android:lineSpacingExtra">0.20sp</item>
         <item name="android:letterSpacing">0.01</item>
         <item name="android:textColor">@color/black</item>
         <item name="android:fontFamily">@font/dmsans_medium</item>
@@ -78,7 +78,7 @@
 
     <style name="label_large_prominent">
         <item name="android:textSize">14sp</item>
-        <item name="android:lineSpacingExtra">20sp</item>
+        <item name="android:lineSpacingExtra">0.20sp</item>
         <item name="android:letterSpacing">0.01</item>
         <item name="android:textColor">@color/black</item>
         <item name="android:fontFamily">@font/dmsans_semibold</item>
@@ -86,7 +86,7 @@
 
     <style name="label_large">
         <item name="android:textSize">14sp</item>
-        <item name="android:lineSpacingExtra">20sp</item>
+        <item name="android:lineSpacingExtra">0.20sp</item>
         <item name="android:letterSpacing">0.01</item>
         <item name="android:textColor">@color/black</item>
         <item name="android:fontFamily">@font/dmsans_medium</item>
@@ -94,7 +94,7 @@
 
     <style name="label_medium_prominent">
         <item name="android:textSize">12sp</item>
-        <item name="android:lineSpacingExtra">16sp</item>
+        <item name="android:lineSpacingExtra">0.16sp</item>
         <item name="android:letterSpacing">0.05</item>
         <item name="android:textColor">@color/black</item>
         <item name="android:fontFamily">@font/dmsans_semibold</item>
@@ -102,7 +102,7 @@
 
     <style name="label_medium">
         <item name="android:textSize">12sp</item>
-        <item name="android:lineSpacingExtra">16sp</item>
+        <item name="android:lineSpacingExtra">0.16sp</item>
         <item name="android:letterSpacing">0.05</item>
         <item name="android:textColor">@color/black</item>
         <item name="android:fontFamily">@font/dmsans_medium</item>
@@ -110,7 +110,7 @@
 
     <style name="label_small">
         <item name="android:textSize">11sp</item>
-        <item name="android:lineSpacingExtra">16sp</item>
+        <item name="android:lineSpacingExtra">0.16sp</item>
         <item name="android:letterSpacing">0.05</item>
         <item name="android:textColor">@color/black</item>
         <item name="android:fontFamily">@font/dmsans_medium</item>
@@ -118,7 +118,7 @@
 
     <style name="body_large">
         <item name="android:textSize">16sp</item>
-        <item name="android:lineSpacingExtra">24sp</item>
+        <item name="android:lineSpacingExtra">0.24sp</item>
         <item name="android:letterSpacing">0.05</item>
         <item name="android:textColor">@color/black</item>
         <item name="android:fontFamily">@font/dmsans_regular</item>
@@ -126,7 +126,7 @@
 
     <style name="body_medium">
         <item name="android:textSize">14sp</item>
-        <item name="android:lineSpacingExtra">20sp</item>
+        <item name="android:lineSpacingExtra">0.20sp</item>
         <item name="android:letterSpacing">0.025</item>
         <item name="android:textColor">@color/black</item>
         <item name="android:fontFamily">@font/dmsans_regular</item>
@@ -134,7 +134,7 @@
 
     <style name="body_small">
         <item name="android:textSize">12sp</item>
-        <item name="android:lineSpacingExtra">16sp</item>
+        <item name="android:lineSpacingExtra">0.16sp</item>
         <item name="android:letterSpacing">0.04</item>
         <item name="android:textColor">@color/black</item>
         <item name="android:fontFamily">@font/dmsans_regular</item>
