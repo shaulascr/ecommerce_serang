@@ -1,5 +1,6 @@
 package com.alya.ecommerce_serang.ui.auth
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -31,9 +32,6 @@ class RegisterActivity : AppCompatActivity() {
 
         // Observe OTP state
         observeOtpState()
-
-        // Observe Register state
-        observeRegisterState()
 
         binding.btnSignup.setOnClickListener {
             // Retrieve values inside the click listener (so we get latest input)
@@ -74,6 +72,14 @@ class RegisterActivity : AppCompatActivity() {
                     }
                 }
             }
+
+            // Observe Register state
+            observeRegisterState()
+        }
+
+        binding.tvLoginAlt.setOnClickListener{
+            val intent = Intent(this, LoginActivity::class.java)
+            startActivity(intent)
         }
 
     }
@@ -110,6 +116,8 @@ class RegisterActivity : AppCompatActivity() {
                         // Hide loading indicator and show success message
                         binding.progressBarRegister.visibility = android.view.View.GONE
                         Toast.makeText(this, result.data, Toast.LENGTH_SHORT).show()
+                        val intent = Intent(this, LoginActivity::class.java)
+                        startActivity(intent)
                         // Navigate to another screen if needed
                     }
                     is com.alya.ecommerce_serang.data.repository.Result.Error -> {

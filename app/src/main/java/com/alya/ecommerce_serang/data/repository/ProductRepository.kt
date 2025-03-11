@@ -11,10 +11,7 @@ class ProductRepository(private val apiService: ApiService) {
         withContext(Dispatchers.IO) {
             try {
                 Log.d("ProductRepository", "Attempting to fetch products")
-                val response = apiService.getAllProduct().execute()
-                Log.d("ProductRepository", "Response received. Success: ${response.isSuccessful}")
-                Log.d("ProductRepository", "Response code: ${response.code()}")
-                Log.d("ProductRepository", "Response message: ${response.message()}")
+                val response = apiService.getAllProduct()
 
                 if (response.isSuccessful) {
                     // Return a Result.Success with the list of products
@@ -28,4 +25,8 @@ class ProductRepository(private val apiService: ApiService) {
                 Result.Error(e)
             }
         }
+
+//    suspend fun getUserData(): Response<UserResponse> {
+//        return apiService.getProtectedData()
+//    }
 }

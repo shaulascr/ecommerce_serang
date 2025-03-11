@@ -17,7 +17,6 @@ class HomeViewModel (
     private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
-
     init {
         loadProducts()
     }
@@ -26,20 +25,16 @@ class HomeViewModel (
         viewModelScope.launch {
             _uiState.value = HomeUiState.Loading
 
-            productRepository.getAllProducts().let { result ->
-                when (result) {
-                    is Result.Success -> {
-                        // Handle the success case
-                        _uiState.value = HomeUiState.Success(result.data)  // result.data contains the list of products
-                    }
-                    is com.alya.ecommerce_serang.data.repository.Result.Error -> {
-                        // Handle the error case
-                        _uiState.value = HomeUiState.Error(result.exception.message ?: "Unknown error")
-                        Log.e("HomeViewModel", "Failed to fetch products", result.exception)
-                    }
-                    com.alya.ecommerce_serang.data.repository.Result.Loading -> {
-                        // Optionally handle the loading state if needed
-                    }
+            when (val result = productRepository.getAllProducts()) {
+                is Result.Success -> {
+                    _uiState.value = HomeUiState.Success(result.data)
+                }
+                is Result.Error -> {
+                    _uiState.value = HomeUiState.Error(result.exception.message ?: "Unknown error")
+                    Log.e("HomeViewModel", "Failed to fetch products", result.exception)
+                }
+                is Result.Loading-> {
+
                 }
             }
         }
@@ -49,6 +44,23 @@ class HomeViewModel (
     fun retry() {
         loadProducts()
     }
+
+//    private fun fetchUserData() {
+//        viewModelScope.launch {
+//            try {
+//                val response = apiService.getProtectedData() // Example API request
+//                if (response.isSuccessful) {
+//                    val data = response.body()
+//                    Log.d("HomeFragment", "User Data: $data")
+//                    // Update UI with data
+//                } else {
+//                    Log.e("HomeFragment", "Error: ${response.message()}")
+//                }
+//            } catch (e: Exception) {
+//                Log.e("HomeFragment", "Exception: ${e.message}")
+//            }
+//        }
+//    }
 }
 
 sealed class HomeUiState {

@@ -12,7 +12,7 @@ class SessionManager(context: Context) {
         private const val USER_TOKEN = "user_token"
     }
 
-    fun saveAuthToken(token: String) {
+    fun saveToken(token: String) {
         val editor = sharedPreferences.edit()
         editor.putString(USER_TOKEN, token)
         editor.apply()

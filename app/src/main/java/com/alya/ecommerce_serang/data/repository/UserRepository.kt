@@ -1,7 +1,9 @@
 package com.alya.ecommerce_serang.data.repository
 
+import com.alya.ecommerce_serang.data.api.dto.LoginRequest
 import com.alya.ecommerce_serang.data.api.dto.OtpRequest
 import com.alya.ecommerce_serang.data.api.dto.RegisterRequest
+import com.alya.ecommerce_serang.data.api.response.LoginResponse
 import com.alya.ecommerce_serang.data.api.response.OtpResponse
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
 
@@ -23,6 +25,21 @@ class UserRepository(private val apiService: ApiService) {
             return responseBody.message // Get the message from RegisterResponse
         } else {
             throw Exception("Registration failed: ${response.errorBody()?.string()}")
+        }
+    }
+
+    suspend fun login(email: String, password: String): Result<LoginResponse> {
+        return try {
+            val response = apiService.login(LoginRequest(email, password))
+            if (response.isSuccessful) {
+                response.body()?.let {
+                    Result.Success(it)
+                } ?: Result.Error(Exception("Login response is empty"))
+            } else {
+                Result.Error(Exception(response.errorBody()?.string() ?: "Unknown error"))
+            }
+        } catch (e: Exception) {
+            Result.Error(e)
         }
     }
 }

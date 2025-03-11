@@ -28,12 +28,12 @@ interface ApiService {
     ):OtpResponse
 
     @POST("login")
-    fun login(
+    suspend fun login(
         @Body loginRequest: LoginRequest
-    ): Call<LoginResponse>
+    ): Response<LoginResponse>
 
     @GET("product")
-    fun getAllProduct(): Call<AllProductResponse>
+    suspend fun getAllProduct(): Response<AllProductResponse>
 
     @GET("product/detail/{id}")
     fun getDetailProduct (

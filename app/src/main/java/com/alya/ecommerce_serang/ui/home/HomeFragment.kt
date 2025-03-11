@@ -25,6 +25,8 @@ class HomeFragment : Fragment() {
 
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
+    private var productAdapter: HorizontalProductAdapter? = null
+    private lateinit var sessionManager: SessionManager
     private val viewModel: HomeViewModel by viewModels {
         BaseViewModelFactory {
             val apiService = ApiConfig.getApiService(sessionManager)
@@ -32,18 +34,18 @@ class HomeFragment : Fragment() {
             HomeViewModel(productRepository)
         }
     }
-    private var productAdapter: HorizontalProductAdapter? = null
-    private lateinit var sessionManager: SessionManager
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        sessionManager = SessionManager(requireContext())
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
-        sessionManager = SessionManager(requireContext()) // Initialize SessionManager
-
-        return binding.root
+        return _binding!!.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
