@@ -1,28 +1,45 @@
 package com.alya.ecommerce_serang.data.api.retrofit
 
+import com.alya.ecommerce_serang.data.api.dto.LoginRequest
+import com.alya.ecommerce_serang.data.api.dto.OtpRequest
+import com.alya.ecommerce_serang.data.api.dto.RegisterRequest
 import com.alya.ecommerce_serang.data.api.response.AllProductResponse
+import com.alya.ecommerce_serang.data.api.response.LoginResponse
+import com.alya.ecommerce_serang.data.api.response.OtpResponse
 import com.alya.ecommerce_serang.data.api.response.ProductResponse
+import com.alya.ecommerce_serang.data.api.response.RegisterResponse
 import com.alya.ecommerce_serang.data.api.response.StoreResponse
 import retrofit2.Call
+import retrofit2.Response
+import retrofit2.http.Body
 import retrofit2.http.GET
-import retrofit2.http.Header
+import retrofit2.http.POST
 import retrofit2.http.Path
 
 interface ApiService {
-    @GET("product")
-    fun getAllProduct(
-        @Header("Authorization") token: String = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NzEsIm5hbWUiOiJhbHlhIiwiZW1haWwiOiJha3VuYmVsYWphci5hbHlhQGdtYWlsLmNvbSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzM4NDg0OTc0LCJleHAiOjE3NDEwNzY5NzR9.0JyXJQ_6CKiZEi0gvk1gcn-0ILu3a9lOr3HqjhJXbBE"
-    ): Call<AllProductResponse>
+    @POST("registeruser")
+    suspend fun register (
+        @Body registerRequest: RegisterRequest
+    ): Response<RegisterResponse>
 
+    @POST("otp")
+    suspend fun getOTP(
+        @Body otpRequest: OtpRequest
+    ):OtpResponse
+
+    @POST("login")
+    fun login(
+        @Body loginRequest: LoginRequest
+    ): Call<LoginResponse>
+
+    @GET("product")
+    fun getAllProduct(): Call<AllProductResponse>
 
     @GET("product/detail/{id}")
     fun getDetailProduct (
-        @Header("Authorization") token: String,
         @Path("id") productId: Int
     ): Call<ProductResponse>
 
     @GET("mystore")
-    fun getStore (
-        @Header("Authorization") token: String = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NzEsIm5hbWUiOiJhbHlhIiwiZW1haWwiOiJha3VuYmVsYWphci5hbHlhQGdtYWlsLmNvbSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzM4NDg0OTc0LCJleHAiOjE3NDEwNzY5NzR9.0JyXJQ_6CKiZEi0gvk1gcn-0ILu3a9lOr3HqjhJXbBE"
-    ): Call<StoreResponse>
+    fun getStore (): Call<StoreResponse>
 }

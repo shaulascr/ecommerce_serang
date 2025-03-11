@@ -23,7 +23,7 @@ android {
 
     buildTypes {
         release {
-            buildConfigField("String", "BASE_URL", "\"http://192.168.1.13:3000/\"")
+            buildConfigField("String", "BASE_URL", "\"http://192.168.1.6:3000/\"")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -31,7 +31,7 @@ android {
             )
         }
         debug {
-            buildConfigField("String", "BASE_URL", "\"http://192.168.1.13:3000/\"")
+            buildConfigField("String", "BASE_URL", "\"http://192.168.1.6:3000/\"")
         }
     }
     compileOptions {
@@ -72,6 +72,8 @@ dependencies {
     implementation("com.github.bumptech.glide:glide:4.16.0")
     implementation("androidx.paging:paging-runtime:3.2.1")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+    implementation("de.hdodenhof:circleimageview:3.1.0")
+
 
 
 //    implementation(libs.hilt.android)

@@ -17,19 +17,15 @@ class ProductRepository(private val apiService: ApiService) {
                 Log.d("ProductRepository", "Response message: ${response.message()}")
 
                 if (response.isSuccessful) {
-                    Result.success(response.body()?.products ?: emptyList())
+                    // Return a Result.Success with the list of products
+                    Result.Success(response.body()?.products ?: emptyList())
                 } else {
-                    Result.failure(Exception("Failed to fetch products"))
+                    // Return a Result.Error with a custom Exception
+                    Result.Error(Exception("Failed to fetch products. Code: ${response.code()}"))
                 }
             } catch (e: Exception) {
-                Result.failure(e)
+                // Return a Result.Error with the exception caught
+                Result.Error(e)
             }
         }
-//    suspend fun getCategories():List<Category>
-//
-//    fun getProducts(query: ProductQuery) : Flow<PagingData<Product>>
-//    fun getRecentSearchs(): Flow<List<String>>
-//    suspend fun clearRecents()
-//    suspend fun addRecents(search:String)
-//    suspend fun getProduct(id:String):DetailProduct
 }

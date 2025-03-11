@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.alya.ecommerce_serang.R
@@ -16,6 +16,7 @@ import com.alya.ecommerce_serang.data.repository.ProductRepository
 import com.alya.ecommerce_serang.databinding.FragmentHomeBinding
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.HorizontalMarginItemDecoration
+import com.alya.ecommerce_serang.utils.SessionManager
 import com.alya.ecommerce_serang.utils.setLightStatusBar
 import kotlinx.coroutines.launch
 
@@ -24,8 +25,15 @@ class HomeFragment : Fragment() {
 
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
-    private lateinit var viewModel: HomeViewModel
+    private val viewModel: HomeViewModel by viewModels {
+        BaseViewModelFactory {
+            val apiService = ApiConfig.getApiService(sessionManager)
+            val productRepository = ProductRepository(apiService)
+            HomeViewModel(productRepository)
+        }
+    }
     private var productAdapter: HorizontalProductAdapter? = null
+    private lateinit var sessionManager: SessionManager
 
 
     override fun onCreateView(
@@ -33,20 +41,13 @@ class HomeFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
+        sessionManager = SessionManager(requireContext()) // Initialize SessionManager
+
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        val repository = ProductRepository(ApiConfig.getApiService())
-        viewModel = ViewModelProvider(
-            this,
-            // Pass a lambda that creates the ViewModel
-            BaseViewModelFactory {
-                HomeViewModel(repository)
-            }
-        )[HomeViewModel::class.java]
 
         initUi()
         setupRecyclerView()
@@ -124,10 +125,7 @@ class HomeFragment : Fragment() {
 
 
     private fun handleProductClick(product: ProductsItem) {
-        // Navigate to product detail
-//        findNavController().navigate(
-//            HomeFragmentDirections.actionHomeToDetail(product.id)
-//        )
+
     }
 
     override fun onDestroyView() {
