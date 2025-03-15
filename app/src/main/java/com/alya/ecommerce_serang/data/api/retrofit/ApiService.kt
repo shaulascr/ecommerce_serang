@@ -4,6 +4,7 @@ import com.alya.ecommerce_serang.data.api.dto.LoginRequest
 import com.alya.ecommerce_serang.data.api.dto.OtpRequest
 import com.alya.ecommerce_serang.data.api.dto.RegisterRequest
 import com.alya.ecommerce_serang.data.api.response.AllProductResponse
+import com.alya.ecommerce_serang.data.api.response.CategoryResponse
 import com.alya.ecommerce_serang.data.api.response.LoginResponse
 import com.alya.ecommerce_serang.data.api.response.OtpResponse
 import com.alya.ecommerce_serang.data.api.response.ProductResponse
@@ -31,6 +32,10 @@ interface ApiService {
     suspend fun login(
         @Body loginRequest: LoginRequest
     ): Response<LoginResponse>
+
+    @GET("category")
+    suspend fun allCategory(
+    ): Response<CategoryResponse>
 
     @GET("product")
     suspend fun getAllProduct(): Response<AllProductResponse>

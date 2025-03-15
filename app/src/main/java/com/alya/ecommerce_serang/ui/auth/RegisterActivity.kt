@@ -12,10 +12,13 @@ import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.repository.Result
 import com.alya.ecommerce_serang.data.repository.UserRepository
 import com.alya.ecommerce_serang.databinding.ActivityRegisterBinding
+import com.alya.ecommerce_serang.ui.MainActivity
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
+import com.alya.ecommerce_serang.utils.SessionManager
 
 class RegisterActivity : AppCompatActivity() {
     private lateinit var binding: ActivityRegisterBinding
+    private lateinit var sessionManager: SessionManager
     private val registerViewModel: RegisterViewModel by viewModels{
         BaseViewModelFactory {
             val apiService = ApiConfig.getUnauthenticatedApiService()
@@ -26,6 +29,14 @@ class RegisterActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        sessionManager = SessionManager(this)
+        if (!sessionManager.getToken().isNullOrEmpty()) {
+            // User already logged in, redirect to MainActivity
+            startActivity(Intent(this, MainActivity::class.java))
+            finish()
+        }
+
         enableEdgeToEdge()
         binding = ActivityRegisterBinding.inflate(layoutInflater)
         setContentView(binding.root)

@@ -1,16 +1,20 @@
 package com.alya.ecommerce_serang.ui.home
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.alya.ecommerce_serang.R
-import com.alya.ecommerce_serang.data.api.response.ProductsItem
+import com.alya.ecommerce_serang.data.api.dto.CategoryItem
+import com.alya.ecommerce_serang.data.api.dto.ProductsItem
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.repository.ProductRepository
 import com.alya.ecommerce_serang.databinding.FragmentHomeBinding
@@ -26,6 +30,7 @@ class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
     private var productAdapter: HorizontalProductAdapter? = null
+    private var categoryAdapter: HomeCategoryAdapter? = null
     private lateinit var sessionManager: SessionManager
     private val viewModel: HomeViewModel by viewModels {
         BaseViewModelFactory {
@@ -62,8 +67,22 @@ class HomeFragment : Fragment() {
             onClick = { product -> handleProductClick(product) }
         )
 
+        categoryAdapter = HomeCategoryAdapter(
+            categories = emptyList(),
+            onClick = { category ->  handleCategoryProduct(category)}
+        )
+
         binding.newProducts.apply {
             adapter = productAdapter
+            layoutManager = LinearLayoutManager(
+                context,
+                LinearLayoutManager.HORIZONTAL,
+                false
+            )
+        }
+
+        binding.categories.apply {
+            adapter = categoryAdapter
             layoutManager = LinearLayoutManager(
                 context,
                 LinearLayoutManager.HORIZONTAL,
@@ -74,32 +93,45 @@ class HomeFragment : Fragment() {
 
     private fun observeData() {
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.uiState.collect { state ->
-                when (state) {
-                    is HomeUiState.Loading -> {
-                        binding.loading.root.isVisible = true
-                        binding.error.root.isVisible = false
-                        binding.home.isVisible = false
-                    }
-                    is HomeUiState.Success -> {
-                        binding.loading.root.isVisible = false
-                        binding.error.root.isVisible = false
-                        binding.home.isVisible = true
-                        productAdapter?.updateProducts(state.products)
-                    }
-                    is HomeUiState.Error -> {
-                        binding.loading.root.isVisible = false
-                        binding.error.root.isVisible = true
-                        binding.home.isVisible = false
-                        binding.error.errorMessage.text = state.message
-                        binding.error.retryButton.setOnClickListener {
-                            viewModel.retry()
+            viewLifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.uiState.collect { state ->
+                    when (state) {
+                        is HomeUiState.Loading -> {
+                            binding.loading.root.isVisible = true
+                            binding.error.root.isVisible = false
+                            binding.home.isVisible = false
+                        }
+                        is HomeUiState.Success -> {
+                            binding.loading.root.isVisible = false
+                            binding.error.root.isVisible = false
+                            binding.home.isVisible = true
+                            productAdapter?.updateLimitedProducts(state.products)
+                        }
+                        is HomeUiState.Error -> {
+                            binding.loading.root.isVisible = false
+                            binding.error.root.isVisible = true
+                            binding.home.isVisible = false
+                            binding.error.errorMessage.text = state.message
+                            binding.error.retryButton.setOnClickListener {
+                                viewModel.retry()
+                            }
                         }
                     }
                 }
             }
         }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.categories.collect { categories ->
+                    Log.d("Categories", "Updated Categories: $categories")
+                    categories.forEach { Log.d("Category Image", "Category: ${it.name}, Image: ${it.image}") }
+                    categoryAdapter?.updateLimitedCategory(categories)
+                }
+            }
+        }
     }
+
 
     private fun initUi() {
         // For LightStatusBar
@@ -130,16 +162,18 @@ class HomeFragment : Fragment() {
 
     }
 
+    private fun handleCategoryProduct(category: CategoryItem) {
+
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
+        productAdapter = null
+        categoryAdapter = null
         _binding = null
     }
 
     private fun showLoading(isLoading: Boolean) {
-        if (isLoading) {
-            binding.progressBar.visibility = View.VISIBLE
-        } else {
-            binding.progressBar.visibility = View.GONE
-        }
+        binding.progressBar.isVisible = isLoading
     }
 }

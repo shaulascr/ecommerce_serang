@@ -46,4 +46,5 @@
     <string name="hint_login_password">Kata Sandi</string>
     <string name="forget_password">Lupa Kata Sandi?</string>
     <string name="enter_otp">Masukkan Kode OTP</string>
+    <string name="sold_product_text">Produk Terlaris</string>
 </resources>

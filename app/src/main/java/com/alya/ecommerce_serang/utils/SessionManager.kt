@@ -19,7 +19,7 @@ class SessionManager(context: Context) {
     }
 
     fun getToken(): String? {
-        val token = sharedPreferences.getString("auth_token", null)
+        val token = sharedPreferences.getString(USER_TOKEN, null)
         Log.d("SessionManager", "Retrieved token: $token")
         return token
     }
