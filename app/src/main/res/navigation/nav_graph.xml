@@ -20,4 +20,14 @@
         android:name="com.alya.ecommerce_serang.ui.chat.ChatFragment"
         android:label="fragment_chat"
         tools:layout="@layout/fragment_chat" />
+    <activity
+        android:id="@+id/registerActivity"
+        android:name="com.alya.ecommerce_serang.ui.auth.RegisterActivity"
+        android:label="activity_register"
+        tools:layout="@layout/activity_register" />
+    <activity
+        android:id="@+id/loginActivity"
+        android:name="com.alya.ecommerce_serang.ui.auth.LoginActivity"
+        android:label="activity_login"
+        tools:layout="@layout/activity_login" />
 </navigation>

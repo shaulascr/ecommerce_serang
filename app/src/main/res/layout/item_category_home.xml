@@ -17,7 +17,7 @@
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/image"
+            android:id="@+id/image_category"
             android:src="@drawable/makanan_ringan"
             android:scaleType="centerCrop" />
     </com.google.android.material.card.MaterialCardView>
