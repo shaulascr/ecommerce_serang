@@ -9,6 +9,7 @@ import com.alya.ecommerce_serang.data.api.response.LoginResponse
 import com.alya.ecommerce_serang.data.api.response.OtpResponse
 import com.alya.ecommerce_serang.data.api.response.ProductResponse
 import com.alya.ecommerce_serang.data.api.response.RegisterResponse
+import com.alya.ecommerce_serang.data.api.response.ReviewProductResponse
 import com.alya.ecommerce_serang.data.api.response.StoreResponse
 import retrofit2.Call
 import retrofit2.Response
@@ -40,10 +41,15 @@ interface ApiService {
     @GET("product")
     suspend fun getAllProduct(): Response<AllProductResponse>
 
-    @GET("product/detail/{id}")
-    fun getDetailProduct (
+    @GET("product/review/{id}")
+    suspend fun getProductReview(
         @Path("id") productId: Int
-    ): Call<ProductResponse>
+    ): Response<ReviewProductResponse>
+
+    @GET("product/detail/{id}")
+    suspend fun getDetailProduct (
+        @Path("id") productId: Int
+    ): Response<ProductResponse>
 
     @GET("mystore")
     fun getStore (): Call<StoreResponse>

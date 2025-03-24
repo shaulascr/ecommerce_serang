@@ -13,15 +13,6 @@
         android:orientation="horizontal"
         android:padding="12dp">
 
-        <!-- User Profile Image -->
-        <ImageView
-            android:id="@+id/imgUser"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:scaleType="centerCrop"
-            android:src="@drawable/placeholder_image"
-            android:background="@drawable/placeholder_image" />
-
         <!-- Review Content -->
         <LinearLayout
             android:layout_width="0dp"

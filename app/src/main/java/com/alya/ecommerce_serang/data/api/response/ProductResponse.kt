@@ -35,7 +35,7 @@ data class Product(
 	val isPreOrder: Boolean,
 
 	@field:SerializedName("duration")
-	val duration: Any,
+	val duration: Any?,
 
 	@field:SerializedName("category_id")
 	val categoryId: Int,

@@ -1,5 +1,6 @@
 package com.alya.ecommerce_serang.ui.home
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -18,6 +19,7 @@ import com.alya.ecommerce_serang.data.api.dto.ProductsItem
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.repository.ProductRepository
 import com.alya.ecommerce_serang.databinding.FragmentHomeBinding
+import com.alya.ecommerce_serang.ui.product.DetailProductActivity
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.HorizontalMarginItemDecoration
 import com.alya.ecommerce_serang.utils.SessionManager
@@ -159,7 +161,9 @@ class HomeFragment : Fragment() {
 
 
     private fun handleProductClick(product: ProductsItem) {
-
+        val intent = Intent(requireContext(), DetailProductActivity::class.java)
+        intent.putExtra("PRODUCT_ID", product.id) // Pass product ID
+        startActivity(intent)
     }
 
     private fun handleCategoryProduct(category: CategoryItem) {

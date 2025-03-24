@@ -47,4 +47,19 @@
     <string name="forget_password">Lupa Kata Sandi?</string>
     <string name="enter_otp">Masukkan Kode OTP</string>
     <string name="sold_product_text">Produk Terlaris</string>
+    <string name="item_sold">Terjual 10 buah</string>
+    <string name="product_image">produc image</string>
+    <string name="ulasan_pembeli">Ulasan Pembeli</string>
+    <string name="lihat_semua">Lihat Semua</string>
+    <string name="detail_produk">Detail Produk</string>
+    <string name="berat_produk">Berat</string>
+    <string name="stock_product">Stok</string>
+    <string name="deskripsi_produk">Deskripsi Produk</string>
+    <string name="kategori">Kategori</string>
+    <string name="seller_image">Seller Profile Picture</string>
+    <string name="produk_lainnya">Produk Lainnya</string>
+    <string name="add_to_cart">Keranjang</string>
+    <string name="beli_sekarang">Beli Sekarang</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

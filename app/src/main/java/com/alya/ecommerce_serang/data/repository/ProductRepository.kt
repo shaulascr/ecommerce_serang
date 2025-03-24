@@ -3,6 +3,8 @@ package com.alya.ecommerce_serang.data.repository
 import android.util.Log
 import com.alya.ecommerce_serang.data.api.dto.CategoryItem
 import com.alya.ecommerce_serang.data.api.dto.ProductsItem
+import com.alya.ecommerce_serang.data.api.response.ProductResponse
+import com.alya.ecommerce_serang.data.api.response.ReviewsItem
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -29,6 +31,19 @@ class ProductRepository(private val apiService: ApiService) {
             }
         }
 
+    suspend fun fetchProductDetail(productId: Int): ProductResponse? {
+        return try {
+            val response = apiService.getDetailProduct(productId)
+            if (response.isSuccessful) {
+                response.body()
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            null
+        }
+    }
+
     suspend fun getAllCategories(): Result<List<CategoryItem>> =
         withContext(Dispatchers.IO) {
             try {
@@ -48,5 +63,18 @@ class ProductRepository(private val apiService: ApiService) {
                 Result.Error(e)
             }
         }
+
+    suspend fun fetchProductReview(productId: Int): List<ReviewsItem>? {
+        return try {
+            val response = apiService.getProductReview(productId)
+            if (response.isSuccessful) {
+                response.body()?.reviews // Ambil daftar review dari response
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            null
+        }
+    }
 
 }
