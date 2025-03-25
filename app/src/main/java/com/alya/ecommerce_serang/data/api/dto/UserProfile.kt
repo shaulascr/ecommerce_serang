@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName
 data class UserProfile(
 
     @field:SerializedName("image")
-    val image: Any?,
+    val image: String? = null,
 
     @field:SerializedName("role")
     val role: String,

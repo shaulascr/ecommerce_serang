@@ -3,6 +3,7 @@ package com.alya.ecommerce_serang.data.repository
 import com.alya.ecommerce_serang.data.api.dto.LoginRequest
 import com.alya.ecommerce_serang.data.api.dto.OtpRequest
 import com.alya.ecommerce_serang.data.api.dto.RegisterRequest
+import com.alya.ecommerce_serang.data.api.dto.UserProfile
 import com.alya.ecommerce_serang.data.api.response.LoginResponse
 import com.alya.ecommerce_serang.data.api.response.OtpResponse
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
@@ -42,6 +43,23 @@ class UserRepository(private val apiService: ApiService) {
             Result.Error(e)
         }
     }
+
+    suspend fun fetchUserProfile(): Result<UserProfile?> {
+        return try {
+            val response = apiService.getUserProfile()
+            if (response.isSuccessful) {
+                response.body()?.user?.let {
+                    Result.Success(it)  // ✅ Returning only UserProfile
+                } ?: Result.Error(Exception("User data not found"))
+            } else {
+                Result.Error(Exception("Error fetching profile: ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
+    }
+
+
 }
 
 sealed class Result<out T> {

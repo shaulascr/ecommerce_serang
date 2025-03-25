@@ -8,6 +8,7 @@ import com.alya.ecommerce_serang.data.api.response.CategoryResponse
 import com.alya.ecommerce_serang.data.api.response.LoginResponse
 import com.alya.ecommerce_serang.data.api.response.OtpResponse
 import com.alya.ecommerce_serang.data.api.response.ProductResponse
+import com.alya.ecommerce_serang.data.api.response.ProfileResponse
 import com.alya.ecommerce_serang.data.api.response.RegisterResponse
 import com.alya.ecommerce_serang.data.api.response.ReviewProductResponse
 import com.alya.ecommerce_serang.data.api.response.StoreResponse
@@ -50,6 +51,10 @@ interface ApiService {
     suspend fun getDetailProduct (
         @Path("id") productId: Int
     ): Response<ProductResponse>
+
+    @GET("profile")
+    suspend fun getUserProfile(): Response<ProfileResponse>
+
 
     @GET("mystore")
     fun getStore (): Call<StoreResponse>

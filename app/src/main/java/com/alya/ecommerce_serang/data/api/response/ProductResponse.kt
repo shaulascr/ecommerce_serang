@@ -17,7 +17,7 @@ data class Product(
 	val storeId: Int,
 
 	@field:SerializedName("image")
-	val image: String,
+	val image: String? = null,
 
 	@field:SerializedName("rating")
 	val rating: String,

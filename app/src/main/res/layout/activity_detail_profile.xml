@@ -104,6 +104,7 @@
         app:layout_constraintTop_toBottomOf="@id/card_profile">
 
         <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/tv_name_user"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Nama"
@@ -120,6 +121,7 @@
         app:layout_constraintTop_toBottomOf="@id/til_nama">
 
         <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/tv_username"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Username"
@@ -136,6 +138,7 @@
         app:layout_constraintTop_toBottomOf="@id/til_username">
 
         <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/tv_email_user"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Email"
@@ -152,6 +155,7 @@
         app:layout_constraintTop_toBottomOf="@id/til_email">
 
         <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/tv_number_phone_user"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Nomor Handphone"
@@ -168,6 +172,7 @@
         app:layout_constraintTop_toBottomOf="@id/til_nomor_handphone">
 
         <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/tv_date_birth"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Tanggal Lahir"

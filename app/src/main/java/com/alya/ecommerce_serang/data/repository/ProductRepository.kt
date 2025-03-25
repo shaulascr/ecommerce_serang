@@ -37,6 +37,7 @@ class ProductRepository(private val apiService: ApiService) {
             if (response.isSuccessful) {
                 response.body()
             } else {
+                Log.e("ProductRepository", "Error: ${response.errorBody()?.string()}")
                 null
             }
         } catch (e: Exception) {
@@ -70,6 +71,7 @@ class ProductRepository(private val apiService: ApiService) {
             if (response.isSuccessful) {
                 response.body()?.reviews // Ambil daftar review dari response
             } else {
+                Log.e("ProductRepository", "Error: ${response.errorBody()?.string()}")
                 null
             }
         } catch (e: Exception) {

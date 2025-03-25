@@ -107,7 +107,7 @@ class HomeFragment : Fragment() {
                             binding.loading.root.isVisible = false
                             binding.error.root.isVisible = false
                             binding.home.isVisible = true
-                            productAdapter?.updateLimitedProducts(state.products)
+                            productAdapter?.updateLimitedProducts(state.products) // Ensure productAdapter is initialized
                         }
                         is HomeUiState.Error -> {
                             binding.loading.root.isVisible = false
@@ -123,7 +123,7 @@ class HomeFragment : Fragment() {
             }
         }
 
-        viewLifecycleOwner.lifecycleScope.launch {
+    viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.categories.collect { categories ->
                     Log.d("Categories", "Updated Categories: $categories")
