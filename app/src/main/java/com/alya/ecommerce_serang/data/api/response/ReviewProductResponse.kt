@@ -20,7 +20,7 @@ data class ReviewsItem(
 	val reviewDate: String,
 
 	@field:SerializedName("user_image")
-	val userImage: Any,
+	val userImage: String? = null,
 
 	@field:SerializedName("product_id")
 	val productId: Int,

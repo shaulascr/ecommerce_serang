@@ -23,6 +23,7 @@ class ProductRepository(private val apiService: ApiService) {
 
                 } else {
                     // Return a Result.Error with a custom Exception
+                    Log.e("ProductRepository", "Error: ${response.errorBody()?.string()}")
                     Result.Error(Exception("Failed to fetch products. Code: ${response.code()}"))
                 }
             } catch (e: Exception) {
@@ -78,5 +79,19 @@ class ProductRepository(private val apiService: ApiService) {
             null
         }
     }
-
 }
+
+//    suspend fun fetchStoreDetail(storeId: Int): Store? {
+//        return try {
+//            val response = apiService.getStore(storeId)
+//            if (response.isSucessful) {
+//                response.body()?.store
+//            } else {
+//                Log.e("ProductRepository", "Error: ${response.errorBody()?.string()}")
+//
+//                null
+//            }
+//        } catch (e: Exception) {
+//            null
+//        }
+//    }

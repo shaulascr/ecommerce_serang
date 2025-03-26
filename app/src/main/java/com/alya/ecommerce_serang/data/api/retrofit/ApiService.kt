@@ -5,6 +5,7 @@ import com.alya.ecommerce_serang.data.api.dto.OtpRequest
 import com.alya.ecommerce_serang.data.api.dto.RegisterRequest
 import com.alya.ecommerce_serang.data.api.response.AllProductResponse
 import com.alya.ecommerce_serang.data.api.response.CategoryResponse
+import com.alya.ecommerce_serang.data.api.response.DetailStoreProductResponse
 import com.alya.ecommerce_serang.data.api.response.LoginResponse
 import com.alya.ecommerce_serang.data.api.response.OtpResponse
 import com.alya.ecommerce_serang.data.api.response.ProductResponse
@@ -54,6 +55,11 @@ interface ApiService {
 
     @GET("profile")
     suspend fun getUserProfile(): Response<ProfileResponse>
+
+    @GET("store/detail/{id}")
+    suspend fun getDetailStore (
+        @Path("id") storeId: Int
+    ): Response<DetailStoreProductResponse>
 
 
     @GET("mystore")
