@@ -1,10 +1,12 @@
 package com.alya.ecommerce_serang.ui.profile
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.dto.UserProfile
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
@@ -61,25 +63,33 @@ class DetailProfileActivity : AppCompatActivity() {
         binding.tvNameUser.setText(user.name.toString())
         binding.tvUsername.setText(user.username)
         binding.tvEmailUser.setText(user.email)
-        binding.tvDateBirth.setText(formatDate(user.birthDate))
+        Log.d("ProfileActivity", "Raw Birth Date: ${user.birthDate}")
+        binding.tvDateBirth.setText(user.birthDate?.let { formatDate(it) } ?: "N/A")
+        Log.d("ProfileActivity", "Formatted Birth Date: ${formatDate(user.birthDate)}")
         binding.tvNumberPhoneUser.setText(user.phone)
 
         if (user.image != null && user.image is String) {
             Glide.with(this)
                 .load(user.image)
+                .placeholder(R.drawable.baseline_account_circle_24)
                 .into(binding.profileImage)
         }
     }
 
-    private fun formatDate(dateString: String): String {
+    private fun formatDate(dateString: String?): String {
+        if (dateString.isNullOrEmpty()) return "N/A" // Return default if null
+
         return try {
-            val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault()) //from json
-            inputFormat.timeZone = TimeZone.getTimeZone("UTC") //get timezone
-            val outputFormat = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()) // new format
-            val date = inputFormat.parse(dateString)  // Parse from json format
-            outputFormat.format(date!!)  // convert to new format
+            val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
+            inputFormat.timeZone = TimeZone.getTimeZone("UTC") // Ensure parsing in UTC
+
+            val outputFormat = SimpleDateFormat("dd-MM-yy", Locale.getDefault()) // Convert to "dd-MM-yy" format
+            val date = inputFormat.parse(dateString)
+            outputFormat.format(date ?: return "Invalid Date") // Ensure valid date
         } catch (e: Exception) {
-            dateString // Return original if error occurs
+            Log.e("ERROR", "Date parsing error: ${e.message}") // Log errors for debugging
+            "Invalid Date"
         }
     }
+
 }

@@ -1,13 +1,16 @@
 package com.alya.ecommerce_serang.ui.product
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.alya.ecommerce_serang.data.api.dto.ProductsItem
 import com.alya.ecommerce_serang.data.api.response.Product
 import com.alya.ecommerce_serang.data.api.response.ReviewsItem
 import com.alya.ecommerce_serang.data.api.response.Store
 import com.alya.ecommerce_serang.data.repository.ProductRepository
+import com.alya.ecommerce_serang.data.repository.Result
 import kotlinx.coroutines.launch
 
 class ProductViewModel(private val repository: ProductRepository) : ViewModel() {
@@ -20,6 +23,9 @@ class ProductViewModel(private val repository: ProductRepository) : ViewModel() 
 
     private val _reviewProduct = MutableLiveData<List<ReviewsItem>>()
     val reviewProduct: LiveData<List<ReviewsItem>> get() = _reviewProduct
+
+    private val _otherProducts = MutableLiveData<List<ProductsItem>>()
+    val otherProducts: LiveData<List<ProductsItem>> get() = _otherProducts
 
     fun loadProductDetail(productId: Int) {
         viewModelScope.launch {
@@ -34,6 +40,22 @@ class ProductViewModel(private val repository: ProductRepository) : ViewModel() 
             _reviewProduct.value = reviews ?: emptyList()
         }
     }
+
+    fun loadOtherProducts(storeId: Int) {
+        viewModelScope.launch {
+            val result = repository.getAllProducts() // Fetch products
+
+            if (result is Result.Success) {
+                val allProducts = result.data // Extract the list
+                val filteredProducts = allProducts.filter { it.storeId == storeId } // Filter by storeId
+                _otherProducts.value = filteredProducts // Update LiveData
+            } else if (result is Result.Error) {
+                Log.e("ProductViewModel", "Error loading other products: ${result.exception.message}")
+                _otherProducts.value = emptyList() // Set empty list on failure
+            }
+        }
+    }
+
 }
 
 //    fun loadStoreDetail(storeId: Int){

@@ -53,22 +53,19 @@ class DetailProductActivity : AppCompatActivity() {
         viewModel.loadProductDetail(productId)
         viewModel.loadReviews(productId)
 
-        viewModel.productDetail.observe(this) { product ->
-            if (product != null) {
-                Log.d("ProductDetail", "Name: ${product.productName}, Price: ${product.price}")
-                // Update UI here, e.g., show in a TextView or ImageView
-                viewModel.loadProductDetail(productId)
-
-            } else {
-                Log.e("ProductDetail", "Failed to fetch product details")
-            }
-        }
         observeProductDetail()
         observeProductReviews()
     }
+
     private fun observeProductDetail() {
         viewModel.productDetail.observe(this) { product ->
-            product?.let { updateUI(it) }
+            product?.let {
+                updateUI(it)
+                viewModel.loadOtherProducts(it.storeId)
+            }
+        }
+        viewModel.otherProducts.observe(this) { products ->
+            updateOtherProducts(products)
         }
     }
 
@@ -77,6 +74,11 @@ class DetailProductActivity : AppCompatActivity() {
             setupRecyclerViewReviewsProduct(reviews)
         }
     }
+
+    private fun updateOtherProducts(products: List<ProductsItem>) {
+        productAdapter?.updateProducts(products) // Make sure your adapter has a method to update data
+    }
+
 
     private fun updateUI(product: Product){
         binding.tvProductName.text = product.productName

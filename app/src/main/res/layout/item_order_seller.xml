@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <LinearLayout
+        android:id="@+id/linear_seller_order"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_margin="4dp"
+        android:gravity="center_vertical">
+
+        <ImageView
+            android:id="@+id/iv_seller_order"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/placeholder_image"/>
+        <TextView
+            android:id="@+id/tv_list_product_order"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Toko Buka"/>
+    </LinearLayout>
+
+    <com.google.android.material.divider.MaterialDivider
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:dividerInsetStart="16dp"
+        app:dividerInsetEnd="16dp"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_seller_order_product"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:listitem="@layout/item_order_product"/>
+
+
+
+</LinearLayout>
