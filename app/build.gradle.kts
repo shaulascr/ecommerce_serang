@@ -66,13 +66,13 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
 
     //retrofit
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.logging.interceptor)
 
-    implementation("com.github.bumptech.glide:glide:4.16.0")
-    implementation("androidx.paging:paging-runtime:3.2.1")
-    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+    implementation(libs.glide)
+    implementation(libs.androidx.paging.runtime)
+    implementation(libs.androidx.swiperefreshlayout)
 
 
 //    implementation(libs.hilt.android)
