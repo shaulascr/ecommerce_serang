@@ -1,7 +1,10 @@
 package com.alya.ecommerce_serang.data.repository
 
 import android.util.Log
-import com.alya.ecommerce_serang.data.api.response.ProductsItem
+import com.alya.ecommerce_serang.data.api.dto.CategoryItem
+import com.alya.ecommerce_serang.data.api.dto.ProductsItem
+import com.alya.ecommerce_serang.data.api.response.ProductResponse
+import com.alya.ecommerce_serang.data.api.response.ReviewsItem
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -11,25 +14,84 @@ class ProductRepository(private val apiService: ApiService) {
         withContext(Dispatchers.IO) {
             try {
                 Log.d("ProductRepository", "Attempting to fetch products")
-                val response = apiService.getAllProduct().execute()
-                Log.d("ProductRepository", "Response received. Success: ${response.isSuccessful}")
-                Log.d("ProductRepository", "Response code: ${response.code()}")
-                Log.d("ProductRepository", "Response message: ${response.message()}")
+                val response = apiService.getAllProduct()
 
                 if (response.isSuccessful) {
-                    Result.success(response.body()?.products ?: emptyList())
+                    // Return a Result.Success with the list of products
+
+                    Result.Success(response.body()?.products ?: emptyList())
+
                 } else {
-                    Result.failure(Exception("Failed to fetch products"))
+                    // Return a Result.Error with a custom Exception
+                    Log.e("ProductRepository", "Error: ${response.errorBody()?.string()}")
+                    Result.Error(Exception("Failed to fetch products. Code: ${response.code()}"))
                 }
             } catch (e: Exception) {
-                Result.failure(e)
+                // Return a Result.Error with the exception caught
+                Result.Error(e)
             }
         }
-//    suspend fun getCategories():List<Category>
-//
-//    fun getProducts(query: ProductQuery) : Flow<PagingData<Product>>
-//    fun getRecentSearchs(): Flow<List<String>>
-//    suspend fun clearRecents()
-//    suspend fun addRecents(search:String)
-//    suspend fun getProduct(id:String):DetailProduct
+
+    suspend fun fetchProductDetail(productId: Int): ProductResponse? {
+        return try {
+            val response = apiService.getDetailProduct(productId)
+            if (response.isSuccessful) {
+                response.body()
+            } else {
+                Log.e("ProductRepository", "Error: ${response.errorBody()?.string()}")
+                null
+            }
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    suspend fun getAllCategories(): Result<List<CategoryItem>> =
+        withContext(Dispatchers.IO) {
+            try {
+                Log.d("Categories", "Attempting to fetch categories")
+                val response = apiService.allCategory()
+
+                if (response.isSuccessful) {
+                    val categories = response.body()?.category ?: emptyList()
+                    Log.d("Categories", "Fetched categories: $categories")
+                    categories.forEach { Log.d("Category Image", "Category: ${it.name}, Image: ${it.image}") }
+                    Result.Success(categories)
+                } else {
+                    Result.Error(Exception("Failed to fetch categories. Code: ${response.code()}"))
+                }
+            } catch (e: Exception) {
+                Log.e("Categories", "Error fetching categories", e)
+                Result.Error(e)
+            }
+        }
+
+    suspend fun fetchProductReview(productId: Int): List<ReviewsItem>? {
+        return try {
+            val response = apiService.getProductReview(productId)
+            if (response.isSuccessful) {
+                response.body()?.reviews // Ambil daftar review dari response
+            } else {
+                Log.e("ProductRepository", "Error: ${response.errorBody()?.string()}")
+                null
+            }
+        } catch (e: Exception) {
+            null
+        }
+    }
 }
+
+//    suspend fun fetchStoreDetail(storeId: Int): Store? {
+//        return try {
+//            val response = apiService.getStore(storeId)
+//            if (response.isSucessful) {
+//                response.body()?.store
+//            } else {
+//                Log.e("ProductRepository", "Error: ${response.errorBody()?.string()}")
+//
+//                null
+//            }
+//        } catch (e: Exception) {
+//            null
+//        }
+//    }

@@ -6,11 +6,16 @@ import androidx.core.view.isVisible
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.alya.ecommerce_serang.R
+import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
+import com.alya.ecommerce_serang.data.api.retrofit.ApiService
 import com.alya.ecommerce_serang.databinding.ActivityMainBinding
+import com.alya.ecommerce_serang.utils.SessionManager
 
 //@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
+    private lateinit var apiService: ApiService
+    private lateinit var sessionManager: SessionManager
     private val navController by lazy {
         (supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment).navController
     }
@@ -18,6 +23,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        sessionManager = SessionManager(this)
+        apiService = ApiConfig.getApiService(sessionManager) // Inject SessionManager
 
         setupBottomNavigation()
         observeDestinationChanges()

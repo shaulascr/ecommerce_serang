@@ -1,8 +1,9 @@
-package com.alya.ecommerce_serang.data.model
+package com.alya.ecommerce_serang.data.api.dto
+
 
 import com.google.gson.annotations.SerializedName
 
-data class Product(
+data class ProductsItem(
 
     @field:SerializedName("store_id")
     val storeId: Int,
@@ -19,14 +20,8 @@ data class Product(
     @field:SerializedName("weight")
     val weight: Int,
 
-    @field:SerializedName("product_name")
-    val productName: String,
-
     @field:SerializedName("is_pre_order")
     val isPreOrder: Boolean,
-
-    @field:SerializedName("duration")
-    val duration: Any,
 
     @field:SerializedName("category_id")
     val categoryId: Int,
@@ -34,8 +29,11 @@ data class Product(
     @field:SerializedName("price")
     val price: String,
 
-    @field:SerializedName("product_id")
-    val productId: Int,
+    @field:SerializedName("name")
+    val name: String,
+
+    @field:SerializedName("id")
+    val id: Int,
 
     @field:SerializedName("min_order")
     val minOrder: Int,
@@ -46,6 +44,6 @@ data class Product(
     @field:SerializedName("stock")
     val stock: Int,
 
-    @field:SerializedName("product_category")
-    val productCategory: String
+    @field:SerializedName("status")
+    val status: String
 )

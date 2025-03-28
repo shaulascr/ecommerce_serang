@@ -14,7 +14,7 @@ data class DetailProduct(
     val inStock: Int,
     val price: Double,
     val rating: Double,
-    val related: List<Product>,
+    val related: List<ProductsItem>,
     val reviews: Int,
     val title: String,
     @SerializedName("free_delivery")

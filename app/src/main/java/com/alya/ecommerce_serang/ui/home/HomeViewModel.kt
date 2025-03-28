@@ -1,13 +1,12 @@
 package com.alya.ecommerce_serang.ui.home
 
 import android.util.Log
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.alya.ecommerce_serang.data.api.response.AllProductResponse
-import com.alya.ecommerce_serang.data.api.response.ProductsItem
-import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
+import com.alya.ecommerce_serang.data.api.dto.CategoryItem
+import com.alya.ecommerce_serang.data.api.dto.ProductsItem
 import com.alya.ecommerce_serang.data.repository.ProductRepository
+import com.alya.ecommerce_serang.data.repository.Result
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,37 +17,56 @@ class HomeViewModel (
 ): ViewModel() {
     private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
-    val home = MutableLiveData<AllProductResponse?>(null)
-    constructor() : this(ProductRepository(ApiConfig.getApiService()))
 
+    private val _categories = MutableStateFlow<List<CategoryItem>>(emptyList())
+    val categories: StateFlow<List<CategoryItem>> = _categories.asStateFlow()
 
     init {
         loadProducts()
+        loadCategories()
     }
 
     private fun loadProducts() {
         viewModelScope.launch {
             _uiState.value = HomeUiState.Loading
-            productRepository.getAllProducts()
-                .onSuccess { products ->
-                    _uiState.value = HomeUiState.Success(products)
-                }
-                .onFailure { error ->
-                    _uiState.value = HomeUiState.Error(error.message ?: "Unknown error")
-                    Log.e("ProductViewModel", "Products fetch failed", error)
-                }
+            when (val result = productRepository.getAllProducts()) {
+                is Result.Success -> _uiState.value = HomeUiState.Success(result.data)
+                is Result.Error -> _uiState.value = HomeUiState.Error(result.exception.message ?: "Unknown error")
+                is Result.Loading -> {}
+            }
         }
     }
 
-    fun retry() {
-        loadProducts()
+    private fun loadCategories() {
+        viewModelScope.launch {
+            when (val result = productRepository.getAllCategories()) {
+                is Result.Success -> _categories.value = result.data
+                is Result.Error -> Log.e("HomeViewModel", "Failed to fetch categories", result.exception)
+                is Result.Loading -> {}
+            }
+        }
     }
 
-//    fun toggleWishlist(product: Product) = viewModelScope.launch {
-//        try {
-//            productRepository.toggleWishlist(product.id,product.wishlist)
-//        }catch (e:Exception){
-//
+
+    fun retry() {
+        loadProducts()
+        loadCategories()
+    }
+
+//    private fun fetchUserData() {
+//        viewModelScope.launch {
+//            try {
+//                val response = apiService.getProtectedData() // Example API request
+//                if (response.isSuccessful) {
+//                    val data = response.body()
+//                    Log.d("HomeFragment", "User Data: $data")
+//                    // Update UI with data
+//                } else {
+//                    Log.e("HomeFragment", "Error: ${response.message()}")
+//                }
+//            } catch (e: Exception) {
+//                Log.e("HomeFragment", "Exception: ${e.message}")
+//            }
 //        }
 //    }
 }

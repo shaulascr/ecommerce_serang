@@ -1,22 +1,67 @@
 package com.alya.ecommerce_serang.data.api.retrofit
 
+import com.alya.ecommerce_serang.data.api.dto.LoginRequest
+import com.alya.ecommerce_serang.data.api.dto.OtpRequest
+import com.alya.ecommerce_serang.data.api.dto.RegisterRequest
 import com.alya.ecommerce_serang.data.api.response.AllProductResponse
+import com.alya.ecommerce_serang.data.api.response.CategoryResponse
+import com.alya.ecommerce_serang.data.api.response.DetailStoreProductResponse
+import com.alya.ecommerce_serang.data.api.response.LoginResponse
+import com.alya.ecommerce_serang.data.api.response.OtpResponse
 import com.alya.ecommerce_serang.data.api.response.ProductResponse
+import com.alya.ecommerce_serang.data.api.response.ProfileResponse
+import com.alya.ecommerce_serang.data.api.response.RegisterResponse
+import com.alya.ecommerce_serang.data.api.response.ReviewProductResponse
+import com.alya.ecommerce_serang.data.api.response.StoreResponse
 import retrofit2.Call
+import retrofit2.Response
+import retrofit2.http.Body
 import retrofit2.http.GET
-import retrofit2.http.Header
+import retrofit2.http.POST
 import retrofit2.http.Path
 
 interface ApiService {
-    @GET("product")
-    fun getAllProduct(
-        @Header("Authorization") token: String = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NzEsIm5hbWUiOiJhbHlhIiwiZW1haWwiOiJha3VuYmVsYWphci5hbHlhQGdtYWlsLmNvbSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzM4NDg0OTc0LCJleHAiOjE3NDEwNzY5NzR9.0JyXJQ_6CKiZEi0gvk1gcn-0ILu3a9lOr3HqjhJXbBE"
-    ): Call<AllProductResponse>
+    @POST("registeruser")
+    suspend fun register (
+        @Body registerRequest: RegisterRequest
+    ): Response<RegisterResponse>
 
+    @POST("otp")
+    suspend fun getOTP(
+        @Body otpRequest: OtpRequest
+    ):OtpResponse
+
+    @POST("login")
+    suspend fun login(
+        @Body loginRequest: LoginRequest
+    ): Response<LoginResponse>
+
+    @GET("category")
+    suspend fun allCategory(
+    ): Response<CategoryResponse>
+
+    @GET("product")
+    suspend fun getAllProduct(): Response<AllProductResponse>
+
+    @GET("product/review/{id}")
+    suspend fun getProductReview(
+        @Path("id") productId: Int
+    ): Response<ReviewProductResponse>
 
     @GET("product/detail/{id}")
-    fun getDetailProduct (
-        @Header("Authorization") token: String,
+    suspend fun getDetailProduct (
         @Path("id") productId: Int
-    ): Call<ProductResponse>
+    ): Response<ProductResponse>
+
+    @GET("profile")
+    suspend fun getUserProfile(): Response<ProfileResponse>
+
+    @GET("store/detail/{id}")
+    suspend fun getDetailStore (
+        @Path("id") storeId: Int
+    ): Response<DetailStoreProductResponse>
+
+
+    @GET("mystore")
+    fun getStore (): Call<StoreResponse>
 }
