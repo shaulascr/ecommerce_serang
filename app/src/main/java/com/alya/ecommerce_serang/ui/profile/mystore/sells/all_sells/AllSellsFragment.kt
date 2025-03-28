@@ -1,4 +1,4 @@
-package com.alya.ecommerce_serang.ui.profile.mystore.sells.shipped
+package com.alya.ecommerce_serang.ui.profile.mystore.sells.all_sells
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -7,12 +7,12 @@ import android.view.View
 import android.view.ViewGroup
 import com.alya.ecommerce_serang.R
 
-class ShippedFragment : Fragment() {
+class AllSellsFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_shipped, container, false)
+        return inflater.inflate(R.layout.fragment_all_sells, container, false)
     }
 }

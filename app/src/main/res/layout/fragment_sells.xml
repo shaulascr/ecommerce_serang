@@ -7,7 +7,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".ui.profile.mystore.sells.main.SellsFragment">
+    tools:context=".ui.profile.mystore.sells.SellsFragment">
 
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tab_layout_sells"

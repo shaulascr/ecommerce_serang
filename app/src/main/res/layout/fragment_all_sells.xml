@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="13dp"
-    tools:context=".ui.profile.mystore.sells.main.AllSellsFragment">
+    tools:context=".ui.profile.mystore.sells.all_sells.AllSellsFragment">
 
     <TextView
         android:id="@+id/tv_semua_pesanan"
