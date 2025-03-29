@@ -63,5 +63,5 @@ interface ApiService {
 
 
     @GET("mystore")
-    fun getStore (): Call<StoreResponse>
+    suspend fun getStore (): Response<StoreResponse>
 }

@@ -42,7 +42,7 @@
             android:name=".ui.profile.mystore.profile.EditStoreProfileActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.profile.mystore.TokoSayaActivity"
+            android:name=".ui.profile.mystore.MyStoreActivity"
             android:exported="false" />
         <activity
             android:name=".ui.product.DetailProductActivity"
