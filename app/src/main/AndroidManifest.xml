@@ -18,6 +18,18 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".ui.profile.mystore.profile.payment_info.DetailPaymentInfoActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.profile.mystore.profile.payment_info.PaymentInfoActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.profile.mystore.profile.address.StoreAddressActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.profile.mystore.product.ProductActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.product.ReviewProductActivity"
             android:exported="false" />
         <activity
@@ -39,7 +51,7 @@
             android:name=".ui.profile.mystore.product.AddProductActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.profile.mystore.profile.EditStoreProfileActivity"
+            android:name=".ui.profile.mystore.profile.DetailStoreProfileActivity"
             android:exported="false" />
         <activity
             android:name=".ui.profile.mystore.MyStoreActivity"
@@ -64,7 +76,7 @@
             android:exported="false" />
         <activity
             android:name=".ui.MainActivity"
-            android:exported="false"></activity>
+            android:exported="false" />
     </application>
 
 </manifest>
