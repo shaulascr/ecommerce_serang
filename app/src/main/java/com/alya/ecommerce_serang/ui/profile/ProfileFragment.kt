@@ -15,7 +15,7 @@ import com.alya.ecommerce_serang.data.api.dto.UserProfile
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.repository.UserRepository
 import com.alya.ecommerce_serang.databinding.FragmentProfileBinding
-import com.alya.ecommerce_serang.ui.profile.mystore.TokoSayaActivity
+import com.alya.ecommerce_serang.ui.profile.mystore.MyStoreActivity
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
 import com.bumptech.glide.Glide
@@ -54,7 +54,7 @@ class ProfileFragment : Fragment() {
         viewModel.loadUserProfile()
 
         binding.cardBukaToko.setOnClickListener{
-            val intentBuka = Intent(requireContext(), TokoSayaActivity::class.java)
+            val intentBuka = Intent(requireContext(), MyStoreActivity::class.java)
             startActivity(intentBuka)
         }
 
