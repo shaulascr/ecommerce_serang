@@ -23,7 +23,7 @@ android {
 
     buildTypes {
         release {
-            buildConfigField("String", "BASE_URL", "\"http://192.168.1.4:3000/\"")
+            buildConfigField("String", "BASE_URL", "\"http://192.168.1.15:3000/\"")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -31,7 +31,7 @@ android {
             )
         }
         debug {
-            buildConfigField("String", "BASE_URL", "\"http://192.168.1.4:3000/\"")
+            buildConfigField("String", "BASE_URL", "\"http://192.168.1.15:3000/\"")
         }
     }
     compileOptions {
@@ -60,19 +60,20 @@ dependencies {
     implementation(libs.androidx.fragment.ktx)
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
-    implementation(libs.androidx.recyclerview)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
     //retrofit
-    implementation(libs.retrofit)
-    implementation(libs.converter.gson)
-    implementation(libs.logging.interceptor)
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
 
-    implementation(libs.glide)
-    implementation(libs.androidx.paging.runtime)
-    implementation(libs.androidx.swiperefreshlayout)
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    implementation("androidx.paging:paging-runtime:3.2.1")
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+    implementation("de.hdodenhof:circleimageview:3.1.0")
+
 
 
 //    implementation(libs.hilt.android)
