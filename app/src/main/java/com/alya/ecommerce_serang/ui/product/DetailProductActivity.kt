@@ -3,6 +3,9 @@ package com.alya.ecommerce_serang.ui.product
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.Button
+import android.widget.ImageButton
+import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -16,9 +19,11 @@ import com.alya.ecommerce_serang.data.api.retrofit.ApiService
 import com.alya.ecommerce_serang.data.repository.ProductRepository
 import com.alya.ecommerce_serang.databinding.ActivityDetailProductBinding
 import com.alya.ecommerce_serang.ui.home.HorizontalProductAdapter
+import com.alya.ecommerce_serang.ui.order.CheckoutActivity
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
 import com.bumptech.glide.Glide
+import com.google.android.material.bottomsheet.BottomSheetDialog
 
 class DetailProductActivity : AppCompatActivity() {
     private lateinit var binding: ActivityDetailProductBinding
@@ -95,6 +100,13 @@ class DetailProductActivity : AppCompatActivity() {
             handleAllReviewsClick(product.productId)
         }
 
+        binding.btnBuyNow.setOnClickListener {
+            viewModel.productDetail.value?.productId?.let { id ->
+                showBuyNowPopup(id)
+            }
+        }
+
+
         val fullImageUrl = when (val img = product.image) {
             is String -> {
                 if (img.startsWith("/")) BASE_URL + img.substring(1) else img
@@ -155,4 +167,45 @@ class DetailProductActivity : AppCompatActivity() {
         intent.putExtra("PRODUCT_ID", product.id) // Pass product ID
         startActivity(intent)
     }
+
+    private fun showBuyNowPopup(productId: Int) {
+        val bottomSheetDialog = BottomSheetDialog(this)
+        val view = layoutInflater.inflate(R.layout.dialog_count_buy, null)
+        bottomSheetDialog.setContentView(view)
+
+        val btnDecrease = view.findViewById<Button>(R.id.btnDecrease)
+        val btnIncrease = view.findViewById<Button>(R.id.btnIncrease)
+        val tvQuantity = view.findViewById<TextView>(R.id.tvQuantity)
+        val btnBuyNow = view.findViewById<Button>(R.id.btnBuyNow)
+        val btnClose = view.findViewById<ImageButton>(R.id.btnCloseDialog)
+
+        var quantity = 1
+        tvQuantity.text = quantity.toString()
+
+        btnDecrease.setOnClickListener {
+            if (quantity > 1) {
+                quantity--
+                tvQuantity.text = quantity.toString()
+            }
+        }
+
+        btnIncrease.setOnClickListener {
+            quantity++
+            tvQuantity.text = quantity.toString()
+        }
+
+        btnBuyNow.setOnClickListener {
+            bottomSheetDialog.dismiss()
+            val intent = Intent(this, CheckoutActivity::class.java)
+            intent.putExtra("PRODUCT_ID", productId)
+            intent.putExtra("QUANTITY", quantity)
+            startActivity(intent)
+        }
+
+        btnClose.setOnClickListener {
+            bottomSheetDialog.dismiss()
+        }
+        bottomSheetDialog.show()
+    }
+
 }

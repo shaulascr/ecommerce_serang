@@ -1,12 +1,15 @@
 package com.alya.ecommerce_serang.data.api.retrofit
 
 import com.alya.ecommerce_serang.data.api.dto.LoginRequest
+import com.alya.ecommerce_serang.data.api.dto.OrderRequest
 import com.alya.ecommerce_serang.data.api.dto.OtpRequest
 import com.alya.ecommerce_serang.data.api.dto.RegisterRequest
+import com.alya.ecommerce_serang.data.api.response.AddressResponse
 import com.alya.ecommerce_serang.data.api.response.AllProductResponse
 import com.alya.ecommerce_serang.data.api.response.CategoryResponse
 import com.alya.ecommerce_serang.data.api.response.DetailStoreProductResponse
 import com.alya.ecommerce_serang.data.api.response.LoginResponse
+import com.alya.ecommerce_serang.data.api.response.OrderResponse
 import com.alya.ecommerce_serang.data.api.response.OtpResponse
 import com.alya.ecommerce_serang.data.api.response.ProductResponse
 import com.alya.ecommerce_serang.data.api.response.ProfileResponse
@@ -60,6 +63,16 @@ interface ApiService {
     suspend fun getDetailStore (
         @Path("id") storeId: Int
     ): Response<DetailStoreProductResponse>
+
+    @POST("order")
+    suspend fun postOrder(
+        @Body request: OrderRequest
+    ): Response<OrderResponse>
+
+    @GET("profile/address")
+    suspend fun getAddress(
+        @Body addressRequest: AddressRequest
+    ): Response<AddressResponse>
 
 
     @GET("mystore")
