@@ -62,7 +62,7 @@ data class Store(
 	val email: String,
 
 	@field:SerializedName("store_image")
-	val storeImage: Any,
+	val storeImage: String? = null,
 
 	@field:SerializedName("longitude")
 	val longitude: String,

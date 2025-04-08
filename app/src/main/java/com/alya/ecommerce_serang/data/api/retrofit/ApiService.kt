@@ -1,5 +1,6 @@
 package com.alya.ecommerce_serang.data.api.retrofit
 
+import com.alya.ecommerce_serang.data.api.dto.CreateAddressRequest
 import com.alya.ecommerce_serang.data.api.dto.LoginRequest
 import com.alya.ecommerce_serang.data.api.dto.OrderRequest
 import com.alya.ecommerce_serang.data.api.dto.OtpRequest
@@ -16,7 +17,6 @@ import com.alya.ecommerce_serang.data.api.response.ProfileResponse
 import com.alya.ecommerce_serang.data.api.response.RegisterResponse
 import com.alya.ecommerce_serang.data.api.response.ReviewProductResponse
 import com.alya.ecommerce_serang.data.api.response.StoreResponse
-import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -71,10 +71,9 @@ interface ApiService {
 
     @GET("profile/address")
     suspend fun getAddress(
-        @Body addressRequest: AddressRequest
+        @Body addressRequest: CreateAddressRequest
     ): Response<AddressResponse>
 
-
     @GET("mystore")
-    fun getStore (): Call<StoreResponse>
+    suspend fun getStore (): Response<StoreResponse>
 }

@@ -26,7 +26,7 @@ data class StoreProduct(
 	val storeLocation: String,
 
 	@field:SerializedName("store_image")
-	val storeImage: Any,
+	val storeImage: String? = null,
 
 	@field:SerializedName("status")
 	val status: String

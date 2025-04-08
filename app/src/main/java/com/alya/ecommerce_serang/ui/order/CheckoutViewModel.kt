@@ -9,6 +9,7 @@ import com.alya.ecommerce_serang.data.api.dto.CheckoutData
 import com.alya.ecommerce_serang.data.api.dto.OrderRequest
 import com.alya.ecommerce_serang.data.api.response.AddressesItem
 import com.alya.ecommerce_serang.data.api.response.OrderResponse
+import com.alya.ecommerce_serang.data.api.response.PaymentItem
 import com.alya.ecommerce_serang.data.repository.OrderRepository
 import com.alya.ecommerce_serang.data.repository.Result
 import kotlinx.coroutines.launch
@@ -21,6 +22,9 @@ class CheckoutViewModel(private val repository: OrderRepository) : ViewModel() {
     private val _addressDetails = MutableLiveData<AddressesItem>()
     val addressDetails: LiveData<AddressesItem> = _addressDetails
 
+    private val _storePayments = MutableLiveData<List<PaymentItem>>()
+    val storePayments: LiveData<List<PaymentItem>> = _storePayments
+
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading
 
@@ -31,6 +35,8 @@ class CheckoutViewModel(private val repository: OrderRepository) : ViewModel() {
             try {
                 // Load all necessary data
                 val productDetails = repository.fetchProductDetail(orderRequest.productIdItem)
+                val storeDetails = repository.getStoreDetails(productDetails.product.storeId)
+
 //                val addressDetails = repository.getAddressDetails(orderRequest.address_id)
 
                 // Update LiveData objects
@@ -42,10 +48,15 @@ class CheckoutViewModel(private val repository: OrderRepository) : ViewModel() {
                     productName = productDetails?.product?.productName,
                     productImageUrl = productDetails.product.image,
                     productPrice = productDetails.product.price,
-                    sellerName = productDetails.product.storeId
-//                    sellerImageUrl = productDetails.sellerImageUrl,
-//                    sellerId = productDetails.sellerId
+                    sellerName = storeDetails.store.storeName,
+                    sellerImageUrl = storeDetails.store.storeImage,
+                    sellerId = productDetails.product.storeId
                 )
+
+                storeDetails?.let {
+                    _storePayments.value = it.payment
+                }
+
             } catch (e: Exception) {
                 // Handle errors
                 Log.e("CheckoutViewModel", "Error loading checkout data", e)
