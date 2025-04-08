@@ -4,8 +4,8 @@ import com.alya.ecommerce_serang.data.api.dto.LoginRequest
 import com.alya.ecommerce_serang.data.api.dto.OtpRequest
 import com.alya.ecommerce_serang.data.api.dto.RegisterRequest
 import com.alya.ecommerce_serang.data.api.dto.UserProfile
-import com.alya.ecommerce_serang.data.api.response.LoginResponse
-import com.alya.ecommerce_serang.data.api.response.OtpResponse
+import com.alya.ecommerce_serang.data.api.response.auth.LoginResponse
+import com.alya.ecommerce_serang.data.api.response.auth.OtpResponse
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
 
 class UserRepository(private val apiService: ApiService) {

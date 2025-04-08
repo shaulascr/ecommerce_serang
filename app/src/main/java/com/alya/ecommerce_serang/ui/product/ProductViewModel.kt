@@ -6,9 +6,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.alya.ecommerce_serang.data.api.dto.ProductsItem
-import com.alya.ecommerce_serang.data.api.response.Product
-import com.alya.ecommerce_serang.data.api.response.ReviewsItem
-import com.alya.ecommerce_serang.data.api.response.Store
+import com.alya.ecommerce_serang.data.api.response.product.Product
+import com.alya.ecommerce_serang.data.api.response.product.ReviewsItem
+import com.alya.ecommerce_serang.data.api.response.product.Store
 import com.alya.ecommerce_serang.data.repository.ProductRepository
 import com.alya.ecommerce_serang.data.repository.Result
 import kotlinx.coroutines.launch

@@ -3,8 +3,8 @@ package com.alya.ecommerce_serang.data.repository
 import android.util.Log
 import com.alya.ecommerce_serang.data.api.dto.CategoryItem
 import com.alya.ecommerce_serang.data.api.dto.ProductsItem
-import com.alya.ecommerce_serang.data.api.response.ProductResponse
-import com.alya.ecommerce_serang.data.api.response.ReviewsItem
+import com.alya.ecommerce_serang.data.api.response.product.ProductResponse
+import com.alya.ecommerce_serang.data.api.response.product.ReviewsItem
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

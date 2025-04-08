@@ -7,11 +7,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.alya.ecommerce_serang.data.api.dto.CheckoutData
 import com.alya.ecommerce_serang.data.api.dto.OrderRequest
-import com.alya.ecommerce_serang.data.api.response.AddressesItem
-import com.alya.ecommerce_serang.data.api.response.OrderResponse
-import com.alya.ecommerce_serang.data.api.response.PaymentItem
+import com.alya.ecommerce_serang.data.api.response.profile.AddressesItem
+import com.alya.ecommerce_serang.data.api.response.product.PaymentItem
 import com.alya.ecommerce_serang.data.repository.OrderRepository
-import com.alya.ecommerce_serang.data.repository.Result
 import kotlinx.coroutines.launch
 
 class CheckoutViewModel(private val repository: OrderRepository) : ViewModel() {

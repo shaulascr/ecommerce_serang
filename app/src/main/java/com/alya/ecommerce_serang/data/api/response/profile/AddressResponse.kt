@@ -1,13 +1,13 @@
-package com.alya.ecommerce_serang.data.api.response
+package com.alya.ecommerce_serang.data.api.response.profile
 
 import com.google.gson.annotations.SerializedName
 
 data class AddressResponse(
 
-	@field:SerializedName("addresses")
+    @field:SerializedName("addresses")
 	val addresses: List<AddressesItem>,
 
-	@field:SerializedName("message")
+    @field:SerializedName("message")
 	val message: String
 )
 

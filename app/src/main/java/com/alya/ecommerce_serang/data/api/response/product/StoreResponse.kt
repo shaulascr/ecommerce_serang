@@ -1,19 +1,19 @@
-package com.alya.ecommerce_serang.data.api.response
+package com.alya.ecommerce_serang.data.api.response.product
 
 import com.google.gson.annotations.SerializedName
 
 data class StoreResponse(
 
-	@field:SerializedName("shipping")
+    @field:SerializedName("shipping")
 	val shipping: List<ShippingItem>,
 
-	@field:SerializedName("payment")
+    @field:SerializedName("payment")
 	val payment: List<PaymentItem>,
 
-	@field:SerializedName("store")
+    @field:SerializedName("store")
 	val store: Store,
 
-	@field:SerializedName("message")
+    @field:SerializedName("message")
 	val message: String
 )
 

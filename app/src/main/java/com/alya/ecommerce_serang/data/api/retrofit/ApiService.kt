@@ -1,22 +1,27 @@
 package com.alya.ecommerce_serang.data.api.retrofit
 
+import com.alya.ecommerce_serang.data.api.dto.CartItem
+import com.alya.ecommerce_serang.data.api.dto.CourierCostRequest
 import com.alya.ecommerce_serang.data.api.dto.CreateAddressRequest
 import com.alya.ecommerce_serang.data.api.dto.LoginRequest
 import com.alya.ecommerce_serang.data.api.dto.OrderRequest
 import com.alya.ecommerce_serang.data.api.dto.OtpRequest
 import com.alya.ecommerce_serang.data.api.dto.RegisterRequest
-import com.alya.ecommerce_serang.data.api.response.AddressResponse
-import com.alya.ecommerce_serang.data.api.response.AllProductResponse
-import com.alya.ecommerce_serang.data.api.response.CategoryResponse
-import com.alya.ecommerce_serang.data.api.response.DetailStoreProductResponse
-import com.alya.ecommerce_serang.data.api.response.LoginResponse
-import com.alya.ecommerce_serang.data.api.response.OrderResponse
-import com.alya.ecommerce_serang.data.api.response.OtpResponse
-import com.alya.ecommerce_serang.data.api.response.ProductResponse
-import com.alya.ecommerce_serang.data.api.response.ProfileResponse
-import com.alya.ecommerce_serang.data.api.response.RegisterResponse
-import com.alya.ecommerce_serang.data.api.response.ReviewProductResponse
-import com.alya.ecommerce_serang.data.api.response.StoreResponse
+import com.alya.ecommerce_serang.data.api.response.auth.LoginResponse
+import com.alya.ecommerce_serang.data.api.response.auth.OtpResponse
+import com.alya.ecommerce_serang.data.api.response.auth.RegisterResponse
+import com.alya.ecommerce_serang.data.api.response.cart.AddCartResponse
+import com.alya.ecommerce_serang.data.api.response.cart.ListCartResponse
+import com.alya.ecommerce_serang.data.api.response.order.CourierCostResponse
+import com.alya.ecommerce_serang.data.api.response.order.CreateOrderResponse
+import com.alya.ecommerce_serang.data.api.response.product.AllProductResponse
+import com.alya.ecommerce_serang.data.api.response.product.CategoryResponse
+import com.alya.ecommerce_serang.data.api.response.product.DetailStoreProductResponse
+import com.alya.ecommerce_serang.data.api.response.product.ProductResponse
+import com.alya.ecommerce_serang.data.api.response.product.ReviewProductResponse
+import com.alya.ecommerce_serang.data.api.response.product.StoreResponse
+import com.alya.ecommerce_serang.data.api.response.profile.AddressResponse
+import com.alya.ecommerce_serang.data.api.response.profile.ProfileResponse
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -32,7 +37,7 @@ interface ApiService {
     @POST("otp")
     suspend fun getOTP(
         @Body otpRequest: OtpRequest
-    ):OtpResponse
+    ): OtpResponse
 
     @POST("login")
     suspend fun login(
@@ -67,13 +72,31 @@ interface ApiService {
     @POST("order")
     suspend fun postOrder(
         @Body request: OrderRequest
-    ): Response<OrderResponse>
+    ): Response<CreateOrderResponse>
 
     @GET("profile/address")
     suspend fun getAddress(
+    ): Response<AddressResponse>
+
+    @POST("profile/addaddress")
+    suspend fun createAddress(
         @Body addressRequest: CreateAddressRequest
     ): Response<AddressResponse>
 
+
     @GET("mystore")
     suspend fun getStore (): Response<StoreResponse>
+
+    @GET("cart_item")
+    suspend fun getCart (): Response<ListCartResponse>
+
+    @POST("cart/add")
+    suspend fun addCart(
+        @Body cartRequest: CartItem
+    ): Response<AddCartResponse>
+
+    @POST("couriercost")
+    suspend fun countCourierCost(
+        @Body courierCost : CourierCostRequest
+    ): CourierCostResponse
 }

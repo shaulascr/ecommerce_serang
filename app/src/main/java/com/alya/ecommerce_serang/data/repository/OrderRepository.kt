@@ -2,9 +2,9 @@ package com.alya.ecommerce_serang.data.repository
 
 import android.util.Log
 import com.alya.ecommerce_serang.data.api.dto.OrderRequest
-import com.alya.ecommerce_serang.data.api.response.OrderResponse
-import com.alya.ecommerce_serang.data.api.response.ProductResponse
-import com.alya.ecommerce_serang.data.api.response.StoreResponse
+import com.alya.ecommerce_serang.data.api.response.order.CreateOrderResponse
+import com.alya.ecommerce_serang.data.api.response.product.ProductResponse
+import com.alya.ecommerce_serang.data.api.response.product.StoreResponse
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
 import retrofit2.Response
 
@@ -24,7 +24,7 @@ class OrderRepository(private val apiService: ApiService) {
         }
     }
 
-    suspend fun createOrder(orderRequest: OrderRequest): Response<OrderResponse> {
+    suspend fun createOrder(orderRequest: OrderRequest): Response<CreateOrderResponse> {
         return apiService.postOrder(orderRequest)
     }
 
