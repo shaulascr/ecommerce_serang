@@ -8,6 +8,7 @@ import com.alya.ecommerce_serang.data.api.response.order.ListCityResponse
 import com.alya.ecommerce_serang.data.api.response.order.ListProvinceResponse
 import com.alya.ecommerce_serang.data.api.response.product.ProductResponse
 import com.alya.ecommerce_serang.data.api.response.product.StoreResponse
+import com.alya.ecommerce_serang.data.api.response.profile.AddressResponse
 import com.alya.ecommerce_serang.data.api.response.profile.CreateAddressResponse
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
 import retrofit2.Response
@@ -34,6 +35,11 @@ class OrderRepository(private val apiService: ApiService) {
 
     suspend fun getStore(): StoreResponse? {
         val response = apiService.getStore()
+        return if (response.isSuccessful) response.body() else null
+    }
+
+    suspend fun getAddress(): AddressResponse?{
+        val response = apiService.getAddress()
         return if (response.isSuccessful) response.body() else null
     }
 

@@ -10,7 +10,6 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.constraintlayout.motion.widget.Debug.getLocation
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -64,16 +63,18 @@ class AddAddressActivity : AppCompatActivity() {
 
     }
 
-    private fun viewModelAddAddress(request: CreateAddressRequest) {
-        // Call the private fun in your ViewModel using reflection or expose it in ViewModel
-        val method = AddAddressViewModel::class.java.getDeclaredMethod("addAddress", CreateAddressRequest::class.java)
-        method.isAccessible = true
-        method.invoke(viewModel, request)
-    }
+//    private fun viewModelAddAddress(request: CreateAddressRequest) {
+//        // Call the private fun in your ViewModel using reflection or expose it in ViewModel
+//        val method = AddAddressViewModel::class.java.getDeclaredMethod("addAddress", CreateAddressRequest::class.java)
+//        method.isAccessible = true
+//        method.invoke(viewModel, request)
+//    }
     // UI setup methods
-    private fun setupToolbar() {
-        binding.toolbar.setNavigationOnClickListener { finish() }
+private fun setupToolbar() {
+    binding.toolbar.setNavigationOnClickListener {
+        onBackPressedDispatcher.onBackPressed()
     }
+}
 
     private fun setupAutoComplete() {
         // Set adapters
@@ -164,17 +165,6 @@ class AddAddressActivity : AppCompatActivity() {
             }
         }
     }
-
-//    private fun showProvinceLoading(isLoading: Boolean) {
-//        // Implement province loading indicator
-//        binding.provinceProgressBar?.visibility = if (isLoading) View.VISIBLE else View.GONE
-//    }
-//
-//    private fun showCityLoading(isLoading: Boolean) {
-//        // Implement city loading indicator
-//        binding.cityProgressBar?.visibility = if (isLoading) View.VISIBLE else View.GONE
-//    }
-//
     private fun showSubmitLoading(isLoading: Boolean) {
         binding.buttonSimpan.isEnabled = !isLoading
         binding.buttonSimpan.text = if (isLoading) "Menyimpan..." else "Simpan"
@@ -187,7 +177,7 @@ class AddAddressActivity : AppCompatActivity() {
 
     private fun showSuccessAndFinish(message: String) {
         Toast.makeText(this, "Sukses: $message", Toast.LENGTH_SHORT).show()
-        finish()
+        onBackPressed()
     }
 
     private fun validateAndSubmitForm() {
@@ -245,7 +235,7 @@ class AddAddressActivity : AppCompatActivity() {
 
     private val locationPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-            if (granted) getLocation() else Toast.makeText(this, "Izin lokasi ditolak",Toast.LENGTH_SHORT).show()
+            if (granted) requestLocation() else Toast.makeText(this, "Izin lokasi ditolak",Toast.LENGTH_SHORT).show()
         }
 
     private fun requestLocationPermission() {
