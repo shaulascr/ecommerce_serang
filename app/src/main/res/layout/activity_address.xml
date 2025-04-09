@@ -29,9 +29,11 @@
             android:textAlignment="textEnd"
             android:layout_gravity="center"
             android:paddingEnd="16dp"
+            android:paddingVertical="16dp"
             android:textColor="@color/blue_500"
             android:fontFamily="@font/dmsans_semibold"
             android:textSize="14sp"
+            android:clickable="true"
             android:text="Tambah Alamat"
             tools:ignore="RtlCompat" />
     </LinearLayout>

@@ -1,10 +1,14 @@
 package com.alya.ecommerce_serang.data.repository
 
 import android.util.Log
+import com.alya.ecommerce_serang.data.api.dto.CreateAddressRequest
 import com.alya.ecommerce_serang.data.api.dto.OrderRequest
 import com.alya.ecommerce_serang.data.api.response.order.CreateOrderResponse
+import com.alya.ecommerce_serang.data.api.response.order.ListCityResponse
+import com.alya.ecommerce_serang.data.api.response.order.ListProvinceResponse
 import com.alya.ecommerce_serang.data.api.response.product.ProductResponse
 import com.alya.ecommerce_serang.data.api.response.product.StoreResponse
+import com.alya.ecommerce_serang.data.api.response.profile.CreateAddressResponse
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
 import retrofit2.Response
 
@@ -33,17 +37,31 @@ class OrderRepository(private val apiService: ApiService) {
         return if (response.isSuccessful) response.body() else null
     }
 
+    //post data with message/response
+    suspend fun addAddress(createAddressRequest: CreateAddressRequest): Result<CreateAddressResponse> {
+        return try {
+            val response = apiService.createAddress(createAddressRequest)
+            if (response.isSuccessful){
+                response.body()?.let {
+                    Result.Success(it)
+                } ?: Result.Error(Exception("Add Address failed"))
+            } else {
+                Log.e("OrderRepository", "Error: ${response.errorBody()?.string()}")
+                Result.Error(Exception(response.errorBody()?.string() ?: "Unknown error"))
+            }
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
+    }
 
-    //not yet implement the api service address
-//    suspend fun getAddressDetails(addressId: Int): AddressesItem {
-//        // Simulate API call to get address details
-//        kotlinx.coroutines.delay(300) // Simulate network request
-//        // Return mock data
-//        return AddressesItem(
-//            id = addressId,
-//            label = "Rumah",
-//            fullAddress = "Jl. Pegangasan Timur No. 42, Jakarta"
-//        )
-//    }
+    suspend fun getListProvinces(): ListProvinceResponse? {
+        val response = apiService.getListProv()
+        return if (response.isSuccessful) response.body() else null
+    }
+
+    suspend fun getListCities(provId : Int): ListCityResponse?{
+        val response = apiService.getCityProvId(provId)
+        return if (response.isSuccessful) response.body() else null
+    }
 
 }

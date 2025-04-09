@@ -21,7 +21,7 @@ data class CreateAddressRequest (
     @SerializedName("province_id")
     val provId: Int,
     @SerializedName("postal_code")
-    val postCode: String,
+    val postCode: String? = null,
 
     @SerializedName("detail")
     val detailAddress: String? = null,

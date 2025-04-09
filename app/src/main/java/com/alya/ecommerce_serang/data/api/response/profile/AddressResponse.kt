@@ -26,7 +26,7 @@ data class AddressesItem(
 	val provinceId: Int,
 
 	@field:SerializedName("phone")
-	val phone: Any,
+	val phone: String,
 
 	@field:SerializedName("street")
 	val street: String,
@@ -35,7 +35,7 @@ data class AddressesItem(
 	val subdistrict: String,
 
 	@field:SerializedName("recipient")
-	val recipient: Any,
+	val recipient: String,
 
 	@field:SerializedName("id")
 	val id: Int,

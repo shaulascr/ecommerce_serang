@@ -10,12 +10,9 @@ import com.alya.ecommerce_serang.data.api.retrofit.ApiService
 
 class UserRepository(private val apiService: ApiService) {
 
+    //post data without message/response
     suspend fun requestOtpRep(email: String): OtpResponse {
-
-//    fun requestOtpRep(email: String): Result<String> {
-
         return apiService.getOTP(OtpRequest(email))
-
     }
 
     suspend fun registerUser(request: RegisterRequest): String {
