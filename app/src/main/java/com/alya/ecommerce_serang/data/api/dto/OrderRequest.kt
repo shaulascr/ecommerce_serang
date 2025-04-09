@@ -21,11 +21,8 @@ data class OrderRequest (
     @SerializedName("is_negotiable")
     val isNego: Boolean,
 
-    @SerializedName("product_id")
-    val productIdItem: Int,
-
-    @SerializedName("quantity")
-    val quantity: Int,
+    @SerializedName("cart_items_id")
+    val cartItemId: List<Int>,
 
     @SerializedName("ship_etd")
     val shipEtd: String

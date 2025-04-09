@@ -1,4 +1,4 @@
-package com.alya.ecommerce_serang.ui.order
+package com.alya.ecommerce_serang.ui.order.address
 
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle
@@ -15,13 +15,13 @@ import kotlinx.coroutines.launch
 
 class AddAddressViewModel(private val repository: OrderRepository, private val savedStateHandle: SavedStateHandle): ViewModel() {
     // Flow states for data
-    private val _addressSubmissionState = MutableStateFlow<com.alya.ecommerce_serang.ui.order.ViewState<String>>(com.alya.ecommerce_serang.ui.order.ViewState.Loading)
+    private val _addressSubmissionState = MutableStateFlow<ViewState<String>>(ViewState.Loading)
     val addressSubmissionState = _addressSubmissionState.asStateFlow()
 
-    private val _provincesState = MutableStateFlow<com.alya.ecommerce_serang.ui.order.ViewState<List<ProvincesItem>>>(com.alya.ecommerce_serang.ui.order.ViewState.Loading)
+    private val _provincesState = MutableStateFlow<ViewState<List<ProvincesItem>>>(ViewState.Loading)
     val provincesState = _provincesState.asStateFlow()
 
-    private val _citiesState = MutableStateFlow<com.alya.ecommerce_serang.ui.order.ViewState<List<CitiesItem>>>(com.alya.ecommerce_serang.ui.order.ViewState.Loading)
+    private val _citiesState = MutableStateFlow<ViewState<List<CitiesItem>>>(ViewState.Loading)
     val citiesState = _citiesState.asStateFlow()
 
     // Stored in SavedStateHandle for configuration changes
@@ -46,7 +46,8 @@ class AddAddressViewModel(private val repository: OrderRepository, private val s
                     _addressSubmissionState.value = ViewState.Success(message)
                 }
                 is Result.Error -> {
-                    _addressSubmissionState.value = ViewState.Error(result.exception.message ?: "Unknown error")
+                    _addressSubmissionState.value =
+                        ViewState.Error(result.exception.message ?: "Unknown error")
                 }
                 is Result.Loading -> {
                     // Optional, karena sudah set Loading di awal
@@ -60,7 +61,7 @@ class AddAddressViewModel(private val repository: OrderRepository, private val s
             try {
                 val result = repository.getListProvinces()
                 result?.let {
-                    _provincesState.value = com.alya.ecommerce_serang.ui.order.ViewState.Success(it.provinces)
+                    _provincesState.value = ViewState.Success(it.provinces)
                 }
             } catch (e: Exception) {
                 Log.e("AddAddressViewModel", "Error fetching provinces: ${e.message}")
@@ -74,7 +75,7 @@ class AddAddressViewModel(private val repository: OrderRepository, private val s
                 selectedProvinceId = provinceId
                 val result = repository.getListCities(provinceId)
                 result?.let {
-                    _citiesState.value = com.alya.ecommerce_serang.ui.order.ViewState.Success(it.cities)
+                    _citiesState.value = ViewState.Success(it.cities)
                 }
             } catch (e: Exception) {
                 Log.e("AddAddressViewModel", "Error fetching cities: ${e.message}")
@@ -99,7 +100,7 @@ class AddAddressViewModel(private val repository: OrderRepository, private val s
 }
 
 sealed class ViewState<out T> {
-    object Loading : com.alya.ecommerce_serang.ui.order.ViewState<Nothing>()
-    data class Success<T>(val data: T) : com.alya.ecommerce_serang.ui.order.ViewState<T>()
-    data class Error(val message: String) : com.alya.ecommerce_serang.ui.order.ViewState<Nothing>()
+    object Loading : ViewState<Nothing>()
+    data class Success<T>(val data: T) : ViewState<T>()
+    data class Error(val message: String) : ViewState<Nothing>()
 }

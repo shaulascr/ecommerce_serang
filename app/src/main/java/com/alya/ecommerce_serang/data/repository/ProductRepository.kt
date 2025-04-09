@@ -1,8 +1,10 @@
 package com.alya.ecommerce_serang.data.repository
 
 import android.util.Log
+import com.alya.ecommerce_serang.data.api.dto.CartItem
 import com.alya.ecommerce_serang.data.api.dto.CategoryItem
 import com.alya.ecommerce_serang.data.api.dto.ProductsItem
+import com.alya.ecommerce_serang.data.api.response.cart.AddCartResponse
 import com.alya.ecommerce_serang.data.api.response.product.ProductResponse
 import com.alya.ecommerce_serang.data.api.response.product.ReviewsItem
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
@@ -77,6 +79,22 @@ class ProductRepository(private val apiService: ApiService) {
             }
         } catch (e: Exception) {
             null
+        }
+    }
+
+    suspend fun addToCart(request: CartItem): Result<AddCartResponse> {
+        return try{
+            val response = apiService.addCart(request)
+            if (response.isSuccessful){
+                response.body()?.let {
+                    Result.Success(it)
+                } ?: Result.Error(Exception("Add Cart failed"))
+            } else {
+                Log.e("OrderRepository", "Error: ${response.errorBody()?.string()}")
+                Result.Error(Exception(response.errorBody()?.string() ?: "Unknown Error"))
+            }
+        } catch (e: Exception){
+            Result.Error(e)
         }
     }
 }

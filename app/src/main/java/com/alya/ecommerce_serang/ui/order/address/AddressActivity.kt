@@ -1,4 +1,4 @@
-package com.alya.ecommerce_serang.ui.order
+package com.alya.ecommerce_serang.ui.order.address
 
 import android.content.Intent
 import android.os.Bundle
@@ -65,3 +65,11 @@ class AddressActivity : AppCompatActivity() {
         finish()
     }
 }
+
+//override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+//    super.onActivityResult(requestCode, resultCode, data)
+//    if (requestCode == REQUEST_ADDRESS && resultCode == RESULT_OK) {
+//        val selectedAddressId = data?.getIntExtra("selected_address_id", -1)
+//        // Use the selected address ID
+//    }
+//}

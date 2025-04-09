@@ -1,8 +1,10 @@
 package com.alya.ecommerce_serang.data.repository
 
 import android.util.Log
+import com.alya.ecommerce_serang.data.api.dto.CourierCostRequest
 import com.alya.ecommerce_serang.data.api.dto.CreateAddressRequest
 import com.alya.ecommerce_serang.data.api.dto.OrderRequest
+import com.alya.ecommerce_serang.data.api.response.order.CourierCostResponse
 import com.alya.ecommerce_serang.data.api.response.order.CreateOrderResponse
 import com.alya.ecommerce_serang.data.api.response.order.ListCityResponse
 import com.alya.ecommerce_serang.data.api.response.order.ListProvinceResponse
@@ -70,4 +72,19 @@ class OrderRepository(private val apiService: ApiService) {
         return if (response.isSuccessful) response.body() else null
     }
 
+    suspend fun getCountCourierCost(courierCost: CourierCostRequest): Result<CourierCostResponse>{
+        return try {
+            val response = apiService.countCourierCost(courierCost)
+            if (response.isSuccessful){
+                response.body()?.let {
+                    Result.Success(it)
+                } ?: Result.Error(Exception("Add Address failed"))
+            } else {
+                Log.e("OrderRepository", "Error: ${response.errorBody()?.string()}")
+                Result.Error(Exception(response.errorBody()?.string() ?: "Unknown error"))
+            }
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
+    }
 }

@@ -3,20 +3,25 @@ package com.alya.ecommerce_serang.ui.product
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.alya.ecommerce_serang.BuildConfig.BASE_URL
 import com.alya.ecommerce_serang.R
+import com.alya.ecommerce_serang.data.api.dto.CartItem
 import com.alya.ecommerce_serang.data.api.dto.ProductsItem
 import com.alya.ecommerce_serang.data.api.response.product.Product
 import com.alya.ecommerce_serang.data.api.response.product.ReviewsItem
+import com.alya.ecommerce_serang.data.api.response.product.StoreProduct
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
 import com.alya.ecommerce_serang.data.repository.ProductRepository
+import com.alya.ecommerce_serang.data.repository.Result
 import com.alya.ecommerce_serang.databinding.ActivityDetailProductBinding
 import com.alya.ecommerce_serang.ui.home.HorizontalProductAdapter
 import com.alya.ecommerce_serang.ui.order.CheckoutActivity
@@ -31,6 +36,8 @@ class DetailProductActivity : AppCompatActivity() {
     private lateinit var sessionManager: SessionManager
     private var productAdapter: HorizontalProductAdapter? = null
     private var reviewsAdapter: ReviewsAdapter? = null
+    private var currentQuantity = 1
+
 
     private val viewModel: ProductViewModel by viewModels {
         BaseViewModelFactory {
@@ -47,43 +54,125 @@ class DetailProductActivity : AppCompatActivity() {
         sessionManager = SessionManager(this)
         apiService = ApiConfig.getApiService(sessionManager)
 
+//        val productId = intent.getIntExtra("PRODUCT_ID", -1)
+//        //nanti tambah get store id dari HomeFragment Product.storeId
+//        if (productId == -1) {
+//            Log.e("DetailProductActivity", "Invalid Product ID")
+//            finish() // Close activity if no valid ID
+//            return
+//        }
+
+        setupUI()
+        setupObservers()
+        loadData()
+    }
+
+    private fun loadData() {
         val productId = intent.getIntExtra("PRODUCT_ID", -1)
-        //nanti tambah get store id dari HomeFragment Product.storeId
         if (productId == -1) {
             Log.e("DetailProductActivity", "Invalid Product ID")
+            Toast.makeText(this, "Invalid product ID", Toast.LENGTH_SHORT).show()
             finish() // Close activity if no valid ID
             return
         }
 
         viewModel.loadProductDetail(productId)
         viewModel.loadReviews(productId)
-
-        observeProductDetail()
-        observeProductReviews()
     }
 
-    private fun observeProductDetail() {
+    private fun setupObservers() {
         viewModel.productDetail.observe(this) { product ->
             product?.let {
                 updateUI(it)
                 viewModel.loadOtherProducts(it.storeId)
             }
         }
+
+        viewModel.storeDetail.observe(this) { store ->
+            updateStoreInfo(store)
+        }
+
         viewModel.otherProducts.observe(this) { products ->
             updateOtherProducts(products)
         }
-    }
 
-    private fun observeProductReviews() {
         viewModel.reviewProduct.observe(this) { reviews ->
             setupRecyclerViewReviewsProduct(reviews)
+        }
+//
+//        viewModel.isLoading.observe(this) { isLoading ->
+//            binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+//        }
+//
+//        viewModel.error.observe(this) { errorMessage ->
+//            if (errorMessage.isNotEmpty()) {
+//                Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
+//            }
+//        }
+
+        viewModel.addCart.observe(this) { result ->
+            when (result) {
+                is com.alya.ecommerce_serang.data.repository.Result.Success -> {
+                    Toast.makeText(this, result.data, Toast.LENGTH_SHORT).show()
+
+                    // Check if we need to navigate to checkout (for "Buy Now" flow)
+                    if (viewModel.shouldNavigateToCheckout) {
+                        viewModel.shouldNavigateToCheckout = false
+                        navigateToCheckout()
+                    }
+                }
+                is com.alya.ecommerce_serang.data.repository.Result.Error -> {
+                    Toast.makeText(this, "Failed to add to cart: ${result.exception.message}", Toast.LENGTH_SHORT).show()
+                }
+                is Result.Loading -> {
+                    // Show loading indicator if needed
+                }
+            }
+        }
+    }
+
+    private fun updateStoreInfo(store: StoreProduct?) {
+        store?.let {
+            binding.tvSellerName.text = it.storeName
+            // Add more store details as needed
         }
     }
 
     private fun updateOtherProducts(products: List<ProductsItem>) {
-        productAdapter?.updateProducts(products) // Make sure your adapter has a method to update data
-    }
+        if (products.isEmpty()) {
+            binding.recyclerViewOtherProducts.visibility = View.GONE
+            binding.tvViewAllProducts.visibility = View.GONE
+        } else {
+            binding.recyclerViewOtherProducts.visibility = View.VISIBLE
+            binding.tvViewAllProducts.visibility = View.VISIBLE
+            productAdapter?.updateProducts(products)
+        }    }
 
+    private fun setupUI() {
+//        binding.btnBack.setOnClickListener {
+//            finish()
+//        }
+
+        binding.tvViewAllReviews.setOnClickListener {
+            viewModel.productDetail.value?.productId?.let { productId ->
+                handleAllReviewsClick(productId)
+            }
+        }
+
+        binding.btnBuyNow.setOnClickListener {
+            viewModel.productDetail.value?.productId?.let { id ->
+                showBuyNowPopup(id)
+            }
+        }
+
+        binding.btnAddToCart.setOnClickListener {
+            viewModel.productDetail.value?.productId?.let { id ->
+                showAddToCartPopup(id)
+            }
+        }
+
+        setupRecyclerViewOtherProducts()
+    }
 
     private fun updateUI(product: Product){
         binding.tvProductName.text = product.productName
@@ -95,16 +184,6 @@ class DetailProductActivity : AppCompatActivity() {
         binding.tvCategory.text = product.productCategory
         binding.tvDescription.text = product.description
         binding.tvSellerName.text = product.storeId.toString()
-
-        binding.tvViewAllReviews.setOnClickListener{
-            handleAllReviewsClick(product.productId)
-        }
-
-        binding.btnBuyNow.setOnClickListener {
-            viewModel.productDetail.value?.productId?.let { id ->
-                showBuyNowPopup(id)
-            }
-        }
 
 
         val fullImageUrl = when (val img = product.image) {
@@ -119,8 +198,6 @@ class DetailProductActivity : AppCompatActivity() {
             .load(fullImageUrl)
             .placeholder(R.drawable.placeholder_image)
             .into(binding.ivProductImage)
-
-        setupRecyclerViewOtherProducts()
     }
 
     private fun handleAllReviewsClick(productId: Int) {
@@ -132,7 +209,7 @@ class DetailProductActivity : AppCompatActivity() {
     private fun setupRecyclerViewOtherProducts(){
         productAdapter = HorizontalProductAdapter(
             products = emptyList(),
-            onClick = { productsItem ->  handleProductClick(productsItem) }
+            onClick = { productsItem -> handleProductClick(productsItem) }
         )
 
         binding.recyclerViewOtherProducts.apply {
@@ -147,7 +224,15 @@ class DetailProductActivity : AppCompatActivity() {
 
     private fun setupRecyclerViewReviewsProduct(reviewList: List<ReviewsItem>){
         val limitedReviewList = if (reviewList.isNotEmpty()) listOf(reviewList.first()) else emptyList()
-
+        if (reviewList.isEmpty()) {
+            binding.recyclerViewReviews.visibility = View.GONE
+            binding.tvViewAllReviews.visibility = View.GONE
+//            binding.tvNoReviews.visibility = View.VISIBLE
+        } else {
+            binding.recyclerViewReviews.visibility = View.VISIBLE
+            binding.tvViewAllReviews.visibility = View.VISIBLE
+        }
+//            binding.tvNoReviews.visibility = View.GONE
         reviewsAdapter = ReviewsAdapter(
             reviewList = limitedReviewList
         )
@@ -169,6 +254,14 @@ class DetailProductActivity : AppCompatActivity() {
     }
 
     private fun showBuyNowPopup(productId: Int) {
+        showQuantityDialog(productId, true)
+    }
+
+    private fun showAddToCartPopup(productId: Int) {
+        showQuantityDialog(productId, false)
+    }
+
+    private fun showQuantityDialog(productId: Int, isBuyNow: Boolean) {
         val bottomSheetDialog = BottomSheetDialog(this)
         val view = layoutInflater.inflate(R.layout.dialog_count_buy, null)
         bottomSheetDialog.setContentView(view)
@@ -179,33 +272,59 @@ class DetailProductActivity : AppCompatActivity() {
         val btnBuyNow = view.findViewById<Button>(R.id.btnBuyNow)
         val btnClose = view.findViewById<ImageButton>(R.id.btnCloseDialog)
 
-        var quantity = 1
-        tvQuantity.text = quantity.toString()
+        // Set button text based on action
+        if (!isBuyNow) {
+            btnBuyNow.setText(R.string.add_to_cart)
+        }
+
+        currentQuantity = 1
+        tvQuantity.text = currentQuantity.toString()
+
+        val maxStock = viewModel.productDetail.value?.stock ?: 1
 
         btnDecrease.setOnClickListener {
-            if (quantity > 1) {
-                quantity--
-                tvQuantity.text = quantity.toString()
+            if (currentQuantity > 1) {
+                currentQuantity--
+                tvQuantity.text = currentQuantity.toString()
             }
         }
 
         btnIncrease.setOnClickListener {
-            quantity++
-            tvQuantity.text = quantity.toString()
+            if (currentQuantity < maxStock) {
+                currentQuantity++
+                tvQuantity.text = currentQuantity.toString()
+            } else {
+                Toast.makeText(this, "Maximum stock reached", Toast.LENGTH_SHORT).show()
+            }
         }
+
 
         btnBuyNow.setOnClickListener {
             bottomSheetDialog.dismiss()
-            val intent = Intent(this, CheckoutActivity::class.java)
-            intent.putExtra("PRODUCT_ID", productId)
-            intent.putExtra("QUANTITY", quantity)
-            startActivity(intent)
-        }
+
+            val cartItem = CartItem(
+                productId = productId,
+                quantity = currentQuantity
+            )
+
+            // For both Buy Now and Add to Cart, we add to cart first
+            if (isBuyNow) {
+                // Set flag to navigate to checkout after adding to cart is successful
+                viewModel.shouldNavigateToCheckout = true
+            }
+
+            // Add to cart in both cases
+            viewModel.reqCart(cartItem)
 
         btnClose.setOnClickListener {
             bottomSheetDialog.dismiss()
         }
         bottomSheetDialog.show()
+        }
     }
 
+    private fun navigateToCheckout() {
+        val intent = Intent(this, CheckoutActivity::class.java)
+        startActivity(intent)
+    }
 }
