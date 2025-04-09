@@ -79,6 +79,16 @@ class ProductRepository(private val apiService: ApiService) {
             null
         }
     }
+
+    suspend fun fetchMyStoreProducts(): List<ProductsItem> {
+        val response = apiService.getStoreProduct()
+        if (response.isSuccessful) {
+            val responseBody = response.body()
+            return responseBody?.products?.filterNotNull() ?: emptyList()
+        } else {
+            throw Exception("Failed to fetch store products: ${response.message()}")
+        }
+    }
 }
 
 //    suspend fun fetchStoreDetail(storeId: Int): Store? {

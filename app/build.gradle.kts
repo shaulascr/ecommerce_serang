@@ -1,3 +1,5 @@
+import org.gradle.api.tasks.compile.JavaCompile
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
@@ -83,4 +85,5 @@ dependencies {
 //    implementation(libs.androidx.hilt.lifecycle.viewmodel)
 //    kapt("androidx.hilt:hilt-compiler:1.0.0")
 }
+
 
