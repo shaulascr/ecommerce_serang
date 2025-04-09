@@ -1,0 +1,63 @@
+package com.alya.ecommerce_serang.ui.profile.mystore.product
+
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.TextView
+import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.RecyclerView
+import com.alya.ecommerce_serang.R
+import com.alya.ecommerce_serang.data.api.dto.ProductsItem
+import com.bumptech.glide.Glide
+
+class ProductAdapter(
+    private val products: List<ProductsItem>,
+    private val onItemClick: (ProductsItem) -> Unit
+) : RecyclerView.Adapter<ProductAdapter.ProductViewHolder>() {
+
+    inner class ProductViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val ivProduct: ImageView = itemView.findViewById(R.id.iv_product)
+        private val tvProductName: TextView = itemView.findViewById(R.id.tv_product_name)
+        private val tvProductPrice: TextView = itemView.findViewById(R.id.tv_product_price)
+        private val tvProductStock: TextView = itemView.findViewById(R.id.tv_product_stock)
+        private val tvProductStatus: TextView = itemView.findViewById(R.id.tv_product_status)
+
+        fun bind(product: ProductsItem) {
+            tvProductName.text = product.name
+            tvProductPrice.text = "Rp${product.price}"
+            tvProductStock.text = "Stok: ${product.stock}"
+            tvProductStatus.text = product.status
+
+            // Change color depending on status
+            tvProductStatus.setTextColor(
+                ContextCompat.getColor(
+                    itemView.context,
+                    if (product.status.equals("active", true))
+                        R.color.darkblue_500 else R.color.black_500
+                )
+            )
+
+            Glide.with(itemView.context)
+                .load(product.image)
+                .placeholder(R.drawable.placeholder_image)
+                .into(ivProduct)
+
+            itemView.setOnClickListener {
+                onItemClick(product)
+            }
+        }
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProductViewHolder {
+        val view = LayoutInflater.from(parent.context)
+            .inflate(R.layout.item_store_product, parent, false)
+        return ProductViewHolder(view)
+    }
+
+    override fun getItemCount(): Int = products.size
+
+    override fun onBindViewHolder(holder: ProductViewHolder, position: Int) {
+        holder.bind(products[position])
+    }
+}

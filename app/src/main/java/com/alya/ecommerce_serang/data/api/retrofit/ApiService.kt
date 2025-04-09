@@ -13,6 +13,7 @@ import com.alya.ecommerce_serang.data.api.response.ProfileResponse
 import com.alya.ecommerce_serang.data.api.response.RegisterResponse
 import com.alya.ecommerce_serang.data.api.response.ReviewProductResponse
 import com.alya.ecommerce_serang.data.api.response.StoreResponse
+import com.alya.ecommerce_serang.data.api.response.ViewStoreProductsResponse
 import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.Body
@@ -64,4 +65,8 @@ interface ApiService {
 
     @GET("mystore")
     suspend fun getStore (): Response<StoreResponse>
+
+    @GET("mystore/product") // Replace with actual endpoint
+    suspend fun getStoreProduct(): Response<ViewStoreProductsResponse>
+
 }
