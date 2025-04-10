@@ -1,4 +1,4 @@
-package com.alya.ecommerce_serang.ui.home
+package com.alya.ecommerce_serang.utils.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.ViewModel

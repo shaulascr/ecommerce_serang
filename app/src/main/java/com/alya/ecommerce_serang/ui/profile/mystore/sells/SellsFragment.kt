@@ -10,6 +10,7 @@ import androidx.viewpager2.widget.ViewPager2
 
 import com.google.android.material.tabs.TabLayoutMediator
 import com.alya.ecommerce_serang.R
+import com.alya.ecommerce_serang.utils.viewmodel.SellsViewModel
 
 class SellsFragment : Fragment() {
     private lateinit var viewModel: SellsViewModel

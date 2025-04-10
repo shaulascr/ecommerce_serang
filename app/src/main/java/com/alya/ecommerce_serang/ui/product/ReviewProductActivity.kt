@@ -13,6 +13,7 @@ import com.alya.ecommerce_serang.data.repository.ProductRepository
 import com.alya.ecommerce_serang.databinding.ActivityReviewProductBinding
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
+import com.alya.ecommerce_serang.utils.viewmodel.ProductViewModel
 
 class ReviewProductActivity : AppCompatActivity() {
     private lateinit var binding: ActivityReviewProductBinding

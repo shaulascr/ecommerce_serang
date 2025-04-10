@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.alya.ecommerce_serang.R
+import com.alya.ecommerce_serang.utils.viewmodel.ReviewViewModel
 
 class ReviewFragment : Fragment() {
 

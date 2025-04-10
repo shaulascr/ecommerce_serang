@@ -17,6 +17,8 @@ import com.alya.ecommerce_serang.data.api.response.ViewStoreProductsResponse
 import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.Field
+import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
@@ -68,5 +70,23 @@ interface ApiService {
 
     @GET("mystore/product") // Replace with actual endpoint
     suspend fun getStoreProduct(): Response<ViewStoreProductsResponse>
+
+    @GET("category")
+    fun getCategories(): Call<CategoryResponse>
+
+    @POST("store/createproduct")
+    @FormUrlEncoded
+    suspend fun addProduct(
+        @Field("name") name: String,
+        @Field("description") description: String,
+        @Field("price") price: Int,
+        @Field("stock") stock: Int,
+        @Field("min_order") minOrder: Int,
+        @Field("weight") weight: Int,
+        @Field("is_pre_order") isPreOrder: Boolean,
+        @Field("duration") duration: Int,
+        @Field("category_id") categoryId: Int,
+        @Field("is_active") isActive: String
+    ): Response<Unit>
 
 }

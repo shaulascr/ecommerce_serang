@@ -10,7 +10,7 @@ import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
 import com.alya.ecommerce_serang.data.repository.MyStoreRepository
 import com.alya.ecommerce_serang.databinding.ActivityDetailStoreProfileBinding
-import com.alya.ecommerce_serang.ui.profile.mystore.MyStoreViewModel
+import com.alya.ecommerce_serang.utils.viewmodel.MyStoreViewModel
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
 import com.bumptech.glide.Glide

@@ -18,6 +18,7 @@ import com.alya.ecommerce_serang.databinding.FragmentProfileBinding
 import com.alya.ecommerce_serang.ui.profile.mystore.MyStoreActivity
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
+import com.alya.ecommerce_serang.utils.viewmodel.ProfileViewModel
 import com.bumptech.glide.Glide
 
 class ProfileFragment : Fragment() {
