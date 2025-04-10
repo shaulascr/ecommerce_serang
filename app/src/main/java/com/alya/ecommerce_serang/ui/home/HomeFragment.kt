@@ -24,6 +24,8 @@ import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.HorizontalMarginItemDecoration
 import com.alya.ecommerce_serang.utils.SessionManager
 import com.alya.ecommerce_serang.utils.setLightStatusBar
+import com.alya.ecommerce_serang.utils.viewmodel.HomeUiState
+import com.alya.ecommerce_serang.utils.viewmodel.HomeViewModel
 import kotlinx.coroutines.launch
 
 //@AndroidEntryPoint

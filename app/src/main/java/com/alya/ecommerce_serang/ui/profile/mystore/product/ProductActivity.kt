@@ -11,7 +11,7 @@ import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.repository.ProductRepository
 import com.alya.ecommerce_serang.data.repository.Result
 import com.alya.ecommerce_serang.databinding.ActivityProductBinding
-import com.alya.ecommerce_serang.ui.product.ProductViewModel
+import com.alya.ecommerce_serang.utils.viewmodel.ProductViewModel
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
 
@@ -74,11 +74,9 @@ class ProductActivity : AppCompatActivity() {
         }
 
         binding.header.headerRightText.setOnClickListener {
-            startActivity(Intent(this, AddProductActivity::class.java))
+            startActivity(Intent(this, StoreProductDetailActivity::class.java))
         }
     }
-
-
 
     private fun setupRecyclerView() {
         binding.rvStoreProduct.layoutManager = LinearLayoutManager(this)

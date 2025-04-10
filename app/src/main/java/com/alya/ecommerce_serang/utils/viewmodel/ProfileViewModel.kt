@@ -1,4 +1,4 @@
-package com.alya.ecommerce_serang.ui.profile
+package com.alya.ecommerce_serang.utils.viewmodel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData

@@ -12,6 +12,7 @@ import com.alya.ecommerce_serang.data.repository.UserRepository
 import com.alya.ecommerce_serang.databinding.ActivityDetailProfileBinding
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
+import com.alya.ecommerce_serang.utils.viewmodel.ProfileViewModel
 import com.bumptech.glide.Glide
 import java.text.SimpleDateFormat
 import java.util.Locale

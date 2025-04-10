@@ -89,6 +89,44 @@ class ProductRepository(private val apiService: ApiService) {
             throw Exception("Failed to fetch store products: ${response.message()}")
         }
     }
+
+    suspend fun addProduct(
+        name: String,
+        description: String,
+        price: Int,
+        stock: Int,
+        minOrder: Int,
+        weight: Int,
+        isPreOrder: Boolean,
+        duration: Int,
+        categoryId: Int,
+        isActive: Boolean
+    ): Result<Unit> = withContext(Dispatchers.IO) {
+        try {
+            val status = if (isActive) "active" else "inactive"
+            val response = apiService.addProduct(
+                name = name,
+                description = description,
+                price = price,
+                stock = stock,
+                minOrder = minOrder,
+                weight = weight,
+                isPreOrder = isPreOrder,
+                duration = duration,
+                categoryId = categoryId,
+                isActive = status
+            )
+
+            if (response.isSuccessful) {
+                Result.Success(Unit)
+            } else {
+                Result.Error(Exception("Failed to add product. Code: ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
+    }
+
 }
 
 //    suspend fun fetchStoreDetail(storeId: Int): Store? {

@@ -15,6 +15,7 @@ import com.alya.ecommerce_serang.databinding.ActivityRegisterBinding
 import com.alya.ecommerce_serang.ui.MainActivity
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
+import com.alya.ecommerce_serang.utils.viewmodel.RegisterViewModel
 
 class RegisterActivity : AppCompatActivity() {
     private lateinit var binding: ActivityRegisterBinding

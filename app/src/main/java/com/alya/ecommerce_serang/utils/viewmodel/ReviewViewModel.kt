@@ -1,4 +1,4 @@
-package com.alya.ecommerce_serang.ui.profile.mystore.review
+package com.alya.ecommerce_serang.utils.viewmodel
 
 import androidx.lifecycle.ViewModel
 

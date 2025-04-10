@@ -48,7 +48,7 @@
             android:name=".ui.profile.mystore.balance.BalanceTopUpActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.profile.mystore.product.AddProductActivity"
+            android:name=".ui.profile.mystore.product.StoreProductDetailActivity"
             android:exported="false" />
         <activity
             android:name=".ui.profile.mystore.profile.DetailStoreProfileActivity"

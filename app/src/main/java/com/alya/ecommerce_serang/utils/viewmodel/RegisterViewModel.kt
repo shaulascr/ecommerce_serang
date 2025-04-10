@@ -1,4 +1,4 @@
-package com.alya.ecommerce_serang.ui.auth
+package com.alya.ecommerce_serang.utils.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.LiveData
@@ -87,7 +87,3 @@ class RegisterViewModel(private val repository: UserRepository) : ViewModel() {
         }
     }
 }
-
-
-
-

@@ -7,7 +7,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".ui.profile.mystore.product.AddProductActivity">
+    tools:context=".ui.profile.mystore.product.StoreProductDetailActivity">
 
     <include
         android:id="@+id/header"
@@ -214,7 +214,7 @@
                 </LinearLayout>
 
                 <EditText
-                    android:id="@+id/DeskripsiProduk"
+                    android:id="@+id/edt_deskripsi_produk"
                     android:layout_width="match_parent"
                     android:layout_height="70dp"
                     android:background="@drawable/bg_text_field"
@@ -434,14 +434,109 @@
 
             </LinearLayout>
 
-            <!-- Kondisi Produk -->
+<!--            &lt;!&ndash; Kondisi Produk &ndash;&gt;-->
+<!--            <LinearLayout-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:orientation="vertical"-->
+<!--                android:layout_marginBottom="24dp">-->
+
+<!--                &lt;!&ndash; Label Kondisi Produk &ndash;&gt;-->
+<!--                <LinearLayout-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:orientation="horizontal">-->
+
+<!--                    <TextView-->
+<!--                        android:layout_width="wrap_content"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:text="Kondisi Produk"-->
+<!--                        style="@style/body_medium"-->
+<!--                        android:layout_marginEnd="4dp"/>-->
+
+<!--                    <TextView-->
+<!--                        android:layout_width="0dp"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:layout_weight="1"-->
+<!--                        android:text="*"-->
+<!--                        style="@style/body_medium"-->
+<!--                        android:textColor="@color/red_required"-->
+<!--                        android:layout_gravity="end"/>-->
+
+<!--                </LinearLayout>-->
+
+<!--                &lt;!&ndash; Spinner Dropdown dengan Chevron &ndash;&gt;-->
+<!--                <LinearLayout-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:orientation="horizontal"-->
+<!--                    android:background="@drawable/bg_text_field"-->
+<!--                    android:gravity="center_vertical"-->
+<!--                    android:layout_marginTop="10dp">-->
+
+<!--                    <Spinner-->
+<!--                        android:id="@+id/spinner_kondisi_produk"-->
+<!--                        android:layout_width="0dp"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:layout_weight="1"-->
+<!--                        android:padding="8dp"-->
+<!--                        style="@style/body_small"-->
+<!--                        android:background="@null"/>-->
+
+<!--                    &lt;!&ndash; Chevron Down Icon &ndash;&gt;-->
+<!--                    <ImageView-->
+<!--                        android:layout_width="16dp"-->
+<!--                        android:layout_height="16dp"-->
+<!--                        android:src="@drawable/ic_down"-->
+<!--                        android:layout_marginEnd="8dp"-->
+<!--                        android:contentDescription="Chevron Down" />-->
+
+<!--                </LinearLayout>-->
+
+<!--            </LinearLayout>-->
+
+            <!-- Pre-Order -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:layout_marginBottom="24dp">
 
-                <!-- Label Kondisi Produk -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Pre-Order"
+                        style="@style/body_medium"
+                        android:layout_marginEnd="4dp"/>
+
+                    <Switch
+                        android:id="@+id/switch_is_pre_order"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- Durasi Pre-Order -->
+            <LinearLayout
+                android:id="@+id/layout_durasi"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginBottom="24dp"
+                android:visibility="gone">
+
+                <!-- Label Durasi Pre-Order -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -450,9 +545,10 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Kondisi Produk"
+                        android:text="Durasi Pre-Order"
                         style="@style/body_medium"
                         android:layout_marginEnd="4dp"/>
+
 
                     <TextView
                         android:layout_width="0dp"
@@ -465,31 +561,32 @@
 
                 </LinearLayout>
 
-                <!-- Spinner Dropdown dengan Chevron -->
+                <!-- Input Durasi Pre-Order dengan Suffix "hari" -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:background="@drawable/bg_text_field"
-                    android:gravity="center_vertical"
-                    android:layout_marginTop="10dp">
+                    android:gravity="center">
 
-                    <Spinner
-                        android:id="@+id/spinner_kondisi_produk"
+                    <EditText
+                        android:id="@+id/edt_durasi"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:padding="8dp"
+                        android:hint="Isi durasi pre-order di sini"
+                        android:inputType="number"
                         style="@style/body_small"
-                        android:background="@null"/>
+                        android:background="@null"
+                        android:padding="8dp"/>
 
-                    <!-- Chevron Down Icon -->
-                    <ImageView
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:src="@drawable/ic_down"
-                        android:layout_marginEnd="8dp"
-                        android:contentDescription="Chevron Down" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="hari"
+                        style="@style/label_medium_prominent"
+                        android:textColor="@color/black_300"
+                        android:padding="8dp"/>
 
                 </LinearLayout>
 
@@ -530,7 +627,8 @@
             <Button
                 android:id="@+id/btn_save_product"
                 android:text="Simpan Produk"
-                style="@style/button.large.disabled.long"/>
+                style="@style/button.large.disabled.long"
+                android:enabled="false"/>
 
         </LinearLayout>
 

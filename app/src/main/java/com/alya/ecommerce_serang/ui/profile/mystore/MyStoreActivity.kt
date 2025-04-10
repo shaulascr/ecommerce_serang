@@ -22,6 +22,7 @@ import com.alya.ecommerce_serang.ui.profile.mystore.sells.payment.PaymentFragmen
 import com.alya.ecommerce_serang.ui.profile.mystore.sells.shipment.ShipmentFragment
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
+import com.alya.ecommerce_serang.utils.viewmodel.MyStoreViewModel
 import com.bumptech.glide.Glide
 import kotlin.getValue
 

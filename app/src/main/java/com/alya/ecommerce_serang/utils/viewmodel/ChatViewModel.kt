@@ -1,4 +1,4 @@
-package com.alya.ecommerce_serang.ui.chat
+package com.alya.ecommerce_serang.utils.viewmodel
 
 import androidx.lifecycle.ViewModel
 
