@@ -28,7 +28,6 @@ import com.alya.ecommerce_serang.ui.home.HorizontalProductAdapter
 import com.alya.ecommerce_serang.ui.order.CheckoutActivity
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
-import com.alya.ecommerce_serang.utils.viewmodel.ProductViewModel
 import com.bumptech.glide.Glide
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import java.text.NumberFormat
@@ -43,11 +42,11 @@ class DetailProductActivity : AppCompatActivity() {
     private var currentQuantity = 1
 
 
-    private val viewModel: ProductViewModel by viewModels {
+    private val viewModel: ProductUserViewModel by viewModels {
         BaseViewModelFactory {
             val apiService = ApiConfig.getApiService(sessionManager)
             val productRepository = ProductRepository(apiService)
-            ProductViewModel(productRepository)
+            ProductUserViewModel(productRepository)
         }
     }
     override fun onCreate(savedInstanceState: Bundle?) {

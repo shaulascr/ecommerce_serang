@@ -15,7 +15,7 @@ import com.alya.ecommerce_serang.data.repository.ProductRepository
 import com.alya.ecommerce_serang.data.repository.Result
 import kotlinx.coroutines.launch
 
-class ProductViewModel(private val repository: ProductRepository) : ViewModel() {
+class ProductUserViewModel(private val repository: ProductRepository) : ViewModel() {
 
     private val _productDetail = MutableLiveData<Product?>()
     val productDetail: LiveData<Product?> get() = _productDetail

@@ -10,7 +10,7 @@ import com.alya.ecommerce_serang.data.api.dto.OrderRequest
 import com.alya.ecommerce_serang.data.api.dto.OrderRequestBuy
 import com.alya.ecommerce_serang.data.api.response.cart.CartItemsItem
 import com.alya.ecommerce_serang.data.api.response.cart.DataItem
-import com.alya.ecommerce_serang.data.api.response.product.PaymentItem
+import com.alya.ecommerce_serang.data.api.response.product.PaymentInfoItem
 import com.alya.ecommerce_serang.data.api.response.profile.AddressesItem
 import com.alya.ecommerce_serang.data.repository.OrderRepository
 import com.alya.ecommerce_serang.data.repository.Result
@@ -24,8 +24,8 @@ class CheckoutViewModel(private val repository: OrderRepository) : ViewModel() {
     private val _addressDetails = MutableLiveData<AddressesItem?>()
     val addressDetails: LiveData<AddressesItem?> = _addressDetails
 
-    private val _paymentDetails = MutableLiveData<PaymentItem?>()
-    val paymentDetails: LiveData<PaymentItem?> = _paymentDetails
+    private val _paymentDetails = MutableLiveData<PaymentInfoItem?>()
+    val paymentDetails: LiveData<PaymentInfoItem?> = _paymentDetails
 
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading
@@ -145,12 +145,16 @@ class CheckoutViewModel(private val repository: OrderRepository) : ViewModel() {
     }
 
     // Get payment methods from API
-    fun getPaymentMethods(callback: (List<PaymentItem>) -> Unit) {
+    fun getPaymentMethods(callback: (List<PaymentInfoItem>) -> Unit) {
         viewModelScope.launch {
             try {
-                val storeResponse = repository.getStore()
-                if (storeResponse != null && storeResponse.payment.isNotEmpty()) {
-                    callback(storeResponse.payment)
+                val storeId = _checkoutData.value?.sellerId ?: return@launch
+
+                // Use fetchStoreDetail instead of getStore
+                val storeResult = repository.fetchStoreDetail(storeId)
+
+                if (storeResult is Result.Success && storeResult.data != null) {
+                    callback(storeResult.data.paymentInfo)
                 } else {
                     callback(emptyList())
                 }
@@ -227,12 +231,16 @@ class CheckoutViewModel(private val repository: OrderRepository) : ViewModel() {
     fun setPaymentMethod(paymentId: Int) {
         viewModelScope.launch {
             try {
-                val storeResponse = repository.getStore()
-                if (storeResponse != null) {
-                    val payment = storeResponse.payment.find { it.id == paymentId }
+                val storeId = _checkoutData.value?.sellerId ?: return@launch
+
+                // Use fetchStoreDetail instead of getStore
+                val storeResult = repository.fetchStoreDetail(storeId)
+                if (storeResult is Result.Success && storeResult.data != null) {
+                    // Find the selected payment in the payment info list
+                    val payment = storeResult.data.paymentInfo.find { it.name == paymentId.toString() }
                     _paymentDetails.value = payment
 
-                    // Update order request only if payment isn't null
+                    // Update order request if payment isn't null
                     if (payment != null) {
                         val currentData = _checkoutData.value ?: return@launch
                         if (currentData.isBuyNow) {

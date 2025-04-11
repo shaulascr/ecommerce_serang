@@ -4,14 +4,14 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.alya.ecommerce_serang.R
-import com.alya.ecommerce_serang.data.api.response.product.PaymentItem
+import com.alya.ecommerce_serang.data.api.response.product.PaymentInfoItem
 import com.alya.ecommerce_serang.databinding.ItemPaymentMethodBinding
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 
 class PaymentMethodAdapter(
-    private val paymentMethods: List<PaymentItem>,
-    private val onPaymentSelected: (PaymentItem) -> Unit
+    private val paymentMethods: List<PaymentInfoItem>,
+    private val onPaymentSelected: (PaymentInfoItem) -> Unit
 ) : RecyclerView.Adapter<PaymentMethodAdapter.PaymentMethodViewHolder>() {
 
     // Track the selected position
@@ -36,7 +36,7 @@ class PaymentMethodAdapter(
 
         with(holder.binding) {
             // Set payment method name
-            tvPaymentMethodName.text = payment.bankName
+            tvPaymentMethodName.text = payment.name
 
             // Set radio button state
             rbPaymentMethod.isChecked = selectedPosition == position
@@ -45,8 +45,7 @@ class PaymentMethodAdapter(
             if (payment.qrisImage.isNotEmpty()) {
                 Glide.with(ivPaymentMethod.context)
                     .load(payment.qrisImage)
-                    .apply(
-                        RequestOptions()
+                    .apply(RequestOptions()
                         .placeholder(R.drawable.outline_store_24)
                         .error(R.drawable.outline_store_24))
                     .into(ivPaymentMethod)
@@ -81,9 +80,9 @@ class PaymentMethodAdapter(
         }
     }
 
-    // Select a payment method programmatically
-    fun setSelectedPaymentId(paymentId: Int) {
-        val position = paymentMethods.indexOfFirst { it.id == paymentId }
+    //selected by name
+    fun setSelectedPaymentName(paymentName: String) {
+        val position = paymentMethods.indexOfFirst { it.name == paymentName }
         if (position != -1 && position != selectedPosition) {
             selectPayment(position)
         }

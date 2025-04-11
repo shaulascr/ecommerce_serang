@@ -13,18 +13,17 @@ import com.alya.ecommerce_serang.data.repository.ProductRepository
 import com.alya.ecommerce_serang.databinding.ActivityReviewProductBinding
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
-import com.alya.ecommerce_serang.utils.viewmodel.ProductViewModel
 
 class ReviewProductActivity : AppCompatActivity() {
     private lateinit var binding: ActivityReviewProductBinding
     private lateinit var apiService: ApiService
     private var reviewsAdapter: ReviewsAdapter? = null
     private lateinit var sessionManager: SessionManager
-    private val viewModel: ProductViewModel by viewModels {
+    private val viewModel: ProductUserViewModel by viewModels {
         BaseViewModelFactory {
             val apiService = ApiConfig.getApiService(sessionManager)
             val productRepository = ProductRepository(apiService)
-            ProductViewModel(productRepository)
+            ProductUserViewModel(productRepository)
         }
     }
 

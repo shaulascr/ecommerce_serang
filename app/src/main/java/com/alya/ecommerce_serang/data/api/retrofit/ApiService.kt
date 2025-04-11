@@ -9,6 +9,7 @@ import com.alya.ecommerce_serang.data.api.dto.OrderRequestBuy
 import com.alya.ecommerce_serang.data.api.dto.OtpRequest
 import com.alya.ecommerce_serang.data.api.dto.RegisterRequest
 import com.alya.ecommerce_serang.data.api.dto.UpdateCart
+import com.alya.ecommerce_serang.data.api.response.ViewStoreProductsResponse
 import com.alya.ecommerce_serang.data.api.response.auth.LoginResponse
 import com.alya.ecommerce_serang.data.api.response.auth.OtpResponse
 import com.alya.ecommerce_serang.data.api.response.auth.RegisterResponse
@@ -28,7 +29,6 @@ import com.alya.ecommerce_serang.data.api.response.product.StoreResponse
 import com.alya.ecommerce_serang.data.api.response.profile.AddressResponse
 import com.alya.ecommerce_serang.data.api.response.profile.CreateAddressResponse
 import com.alya.ecommerce_serang.data.api.response.profile.ProfileResponse
-import com.alya.ecommerce_serang.data.api.response.ViewStoreProductsResponse
 import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.Body

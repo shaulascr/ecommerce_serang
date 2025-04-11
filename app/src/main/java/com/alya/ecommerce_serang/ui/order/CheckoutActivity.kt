@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.alya.ecommerce_serang.data.api.dto.CheckoutData
 import com.alya.ecommerce_serang.data.api.dto.OrderRequest
 import com.alya.ecommerce_serang.data.api.dto.OrderRequestBuy
-import com.alya.ecommerce_serang.data.api.response.product.PaymentItem
+import com.alya.ecommerce_serang.data.api.response.product.PaymentInfoItem
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.repository.OrderRepository
 import com.alya.ecommerce_serang.databinding.ActivityCheckoutBinding
@@ -104,8 +104,10 @@ class CheckoutActivity : AppCompatActivity() {
 
         // Observe payment details
         viewModel.paymentDetails.observe(this) { payment ->
-            // Update selected payment in adapter
-            payment?.id?.let { paymentAdapter?.setSelectedPaymentId(it) }
+            if (payment != null) {
+                // Update selected payment in adapter by name instead of ID
+                paymentAdapter?.setSelectedPaymentName(payment.name)
+            }
         }
 
         // Observe loading state
@@ -145,10 +147,13 @@ class CheckoutActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupPaymentMethodsRecyclerView(paymentMethods: List<PaymentItem>) {
+    private fun setupPaymentMethodsRecyclerView(paymentMethods: List<PaymentInfoItem>) {
         paymentAdapter = PaymentMethodAdapter(paymentMethods) { payment ->
             // When a payment method is selected
-            viewModel.setPaymentMethod(payment.id)
+            // Since PaymentInfoItem doesn't have an id field, we'll use the name as identifier
+            // You might need to convert the name to an ID if your backend expects an integer
+            val paymentId = payment.name.toIntOrNull() ?: 0
+            viewModel.setPaymentMethod(paymentId)
         }
 
         binding.rvPaymentMethods.apply {
