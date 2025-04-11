@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.alya.ecommerce_serang.R
-import com.alya.ecommerce_serang.data.api.response.ReviewsItem
+import com.alya.ecommerce_serang.data.api.response.product.ReviewsItem
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.TimeZone

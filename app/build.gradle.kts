@@ -1,5 +1,3 @@
-import org.gradle.api.tasks.compile.JavaCompile
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
@@ -11,7 +9,7 @@ plugins {
 
 android {
     namespace = "com.alya.ecommerce_serang"
-    compileSdk = 35
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.alya.ecommerce_serang"
@@ -25,7 +23,7 @@ android {
 
     buildTypes {
         release {
-            buildConfigField("String", "BASE_URL", "\"http://192.168.1.15:3000/\"")
+            buildConfigField("String", "BASE_URL", "\"http://192.168.1.5:3000/\"")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -33,7 +31,7 @@ android {
             )
         }
         debug {
-            buildConfigField("String", "BASE_URL", "\"http://192.168.1.15:3000/\"")
+            buildConfigField("String", "BASE_URL", "\"http://192.168.1.5:3000/\"")
         }
     }
     compileOptions {
@@ -85,5 +83,4 @@ dependencies {
 //    implementation(libs.androidx.hilt.lifecycle.viewmodel)
 //    kapt("androidx.hilt:hilt-compiler:1.0.0")
 }
-
 

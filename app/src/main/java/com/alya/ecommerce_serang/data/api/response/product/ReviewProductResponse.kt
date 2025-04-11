@@ -1,13 +1,13 @@
-package com.alya.ecommerce_serang.data.api.response
+package com.alya.ecommerce_serang.data.api.response.product
 
 import com.google.gson.annotations.SerializedName
 
 data class ReviewProductResponse(
 
-	@field:SerializedName("reviews")
+    @field:SerializedName("reviews")
 	val reviews: List<ReviewsItem>,
 
-	@field:SerializedName("message")
+    @field:SerializedName("message")
 	val message: String
 )
 
