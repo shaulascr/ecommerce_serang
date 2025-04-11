@@ -13,6 +13,7 @@ import com.alya.ecommerce_serang.data.api.response.ReviewsItem
 import com.alya.ecommerce_serang.data.repository.ProductRepository
 import com.alya.ecommerce_serang.data.repository.Result
 import kotlinx.coroutines.launch
+import java.io.File
 
 class ProductViewModel(private val repository: ProductRepository) : ViewModel() {
 
@@ -74,16 +75,14 @@ class ProductViewModel(private val repository: ProductRepository) : ViewModel() 
         isPreOrder: Boolean,
         duration: Int,
         categoryId: Int,
-        isActive: Boolean
+        isActive: Boolean,
+        image: File?,
+        sppirt: File?,
+        halal: File?
     ): LiveData<Result<Unit>> = liveData {
         emit(Result.Loading)
-        val result = repository.addProduct(
-            name, description, price, stock, minOrder, weight, isPreOrder, duration, categoryId, isActive
-        )
-        emit(result)
+        emit(repository.addProduct(name, description, price, stock, minOrder, weight, isPreOrder, duration, categoryId, isActive, image, sppirt, halal))
     }
-
-
 
     // Optional: for store detail if you need it later
 //    fun loadStoreDetail(storeId: Int) {
@@ -92,4 +91,5 @@ class ProductViewModel(private val repository: ProductRepository) : ViewModel() 
 //            _storeDetail.value = storeResult
 //        }
 //    }
+
 }
