@@ -28,11 +28,19 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField(
+            "String",
+            "BASE_URL",
+            "\"${localProperties["BASE_URL"] ?: "http://default-url.com/"}\""
+        )
     }
 
     buildTypes {
         release {
-            buildConfigField("String", "BASE_URL", "\"http://192.168.1.6:3000/\"")
+            buildConfigField("String",
+                "BASE_URL",
+                "\"${localProperties["BASE_URL"] ?: "http://default-url.com/"}\"")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -40,7 +48,9 @@ android {
             )
         }
         debug {
-            buildConfigField("String", "BASE_URL", "\"http://192.168.1.6:3000/\"")
+            buildConfigField("String",
+                "BASE_URL",
+                "\"${localProperties["BASE_URL"] ?: "http://default-url.com/"}\"")
         }
     }
     compileOptions {
