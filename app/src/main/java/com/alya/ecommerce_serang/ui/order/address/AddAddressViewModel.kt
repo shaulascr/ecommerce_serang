@@ -91,9 +91,6 @@ class AddAddressViewModel(private val repository: OrderRepository, private val s
         selectedCityId = id
     }
 
-    fun getSelectedProvinceId(): Int? = selectedProvinceId
-    fun getSelectedCityId(): Int? = selectedCityId
-
     companion object {
         private const val TAG = "AddAddressViewModel"
     }

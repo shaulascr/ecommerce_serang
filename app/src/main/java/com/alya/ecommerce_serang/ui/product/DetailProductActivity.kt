@@ -1,5 +1,6 @@
 package com.alya.ecommerce_serang.ui.product
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -29,6 +30,8 @@ import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
 import com.bumptech.glide.Glide
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import java.text.NumberFormat
+import java.util.Locale
 
 class DetailProductActivity : AppCompatActivity() {
     private lateinit var binding: ActivityDetailProductBinding
@@ -53,14 +56,6 @@ class DetailProductActivity : AppCompatActivity() {
 
         sessionManager = SessionManager(this)
         apiService = ApiConfig.getApiService(sessionManager)
-
-//        val productId = intent.getIntExtra("PRODUCT_ID", -1)
-//        //nanti tambah get store id dari HomeFragment Product.storeId
-//        if (productId == -1) {
-//            Log.e("DetailProductActivity", "Invalid Product ID")
-//            finish() // Close activity if no valid ID
-//            return
-//        }
 
         setupUI()
         setupObservers()
@@ -88,8 +83,19 @@ class DetailProductActivity : AppCompatActivity() {
             }
         }
 
-        viewModel.storeDetail.observe(this) { store ->
-            updateStoreInfo(store)
+        viewModel.storeDetail.observe(this) { result ->
+            when (result) {
+                is Result.Success -> {
+                    updateStoreInfo(result.data)
+                }
+                is Result.Error -> {
+                    // Show error message, maybe a Toast or Snackbar
+                    Toast.makeText(this, "Failed to load store: ${result.exception.message}", Toast.LENGTH_SHORT).show()
+                }
+                is Result.Loading -> {
+                    // Show loading indicator if needed
+                }
+            }
         }
 
         viewModel.otherProducts.observe(this) { products ->
@@ -99,29 +105,23 @@ class DetailProductActivity : AppCompatActivity() {
         viewModel.reviewProduct.observe(this) { reviews ->
             setupRecyclerViewReviewsProduct(reviews)
         }
-//
-//        viewModel.isLoading.observe(this) { isLoading ->
-//            binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
-//        }
-//
-//        viewModel.error.observe(this) { errorMessage ->
-//            if (errorMessage.isNotEmpty()) {
-//                Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
-//            }
-//        }
 
+        viewModel.isLoading.observe(this) { isLoading ->
+            binding.progressBarDetailProd.visibility = if (isLoading) View.VISIBLE else View.GONE
+        }
+
+        viewModel.error.observe(this) { errorMessage ->
+            if (errorMessage.isNotEmpty()) {
+                Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
+            }
+        }
         viewModel.addCart.observe(this) { result ->
             when (result) {
-                is com.alya.ecommerce_serang.data.repository.Result.Success -> {
-                    Toast.makeText(this, result.data, Toast.LENGTH_SHORT).show()
-
-                    // Check if we need to navigate to checkout (for "Buy Now" flow)
-                    if (viewModel.shouldNavigateToCheckout) {
-                        viewModel.shouldNavigateToCheckout = false
-                        navigateToCheckout()
-                    }
+                is Result.Success -> {
+                    val cartId = result.data.data.cartId
+                    Toast.makeText(this, result.data.message, Toast.LENGTH_SHORT).show()
                 }
-                is com.alya.ecommerce_serang.data.repository.Result.Error -> {
+                is Result.Error -> {
                     Toast.makeText(this, "Failed to add to cart: ${result.exception.message}", Toast.LENGTH_SHORT).show()
                 }
                 is Result.Loading -> {
@@ -134,7 +134,21 @@ class DetailProductActivity : AppCompatActivity() {
     private fun updateStoreInfo(store: StoreProduct?) {
         store?.let {
             binding.tvSellerName.text = it.storeName
-            // Add more store details as needed
+            binding.tvSellerRating.text = it.storeRating
+            binding.tvSellerLocation.text = it.storeLocation
+
+            // Load store image using Glide
+            val fullImageUrl = when (val img = it.storeImage) {
+                is String -> {
+                    if (img.startsWith("/")) BASE_URL + img.substring(1) else img
+                }
+                else -> R.drawable.placeholder_image
+            }
+
+            Glide.with(this)
+                .load(fullImageUrl)
+                .placeholder(R.drawable.placeholder_image)
+                .into(binding.ivSellerImage)
         }
     }
 
@@ -176,14 +190,14 @@ class DetailProductActivity : AppCompatActivity() {
 
     private fun updateUI(product: Product){
         binding.tvProductName.text = product.productName
-        binding.tvPrice.text = product.price
+        binding.tvPrice.text = formatCurrency(product.price.toDouble())
         binding.tvSold.text = product.totalSold.toString()
         binding.tvRating.text = product.rating
         binding.tvWeight.text = product.weight.toString()
         binding.tvStock.text = product.stock.toString()
         binding.tvCategory.text = product.productCategory
         binding.tvDescription.text = product.description
-        binding.tvSellerName.text = product.storeId.toString()
+
 
 
         val fullImageUrl = when (val img = product.image) {
@@ -298,33 +312,63 @@ class DetailProductActivity : AppCompatActivity() {
             }
         }
 
-
         btnBuyNow.setOnClickListener {
             bottomSheetDialog.dismiss()
 
-            val cartItem = CartItem(
-                productId = productId,
-                quantity = currentQuantity
-            )
-
-            // For both Buy Now and Add to Cart, we add to cart first
             if (isBuyNow) {
-                // Set flag to navigate to checkout after adding to cart is successful
-                viewModel.shouldNavigateToCheckout = true
+                // If it's Buy Now, navigate directly to checkout without adding to cart
+                navigateToCheckout()
+            } else {
+                // If it's Add to Cart, add the item to the cart
+                val cartItem = CartItem(
+                    productId = productId,
+                    quantity = currentQuantity
+                )
+                viewModel.reqCart(cartItem)
             }
-
-            // Add to cart in both cases
-            viewModel.reqCart(cartItem)
+        }
 
         btnClose.setOnClickListener {
             bottomSheetDialog.dismiss()
         }
+
         bottomSheetDialog.show()
-        }
+    }
+
+    private fun formatCurrency(amount: Double): String {
+        val formatter = NumberFormat.getCurrencyInstance(Locale("in", "ID"))
+        return formatter.format(amount).replace(",00", "")
     }
 
     private fun navigateToCheckout() {
-        val intent = Intent(this, CheckoutActivity::class.java)
-        startActivity(intent)
+        val productDetail = viewModel.productDetail.value ?: return
+        val storeDetail = viewModel.storeDetail.value
+
+        if (storeDetail !is Result.Success || storeDetail.data == null) {
+            Toast.makeText(this, "Store information not available", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Start checkout activity with buy now flow
+        CheckoutActivity.startForBuyNow(
+            context = this,
+            storeId = productDetail.storeId,
+            storeName = storeDetail.data.storeName,
+            productId = productDetail.productId,
+            productName = productDetail.productName,
+            productImage = productDetail.image,
+            quantity = currentQuantity,
+            price = productDetail.price.toDouble()
+        )
+    }
+
+    companion object {
+        const val EXTRA_PRODUCT_ID = "extra_product_id"
+
+        fun start(context: Context, productId: Int) {
+            val intent = Intent(context, DetailProductActivity::class.java)
+            intent.putExtra(EXTRA_PRODUCT_ID, productId)
+            context.startActivity(intent)
+        }
     }
 }

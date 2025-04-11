@@ -5,6 +5,7 @@ import com.alya.ecommerce_serang.data.api.dto.CourierCostRequest
 import com.alya.ecommerce_serang.data.api.dto.CreateAddressRequest
 import com.alya.ecommerce_serang.data.api.dto.LoginRequest
 import com.alya.ecommerce_serang.data.api.dto.OrderRequest
+import com.alya.ecommerce_serang.data.api.dto.OrderRequestBuy
 import com.alya.ecommerce_serang.data.api.dto.OtpRequest
 import com.alya.ecommerce_serang.data.api.dto.RegisterRequest
 import com.alya.ecommerce_serang.data.api.dto.UpdateCart
@@ -13,11 +14,11 @@ import com.alya.ecommerce_serang.data.api.response.auth.OtpResponse
 import com.alya.ecommerce_serang.data.api.response.auth.RegisterResponse
 import com.alya.ecommerce_serang.data.api.response.cart.AddCartResponse
 import com.alya.ecommerce_serang.data.api.response.cart.ListCartResponse
+import com.alya.ecommerce_serang.data.api.response.cart.UpdateCartResponse
 import com.alya.ecommerce_serang.data.api.response.order.CourierCostResponse
 import com.alya.ecommerce_serang.data.api.response.order.CreateOrderResponse
 import com.alya.ecommerce_serang.data.api.response.order.ListCityResponse
 import com.alya.ecommerce_serang.data.api.response.order.ListProvinceResponse
-import com.alya.ecommerce_serang.data.api.response.order.UpdateCartResponse
 import com.alya.ecommerce_serang.data.api.response.product.AllProductResponse
 import com.alya.ecommerce_serang.data.api.response.product.CategoryResponse
 import com.alya.ecommerce_serang.data.api.response.product.DetailStoreProductResponse
@@ -78,6 +79,11 @@ interface ApiService {
     @POST("order")
     suspend fun postOrder(
         @Body request: OrderRequest
+    ): Response<CreateOrderResponse>
+
+    @POST("order")
+    suspend fun postOrderBuyNow(
+        @Body request: OrderRequestBuy
     ): Response<CreateOrderResponse>
 
     @GET("profile/address")

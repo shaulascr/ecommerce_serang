@@ -1,65 +1,96 @@
 package com.alya.ecommerce_serang.ui.order
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.RadioButton
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.alya.ecommerce_serang.R
+import com.alya.ecommerce_serang.data.api.response.order.CourierCostsItem
 import com.alya.ecommerce_serang.data.api.response.order.ServicesItem
+import com.alya.ecommerce_serang.databinding.ItemShippingOrderBinding
 
 class ShippingAdapter(
-    private val onItemSelected: (ServicesItem) -> Unit
+    private val onItemSelected: (CourierCostsItem, ServicesItem) -> Unit
 ) : RecyclerView.Adapter<ShippingAdapter.ShippingViewHolder>() {
 
-    private var services = listOf<ServicesItem>()
-    private var selectedPosition = -1
+    private val courierCostsList = mutableListOf<CourierCostsItem>()
+    private var selectedPosition = RecyclerView.NO_POSITION
+    private var selectedCourierPosition = RecyclerView.NO_POSITION
 
-    fun submitList(newList: List<ServicesItem>) {
-        services = newList
+    fun submitList(courierCostsList: List<CourierCostsItem>) {
+        this.courierCostsList.clear()
+        this.courierCostsList.addAll(courierCostsList)
         notifyDataSetChanged()
     }
 
-    inner class ShippingViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val courierName = itemView.findViewById<TextView>(R.id.courier_name_cost)
-        private val estDate = itemView.findViewById<TextView>(R.id.est_date)
-        private val costPrice = itemView.findViewById<TextView>(R.id.cost_price)
-        private val radioButton = itemView.findViewById<RadioButton>(R.id.radio_btn_cost)
+    inner class ShippingViewHolder(
+        private val binding: ItemShippingOrderBinding
+    ) : RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(service: ServicesItem, isSelected: Boolean) {
-            courierName.text = service.service // already includes courier name from ViewModel
-            estDate.text = "Estimasi ${service.etd}"
-            costPrice.text = "Rp${service.cost}"
-            radioButton.isChecked = isSelected
+        fun bind(courierCostsItem: CourierCostsItem, service: ServicesItem, isSelected: Boolean) {
+            binding.apply {
+                // Combine courier name and service
+                courierNameCost.text = "${courierCostsItem.courier} - ${service.service}"
+                estDate.text = "Estimasi ${service.etd} hari"
+                costPrice.text = "Rp${service.cost}"
 
-            itemView.setOnClickListener {
-                if (adapterPosition != RecyclerView.NO_POSITION) {
-                    selectedPosition = adapterPosition
-                    notifyDataSetChanged()
-                    onItemSelected(service)
+                // Single click handler for both item and radio button
+                val onClickAction = {
+                    val newPosition = adapterPosition
+                    if (newPosition != RecyclerView.NO_POSITION) {
+                        // Update selected position
+                        val oldPosition = selectedPosition
+                        selectedPosition = newPosition
+                        selectedCourierPosition = getParentCourierPosition(courierCostsItem)
+
+                        // Notify only the changed items to improve performance
+                        notifyItemChanged(oldPosition)
+                        notifyItemChanged(newPosition)
+
+                        // Call the callback with both courier and service
+                        onItemSelected(courierCostsItem, service)
+                    }
                 }
-            }
 
-            radioButton.setOnClickListener {
-                if (adapterPosition != RecyclerView.NO_POSITION) {
-                    selectedPosition = adapterPosition
-                    notifyDataSetChanged()
-                    onItemSelected(service)
+                root.setOnClickListener { onClickAction() }
+                radioBtnCost.apply {
+                    isChecked = isSelected
+                    setOnClickListener { onClickAction() }
                 }
             }
         }
     }
 
+    private fun getParentCourierPosition(courierCostsItem: CourierCostsItem): Int {
+        return courierCostsList.indexOfFirst { it == courierCostsItem }
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ShippingViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_shipping_order, parent, false)
-        return ShippingViewHolder(view)
+        val binding = ItemShippingOrderBinding.inflate(
+            LayoutInflater.from(parent.context),
+            parent,
+            false
+        )
+        return ShippingViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: ShippingViewHolder, position: Int) {
-        val service = services[position]
-        holder.bind(service, position == selectedPosition)
+        // Flatten the nested structure for binding
+        var currentPosition = 0
+        for (courierCostsItem in courierCostsList) {
+            for (service in courierCostsItem.services) {
+                if (currentPosition == position) {
+                    holder.bind(
+                        courierCostsItem,
+                        service,
+                        currentPosition == selectedPosition
+                    )
+                    return
+                }
+                currentPosition++
+            }
+        }
     }
 
-    override fun getItemCount(): Int = services.size
+    override fun getItemCount(): Int {
+        return courierCostsList.sumOf { it.services.size }
+    }
 }

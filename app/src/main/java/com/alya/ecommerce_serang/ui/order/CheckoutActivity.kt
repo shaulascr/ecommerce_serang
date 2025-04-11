@@ -1,48 +1,39 @@
 package com.alya.ecommerce_serang.ui.order
 
-import android.app.Activity
-import android.app.ProgressDialog
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
-import android.os.Looper
-import android.util.Log
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.alya.ecommerce_serang.data.api.dto.CheckoutData
 import com.alya.ecommerce_serang.data.api.dto.OrderRequest
+import com.alya.ecommerce_serang.data.api.dto.OrderRequestBuy
+import com.alya.ecommerce_serang.data.api.response.product.PaymentItem
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
-import com.alya.ecommerce_serang.data.api.retrofit.ApiService
 import com.alya.ecommerce_serang.data.repository.OrderRepository
-import com.alya.ecommerce_serang.data.repository.ProductRepository
 import com.alya.ecommerce_serang.databinding.ActivityCheckoutBinding
-import com.alya.ecommerce_serang.databinding.ActivityDetailProductBinding
+import com.alya.ecommerce_serang.ui.order.address.AddressActivity
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
-import com.google.gson.Gson
+import java.text.NumberFormat
 import java.util.Locale
 
 class CheckoutActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityCheckoutBinding
-    private lateinit var apiService: ApiService
     private lateinit var sessionManager: SessionManager
-    private var itemOrderAdapter: CheckoutSellerAdapter? = null
+    private var paymentAdapter: PaymentMethodAdapter? = null
 
     private val viewModel: CheckoutViewModel by viewModels {
         BaseViewModelFactory {
             val apiService = ApiConfig.getApiService(sessionManager)
-            val productRepository = ProductRepository(apiService)
             val orderRepository = OrderRepository(apiService)
             CheckoutViewModel(orderRepository)
         }
     }
-
-    private var orderRequest: OrderRequest? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,60 +41,38 @@ class CheckoutActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         sessionManager = SessionManager(this)
-        apiService = ApiConfig.getApiService(sessionManager)
-
-        // Get order request from intent
-        getOrderRequestFromIntent()
 
         // Setup UI components
         setupToolbar()
         setupObservers()
         setupClickListeners()
-
-        // Load data if order request is available
-        orderRequest?.let {
-            viewModel.loadCheckoutData(it)
-            // Update shipping method display
-            binding.tvShippingMethod.text = "${it.shipName} ${it.shipService} (${it.shipEtd} hari)"
-        } ?: run {
-            // Handle case when order request is not available
-            Toast.makeText(this, "Error: Order request data not found", Toast.LENGTH_SHORT).show()
-            finish()
-        }
+        processIntentData()
     }
 
-    private fun getOrderRequestFromIntent() {
-        // Check for direct OrderRequest object
-        if (intent.hasExtra(EXTRA_ORDER_REQUEST)) {
-            orderRequest = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                intent.getSerializableExtra(EXTRA_ORDER_REQUEST, OrderRequest::class.java)
-            } else {
-                @Suppress("DEPRECATION")
-                intent.getSerializableExtra(EXTRA_ORDER_REQUEST) as? OrderRequest
-            }
-        }
-        // Check for JSON string
-        else if (intent.hasExtra(EXTRA_ORDER_REQUEST_JSON)) {
-            val jsonString = intent.getStringExtra(EXTRA_ORDER_REQUEST_JSON)
-            try {
-                orderRequest = Gson().fromJson(jsonString, OrderRequest::class.java)
-            } catch (e: Exception) {
-                Log.e(TAG, "Error parsing order request JSON", e)
-            }
-        }
-        // Check for individual fields
-        else if (intent.hasExtra(EXTRA_ADDRESS_ID) && intent.hasExtra(EXTRA_PRODUCT_ID)) {
-            orderRequest = OrderRequest(
-                address_id = intent.getIntExtra(EXTRA_ADDRESS_ID, 0),
-                payment_method_id = intent.getIntExtra(EXTRA_PAYMENT_METHOD_ID, 0),
-                ship_price = intent.getIntExtra(EXTRA_SHIP_PRICE, 0),
-                ship_name = intent.getStringExtra(EXTRA_SHIP_NAME) ?: "",
-                ship_service = intent.getStringExtra(EXTRA_SHIP_SERVICE) ?: "",
-                is_negotiable = intent.getBooleanExtra(EXTRA_IS_NEGOTIABLE, false),
-                product_id = intent.getIntExtra(EXTRA_PRODUCT_ID, 0),
-                quantity = intent.getIntExtra(EXTRA_QUANTITY, 0),
-                ship_etd = intent.getStringExtra(EXTRA_SHIP_ETD) ?: ""
+    private fun processIntentData() {
+        // Determine if this is Buy Now or Cart checkout
+        val isBuyNow = intent.hasExtra(EXTRA_PRODUCT_ID) && !intent.hasExtra(EXTRA_CART_ITEM_IDS)
+
+        if (isBuyNow) {
+            // Process Buy Now flow
+            viewModel.initializeBuyNow(
+                storeId = intent.getIntExtra(EXTRA_STORE_ID, 0),
+                storeName = intent.getStringExtra(EXTRA_STORE_NAME),
+                productId = intent.getIntExtra(EXTRA_PRODUCT_ID, 0),
+                productName = intent.getStringExtra(EXTRA_PRODUCT_NAME),
+                productImage = intent.getStringExtra(EXTRA_PRODUCT_IMAGE),
+                quantity = intent.getIntExtra(EXTRA_QUANTITY, 1),
+                price = intent.getDoubleExtra(EXTRA_PRICE, 0.0)
             )
+        } else {
+            // Process Cart checkout flow
+            val cartItemIds = intent.getIntArrayExtra(EXTRA_CART_ITEM_IDS)?.toList() ?: emptyList()
+            if (cartItemIds.isNotEmpty()) {
+                viewModel.initializeFromCart(cartItemIds)
+            } else {
+                Toast.makeText(this, "Error: No cart items specified", Toast.LENGTH_SHORT).show()
+                finish()
+            }
         }
     }
 
@@ -116,88 +85,186 @@ class CheckoutActivity : AppCompatActivity() {
     private fun setupObservers() {
         // Observe checkout data
         viewModel.checkoutData.observe(this) { data ->
-            setupSellerOrderRecyclerView(data)
+            setupProductRecyclerView(data)
             updateOrderSummary()
+
+            // Load payment methods
+            viewModel.getPaymentMethods { paymentMethods ->
+                if (paymentMethods.isNotEmpty()) {
+                    setupPaymentMethodsRecyclerView(paymentMethods)
+                }
+            }
         }
 
         // Observe address details
         viewModel.addressDetails.observe(this) { address ->
-            binding.tvPlacesAddress.text = address.label
-            binding.tvAddress.text = address.fullAddress
+            binding.tvPlacesAddress.text = address?.recipient
+            binding.tvAddress.text = "${address?.street}, ${address?.subdistrict}"
         }
 
         // Observe payment details
         viewModel.paymentDetails.observe(this) { payment ->
-            binding.tvPaymentMethod.text = payment.name
+            // Update selected payment in adapter
+            payment?.id?.let { paymentAdapter?.setSelectedPaymentId(it) }
         }
 
         // Observe loading state
         viewModel.isLoading.observe(this) { isLoading ->
-            // Show/hide loading indicator
-            // binding.progressBar.isVisible = isLoading
+            binding.btnPay.isEnabled = !isLoading
+            // Show/hide loading indicator if you have one
+        }
+
+        // Observe error messages
+        viewModel.errorMessage.observe(this) { message ->
+            if (message.isNotEmpty()) {
+                Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        // Observe order creation
+        viewModel.orderCreated.observe(this) { created ->
+            if (created) {
+                Toast.makeText(this, "Order successfully created!", Toast.LENGTH_SHORT).show()
+                setResult(RESULT_OK)
+                finish()
+            }
         }
     }
 
-    private fun setupSellerOrderRecyclerView(checkoutData: CheckoutData) {
-        val adapter = CheckoutSellerAdapter(checkoutData)
-        binding.rvSellerOrder.apply {
+    private fun setupProductRecyclerView(checkoutData: CheckoutData) {
+        val adapter = if (checkoutData.isBuyNow || checkoutData.cartItems.size <= 1) {
+            CheckoutSellerAdapter(checkoutData)
+        } else {
+            CartCheckoutAdapter(checkoutData)
+        }
+
+        binding.rvProductItems.apply {
             layoutManager = LinearLayoutManager(this@CheckoutActivity)
             this.adapter = adapter
             isNestedScrollingEnabled = false
         }
     }
 
+    private fun setupPaymentMethodsRecyclerView(paymentMethods: List<PaymentItem>) {
+        paymentAdapter = PaymentMethodAdapter(paymentMethods) { payment ->
+            // When a payment method is selected
+            viewModel.setPaymentMethod(payment.id)
+        }
+
+        binding.rvPaymentMethods.apply {
+            layoutManager = LinearLayoutManager(this@CheckoutActivity)
+            adapter = paymentAdapter
+        }
+    }
+
     private fun updateOrderSummary() {
         viewModel.checkoutData.value?.let { data ->
-            // Calculate subtotal (product price * quantity)
-            val subtotal = data.productPrice * data.orderRequest.quantity
-            binding.tvSubtotal.text = formatCurrency(subtotal)
+            // Update price information
+            binding.tvItemTotal.text = formatCurrency(viewModel.calculateSubtotal())
 
-            // Calculate total (subtotal + shipping)
-            val total = subtotal + data.orderRequest.ship_price
+            // Get shipping price
+            val shipPrice = if (data.isBuyNow) {
+                (data.orderRequest as OrderRequestBuy).shipPrice.toDouble()
+            } else {
+                (data.orderRequest as OrderRequest).shipPrice.toDouble()
+            }
+            binding.tvShippingFee.text = formatCurrency(shipPrice)
+
+            // Update total
+            val total = viewModel.calculateTotal()
             binding.tvTotal.text = formatCurrency(total)
+            binding.tvBottomTotal.text = formatCurrency(total)
+        }
+    }
+
+    private fun updateShippingUI(shipName: String, shipService: String, shipEtd: String, shipPrice: Int) {
+        if (shipName.isNotEmpty() && shipService.isNotEmpty()) {
+            // Display shipping name and service in one line
+            binding.tvCourierName.text = "$shipName $shipService"
+            binding.tvDeliveryEstimate.text = "$shipEtd hari kerja"
+            binding.tvShippingPrice.text = formatCurrency(shipPrice.toDouble())
+            binding.rbJne.isChecked = true
         }
     }
 
     private fun setupClickListeners() {
-        // Setup address selection
+        // Address selection
         binding.tvChangeAddress.setOnClickListener {
-            // Launch address selection activity
-            startActivityForResult(
-                Intent(this, AddressSelectionActivity::class.java),
-                REQUEST_ADDRESS
-            )
+            val intent = Intent(this, AddressActivity::class.java)
+            addressSelectionLauncher.launch(intent)
         }
 
-        // Setup payment button
+        // Shipping method selection
+        binding.layoutShippingMethod.setOnClickListener {
+            val addressId = viewModel.addressDetails.value?.id ?: 0
+            if (addressId <= 0) {
+                Toast.makeText(this, "Please select delivery address first", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            // Launch shipping selection with address and product info
+            val intent = Intent(this, ShippingActivity::class.java)
+            intent.putExtra(ShippingActivity.EXTRA_ADDRESS_ID, addressId)
+
+            // Add product info for courier cost calculation
+            val currentData = viewModel.checkoutData.value
+            if (currentData != null) {
+                if (currentData.isBuyNow) {
+                    val buyRequest = currentData.orderRequest as OrderRequestBuy
+                    intent.putExtra(ShippingActivity.EXTRA_PRODUCT_ID, buyRequest.productId)
+                    intent.putExtra(ShippingActivity.EXTRA_QUANTITY, buyRequest.quantity)
+                } else {
+                    // For cart, we'll pass the first item's info
+                    val firstItem = currentData.cartItems.firstOrNull()
+                    if (firstItem != null) {
+                        intent.putExtra(ShippingActivity.EXTRA_PRODUCT_ID, firstItem.productId)
+                        intent.putExtra(ShippingActivity.EXTRA_QUANTITY, firstItem.quantity)
+                    }
+                }
+            }
+
+            shippingSelectionLauncher.launch(intent)
+        }
+
+        // Create order button
         binding.btnPay.setOnClickListener {
-            // Create the order by sending API request
             if (validateOrder()) {
-                createOrder()
+                viewModel.createOrder()
             }
         }
 
-        // Setup voucher section
-        binding.layoutVoucher.setOnClickListener {
-            Toast.makeText(this, "Select Voucher", Toast.LENGTH_SHORT).show()
+        // Voucher section (if implemented)
+        binding.layoutVoucher?.setOnClickListener {
+            Toast.makeText(this, "Voucher feature not implemented", Toast.LENGTH_SHORT).show()
         }
+    }
 
-        // Setup shipping method
-        binding.layoutShippingMethod.setOnClickListener {
-            // Launch shipping method selection
-            val orderRequest = this.orderRequest ?: return@setOnClickListener
-            val intent = Intent(this, ShippingMethodActivity::class.java)
-            intent.putExtra(ShippingMethodActivity.EXTRA_PRODUCT_ID, orderRequest.product_id)
-            startActivityForResult(intent, REQUEST_SHIPPING)
+    private val addressSelectionLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val addressId = result.data?.getIntExtra(AddressActivity.EXTRA_ADDRESS_ID, 0) ?: 0
+            if (addressId > 0) {
+                viewModel.setSelectedAddress(addressId)
+            }
         }
+    }
 
-        // Setup payment method
-        binding.layoutPaymentMethod.setOnClickListener {
-            // Launch payment method selection
-            startActivityForResult(
-                Intent(this, PaymentMethodActivity::class.java),
-                REQUEST_PAYMENT
-            )
+    private val shippingSelectionLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val data = result.data ?: return@registerForActivityResult
+            val shipName = data.getStringExtra(ShippingActivity.EXTRA_SHIP_NAME) ?: return@registerForActivityResult
+            val shipService = data.getStringExtra(ShippingActivity.EXTRA_SHIP_SERVICE) ?: return@registerForActivityResult
+            val shipPrice = data.getIntExtra(ShippingActivity.EXTRA_SHIP_PRICE, 0)
+            val shipEtd = data.getStringExtra(ShippingActivity.EXTRA_SHIP_ETD) ?: ""
+
+            // Update shipping in ViewModel
+            viewModel.setShippingMethod(shipName, shipService, shipPrice, shipEtd)
+
+            // Update UI - display shipping name and service in one line
+            updateShippingUI(shipName, shipService, shipEtd, shipPrice)
         }
     }
 
@@ -207,22 +274,27 @@ class CheckoutActivity : AppCompatActivity() {
     }
 
     private fun validateOrder(): Boolean {
-        val orderRequest = this.orderRequest ?: return false
-
-        // Check address
-        if (orderRequest.address_id <= 0) {
+        // Check if address is selected
+        if (viewModel.addressDetails.value == null) {
             Toast.makeText(this, "Silakan pilih alamat pengiriman", Toast.LENGTH_SHORT).show()
             return false
         }
 
-        // Check shipping method
-        if (orderRequest.ship_name.isEmpty() || orderRequest.ship_service.isEmpty()) {
+        // Check if shipping is selected
+        val checkoutData = viewModel.checkoutData.value ?: return false
+        val shipName = if (checkoutData.isBuyNow) {
+            (checkoutData.orderRequest as OrderRequestBuy).shipName
+        } else {
+            (checkoutData.orderRequest as OrderRequest).shipName
+        }
+
+        if (shipName.isEmpty()) {
             Toast.makeText(this, "Silakan pilih metode pengiriman", Toast.LENGTH_SHORT).show()
             return false
         }
 
-        // Check payment method
-        if (orderRequest.payment_method_id <= 0) {
+        // Check if payment method is selected
+        if (viewModel.paymentDetails.value == null) {
             Toast.makeText(this, "Silakan pilih metode pembayaran", Toast.LENGTH_SHORT).show()
             return false
         }
@@ -230,163 +302,51 @@ class CheckoutActivity : AppCompatActivity() {
         return true
     }
 
-    private fun createOrder() {
-        val orderRequest = this.orderRequest ?: return
-
-        // Show progress dialog
-        val progressDialog = ProgressDialog(this)
-        progressDialog.setMessage("Membuat pesanan...")
-        progressDialog.setCancelable(false)
-        progressDialog.show()
-
-        // In a real app, you would send the order request to your API
-        // For now, we'll simulate an API call
-        Handler(Looper.getMainLooper()).postDelayed({
-            progressDialog.dismiss()
-
-            // Show success message
-            Toast.makeText(this, "Pesanan berhasil dibuat!", Toast.LENGTH_SHORT).show()
-
-            // Create intent result with the order request
-            val resultIntent = Intent()
-            resultIntent.putExtra(EXTRA_ORDER_REQUEST, orderRequest)
-            setResult(RESULT_OK, resultIntent)
-
-            // Return to previous screen
-            finish()
-        }, 1500)
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (resultCode == RESULT_OK) {
-            when (requestCode) {
-                REQUEST_ADDRESS -> {
-                    // Handle address selection result
-                    val addressId = data?.getIntExtra(AddressSelectionActivity.EXTRA_ADDRESS_ID, 0) ?: 0
-                    if (addressId > 0) {
-                        orderRequest?.address_id = addressId
-                        // Reload address details
-                        orderRequest?.let { request ->
-                            viewModelScope.launch {
-                                val addressDetails = repository.getAddressDetails(request.address_id)
-                                binding.tvPlacesAddress.text = addressDetails.label
-                                binding.tvAddress.text = addressDetails.fullAddress
-                            }
-                        }
-                    }
-                }
-                REQUEST_SHIPPING -> {
-                    // Handle shipping method selection result
-                    data?.let { intent ->
-                        val shipName = intent.getStringExtra(ShippingMethodActivity.EXTRA_SHIP_NAME) ?: return
-                        val shipService = intent.getStringExtra(ShippingMethodActivity.EXTRA_SHIP_SERVICE) ?: return
-                        val shipPrice = intent.getIntExtra(ShippingMethodActivity.EXTRA_SHIP_PRICE, 0)
-                        val shipEtd = intent.getStringExtra(ShippingMethodActivity.EXTRA_SHIP_ETD) ?: ""
-
-                        // Update order request
-                        orderRequest?.apply {
-                            this.ship_name = shipName
-                            this.ship_service = shipService
-                            this.ship_price = shipPrice
-                            this.ship_etd = shipEtd
-                        }
-
-                        // Update UI
-                        binding.tvShippingMethod.text = "$shipName $shipService ($shipEtd hari)"
-                        updateOrderSummary()
-                    }
-                }
-                REQUEST_PAYMENT -> {
-                    // Handle payment method selection result
-                    val paymentMethodId = data?.getIntExtra(PaymentMethodActivity.EXTRA_PAYMENT_METHOD_ID, 0) ?: 0
-                    if (paymentMethodId > 0) {
-                        orderRequest?.payment_method_id = paymentMethodId
-                        // Reload payment method details
-                        orderRequest?.let { request ->
-                            viewModelScope.launch {
-                                val paymentDetails = repository.getPaymentMethodDetails(request.payment_method_id)
-                                binding.tvPaymentMethod.text = paymentDetails.name
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     companion object {
-        private const val TAG = "CheckoutActivity"
-
-        // Request codes
-        const val REQUEST_ADDRESS = 100
-        const val REQUEST_SHIPPING = 101
-        const val REQUEST_PAYMENT = 102
-
         // Intent extras
-        const val EXTRA_ORDER_REQUEST = "extra_order_request"
-        const val EXTRA_ORDER_REQUEST_JSON = "extra_order_request_json"
+        const val EXTRA_CART_ITEM_IDS = "extra_cart_item_ids"
+        const val EXTRA_STORE_ID = "STORE_ID"
+        const val EXTRA_STORE_NAME = "STORE_NAME"
+        const val EXTRA_PRODUCT_ID = "PRODUCT_ID"
+        const val EXTRA_PRODUCT_NAME = "PRODUCT_NAME"
+        const val EXTRA_PRODUCT_IMAGE = "PRODUCT_IMAGE"
+        const val EXTRA_QUANTITY = "QUANTITY"
+        const val EXTRA_PRICE = "PRICE"
 
-        // Individual field extras
-        const val EXTRA_ADDRESS_ID = "extra_address_id"
-        const val EXTRA_PAYMENT_METHOD_ID = "extra_payment_method_id"
-        const val EXTRA_SHIP_PRICE = "extra_ship_price"
-        const val EXTRA_SHIP_NAME = "extra_ship_name"
-        const val EXTRA_SHIP_SERVICE = "extra_ship_service"
-        const val EXTRA_IS_NEGOTIABLE = "extra_is_negotiable"
-        const val EXTRA_PRODUCT_ID = "extra_product_id"
-        const val EXTRA_QUANTITY = "extra_quantity"
-        const val EXTRA_SHIP_ETD = "extra_ship_etd"
+        // Helper methods for starting activity
 
-        // Start methods for various ways to launch the activity
-
-        // Start with OrderRequest object
-        fun start(context: Context, orderRequest: OrderRequest) {
-            val intent = Intent(context, CheckoutActivity::class.java)
-            intent.putExtra(EXTRA_ORDER_REQUEST, orderRequest)
-            context.startActivity(intent)
-        }
-
-        // Start with OrderRequest JSON
-        fun startWithJson(context: Context, orderRequestJson: String) {
-            val intent = Intent(context, CheckoutActivity::class.java)
-            intent.putExtra(EXTRA_ORDER_REQUEST_JSON, orderRequestJson)
-            context.startActivity(intent)
-        }
-
-        // Start with individual fields
-        fun start(
+        // For Buy Now
+        fun startForBuyNow(
             context: Context,
-            addressId: Int,
-            paymentMethodId: Int,
-            shipPrice: Int,
-            shipName: String,
-            shipService: String,
-            isNegotiable: Boolean,
+            storeId: Int,
+            storeName: String?,
             productId: Int,
+            productName: String?,
+            productImage: String?,
             quantity: Int,
-            shipEtd: String
+            price: Double
         ) {
             val intent = Intent(context, CheckoutActivity::class.java).apply {
-                putExtra(EXTRA_ADDRESS_ID, addressId)
-                putExtra(EXTRA_PAYMENT_METHOD_ID, paymentMethodId)
-                putExtra(EXTRA_SHIP_PRICE, shipPrice)
-                putExtra(EXTRA_SHIP_NAME, shipName)
-                putExtra(EXTRA_SHIP_SERVICE, shipService)
-                putExtra(EXTRA_IS_NEGOTIABLE, isNegotiable)
+                putExtra(EXTRA_STORE_ID, storeId)
+                putExtra(EXTRA_STORE_NAME, storeName)
                 putExtra(EXTRA_PRODUCT_ID, productId)
+                putExtra(EXTRA_PRODUCT_NAME, productName)
+                putExtra(EXTRA_PRODUCT_IMAGE, productImage)
                 putExtra(EXTRA_QUANTITY, quantity)
-                putExtra(EXTRA_SHIP_ETD, shipEtd)
+                putExtra(EXTRA_PRICE, price)
             }
             context.startActivity(intent)
         }
 
-        // Launch for result with OrderRequest
-        fun startForResult(activity: Activity, orderRequest: OrderRequest, requestCode: Int) {
-            val intent = Intent(activity, CheckoutActivity::class.java)
-            intent.putExtra(EXTRA_ORDER_REQUEST, orderRequest)
-            activity.startActivityForResult(intent, requestCode)
+        // For Cart checkout
+        fun startForCart(
+            context: Context,
+            cartItemIds: List<Int>
+        ) {
+            val intent = Intent(context, CheckoutActivity::class.java).apply {
+                putExtra(EXTRA_CART_ITEM_IDS, cartItemIds.toIntArray())
+            }
+            context.startActivity(intent)
         }
     }
 }

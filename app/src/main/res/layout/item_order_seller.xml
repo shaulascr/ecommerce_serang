@@ -11,26 +11,23 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_margin="4dp"
+        android:layout_margin="8dp"
         android:gravity="center_vertical">
 
         <ImageView
-            android:id="@+id/iv_seller_order"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:src="@drawable/placeholder_image"/>
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/outline_store_24" />
+
         <TextView
-            android:id="@+id/tv_list_product_order"
+            android:id="@+id/tv_store_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Toko Buka"/>
+            android:text="SnackEnak"
+            android:textSize="16sp"
+            android:fontFamily="@font/dmsans_semibold"
+            android:layout_marginStart="8dp" />
     </LinearLayout>
-
-    <com.google.android.material.divider.MaterialDivider
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:dividerInsetStart="16dp"
-        app:dividerInsetEnd="16dp"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_seller_order_product"
@@ -38,6 +35,10 @@
         android:layout_height="wrap_content"
         tools:listitem="@layout/item_order_product"/>
 
-
+    <com.google.android.material.divider.MaterialDivider
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:dividerInsetStart="16dp"
+        app:dividerInsetEnd="16dp"/>
 
 </LinearLayout>

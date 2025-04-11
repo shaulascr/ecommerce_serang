@@ -26,6 +26,7 @@ class AddressActivity : AppCompatActivity() {
         }
     }
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityAddressBinding.inflate(layoutInflater)
@@ -33,6 +34,8 @@ class AddressActivity : AppCompatActivity() {
 
         sessionManager = SessionManager(this)
         apiService = ApiConfig.getApiService(sessionManager)
+
+        setupToolbar()
 
         adapter = AddressAdapter { selectedId ->
             viewModel.selectAddress(selectedId)
@@ -55,14 +58,27 @@ class AddressActivity : AppCompatActivity() {
             adapter.setSelectedAddressId(selectedId)
         }
     }
+    private fun setupToolbar() {
+        binding.toolbar.setNavigationOnClickListener {
+            finish()
+        }
+    }
+//    private fun updateEmptyState(isEmpty: Boolean) {
+//        binding.layoutEmptyAddresses.isVisible = isEmpty
+//        binding.rvAddresses.isVisible = !isEmpty
+//    }
 
     private fun onBackPressedWithResult() {
         viewModel.selectedAddressId.value?.let {
             val intent = Intent()
-            intent.putExtra("selected_address_id", it)
+            intent.putExtra(EXTRA_ADDRESS_ID, it)
             setResult(RESULT_OK, intent)
         }
         finish()
+    }
+
+    companion object {
+        const val EXTRA_ADDRESS_ID = "extra_address_id"
     }
 }
 

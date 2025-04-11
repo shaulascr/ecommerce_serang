@@ -5,82 +5,130 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.alya.ecommerce_serang.R
-import com.alya.ecommerce_serang.data.api.dto.CostProduct
-import com.alya.ecommerce_serang.data.api.dto.CourierCostRequest
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
-import com.alya.ecommerce_serang.data.api.retrofit.ApiService
 import com.alya.ecommerce_serang.data.repository.OrderRepository
-import com.alya.ecommerce_serang.data.repository.Result
-import com.alya.ecommerce_serang.databinding.ActivityCheckoutBinding
+import com.alya.ecommerce_serang.databinding.ActivityShippingBinding
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
-import com.google.android.material.appbar.MaterialToolbar
-import kotlinx.coroutines.launch
 
 class ShippingActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityCheckoutBinding
-    private lateinit var apiService: ApiService
+
+    private lateinit var binding: ActivityShippingBinding
     private lateinit var sessionManager: SessionManager
-    private lateinit var adapter: ShippingAdapter
+    private lateinit var shippingAdapter: ShippingAdapter
 
     private val viewModel: ShippingViewModel by viewModels {
         BaseViewModelFactory {
             val apiService = ApiConfig.getApiService(sessionManager)
-            val orderRepository = OrderRepository(apiService)
-            ShippingViewModel(orderRepository)
+            val repository = OrderRepository(apiService)
+            ShippingViewModel(repository)
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityCheckoutBinding.inflate(layoutInflater)
+        binding = ActivityShippingBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // Initialize SessionManager
         sessionManager = SessionManager(this)
-        apiService = ApiConfig.getApiService(sessionManager)
 
-        val recyclerView = findViewById<RecyclerView>(R.id.rv_shipment_order)
-        adapter = ShippingAdapter { selectedService ->
-            val intent = Intent().apply {
-                putExtra("ship_name", selectedService.service)
-                putExtra("ship_price", selectedService.cost)
-                putExtra("ship_service", selectedService.description)
-            }
-            setResult(RESULT_OK, intent)
+        // Get data from intent
+        val addressId = intent.getIntExtra(EXTRA_ADDRESS_ID, 0)
+        val productId = intent.getIntExtra(EXTRA_PRODUCT_ID, 0)
+        val quantity = intent.getIntExtra(EXTRA_QUANTITY, 1)
+
+        // Validate required information
+        if (addressId <= 0 || productId <= 0) {
+            Toast.makeText(this, "Missing required shipping information", Toast.LENGTH_SHORT).show()
+            finish()
+            return
+        }
+
+        // Setup UI components
+        setupToolbar()
+        setupRecyclerView()
+        setupObservers()
+
+        // Load shipping options
+        viewModel.loadShippingOptions(addressId, productId, quantity)
+    }
+
+    private fun setupToolbar() {
+        binding.toolbar.setNavigationOnClickListener {
             finish()
         }
-        recyclerView.adapter = adapter
-        recyclerView.layoutManager = LinearLayoutManager(this)
+    }
 
-        val request = CourierCostRequest(
-            addressId = intent.getIntExtra("extra_address_id", 0),
-            itemCost = CostProduct(
-                productId = intent.getIntExtra("product_id", 0),
-                quantity = intent.getIntExtra("quantity", 1)
+    private fun setupRecyclerView() {
+        shippingAdapter = ShippingAdapter { courierCostsItem, service ->
+            // Handle shipping method selection
+            returnSelectedShipping(
+                courierCostsItem.courier,
+                service.service,
+                service.cost,
+                service.etd
             )
-        )
+        }
 
-        viewModel.fetchShippingServices(request)
+        binding.rvShipmentOrder.apply {
+            layoutManager = LinearLayoutManager(this@ShippingActivity)
+            adapter = shippingAdapter
+        }
+    }
 
-        lifecycleScope.launch {
-            viewModel.shippingServices.collect { result ->
-                result?.let {
-                    when (it) {
-                        is Result.Success -> adapter.submitList(it.data)
-                        is Result.Error -> Toast.makeText(this@ShippingActivity, it.exception.message, Toast.LENGTH_SHORT).show()
-                        is Result.Loading -> null
-                    }
-                }
+    private fun setupObservers() {
+        // Observe shipping options
+        viewModel.shippingOptions.observe(this) { courierOptions ->
+            shippingAdapter.submitList(courierOptions)
+            updateEmptyState(courierOptions.isEmpty() || courierOptions.all { it.services.isEmpty() })
+        }
+
+        // Observe loading state
+        viewModel.isLoading.observe(this) { isLoading ->
+//            binding.progressBar.isVisible = isLoading
+        }
+
+        // Observe error messages
+        viewModel.errorMessage.observe(this) { message ->
+            if (message.isNotEmpty()) {
+                Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
             }
         }
+    }
 
-        findViewById<MaterialToolbar>(R.id.toolbar).setNavigationOnClickListener {
-            finish()
+    private fun updateEmptyState(isEmpty: Boolean) {
+//        binding.layoutEmptyShipping.isVisible = isEmpty
+        binding.rvShipmentOrder.isVisible = !isEmpty
+    }
+
+    private fun returnSelectedShipping(
+        shipName: String,
+        shipService: String,
+        shipPrice: Int,
+        shipEtd: String
+    ) {
+        val intent = Intent().apply {
+            putExtra(EXTRA_SHIP_NAME, shipName)
+            putExtra(EXTRA_SHIP_SERVICE, shipService)
+            putExtra(EXTRA_SHIP_PRICE, shipPrice)
+            putExtra(EXTRA_SHIP_ETD, shipEtd)
         }
+        setResult(RESULT_OK, intent)
+        finish()
+    }
+
+    companion object {
+        // Constants for intent extras
+        const val EXTRA_ADDRESS_ID = "extra_address_id"
+        const val EXTRA_PRODUCT_ID = "extra_product_id"
+        const val EXTRA_QUANTITY = "extra_quantity"
+        const val EXTRA_SHIP_NAME = "extra_ship_name"
+        const val EXTRA_SHIP_SERVICE = "extra_ship_service"
+        const val EXTRA_SHIP_PRICE = "extra_ship_price"
+        const val EXTRA_SHIP_ETD = "extra_ship_etd"
     }
 }
 
