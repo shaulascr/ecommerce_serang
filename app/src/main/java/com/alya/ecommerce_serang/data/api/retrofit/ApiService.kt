@@ -28,8 +28,12 @@ import com.alya.ecommerce_serang.data.api.response.product.StoreResponse
 import com.alya.ecommerce_serang.data.api.response.profile.AddressResponse
 import com.alya.ecommerce_serang.data.api.response.profile.CreateAddressResponse
 import com.alya.ecommerce_serang.data.api.response.profile.ProfileResponse
+import com.alya.ecommerce_serang.data.api.response.ViewStoreProductsResponse
+import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.Field
+import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
@@ -44,7 +48,7 @@ interface ApiService {
     @POST("otp")
     suspend fun getOTP(
         @Body otpRequest: OtpRequest
-    ): OtpResponse
+    ):OtpResponse
 
     @POST("login")
     suspend fun login(
@@ -98,6 +102,27 @@ interface ApiService {
     @GET("mystore")
     suspend fun getStore (): Response<StoreResponse>
 
+    @GET("mystore/product") // Replace with actual endpoint
+    suspend fun getStoreProduct(): Response<ViewStoreProductsResponse>
+
+    @GET("category")
+    fun getCategories(): Call<CategoryResponse>
+
+    @POST("store/createproduct")
+    @FormUrlEncoded
+    suspend fun addProduct(
+        @Field("name") name: String,
+        @Field("description") description: String,
+        @Field("price") price: Int,
+        @Field("stock") stock: Int,
+        @Field("min_order") minOrder: Int,
+        @Field("weight") weight: Int,
+        @Field("is_pre_order") isPreOrder: Boolean,
+        @Field("duration") duration: Int,
+        @Field("category_id") categoryId: Int,
+        @Field("is_active") isActive: String
+    ): Response<Unit>
+
     @GET("cart_item")
     suspend fun getCart (): Response<ListCartResponse>
 
@@ -124,5 +149,4 @@ interface ApiService {
     @GET("provinces")
     suspend fun getListProv(
     ): Response<ListProvinceResponse>
-
 }

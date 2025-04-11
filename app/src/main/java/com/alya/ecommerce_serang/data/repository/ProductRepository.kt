@@ -63,6 +63,7 @@ class ProductRepository(private val apiService: ApiService) {
     suspend fun getAllCategories(): Result<List<CategoryItem>> =
         withContext(Dispatchers.IO) {
             try {
+                Log.d("Categories", "Attempting to fetch categories")
                 val response = apiService.allCategory()
 
                 if (response.isSuccessful) {
@@ -109,7 +110,6 @@ class ProductRepository(private val apiService: ApiService) {
         }
     }
 
-
     suspend fun fetchStoreDetail(storeId: Int): Result<StoreProduct?> {
         return try {
             val response = apiService.getDetailStore(storeId)
@@ -130,10 +130,56 @@ class ProductRepository(private val apiService: ApiService) {
         }
     }
 
+    suspend fun fetchMyStoreProducts(): List<ProductsItem> {
+        val response = apiService.getStoreProduct()
+        if (response.isSuccessful) {
+            val responseBody = response.body()
+            return responseBody?.products?.filterNotNull() ?: emptyList()
+        } else {
+            throw Exception("Failed to fetch store products: ${response.message()}")
+        }
+    }
+
+    suspend fun addProduct(
+        name: String,
+        description: String,
+        price: Int,
+        stock: Int,
+        minOrder: Int,
+        weight: Int,
+        isPreOrder: Boolean,
+        duration: Int,
+        categoryId: Int,
+        isActive: Boolean
+    ): Result<Unit> = withContext(Dispatchers.IO) {
+        try {
+            val status = if (isActive) "active" else "inactive"
+            val response = apiService.addProduct(
+                name = name,
+                description = description,
+                price = price,
+                stock = stock,
+                minOrder = minOrder,
+                weight = weight,
+                isPreOrder = isPreOrder,
+                duration = duration,
+                categoryId = categoryId,
+                isActive = status
+            )
+
+            if (response.isSuccessful) {
+                Result.Success(Unit)
+            } else {
+                Result.Error(Exception("Failed to add product. Code: ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
+    }
+
     companion object {
         private const val TAG = "ProductRepository"
     }
-
 }
 
 //    suspend fun fetchStoreDetail(storeId: Int): Store? {

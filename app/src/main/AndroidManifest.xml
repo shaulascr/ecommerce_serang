@@ -35,7 +35,22 @@
             android:name=".ui.order.CheckoutActivity"
             android:exported="false" />
         <activity
+            android:name=".ui.profile.mystore.profile.payment_info.DetailPaymentInfoActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.profile.mystore.profile.payment_info.PaymentInfoActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.profile.mystore.profile.address.StoreAddressActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.profile.mystore.product.ProductActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.product.ReviewProductActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.profile.mystore.sells.SellsActivity"
             android:exported="false" />
         <activity
             android:name=".ui.profile.mystore.balance.BalanceActivity"
@@ -50,13 +65,13 @@
             android:name=".ui.profile.mystore.balance.BalanceTopUpActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.profile.mystore.product.AddProductActivity"
+            android:name=".ui.profile.mystore.product.StoreProductDetailActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.profile.mystore.profile.EditStoreProfileActivity"
+            android:name=".ui.profile.mystore.profile.DetailStoreProfileActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.profile.mystore.TokoSayaActivity"
+            android:name=".ui.profile.mystore.MyStoreActivity"
             android:exported="false" />
         <activity
             android:name=".ui.product.DetailProductActivity"

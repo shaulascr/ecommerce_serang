@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.alya.ecommerce_serang.R
+import com.alya.ecommerce_serang.utils.viewmodel.ChatViewModel
 
 class ChatFragment : Fragment() {
 
