@@ -1,5 +1,6 @@
 package com.alya.ecommerce_serang.data.api.response
 
+import com.alya.ecommerce_serang.data.api.response.product.Product
 import com.google.gson.annotations.SerializedName
 
 data class CreateProductResponse(

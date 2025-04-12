@@ -61,6 +61,7 @@ class HorizontalProductAdapter(
         val diffResult = DiffUtil.calculateDiff(diffCallback)
         products = newProducts
         diffResult.dispatchUpdatesTo(this)
+        notifyDataSetChanged()
     }
 
     fun updateLimitedProducts(newProducts: List<ProductsItem>) {
