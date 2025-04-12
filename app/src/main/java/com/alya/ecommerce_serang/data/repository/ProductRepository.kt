@@ -1,10 +1,13 @@
 package com.alya.ecommerce_serang.data.repository
 
 import android.util.Log
+import com.alya.ecommerce_serang.data.api.dto.CartItem
 import com.alya.ecommerce_serang.data.api.dto.CategoryItem
 import com.alya.ecommerce_serang.data.api.dto.ProductsItem
-import com.alya.ecommerce_serang.data.api.response.ProductResponse
-import com.alya.ecommerce_serang.data.api.response.ReviewsItem
+import com.alya.ecommerce_serang.data.api.response.cart.AddCartResponse
+import com.alya.ecommerce_serang.data.api.response.product.ProductResponse
+import com.alya.ecommerce_serang.data.api.response.product.ReviewsItem
+import com.alya.ecommerce_serang.data.api.response.product.StoreProduct
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -23,26 +26,37 @@ class ProductRepository(private val apiService: ApiService) {
                 if (response.isSuccessful) {
                     // Return a Result.Success with the list of products
 
-                    Result.Success(response.body()?.products ?: emptyList())
+                    val products = response.body()?.products ?: emptyList()
+                    Log.d(TAG, "Products fetched successfully. Total products: ${products.size}")
 
+                    // Optional: Log some product details
+                    products.take(3).forEach { product ->
+                        Log.d(TAG, "Sample Product - ID: ${product.id}, Name: ${product.name}, Price: ${product.price}")
+                    }
+
+                    Result.Success(products)
                 } else {
-                    // Return a Result.Error with a custom Exception
-                    Log.e("ProductRepository", "Error: ${response.errorBody()?.string()}")
+                    val errorBody = response.errorBody()?.string() ?: "Unknown error"
+                    Log.e(TAG, "Failed to fetch products. Code: ${response.code()}, Error: $errorBody")
                     Result.Error(Exception("Failed to fetch products. Code: ${response.code()}"))
                 }
             } catch (e: Exception) {
-                // Return a Result.Error with the exception caught
+                Log.e(TAG, "Exception while fetching products", e)
                 Result.Error(e)
             }
         }
 
     suspend fun fetchProductDetail(productId: Int): ProductResponse? {
         return try {
+            Log.d(TAG, "Fetching product detail for ID: $productId")
             val response = apiService.getDetailProduct(productId)
             if (response.isSuccessful) {
-                response.body()
+                val productResponse = response.body()
+                Log.d(TAG, "Product detail fetched successfully. Product: ${productResponse?.product?.productName}")
+                productResponse
             } else {
-                Log.e("ProductRepository", "Error: ${response.errorBody()?.string()}")
+                val errorBody = response.errorBody()?.string() ?: "Unknown error"
+                Log.e(TAG, "Error fetching product detail. Code: ${response.code()}, Error: $errorBody")
                 null
             }
         } catch (e: Exception) {
@@ -58,14 +72,14 @@ class ProductRepository(private val apiService: ApiService) {
 
                 if (response.isSuccessful) {
                     val categories = response.body()?.category ?: emptyList()
-                    Log.d("Categories", "Fetched categories: $categories")
+                    Log.d("ProductRepository", "Fetched categories: $categories")
                     categories.forEach { Log.d("Category Image", "Category: ${it.name}, Image: ${it.image}") }
                     Result.Success(categories)
                 } else {
                     Result.Error(Exception("Failed to fetch categories. Code: ${response.code()}"))
                 }
             } catch (e: Exception) {
-                Log.e("Categories", "Error fetching categories", e)
+                Log.e("ProductRepository", "Error fetching categories", e)
                 Result.Error(e)
             }
         }
@@ -81,6 +95,42 @@ class ProductRepository(private val apiService: ApiService) {
             }
         } catch (e: Exception) {
             null
+        }
+    }
+
+    suspend fun addToCart(request: CartItem): Result<AddCartResponse> {
+        return try {
+            val response = apiService.addCart(request)
+            if (response.isSuccessful) {
+                response.body()?.let {
+                    Result.Success(it)
+                } ?: Result.Error(Exception("Add Cart failed"))
+            } else {
+                Log.e("ProductRepository", "Error: ${response.errorBody()?.string()}")
+                Result.Error(Exception(response.errorBody()?.string() ?: "Unknown Error"))
+            }
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
+    }
+
+    suspend fun fetchStoreDetail(storeId: Int): Result<StoreProduct?> {
+        return try {
+            val response = apiService.getDetailStore(storeId)
+            if (response.isSuccessful) {
+                val store = response.body()?.store
+                if (store != null) {
+                    Result.Success(store)
+                } else {
+                    Result.Error(Throwable("Empty response body"))
+                }
+            } else {
+                val errorMsg = response.errorBody()?.string() ?: "Unknown error"
+                Log.e("ProductRepository", "Error: $errorMsg")
+                Result.Error(Throwable(errorMsg))
+            }
+        } catch (e: Exception) {
+            Result.Error(e)
         }
     }
 
@@ -151,6 +201,10 @@ class ProductRepository(private val apiService: ApiService) {
         } catch (e: Exception) {
             Result.Error(e)
         }
+    }
+
+    companion object {
+        private const val TAG = "ProductRepository"
     }
 }
 

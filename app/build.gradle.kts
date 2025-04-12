@@ -1,5 +1,4 @@
-import org.gradle.api.tasks.compile.JavaCompile
-
+import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
@@ -8,6 +7,14 @@ plugins {
     id("kotlin-parcelize")
 //    id("com.google.dagger.hilt.android")
 }
+
+val localProperties = Properties().apply {
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        load(localPropertiesFile.inputStream())
+    }
+}
+
 
 android {
     namespace = "com.alya.ecommerce_serang"
@@ -21,11 +28,19 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField(
+            "String",
+            "BASE_URL",
+            "\"${localProperties["BASE_URL"] ?: "http://default-url.com/"}\""
+        )
     }
 
     buildTypes {
         release {
-            buildConfigField("String", "BASE_URL", "\"http://192.168.20.238:3000/\"")
+            buildConfigField("String",
+                "BASE_URL",
+                "\"${localProperties["BASE_URL"] ?: "http://default-url.com/"}\"")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -33,7 +48,9 @@ android {
             )
         }
         debug {
-            buildConfigField("String", "BASE_URL", "\"http://192.168.20.238:3000/\"")
+            buildConfigField("String",
+                "BASE_URL",
+                "\"${localProperties["BASE_URL"] ?: "http://default-url.com/"}\"")
         }
     }
     compileOptions {
