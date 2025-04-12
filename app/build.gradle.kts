@@ -25,7 +25,7 @@ android {
 
     buildTypes {
         release {
-            buildConfigField("String", "BASE_URL", "\"http://192.168.100.156:3000/\"")
+            buildConfigField("String", "BASE_URL", "\"http://192.168.20.238:3000/\"")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -33,7 +33,7 @@ android {
             )
         }
         debug {
-            buildConfigField("String", "BASE_URL", "\"http://192.168.100.156:3000/\"")
+            buildConfigField("String", "BASE_URL", "\"http://192.168.20.238:3000/\"")
         }
     }
     compileOptions {
