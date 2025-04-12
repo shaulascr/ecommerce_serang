@@ -154,7 +154,7 @@ private fun setupToolbar() {
 
     private fun handleAddressSubmissionState(state: ViewState<String>) {
         when (state) {
-            is ViewState.Loading -> showSubmitLoading(true)
+            is ViewState.Loading -> null //showSubmitLoading(true)
             is ViewState.Success -> {
                 showSubmitLoading(false)
                 showSuccessAndFinish(state.data)
