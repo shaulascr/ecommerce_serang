@@ -115,9 +115,20 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="none"
+                    android:focusable="false"
+                    android:clickable="true"
                     android:padding="12dp"
                     android:textSize="14sp" />
             </com.google.android.material.textfield.TextInputLayout>
+
+            <ProgressBar
+                android:id="@+id/progressBar"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="8dp"
+                android:visibility="gone" />
+
 
             <!-- Kabupaten / Kota -->
             <TextView
@@ -138,10 +149,19 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="none"
-                    android:hint="Masukkan Kabupaten"
+                    android:focusable="false"
+                    android:clickable="true"
                     android:padding="12dp"
                     android:textSize="14sp" />
             </com.google.android.material.textfield.TextInputLayout>
+
+            <ProgressBar
+                android:id="@+id/cityProgressBar"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="8dp"
+                android:visibility="gone" />
 
             <!-- Kecamatan / Desa -->
             <TextView
@@ -188,6 +208,8 @@
         </LinearLayout>
     </ScrollView>
 
+
+
     <Button
         android:id="@+id/buttonSimpan"
         android:layout_width="match_parent"
@@ -200,5 +222,60 @@
         android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="parent" />
 
+    <ProgressBar
+        android:id="@+id/submitProgressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="16dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/buttonSimpan"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="16dp"
+        android:gravity="center_vertical"
+        app:layout_constraintTop_toBottomOf="@id/buttonSimpan"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Status Lokasi"
+                android:textColor="@android:color/black"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/tvLocationStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Menunggu lokasi..."
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <ProgressBar
+            android:id="@+id/locationProgressBar"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/btnReloadLocation"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:text="Reload"
+            android:textSize="12sp"
+            android:layout_marginStart="8dp"
+            android:textAllCaps="false" />
+    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

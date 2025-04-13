@@ -157,7 +157,19 @@ class CheckoutViewModel(private val repository: OrderRepository) : ViewModel() {
                 val storeResult = repository.fetchStoreDetail(storeId)
 
                 if (storeResult is Result.Success && storeResult.data != null) {
-                    val paymentMethodsList = storeResult.data.paymentInfo
+                    // For now, we'll use hardcoded payment ID (1) for all payment methods
+                    // This will be updated once the backend provides proper IDs
+                    val paymentMethodsList = storeResult.data.paymentInfo.map { paymentInfo ->
+                        PaymentInfoItem(
+                            id = 1, // Hardcoded payment ID
+                            name = paymentInfo.name,
+                            bankNum = paymentInfo.bankNum,
+                            qrisImage = paymentInfo.qrisImage
+                        )
+                    }
+
+                    Log.d(TAG, "Fetched ${paymentMethodsList.size} payment methods")
+
                     _availablePaymentMethods.value = paymentMethodsList
                     callback(paymentMethodsList)
                 } else {
@@ -172,55 +184,47 @@ class CheckoutViewModel(private val repository: OrderRepository) : ViewModel() {
         }
     }
 
-    // Set payment method
-    // In CheckoutViewModel
+    // Updated setPaymentMethod function
     fun setPaymentMethod(paymentId: Int) {
+        // We'll use the hardcoded ID (1) for now
+        val currentPaymentId = 1
+
         viewModelScope.launch {
             try {
-                // Get the available payment methods, or fetch them if not available
-                val paymentMethods = _availablePaymentMethods.value ?: run {
-                    val storeId = _checkoutData.value?.sellerId ?: return@launch
-                    val storeResult = repository.fetchStoreDetail(storeId)
-                    if (storeResult is Result.Success && storeResult.data != null) {
-                        val methods = storeResult.data.paymentInfo
-                        _availablePaymentMethods.value = methods
-                        methods
-                    } else {
-                        emptyList()
-                    }
+                // Get the available payment methods
+                val paymentMethods = _availablePaymentMethods.value
+
+                if (paymentMethods.isNullOrEmpty()) {
+                    // If no payment methods available, try to fetch them
+                    getPaymentMethods { /* do nothing here */ }
+                    return@launch
                 }
 
-                // Find the selected payment method
-                val selectedPayment = paymentMethods.find {
-                    // Change this line to match the actual way you want to identify the payment method
-                    it.name == paymentId.toString() // to do: edit to using it.id
-                }
+                // Use the first payment method (or specific one if you prefer)
+                val selectedPayment = paymentMethods.first()
 
-                if (selectedPayment != null) {
-                    // Set the selected payment
-                    _selectedPayment.value = selectedPayment
+                // Set the selected payment
+                _selectedPayment.value = selectedPayment
+                Log.d(TAG, "Payment selected: Name=${selectedPayment.name}")
 
-                    // Update the order request with the payment method ID
-                    val currentData = _checkoutData.value ?: return@launch
+                // Update the order request with the payment method ID (hardcoded for now)
+                val currentData = _checkoutData.value ?: return@launch
 
-                    // Different handling for Buy Now vs Cart checkout
-                    if (currentData.isBuyNow) {
-                        // For Buy Now checkout
-                        val buyRequest = currentData.orderRequest as OrderRequestBuy
-                        val updatedRequest = buyRequest.copy(paymentMethodId = paymentId)
-                        _checkoutData.value = currentData.copy(orderRequest = updatedRequest)
-                    } else {
-                        // For Cart checkout
-                        val cartRequest = currentData.orderRequest as OrderRequest
-                        val updatedRequest = cartRequest.copy(paymentMethodId = paymentId)
-                        _checkoutData.value = currentData.copy(orderRequest = updatedRequest)
-                    }
+                // Different handling for Buy Now vs Cart checkout
+                if (currentData.isBuyNow) {
+                    // For Buy Now checkout
+                    val buyRequest = currentData.orderRequest as OrderRequestBuy
+                    val updatedRequest = buyRequest.copy(paymentMethodId = currentPaymentId)
+                    _checkoutData.value = currentData.copy(orderRequest = updatedRequest)
                 } else {
-                    // If no matching payment method is found
-                    _errorMessage.value = "Selected payment method not found"
+                    // For Cart checkout
+                    val cartRequest = currentData.orderRequest as OrderRequest
+                    val updatedRequest = cartRequest.copy(paymentMethodId = currentPaymentId)
+                    _checkoutData.value = currentData.copy(orderRequest = updatedRequest)
                 }
             } catch (e: Exception) {
                 _errorMessage.value = "Error setting payment method: ${e.message}"
+                Log.e(TAG, "Error setting payment method", e)
             }
         }
     }

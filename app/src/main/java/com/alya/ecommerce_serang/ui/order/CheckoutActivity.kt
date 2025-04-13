@@ -147,12 +147,18 @@ class CheckoutActivity : AppCompatActivity() {
     }
 
     private fun setupPaymentMethodsRecyclerView(paymentMethods: List<PaymentInfoItem>) {
-        paymentAdapter = PaymentMethodAdapter(paymentMethods) { payment ->
-            // Convert payment name to ID
-            val paymentId = payment.name.toIntOrNull() ?: 0
+        if (paymentMethods.isEmpty()) {
+            Log.e("CheckoutActivity", "Payment methods list is empty")
+            Toast.makeText(this, "No payment methods available", Toast.LENGTH_SHORT).show()
+            return
+        }
 
-            // Call the ViewModel's setPaymentMethod function
-            viewModel.setPaymentMethod(paymentId)
+        // Debug logging
+        Log.d("CheckoutActivity", "Setting up payment methods: ${paymentMethods.size} methods available")
+
+        paymentAdapter = PaymentMethodAdapter(paymentMethods) { payment ->
+            // We're using a hardcoded ID for now
+            viewModel.setPaymentMethod(1)
         }
 
         binding.rvPaymentMethods.apply {

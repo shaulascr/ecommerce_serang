@@ -36,12 +36,14 @@ class ShippingViewModel(
         _errorMessage.value = ""
 
         // Prepare the request
+        val costProduct = CostProduct(
+            productId = productId,
+            quantity = quantity
+        )
+
         val request = CourierCostRequest(
             addressId = addressId,
-            itemCost = CostProduct(
-                productId = productId,
-                quantity = quantity
-            )
+            itemCost = listOf(costProduct)  // Wrap in a list
         )
 
         viewModelScope.launch {
