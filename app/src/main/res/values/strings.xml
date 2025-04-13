@@ -61,4 +61,21 @@
     <string name="add_to_cart">Keranjang</string>
     <string name="beli_sekarang">Beli Sekarang</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="batas_tagihan">Batas Tagihan :</string>
+    <string name="total_order">Total: </string>
+    <string name="dl_date_wait">23:59 15 April 2025</string>
+    <string name="no_available_orders">Tidak ada order</string>
+    <string name="item_count_prod">%d produk</string>
+    <string name="show_more_product">%d produk lainnya</string>
+<!--    status order-->
+    <string name="all_orders">Semua Pesanan </string>
+    <string name="pending_orders">Menunggu Tagihan</string>
+    <string name="unpaid_orders">Konfrimasi Bayar</string>
+    <string name="processed_orders">Diproses</string>
+    <string name="paid_orders">Sudah Dibayar</string>
+    <string name="delivered_orders">Pesanan Sampai</string>
+    <string name="completed_orders">Selesai</string>
+    <string name="shipped_orders">Dikirim</string>
+    <string name="canceled_orders">Dibatalkan</string>
+
 </resources>

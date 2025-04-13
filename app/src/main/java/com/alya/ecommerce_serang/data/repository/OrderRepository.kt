@@ -1,16 +1,20 @@
 package com.alya.ecommerce_serang.data.repository
 
 import android.util.Log
+import com.alya.ecommerce_serang.data.api.dto.AddEvidenceRequest
 import com.alya.ecommerce_serang.data.api.dto.CourierCostRequest
 import com.alya.ecommerce_serang.data.api.dto.CreateAddressRequest
 import com.alya.ecommerce_serang.data.api.dto.OrderRequest
 import com.alya.ecommerce_serang.data.api.dto.OrderRequestBuy
 import com.alya.ecommerce_serang.data.api.dto.UserProfile
 import com.alya.ecommerce_serang.data.api.response.cart.DataItem
+import com.alya.ecommerce_serang.data.api.response.order.AddEvidenceResponse
 import com.alya.ecommerce_serang.data.api.response.order.CourierCostResponse
 import com.alya.ecommerce_serang.data.api.response.order.CreateOrderResponse
 import com.alya.ecommerce_serang.data.api.response.order.ListCityResponse
 import com.alya.ecommerce_serang.data.api.response.order.ListProvinceResponse
+import com.alya.ecommerce_serang.data.api.response.order.OrderDetailResponse
+import com.alya.ecommerce_serang.data.api.response.order.OrderListResponse
 import com.alya.ecommerce_serang.data.api.response.product.ProductResponse
 import com.alya.ecommerce_serang.data.api.response.product.StoreProduct
 import com.alya.ecommerce_serang.data.api.response.product.StoreResponse
@@ -228,6 +232,61 @@ class OrderRepository(private val apiService: ApiService) {
                 Result.Error(Exception("Error fetching profile: ${response.code()}"))
             }
         } catch (e: Exception) {
+            Result.Error(e)
+        }
+    }
+
+    suspend fun getOrderDetails(orderId: Int): OrderDetailResponse? {
+        val response = apiService.getDetailOrder(orderId)
+        return if (response.isSuccessful) response.body() else null
+    }
+
+    suspend fun uploadPaymentProof(request : AddEvidenceRequest): Result<AddEvidenceResponse> {
+        return try {
+            Log.d("OrderRepository", "Add Evidence : $request")
+            val response = apiService.addEvidence(request)
+
+            if (response.isSuccessful) {
+                val addEvidenceResponse = response.body()
+                if (addEvidenceResponse != null) {
+                    Log.d("OrderRepository", "Add Evidence successfully: ${addEvidenceResponse.message}")
+                    Result.Success(addEvidenceResponse)
+                } else {
+                    Log.e("OrderRepository", "Response body was null")
+                    Result.Error(Exception("Empty response from server"))
+                }
+            } else {
+                val errorBody = response.errorBody()?.string() ?: "Unknown error"
+                Log.e("OrderRepository", "Error Add Evidence : $errorBody")
+                Result.Error(Exception(errorBody))
+            }
+        } catch (e: Exception) {
+            Log.e("OrderRepository", "Exception Add Evidence ", e)
+            Result.Error(e)
+        }
+    }
+
+    suspend fun getOrderList(status: String): Result<OrderListResponse> {
+        return try {
+            Log.d("OrderRepository", "Add Evidence : $status")
+            val response = apiService.getOrderList(status)
+
+            if (response.isSuccessful) {
+                val allListOrder = response.body()
+                if (allListOrder != null) {
+                    Log.d("OrderRepository", "Add Evidence successfully: ${allListOrder.message}")
+                    Result.Success(allListOrder)
+                } else {
+                    Log.e("OrderRepository", "Response body was null")
+                    Result.Error(Exception("Empty response from server"))
+                }
+            } else {
+                val errorBody = response.errorBody()?.string() ?: "Unknown error"
+                Log.e("OrderRepository", "Error Add Evidence : $errorBody")
+                Result.Error(Exception(errorBody))
+            }
+        } catch (e: Exception) {
+            Log.e("OrderRepository", "Exception Add Evidence ", e)
             Result.Error(e)
         }
     }

@@ -15,6 +15,7 @@ import com.alya.ecommerce_serang.data.api.dto.UserProfile
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.repository.UserRepository
 import com.alya.ecommerce_serang.databinding.FragmentProfileBinding
+import com.alya.ecommerce_serang.ui.order.history.HistoryActivity
 import com.alya.ecommerce_serang.ui.profile.mystore.MyStoreActivity
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
@@ -62,6 +63,16 @@ class ProfileFragment : Fragment() {
         binding.btnDetailProfile.setOnClickListener{
             val intentDetail = Intent(requireContext(), DetailProfileActivity::class.java)
             startActivity(intentDetail)
+        }
+
+        binding.tvLihatRiwayat.setOnClickListener{
+            val intent = Intent(requireContext(), HistoryActivity::class.java)
+            startActivity(intent)
+        }
+
+        binding.cardPesanan.setOnClickListener{
+            val intent = Intent(requireContext(), HistoryActivity::class.java)
+            startActivity(intent)
         }
     }
 

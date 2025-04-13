@@ -1,5 +1,6 @@
 package com.alya.ecommerce_serang.data.api.retrofit
 
+import com.alya.ecommerce_serang.data.api.dto.AddEvidenceRequest
 import com.alya.ecommerce_serang.data.api.dto.CartItem
 import com.alya.ecommerce_serang.data.api.dto.CourierCostRequest
 import com.alya.ecommerce_serang.data.api.dto.CreateAddressRequest
@@ -16,10 +17,13 @@ import com.alya.ecommerce_serang.data.api.response.auth.RegisterResponse
 import com.alya.ecommerce_serang.data.api.response.cart.AddCartResponse
 import com.alya.ecommerce_serang.data.api.response.cart.ListCartResponse
 import com.alya.ecommerce_serang.data.api.response.cart.UpdateCartResponse
+import com.alya.ecommerce_serang.data.api.response.order.AddEvidenceResponse
 import com.alya.ecommerce_serang.data.api.response.order.CourierCostResponse
 import com.alya.ecommerce_serang.data.api.response.order.CreateOrderResponse
 import com.alya.ecommerce_serang.data.api.response.order.ListCityResponse
 import com.alya.ecommerce_serang.data.api.response.order.ListProvinceResponse
+import com.alya.ecommerce_serang.data.api.response.order.OrderDetailResponse
+import com.alya.ecommerce_serang.data.api.response.order.OrderListResponse
 import com.alya.ecommerce_serang.data.api.response.product.AllProductResponse
 import com.alya.ecommerce_serang.data.api.response.product.CategoryResponse
 import com.alya.ecommerce_serang.data.api.response.product.DetailStoreProductResponse
@@ -84,6 +88,21 @@ interface ApiService {
     suspend fun postOrder(
         @Body request: OrderRequest
     ): Response<CreateOrderResponse>
+
+    @GET("order/detail/{id}")
+    suspend fun getDetailOrder(
+        @Path("id") orderId: Int
+    ): Response<OrderDetailResponse>
+
+    @POST("order/addevidence")
+    suspend fun addEvidence(
+        @Body request : AddEvidenceRequest,
+    ): Response<AddEvidenceResponse>
+
+    @GET("order/{status}")
+    suspend fun getOrderList(
+        @Path("status") status: String
+    ):Response<OrderListResponse>
 
     @POST("order")
     suspend fun postOrderBuyNow(

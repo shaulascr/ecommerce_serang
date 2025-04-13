@@ -14,22 +14,22 @@ data class OrderDetailResponse(
 data class Orders(
 
 	@field:SerializedName("receipt_num")
-	val receiptNum: String,
+	val receiptNum: String? = null,
 
 	@field:SerializedName("payment_upload_at")
-	val paymentUploadAt: String,
+	val paymentUploadAt: String? = null,
 
 	@field:SerializedName("latitude")
 	val latitude: String,
 
 	@field:SerializedName("pay_info_name")
-	val payInfoName: String,
+	val payInfoName: String? = null,
 
 	@field:SerializedName("created_at")
 	val createdAt: String,
 
 	@field:SerializedName("voucher_code")
-	val voucherCode: Any,
+	val voucherCode: String? = null,
 
 	@field:SerializedName("updated_at")
 	val updatedAt: String,
@@ -41,10 +41,10 @@ data class Orders(
 	val street: String,
 
 	@field:SerializedName("cancel_date")
-	val cancelDate: String,
+	val cancelDate: String? = null,
 
 	@field:SerializedName("payment_evidence")
-	val paymentEvidence: String,
+	val paymentEvidence: String? = null,
 
 	@field:SerializedName("longitude")
 	val longitude: String,
@@ -53,34 +53,34 @@ data class Orders(
 	val shipmentStatus: String,
 
 	@field:SerializedName("order_items")
-	val orderItems: List<OrderItemsItem>,
+	val orderItems: List<OrderListItemsItem>,
 
 	@field:SerializedName("auto_completed_at")
-	val autoCompletedAt: String,
+	val autoCompletedAt: String? = null,
 
 	@field:SerializedName("is_store_location")
-	val isStoreLocation: Boolean,
+	val isStoreLocation: Boolean? = null,
 
 	@field:SerializedName("qris_image")
-	val qrisImage: String,
+	val qrisImage: String? = null,
 
 	@field:SerializedName("voucher_name")
-	val voucherName: Any,
+	val voucherName: String? = null,
 
 	@field:SerializedName("payment_status")
-	val paymentStatus: String,
+	val paymentStatus: String? = null,
 
 	@field:SerializedName("address_id")
 	val addressId: Int,
 
 	@field:SerializedName("payment_amount")
-	val paymentAmount: String,
+	val paymentAmount: String? = null,
 
 	@field:SerializedName("cancel_reason")
-	val cancelReason: String,
+	val cancelReason: String? = null,
 
 	@field:SerializedName("total_amount")
-	val totalAmount: String,
+	val totalAmount: String? = null,
 
 	@field:SerializedName("user_id")
 	val userId: Int,
@@ -98,16 +98,16 @@ data class Orders(
 	val service: String,
 
 	@field:SerializedName("pay_info_num")
-	val payInfoNum: String,
+	val payInfoNum: String? = null,
 
 	@field:SerializedName("shipment_price")
 	val shipmentPrice: String,
 
 	@field:SerializedName("voucher_id")
-	val voucherId: Any,
+	val voucherId: Int? = null,
 
 	@field:SerializedName("payment_info_id")
-	val paymentInfoId: Int,
+	val paymentInfoId: Int? = null,
 
 	@field:SerializedName("detail")
 	val detail: String,
@@ -122,13 +122,13 @@ data class Orders(
 	val cityId: Int
 )
 
-data class OrderItemsItem(
+data class OrderListItemsItem(
 
 	@field:SerializedName("order_item_id")
 	val orderItemId: Int,
 
 	@field:SerializedName("review_id")
-	val reviewId: Int,
+	val reviewId: Int? = null,
 
 	@field:SerializedName("quantity")
 	val quantity: Int,
