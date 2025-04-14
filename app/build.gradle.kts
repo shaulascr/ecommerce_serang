@@ -18,7 +18,7 @@ val localProperties = Properties().apply {
 
 android {
     namespace = "com.alya.ecommerce_serang"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.alya.ecommerce_serang"
@@ -38,14 +38,14 @@ android {
 
     buildTypes {
         release {
-            buildConfigField("String",
-                "BASE_URL",
-                "\"${localProperties["BASE_URL"] ?: "http://default-url.com/"}\"")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField("String",
+                "BASE_URL",
+                "\"${localProperties["BASE_URL"] ?: "http://default-url.com/"}\"")
         }
         debug {
             buildConfigField("String",
@@ -79,6 +79,7 @@ dependencies {
     implementation(libs.androidx.fragment.ktx)
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
+    implementation(libs.androidx.recyclerview)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -94,7 +95,6 @@ dependencies {
     implementation("de.hdodenhof:circleimageview:3.1.0")
 
 
-
 //    implementation(libs.hilt.android)
 //    kapt("com.google.dagger:hilt-compiler:2.48")
 //
@@ -102,4 +102,5 @@ dependencies {
 //    implementation(libs.androidx.hilt.lifecycle.viewmodel)
 //    kapt("androidx.hilt:hilt-compiler:1.0.0")
 }
+
 

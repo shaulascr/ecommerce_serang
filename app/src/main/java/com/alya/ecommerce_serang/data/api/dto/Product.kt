@@ -29,7 +29,7 @@ data class Product(
     val categoryId: Int? = null,
 
     @field:SerializedName("price")
-    val price: String? = null,
+    val price: Int? = null,
 
     @field:SerializedName("name")
     val name: String? = null,

@@ -9,7 +9,10 @@ import com.alya.ecommerce_serang.data.api.dto.OrderRequestBuy
 import com.alya.ecommerce_serang.data.api.dto.OtpRequest
 import com.alya.ecommerce_serang.data.api.dto.RegisterRequest
 import com.alya.ecommerce_serang.data.api.dto.UpdateCart
+import com.alya.ecommerce_serang.data.api.response.product.CreateProductResponse
 import com.alya.ecommerce_serang.data.api.response.ViewStoreProductsResponse
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import com.alya.ecommerce_serang.data.api.response.auth.LoginResponse
 import com.alya.ecommerce_serang.data.api.response.auth.OtpResponse
 import com.alya.ecommerce_serang.data.api.response.auth.RegisterResponse
@@ -32,10 +35,12 @@ import com.alya.ecommerce_serang.data.api.response.profile.ProfileResponse
 import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.Body
-import retrofit2.http.Field
-import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
+import retrofit2.http.Header
+import retrofit2.http.HeaderMap
+import retrofit2.http.Multipart
 import retrofit2.http.POST
+import retrofit2.http.Part
 import retrofit2.http.PUT
 import retrofit2.http.Path
 
@@ -108,20 +113,23 @@ interface ApiService {
     @GET("category")
     fun getCategories(): Call<CategoryResponse>
 
+    @Multipart
     @POST("store/createproduct")
-    @FormUrlEncoded
     suspend fun addProduct(
-        @Field("name") name: String,
-        @Field("description") description: String,
-        @Field("price") price: Int,
-        @Field("stock") stock: Int,
-        @Field("min_order") minOrder: Int,
-        @Field("weight") weight: Int,
-        @Field("is_pre_order") isPreOrder: Boolean,
-        @Field("duration") duration: Int,
-        @Field("category_id") categoryId: Int,
-        @Field("is_active") isActive: String
-    ): Response<Unit>
+        @Part("name") name: RequestBody,
+        @Part("description") description: RequestBody,
+        @Part("price") price: RequestBody,
+        @Part("stock") stock: RequestBody,
+        @Part("min_order") minOrder: RequestBody,
+        @Part("weight") weight: RequestBody,
+        @Part("is_pre_order") isPreOrder: RequestBody,
+        @Part("duration") duration: RequestBody,
+        @Part("category_id") categoryId: RequestBody,
+        @Part("status") status: RequestBody,
+        @Part image: MultipartBody.Part?,
+        @Part sppirt: MultipartBody.Part?,
+        @Part halal: MultipartBody.Part?
+    ): Response<CreateProductResponse>
 
     @GET("cart_item")
     suspend fun getCart (): Response<ListCartResponse>

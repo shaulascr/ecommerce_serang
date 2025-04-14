@@ -4,13 +4,19 @@ import android.util.Log
 import com.alya.ecommerce_serang.data.api.dto.CartItem
 import com.alya.ecommerce_serang.data.api.dto.CategoryItem
 import com.alya.ecommerce_serang.data.api.dto.ProductsItem
+import com.alya.ecommerce_serang.data.api.response.product.CreateProductResponse
 import com.alya.ecommerce_serang.data.api.response.cart.AddCartResponse
 import com.alya.ecommerce_serang.data.api.response.product.ProductResponse
 import com.alya.ecommerce_serang.data.api.response.product.ReviewsItem
 import com.alya.ecommerce_serang.data.api.response.product.StoreProduct
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
+import com.alya.ecommerce_serang.utils.SessionManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import java.io.File
 
 class ProductRepository(private val apiService: ApiService) {
     suspend fun getAllProducts(): Result<List<ProductsItem>> =
@@ -131,12 +137,16 @@ class ProductRepository(private val apiService: ApiService) {
     }
 
     suspend fun fetchMyStoreProducts(): List<ProductsItem> {
-        val response = apiService.getStoreProduct()
-        if (response.isSuccessful) {
-            val responseBody = response.body()
-            return responseBody?.products?.filterNotNull() ?: emptyList()
-        } else {
-            throw Exception("Failed to fetch store products: ${response.message()}")
+        return try {
+            val response = apiService.getStoreProduct()
+            if (response.isSuccessful) {
+                response.body()?.products?.filterNotNull() ?: emptyList()
+            } else {
+                throw Exception("Failed to fetch store products: ${response.message()}")
+            }
+        } catch (e: Exception) {
+            Log.e("ProductRepository", "Error fetching store products", e)
+            throw e
         }
     }
 
@@ -150,32 +160,38 @@ class ProductRepository(private val apiService: ApiService) {
         isPreOrder: Boolean,
         duration: Int,
         categoryId: Int,
-        isActive: Boolean
-    ): Result<Unit> = withContext(Dispatchers.IO) {
-        try {
-            val status = if (isActive) "active" else "inactive"
+        status: String,
+        imagePart: MultipartBody.Part?,
+        sppirtPart: MultipartBody.Part?,
+        halalPart: MultipartBody.Part?
+    ): Result<CreateProductResponse> {
+        return try {
             val response = apiService.addProduct(
-                name = name,
-                description = description,
-                price = price,
-                stock = stock,
-                minOrder = minOrder,
-                weight = weight,
-                isPreOrder = isPreOrder,
-                duration = duration,
-                categoryId = categoryId,
-                isActive = status
+                name = RequestBody.create("text/plain".toMediaTypeOrNull(), name),
+                description = RequestBody.create("text/plain".toMediaTypeOrNull(), description),
+                price = RequestBody.create("text/plain".toMediaTypeOrNull(), price.toString()),
+                stock = RequestBody.create("text/plain".toMediaTypeOrNull(), stock.toString()),
+                minOrder = RequestBody.create("text/plain".toMediaTypeOrNull(), minOrder.toString()),
+                weight = RequestBody.create("text/plain".toMediaTypeOrNull(), weight.toString()),
+                isPreOrder = RequestBody.create("text/plain".toMediaTypeOrNull(), isPreOrder.toString()),
+                duration = RequestBody.create("text/plain".toMediaTypeOrNull(), duration.toString()),
+                categoryId = RequestBody.create("text/plain".toMediaTypeOrNull(), categoryId.toString()),
+                status = RequestBody.create("text/plain".toMediaTypeOrNull(), status),
+                image = imagePart,
+                sppirt = sppirtPart,
+                halal = halalPart
             )
 
             if (response.isSuccessful) {
-                Result.Success(Unit)
+                Result.Success(response.body()!!)
             } else {
-                Result.Error(Exception("Failed to add product. Code: ${response.code()}"))
+                Result.Error(Exception("Failed to create product: ${response.code()}"))
             }
         } catch (e: Exception) {
             Result.Error(e)
         }
     }
+
 
     companion object {
         private const val TAG = "ProductRepository"
