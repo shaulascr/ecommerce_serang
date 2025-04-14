@@ -38,14 +38,14 @@ android {
 
     buildTypes {
         release {
-            buildConfigField("String",
-                "BASE_URL",
-                "\"${localProperties["BASE_URL"] ?: "http://default-url.com/"}\"")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField("String",
+                "BASE_URL",
+                "\"${localProperties["BASE_URL"] ?: "http://default-url.com/"}\"")
         }
         debug {
             buildConfigField("String",

@@ -4,11 +4,13 @@ import android.util.Log
 import com.alya.ecommerce_serang.data.api.dto.CartItem
 import com.alya.ecommerce_serang.data.api.dto.CategoryItem
 import com.alya.ecommerce_serang.data.api.dto.ProductsItem
+import com.alya.ecommerce_serang.data.api.response.product.CreateProductResponse
 import com.alya.ecommerce_serang.data.api.response.cart.AddCartResponse
 import com.alya.ecommerce_serang.data.api.response.product.ProductResponse
 import com.alya.ecommerce_serang.data.api.response.product.ReviewsItem
 import com.alya.ecommerce_serang.data.api.response.product.StoreProduct
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
+import com.alya.ecommerce_serang.utils.SessionManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -158,50 +160,38 @@ class ProductRepository(private val apiService: ApiService) {
         isPreOrder: Boolean,
         duration: Int,
         categoryId: Int,
-        isActive: Boolean,
-        image: File?,
-        sppirt: File?,
-        halal: File?
-    ): Result<Unit> = withContext(Dispatchers.IO) {
-        try {
-            val namePart = RequestBody.create("text/plain".toMediaTypeOrNull(), name)
-            val descriptionPart = RequestBody.create("text/plain".toMediaTypeOrNull(), description)
-            val pricePart = RequestBody.create("text/plain".toMediaTypeOrNull(), price.toString())
-            val stockPart = RequestBody.create("text/plain".toMediaTypeOrNull(), stock.toString())
-            val minOrderPart = RequestBody.create("text/plain".toMediaTypeOrNull(), minOrder.toString())
-            val weightPart = RequestBody.create("text/plain".toMediaTypeOrNull(), weight.toString())
-            val isPreOrderPart = RequestBody.create("text/plain".toMediaTypeOrNull(), isPreOrder.toString())
-            val durationPart = RequestBody.create("text/plain".toMediaTypeOrNull(), duration.toString())
-            val categoryIdPart = RequestBody.create("text/plain".toMediaTypeOrNull(), categoryId.toString())
-            val isActivePart = RequestBody.create("text/plain".toMediaTypeOrNull(), if (isActive) "1" else "0")
-
-            val imagePart = image?.let {
-                val req = RequestBody.create("image/*".toMediaTypeOrNull(), it)
-                MultipartBody.Part.createFormData("image", it.name, req)
-            }
-
-            val sppirtPart = sppirt?.let {
-                val req = RequestBody.create("application/pdf".toMediaTypeOrNull(), it)
-                MultipartBody.Part.createFormData("sppirt", it.name, req)
-            }
-
-            val halalPart = halal?.let {
-                val req = RequestBody.create("application/pdf".toMediaTypeOrNull(), it)
-                MultipartBody.Part.createFormData("halal", it.name, req)
-            }
-
+        status: String,
+        imagePart: MultipartBody.Part?,
+        sppirtPart: MultipartBody.Part?,
+        halalPart: MultipartBody.Part?
+    ): Result<CreateProductResponse> {
+        return try {
             val response = apiService.addProduct(
-                namePart, descriptionPart, pricePart, stockPart, minOrderPart,
-                weightPart, isPreOrderPart, durationPart, categoryIdPart, isActivePart,
-                imagePart, sppirtPart, halalPart
+                name = RequestBody.create("text/plain".toMediaTypeOrNull(), name),
+                description = RequestBody.create("text/plain".toMediaTypeOrNull(), description),
+                price = RequestBody.create("text/plain".toMediaTypeOrNull(), price.toString()),
+                stock = RequestBody.create("text/plain".toMediaTypeOrNull(), stock.toString()),
+                minOrder = RequestBody.create("text/plain".toMediaTypeOrNull(), minOrder.toString()),
+                weight = RequestBody.create("text/plain".toMediaTypeOrNull(), weight.toString()),
+                isPreOrder = RequestBody.create("text/plain".toMediaTypeOrNull(), isPreOrder.toString()),
+                duration = RequestBody.create("text/plain".toMediaTypeOrNull(), duration.toString()),
+                categoryId = RequestBody.create("text/plain".toMediaTypeOrNull(), categoryId.toString()),
+                status = RequestBody.create("text/plain".toMediaTypeOrNull(), status),
+                image = imagePart,
+                sppirt = sppirtPart,
+                halal = halalPart
             )
 
-            if (response.isSuccessful) Result.Success(Unit)
-            else Result.Error(Exception("Failed: ${response.code()}"))
+            if (response.isSuccessful) {
+                Result.Success(response.body()!!)
+            } else {
+                Result.Error(Exception("Failed to create product: ${response.code()}"))
+            }
         } catch (e: Exception) {
             Result.Error(e)
         }
     }
+
 
     companion object {
         private const val TAG = "ProductRepository"

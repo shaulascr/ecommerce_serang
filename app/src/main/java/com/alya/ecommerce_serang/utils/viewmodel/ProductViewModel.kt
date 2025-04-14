@@ -3,19 +3,22 @@ package com.alya.ecommerce_serang.utils.viewmodel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import com.alya.ecommerce_serang.data.api.dto.CategoryItem
 import com.alya.ecommerce_serang.data.api.dto.ProductsItem
+import com.alya.ecommerce_serang.data.api.response.product.CreateProductResponse
 import com.alya.ecommerce_serang.data.api.response.product.Product
 import com.alya.ecommerce_serang.data.api.response.product.ReviewsItem
 import com.alya.ecommerce_serang.data.api.response.product.StoreProduct
 import com.alya.ecommerce_serang.data.repository.ProductRepository
 import com.alya.ecommerce_serang.data.repository.Result
 import kotlinx.coroutines.launch
-import java.io.File
+import okhttp3.MultipartBody
 
 class ProductViewModel(private val repository: ProductRepository) : ViewModel() {
+
+    private val _productCreationResult = MutableLiveData<Result<CreateProductResponse>>()
+    val productCreationResult: LiveData<Result<CreateProductResponse>> get() = _productCreationResult
 
     private val _productDetail = MutableLiveData<Product?>()
     val productDetail: LiveData<Product?> get() = _productDetail
@@ -75,13 +78,18 @@ class ProductViewModel(private val repository: ProductRepository) : ViewModel() 
         isPreOrder: Boolean,
         duration: Int,
         categoryId: Int,
-        isActive: Boolean,
-        image: File?,
-        sppirt: File?,
-        halal: File?
-    ): LiveData<Result<Unit>> = liveData {
-        emit(Result.Loading)
-        emit(repository.addProduct(name, description, price, stock, minOrder, weight, isPreOrder, duration, categoryId, isActive, image, sppirt, halal))
+        status: String,
+        imagePart: MultipartBody.Part?,
+        sppirtPart: MultipartBody.Part?,
+        halalPart: MultipartBody.Part?
+    ) {
+        _productCreationResult.value = Result.Loading
+        viewModelScope.launch {
+            val result = repository.addProduct(
+                name, description, price, stock, minOrder, weight, isPreOrder, duration, categoryId, status, imagePart, sppirtPart, halalPart
+            )
+            _productCreationResult.value = result
+        }
     }
 
     // Optional: for store detail if you need it later

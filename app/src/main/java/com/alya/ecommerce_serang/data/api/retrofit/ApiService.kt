@@ -9,6 +9,7 @@ import com.alya.ecommerce_serang.data.api.dto.OrderRequestBuy
 import com.alya.ecommerce_serang.data.api.dto.OtpRequest
 import com.alya.ecommerce_serang.data.api.dto.RegisterRequest
 import com.alya.ecommerce_serang.data.api.dto.UpdateCart
+import com.alya.ecommerce_serang.data.api.response.product.CreateProductResponse
 import com.alya.ecommerce_serang.data.api.response.ViewStoreProductsResponse
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -34,9 +35,9 @@ import com.alya.ecommerce_serang.data.api.response.profile.ProfileResponse
 import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.Body
-import retrofit2.http.Field
-import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
+import retrofit2.http.Header
+import retrofit2.http.HeaderMap
 import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
@@ -84,6 +85,24 @@ interface ApiService {
         @Path("id") storeId: Int
     ): Response<DetailStoreProductResponse>
 
+    @POST("order")
+    suspend fun postOrder(
+        @Body request: OrderRequest
+    ): Response<CreateOrderResponse>
+
+    @POST("order")
+    suspend fun postOrderBuyNow(
+        @Body request: OrderRequestBuy
+    ): Response<CreateOrderResponse>
+
+    @GET("profile/address")
+    suspend fun getAddress(
+    ): Response<AddressResponse>
+
+    @POST("profile/addaddress")
+    suspend fun createAddress(
+        @Body createAddressRequest: CreateAddressRequest
+    ): Response<CreateAddressResponse>
 
     @GET("mystore")
     suspend fun getStore (): Response<StoreResponse>
@@ -106,11 +125,11 @@ interface ApiService {
         @Part("is_pre_order") isPreOrder: RequestBody,
         @Part("duration") duration: RequestBody,
         @Part("category_id") categoryId: RequestBody,
-        @Part("is_active") isActive: RequestBody,
+        @Part("status") status: RequestBody,
         @Part image: MultipartBody.Part?,
         @Part sppirt: MultipartBody.Part?,
         @Part halal: MultipartBody.Part?
-    ): Response<Unit>
+    ): Response<CreateProductResponse>
 
     @GET("cart_item")
     suspend fun getCart (): Response<ListCartResponse>

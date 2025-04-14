@@ -5,8 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
+import android.util.Log
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Toast
@@ -23,11 +22,11 @@ import com.alya.ecommerce_serang.databinding.ActivityStoreProductDetailBinding
 import com.alya.ecommerce_serang.utils.viewmodel.ProductViewModel
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
-import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import java.io.File
+import java.io.FileOutputStream
 import kotlin.getValue
 
 class StoreProductDetailActivity : AppCompatActivity() {
@@ -62,7 +61,7 @@ class StoreProductDetailActivity : AppCompatActivity() {
     private val sppirtLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         if (uri != null && isValidFile(uri)) {
             sppirtUri = uri
-            binding.tvSppirtName.text = File(uri.path ?: "").name
+            binding.tvSppirtName.text = getFileName(uri)
             binding.switcherSppirt.showNext()
         }
     }
@@ -70,7 +69,7 @@ class StoreProductDetailActivity : AppCompatActivity() {
     private val halalLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         if (uri != null && isValidFile(uri)) {
             halalUri = uri
-            binding.tvHalalName.text = File(uri.path ?: "").name
+            binding.tvHalalName.text = getFileName(uri)
             binding.switcherHalal.showNext()
         }
     }
@@ -109,6 +108,12 @@ class StoreProductDetailActivity : AppCompatActivity() {
             imagePickerLauncher.launch(intent)
         }
 
+        binding.btnRemoveFoto.setOnClickListener {
+            imageUri = null
+            binding.switcherFotoProduk.showPrevious()
+            validateForm()
+        }
+
         binding.layoutUploadSppirt.setOnClickListener { sppirtLauncher.launch("*/*") }
         binding.btnRemoveSppirt.setOnClickListener {
             sppirtUri = null
@@ -121,33 +126,10 @@ class StoreProductDetailActivity : AppCompatActivity() {
             binding.switcherHalal.showPrevious()
         }
 
-        binding.btnRemoveFoto.setOnClickListener {
-            imageUri = null
-            binding.switcherFotoProduk.showPrevious()
-            validateForm()
-        }
-
-        val watcher = object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-            override fun afterTextChanged(s: Editable?) { validateForm() }
-        }
-
-        listOf(
-            binding.edtNamaProduk,
-            binding.edtDeskripsiProduk,
-            binding.edtHargaProduk,
-            binding.edtStokProduk,
-            binding.edtMinOrder,
-            binding.edtBeratProduk,
-            binding.edtDurasi
-        ).forEach { it.addTextChangedListener(watcher) }
-
         validateForm()
 
         binding.btnSaveProduct.setOnClickListener {
             if (!binding.btnSaveProduct.isEnabled) {
-                focusFirstInvalidField()
                 return@setOnClickListener
             }
             submitProduct()
@@ -157,6 +139,10 @@ class StoreProductDetailActivity : AppCompatActivity() {
     private fun isValidFile(uri: Uri): Boolean {
         val mimeType = contentResolver.getType(uri) ?: return false
         return listOf("application/pdf", "image/jpeg", "image/png", "image/jpg").contains(mimeType)
+    }
+
+    private fun getFileName(uri: Uri): String {
+        return uri.lastPathSegment?.split("/")?.last() ?: "unknown_file"
     }
 
     private fun validateForm() {
@@ -178,23 +164,15 @@ class StoreProductDetailActivity : AppCompatActivity() {
         )
     }
 
-    private fun focusFirstInvalidField() {
-        when {
-            binding.edtNamaProduk.text.isBlank() -> binding.edtNamaProduk.requestFocus()
-            binding.edtDeskripsiProduk.text.isBlank() -> binding.edtDeskripsiProduk.requestFocus()
-            binding.edtHargaProduk.text.isBlank() -> binding.edtHargaProduk.requestFocus()
-            binding.edtStokProduk.text.isBlank() -> binding.edtStokProduk.requestFocus()
-            binding.edtMinOrder.text.isBlank() -> binding.edtMinOrder.requestFocus()
-            binding.edtBeratProduk.text.isBlank() -> binding.edtBeratProduk.requestFocus()
-            binding.switchIsPreOrder.isChecked && binding.edtDurasi.text.isBlank() -> binding.edtDurasi.requestFocus()
-            imageUri == null -> Toast.makeText(this, "Silakan unggah foto produk", Toast.LENGTH_SHORT).show()
-        }
-    }
+    private fun uriToNamedFile(uri: Uri, context: Context, prefix: String): File {
+        val extension = context.contentResolver.getType(uri)?.substringAfter("/") ?: "jpg"
+        val filename = "$prefix-${System.currentTimeMillis()}.$extension"
+        val file = File(context.cacheDir, filename)
 
-    private fun uriToFile(uri: Uri, context: Context): File {
-        val inputStream = context.contentResolver.openInputStream(uri)
-        val file = File.createTempFile("upload_", ".tmp", context.cacheDir)
-        inputStream?.use { input -> file.outputStream().use { input.copyTo(it) } }
+        context.contentResolver.openInputStream(uri)?.use { input ->
+            FileOutputStream(file).use { output -> input.copyTo(output) }
+        }
+
         return file
     }
 
@@ -207,27 +185,44 @@ class StoreProductDetailActivity : AppCompatActivity() {
         val weight = binding.edtBeratProduk.text.toString().toInt()
         val isPreOrder = binding.switchIsPreOrder.isChecked
         val duration = if (isPreOrder) binding.edtDurasi.text.toString().toInt() else 0
-        val isActive = binding.switchIsActive.isChecked
+        val status = if (binding.switchIsActive.isChecked) "active" else "inactive"
         val categoryId = categoryList.getOrNull(binding.spinnerKategoriProduk.selectedItemPosition)?.id ?: 0
 
-        val imageFile = imageUri?.let { uriToFile(it, this) }
-        val sppirtFile = sppirtUri?.let { uriToFile(it, this) }
-        val halalFile = halalUri?.let { uriToFile(it, this) }
+        val imageFile = imageUri?.let { File(it.path) }
+        val sppirtFile = sppirtUri?.let { uriToNamedFile(it, this, "sppirt") }
+        val halalFile = halalUri?.let { uriToNamedFile(it, this, "halal") }
+
+        Log.d("File URI", "SPPIRT URI: ${sppirtUri.toString()}")
+        Log.d("File URI", "Halal URI: ${halalUri.toString()}")
+
+        val imagePart = imageFile?.let { createPartFromFile("image", it) }
+        val sppirtPart = sppirtFile?.let { createPartFromFile("sppirt", it) }
+        val halalPart = halalFile?.let { createPartFromFile("halal", it) }
 
         viewModel.addProduct(
-            name, description, price, stock, minOrder, weight, isPreOrder, duration, categoryId, isActive, imageFile, sppirtFile, halalFile
-        ).observe(this) { result ->
+            name, description, price, stock, minOrder, weight, isPreOrder, duration, categoryId, status, imagePart, sppirtPart, halalPart
+        )
+
+        viewModel.productCreationResult.observe(this) { result ->
             when (result) {
                 is Result.Loading -> binding.btnSaveProduct.isEnabled = false
                 is Result.Success -> {
-                    Toast.makeText(this, "Produk berhasil ditambahkan!", Toast.LENGTH_SHORT).show()
+                    val product = result.data.product
+                    Toast.makeText(this, "Product Created: ${product?.productName}", Toast.LENGTH_SHORT).show()
                     finish()
                 }
                 is Result.Error -> {
-                    Toast.makeText(this, "Gagal: ${result.exception.message}", Toast.LENGTH_SHORT).show()
+                    Log.e("ProductDetailActivity", "Error: ${result.exception.message}")
                     binding.btnSaveProduct.isEnabled = true
                 }
             }
+        }
+    }
+
+    fun createPartFromFile(field: String, file: File?): MultipartBody.Part? {
+        return file?.let {
+            val requestBody = RequestBody.create("application/octet-stream".toMediaTypeOrNull(), it)
+            MultipartBody.Part.createFormData(field, it.name, requestBody)
         }
     }
 
