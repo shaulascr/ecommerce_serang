@@ -188,14 +188,14 @@ class StoreProductDetailActivity : AppCompatActivity() {
         val status = if (binding.switchIsActive.isChecked) "active" else "inactive"
         val categoryId = categoryList.getOrNull(binding.spinnerKategoriProduk.selectedItemPosition)?.id ?: 0
 
-        val imageFile = imageUri?.let { File(it.path) }
+        val imageFile = imageUri?.let { uriToNamedFile(it, this, "productimg") }
         val sppirtFile = sppirtUri?.let { uriToNamedFile(it, this, "sppirt") }
         val halalFile = halalUri?.let { uriToNamedFile(it, this, "halal") }
 
         Log.d("File URI", "SPPIRT URI: ${sppirtUri.toString()}")
         Log.d("File URI", "Halal URI: ${halalUri.toString()}")
 
-        val imagePart = imageFile?.let { createPartFromFile("image", it) }
+        val imagePart = imageFile?.let { createPartFromFile("productimg", it) }
         val sppirtPart = sppirtFile?.let { createPartFromFile("sppirt", it) }
         val halalPart = halalFile?.let { createPartFromFile("halal", it) }
 
@@ -219,9 +219,20 @@ class StoreProductDetailActivity : AppCompatActivity() {
         }
     }
 
+    fun getMimeType(file: File): String {
+        val extension = file.extension
+        return when (extension.lowercase()) {
+            "jpg", "jpeg" -> "image/jpeg"
+            "png" -> "image/png"
+            "pdf" -> "application/pdf"
+            else -> "application/octet-stream"
+        }
+    }
+
     fun createPartFromFile(field: String, file: File?): MultipartBody.Part? {
         return file?.let {
-            val requestBody = RequestBody.create("application/octet-stream".toMediaTypeOrNull(), it)
+            val mimeType = getMimeType(it).toMediaTypeOrNull()
+            val requestBody = RequestBody.create(mimeType, it)
             MultipartBody.Part.createFormData(field, it.name, requestBody)
         }
     }
