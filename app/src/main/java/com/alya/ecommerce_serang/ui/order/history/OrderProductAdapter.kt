@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.response.order.OrderItemsItem
 import com.bumptech.glide.Glide
+import com.google.android.material.button.MaterialButton
 
 class OrderProductAdapter : RecyclerView.Adapter<OrderProductAdapter.ProductViewHolder>() {
 
@@ -53,7 +54,10 @@ class OrderProductAdapter : RecyclerView.Adapter<OrderProductAdapter.ProductView
                 .placeholder(R.drawable.placeholder_image)
 //                .error(R.drawable.error_image)
                 .into(ivProductImage)
+
         }
+
+
 
         private fun formatCurrency(amount: Int): String {
             // In a real app, you would use NumberFormat for proper currency formatting

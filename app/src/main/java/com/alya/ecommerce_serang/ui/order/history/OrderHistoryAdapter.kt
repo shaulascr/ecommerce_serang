@@ -1,5 +1,7 @@
 package com.alya.ecommerce_serang.ui.order.history
 
+import android.content.Intent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,12 +10,20 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.response.order.OrdersItem
+import com.alya.ecommerce_serang.ui.order.detail.PaymentActivity
+import com.google.android.material.button.MaterialButton
 
 class OrderHistoryAdapter(
     private val onOrderClickListener: (OrdersItem) -> Unit
 ) : RecyclerView.Adapter<OrderHistoryAdapter.OrderViewHolder>() {
 
     private val orders = mutableListOf<OrdersItem>()
+
+    private var fragmentStatus: String = "all"
+
+    fun setFragmentStatus(status: String) {
+        fragmentStatus = status
+    }
 
     fun submitList(newOrders: List<OrdersItem>) {
         orders.clear()
@@ -34,7 +44,6 @@ class OrderHistoryAdapter(
 
     inner class OrderViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val tvStoreName: TextView = itemView.findViewById(R.id.tvStoreName)
-        private val tvOrderStatus: TextView = itemView.findViewById(R.id.tvOrderStatus)
         private val rvOrderItems: RecyclerView = itemView.findViewById(R.id.rvOrderItems)
         private val tvShowMore: TextView = itemView.findViewById(R.id.tvShowMore)
         private val tvTotalAmount: TextView = itemView.findViewById(R.id.tvTotalAmount)
@@ -46,9 +55,6 @@ class OrderHistoryAdapter(
             val storeName = if (order.orderItems.isNotEmpty()) order.orderItems[0].storeName else ""
             tvStoreName.text = storeName
 
-            // Set order status based on shipment status
-            tvOrderStatus.text = getStatusLabel(order.shipmentStatus)
-
             // Set total amount
             tvTotalAmount.text = order.totalAmount
 
@@ -56,8 +62,8 @@ class OrderHistoryAdapter(
             val itemCount = order.orderItems.size
             tvItemCountLabel.text = itemView.context.getString(R.string.item_count_prod, itemCount)
 
-            // Set deadline date
-            tvDeadlineDate.text = formatDate(order.createdAt) // This would need a proper date formatting function
+            // Set deadline date, adjust to each status
+            tvDeadlineDate.text = formatDate(order.createdAt)
 
             // Set up the order items RecyclerView
             val productAdapter = OrderProductAdapter()
@@ -86,6 +92,10 @@ class OrderHistoryAdapter(
             itemView.setOnClickListener {
                 onOrderClickListener(order)
             }
+
+            //adjust each fragment
+            adjustButtonsAndText(fragmentStatus, order)
+
         }
 
         private fun getStatusLabel(status: String): String {
@@ -99,6 +109,127 @@ class OrderHistoryAdapter(
                 "completed" -> itemView.context.getString(R.string.completed_orders)
                 "canceled" -> itemView.context.getString(R.string.canceled_orders)
                 else -> status
+            }
+        }
+
+        private fun adjustButtonsAndText(status: String, order: OrdersItem) {
+            Log.d("OrderHistoryAdapter", "Adjusting buttons for status: $status")
+            // Mendapatkan referensi ke tombol-tombol
+            val btnLeft = itemView.findViewById<MaterialButton>(R.id.btn_left)
+            val btnRight = itemView.findViewById<MaterialButton>(R.id.btn_right)
+            val statusOrder = itemView.findViewById<TextView>(R.id.tvOrderStatus)
+            val deadlineLabel = itemView.findViewById<TextView>(R.id.tvDeadlineLabel)
+
+            // Reset visibility
+            btnLeft.visibility = View.GONE
+            btnRight.visibility = View.GONE
+            statusOrder.visibility = View.GONE
+            deadlineLabel.visibility = View.GONE
+
+            when (status) {
+                "pending" -> {
+                    statusOrder.apply {
+                        visibility = View.VISIBLE
+                        text = itemView.context.getString(R.string.pending_orders)
+                    }
+                    deadlineLabel.apply {
+                        visibility = View.VISIBLE
+                        text = itemView.context.getString(R.string.dl_pending)
+                    }
+                }
+                "unpaid" -> {
+                    statusOrder.apply {
+                        visibility = View.VISIBLE
+                        text = itemView.context.getString(R.string.unpaid_orders)
+                    }
+                    deadlineLabel.apply {
+                        visibility = View.VISIBLE
+                        text = itemView.context.getString(R.string.dl_unpaid)
+                    }
+                    btnLeft.apply {
+                        visibility = View.VISIBLE
+                        text = itemView.context.getString(R.string.canceled_order_btn)
+                        setOnClickListener {
+                        }
+                    }
+                    btnRight.apply {
+                        visibility = View.VISIBLE
+                        text = itemView.context.getString(R.string.sent_evidence)
+                        setOnClickListener {
+                            val intent = Intent(itemView.context, PaymentActivity::class.java)
+                            // Menambahkan data yang diperlukan
+                            intent.putExtra("ORDER_ID", order.orderId)
+                            intent.putExtra("ORDER_PAYMENT_ID", order.paymentInfoId)
+
+                            // Memulai aktivitas
+                            itemView.context.startActivity(intent)
+                        }
+                    }
+                }
+                "processed" -> {
+                    // Untuk status processed, tampilkan "Hubungi Penjual"
+                    statusOrder.apply {
+                        visibility = View.VISIBLE
+                        text = itemView.context.getString(R.string.processed_orders)
+                    }
+                    deadlineLabel.apply {
+                        visibility = View.VISIBLE
+                        text = itemView.context.getString(R.string.dl_processed)
+                    }
+
+                }
+                "shipped" -> {
+                    // Untuk status shipped, tampilkan "Lacak Pengiriman" dan "Terima Barang"
+                    statusOrder.apply {
+                        visibility = View.VISIBLE
+                        text = itemView.context.getString(R.string.shipped_orders)
+                    }
+                    deadlineLabel.apply {
+                        visibility = View.VISIBLE
+                        text = itemView.context.getString(R.string.dl_shipped)
+                    }
+                    btnLeft.apply {
+                        visibility = View.VISIBLE
+                        text = itemView.context.getString(R.string.claim_complaint)
+                        setOnClickListener {
+                            // Handle click event
+                        }
+                    }
+                    btnRight.apply {
+                        visibility = View.VISIBLE
+                        text = itemView.context.getString(R.string.claim_order)
+                        setOnClickListener {
+                            // Handle click event
+                        }
+                    }
+                }
+                "delivered" -> {
+                    // Untuk status delivered, tampilkan "Beri Ulasan"
+                    btnRight.apply {
+                        visibility = View.VISIBLE
+                        text = itemView.context.getString(R.string.add_review)
+                        setOnClickListener {
+                            // Handle click event
+                        }
+                    }
+                }
+                "completed" -> {
+                    statusOrder.apply {
+                        visibility = View.VISIBLE
+                        text = itemView.context.getString(R.string.shipped_orders)
+                    }
+                    deadlineLabel.apply {
+                        visibility = View.VISIBLE
+                        text = itemView.context.getString(R.string.dl_shipped)
+                    }
+                    btnRight.apply {
+                        visibility = View.VISIBLE
+                        text = itemView.context.getString(R.string.add_review)
+                        setOnClickListener {
+                            // Handle click event
+                        }
+                    }
+                }
             }
         }
 

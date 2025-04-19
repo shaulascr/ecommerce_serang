@@ -77,5 +77,24 @@
     <string name="completed_orders">Selesai</string>
     <string name="shipped_orders">Dikirim</string>
     <string name="canceled_orders">Dibatalkan</string>
+    <!--    deadline label -->
+    <string name="dl_pending">Batas Tagihan</string>
+    <string name="dl_unpaid">Batas Pembayaran</string>
+    <string name="dl_processed">Batas Pengiriman</string>
+    <string name="dal_paid">Semua Pesanan </string>
+    <string name="dl_delivered">Semua Pesanan </string>
+    <string name="dl_completed">Semua Pesanan </string>
+    <string name="dl_shipped">Tanggal Pesanan Sampai</string>
+    <string name="dl_canceled">Semua Pesanan </string>
+
+    <string name="sent_evidence">Kirim Bukti Pembayaran </string>
+    <string name="canceled_order_btn">Batalkan Pesanan </string>
+    <string name="claim_complaint">Ajukan Komplain </string>
+    <string name="claim_order">Pesanan Diterima </string>
+    <string name="add_review">Beri Ulasan </string>
+
+
+
+
 
 </resources>

@@ -237,8 +237,13 @@ class OrderRepository(private val apiService: ApiService) {
     }
 
     suspend fun getOrderDetails(orderId: Int): OrderDetailResponse? {
-        val response = apiService.getDetailOrder(orderId)
-        return if (response.isSuccessful) response.body() else null
+        return try {
+            val response = apiService.getDetailOrder(orderId)
+            if (response.isSuccessful) response.body() else null
+        } catch (e: Exception) {
+            Log.e("OrderRepository", "Error getting order details", e)
+            null
+        }
     }
 
     suspend fun uploadPaymentProof(request : AddEvidenceRequest): Result<AddEvidenceResponse> {

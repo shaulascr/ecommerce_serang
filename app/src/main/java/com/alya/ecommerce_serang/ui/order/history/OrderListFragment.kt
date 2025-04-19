@@ -77,6 +77,8 @@ class OrderListFragment : Fragment() {
             navigateToOrderDetail(order)
         }
 
+        orderAdapter.setFragmentStatus(status)
+
         binding.rvOrders.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = orderAdapter
