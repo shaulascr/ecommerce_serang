@@ -18,7 +18,8 @@ import java.util.Locale
 import java.util.TimeZone
 
 class OrderHistoryAdapter(
-    private val onOrderClickListener: (OrdersItem) -> Unit
+    private val onOrderClickListener: (OrdersItem) -> Unit,
+    private val viewModel: HistoryViewModel // Add this parameter
 ) : RecyclerView.Adapter<OrderHistoryAdapter.OrderViewHolder>() {
 
     private val orders = mutableListOf<OrdersItem>()
@@ -200,6 +201,8 @@ class OrderHistoryAdapter(
                         text = itemView.context.getString(R.string.claim_order)
                         setOnClickListener {
                             // Handle click event
+                            viewModel.confirmOrderCompleted(order.orderId, "completed")
+
                         }
                     }
                     deadlineDate.apply {

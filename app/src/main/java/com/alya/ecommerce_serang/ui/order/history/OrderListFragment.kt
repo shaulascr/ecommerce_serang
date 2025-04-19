@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.alya.ecommerce_serang.data.api.response.order.OrdersItem
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.repository.OrderRepository
+import com.alya.ecommerce_serang.data.repository.Result
 import com.alya.ecommerce_serang.databinding.FragmentOrderListBinding
 import com.alya.ecommerce_serang.ui.order.address.ViewState
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
@@ -68,14 +69,18 @@ class OrderListFragment : Fragment() {
 
         setupRecyclerView()
         observeOrderList()
+        observeOrderCompletionStatus()
         loadOrders()
     }
 
     private fun setupRecyclerView() {
-        orderAdapter = OrderHistoryAdapter { order ->
-            // Handle order click
-            navigateToOrderDetail(order)
-        }
+        orderAdapter = OrderHistoryAdapter(
+            onOrderClickListener = { order ->
+                // Handle order click
+                navigateToOrderDetail(order)
+            },
+            viewModel = viewModel // Pass the ViewModel to the adapter
+        )
 
         orderAdapter.setFragmentStatus(status)
 
@@ -125,5 +130,22 @@ class OrderListFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun observeOrderCompletionStatus(){
+        viewModel.orderCompletionStatus.observe(viewLifecycleOwner){ result ->
+            when(result){
+                is Result.Loading -> {
+
+                }
+                is Result.Success -> {
+                    Toast.makeText(requireContext(), "Order completed successfully!", Toast.LENGTH_SHORT).show()
+                    loadOrders()
+                }
+                is Result.Error -> {
+                    Toast.makeText(requireContext(), "Failed to complete order: ${result.exception.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
     }
 }

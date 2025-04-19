@@ -2,6 +2,7 @@ package com.alya.ecommerce_serang.data.api.retrofit
 
 import com.alya.ecommerce_serang.data.api.dto.AddEvidenceRequest
 import com.alya.ecommerce_serang.data.api.dto.CartItem
+import com.alya.ecommerce_serang.data.api.dto.CompletedOrderRequest
 import com.alya.ecommerce_serang.data.api.dto.CourierCostRequest
 import com.alya.ecommerce_serang.data.api.dto.CreateAddressRequest
 import com.alya.ecommerce_serang.data.api.dto.LoginRequest
@@ -18,6 +19,7 @@ import com.alya.ecommerce_serang.data.api.response.cart.AddCartResponse
 import com.alya.ecommerce_serang.data.api.response.cart.ListCartResponse
 import com.alya.ecommerce_serang.data.api.response.cart.UpdateCartResponse
 import com.alya.ecommerce_serang.data.api.response.order.AddEvidenceResponse
+import com.alya.ecommerce_serang.data.api.response.order.CompletedOrderResponse
 import com.alya.ecommerce_serang.data.api.response.order.CourierCostResponse
 import com.alya.ecommerce_serang.data.api.response.order.CreateOrderResponse
 import com.alya.ecommerce_serang.data.api.response.order.ListCityResponse
@@ -180,4 +182,9 @@ interface ApiService {
     @GET("provinces")
     suspend fun getListProv(
     ): Response<ListProvinceResponse>
+
+    @PUT("store/order/update")
+    suspend fun confirmOrder(
+        @Body confirmOrder : CompletedOrderRequest
+    ): Response<CompletedOrderResponse>
 }

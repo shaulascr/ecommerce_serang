@@ -2,6 +2,7 @@ package com.alya.ecommerce_serang.data.repository
 
 import android.util.Log
 import com.alya.ecommerce_serang.data.api.dto.AddEvidenceMultipartRequest
+import com.alya.ecommerce_serang.data.api.dto.CompletedOrderRequest
 import com.alya.ecommerce_serang.data.api.dto.CourierCostRequest
 import com.alya.ecommerce_serang.data.api.dto.CreateAddressRequest
 import com.alya.ecommerce_serang.data.api.dto.OrderRequest
@@ -9,6 +10,7 @@ import com.alya.ecommerce_serang.data.api.dto.OrderRequestBuy
 import com.alya.ecommerce_serang.data.api.dto.UserProfile
 import com.alya.ecommerce_serang.data.api.response.cart.DataItem
 import com.alya.ecommerce_serang.data.api.response.order.AddEvidenceResponse
+import com.alya.ecommerce_serang.data.api.response.order.CompletedOrderResponse
 import com.alya.ecommerce_serang.data.api.response.order.CourierCostResponse
 import com.alya.ecommerce_serang.data.api.response.order.CreateOrderResponse
 import com.alya.ecommerce_serang.data.api.response.order.ListCityResponse
@@ -321,6 +323,30 @@ suspend fun uploadPaymentProof(request: AddEvidenceMultipartRequest): Result<Add
             }
         } catch (e: Exception) {
             Log.e("OrderRepository", "Exception Add Evidence ", e)
+            Result.Error(e)
+        }
+    }
+
+    suspend fun confirmOrderCompleted(request: CompletedOrderRequest): Result<CompletedOrderResponse> {
+        return try {
+            Log.d("OrderRepository", "Cinfroming order request completed: $request")
+            val response = apiService.confirmOrder(request)
+
+            if(response.isSuccessful) {
+                val completedOrderResponse = response.body()
+                if (completedOrderResponse != null) {
+                    Log.d("OrderRepository", "Order confirmed successfully: ${completedOrderResponse.message}")
+                    Result.Success(completedOrderResponse)
+                } else {
+                    Log.e("OrderRepository", "Response body was null")
+                    Result.Error(Exception("Empty response from server"))
+                }
+            } else {
+                val errorBody = response.errorBody()?.string() ?: "Unknown Error"
+                Log.e("OrderRepository", "Error confirming order: $errorBody")
+                Result.Error(Exception(errorBody))
+            }
+        } catch (e: Exception){
             Result.Error(e)
         }
     }

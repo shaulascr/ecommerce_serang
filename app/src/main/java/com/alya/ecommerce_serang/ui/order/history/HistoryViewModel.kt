@@ -5,6 +5,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.alya.ecommerce_serang.data.api.dto.CompletedOrderRequest
+import com.alya.ecommerce_serang.data.api.response.order.CompletedOrderResponse
 import com.alya.ecommerce_serang.data.api.response.order.OrdersItem
 import com.alya.ecommerce_serang.data.repository.OrderRepository
 import com.alya.ecommerce_serang.data.repository.Result
@@ -19,6 +21,9 @@ class HistoryViewModel(private val repository: OrderRepository) : ViewModel()  {
 
     private val _orders = MutableLiveData<ViewState<List<OrdersItem>>>()
     val orders: LiveData<ViewState<List<OrdersItem>>> = _orders
+
+    private val _orderCompletionStatus = MutableLiveData<Result<CompletedOrderResponse>>()
+    val orderCompletionStatus: LiveData<Result<CompletedOrderResponse>> = _orderCompletionStatus
 
     fun getOrderList(status: String) {
         _orders.value = ViewState.Loading
@@ -43,6 +48,15 @@ class HistoryViewModel(private val repository: OrderRepository) : ViewModel()  {
                 _orders.value = ViewState.Error("An unexpected error occurred: ${e.message}")
                 Log.e("HistoryViewModel", "Exception in getOrderList", e)
             }
+        }
+    }
+    fun confirmOrderCompleted(orderId: Int, status: String) {
+        viewModelScope.launch {
+            _orderCompletionStatus.value = Result.Loading
+            val request = CompletedOrderRequest(orderId, status)
+
+            val result = repository.confirmOrderCompleted(request)
+            _orderCompletionStatus.value = result
         }
     }
 }

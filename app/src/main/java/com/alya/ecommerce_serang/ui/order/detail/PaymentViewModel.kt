@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.alya.ecommerce_serang.data.api.dto.AddEvidenceMultipartRequest
 import com.alya.ecommerce_serang.data.api.response.order.AddEvidenceResponse
+import com.alya.ecommerce_serang.data.api.response.order.CompletedOrderResponse
 import com.alya.ecommerce_serang.data.api.response.order.OrderListItemsItem
 import com.alya.ecommerce_serang.data.api.response.order.Orders
 import com.alya.ecommerce_serang.data.repository.OrderRepository
@@ -25,6 +26,9 @@ class PaymentViewModel(private val repository: OrderRepository) : ViewModel() {
     // LiveData untuk OrderItems
     private val _orderItems = MutableLiveData<List<OrderListItemsItem>>()
     val orderItems: LiveData<List<OrderListItemsItem>> get() = _orderItems
+
+    private val _orderCompletionStatus = MutableLiveData<Result<CompletedOrderResponse>>()
+    val orderCompletionStatus: LiveData<Result<CompletedOrderResponse>> = _orderCompletionStatus
 
     // LiveData untuk status loading
     private val _isLoading = MutableLiveData<Boolean>()
@@ -69,4 +73,6 @@ class PaymentViewModel(private val repository: OrderRepository) : ViewModel() {
             }
         }
     }
+
+
 }
