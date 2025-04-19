@@ -2,7 +2,7 @@ package com.alya.ecommerce_serang.data.repository
 
 import android.util.Log
 import com.alya.ecommerce_serang.data.api.dto.Store
-import com.alya.ecommerce_serang.data.api.response.product.StoreResponse
+import com.alya.ecommerce_serang.data.api.response.customer.product.StoreResponse
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
 import retrofit2.HttpException
 import java.io.IOException

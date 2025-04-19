@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.alya.ecommerce_serang.data.api.dto.CostProduct
 import com.alya.ecommerce_serang.data.api.dto.CourierCostRequest
-import com.alya.ecommerce_serang.data.api.response.order.CourierCostsItem
+import com.alya.ecommerce_serang.data.api.response.customer.order.CourierCostsItem
 import com.alya.ecommerce_serang.data.repository.OrderRepository
 import com.alya.ecommerce_serang.data.repository.Result
 import kotlinx.coroutines.launch

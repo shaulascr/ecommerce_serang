@@ -25,11 +25,14 @@ data class Product(
     @field:SerializedName("is_pre_order")
     val isPreOrder: Boolean? = null,
 
+    @field:SerializedName("condition")
+    val condition: String? = null,
+
     @field:SerializedName("category_id")
     val categoryId: Int? = null,
 
     @field:SerializedName("price")
-    val price: Int? = null,
+    val price: String? = null,
 
     @field:SerializedName("name")
     val name: String? = null,

@@ -1,17 +1,44 @@
-package com.alya.ecommerce_serang.data.api.response.order
+package com.alya.ecommerce_serang.data.api.response.customer.order
 
 import com.google.gson.annotations.SerializedName
 
-data class OrderListResponse(
+data class OrderDetailResponse(
 
-	@field:SerializedName("orders")
-	val orders: List<OrdersItem>,
+    @field:SerializedName("orders")
+	val orders: Orders,
 
-	@field:SerializedName("message")
+    @field:SerializedName("message")
 	val message: String
 )
 
-data class OrdersItem(
+data class OrderItemsItem(
+
+	@field:SerializedName("review_id")
+	val reviewId: Int? = null,
+
+	@field:SerializedName("quantity")
+	val quantity: Int,
+
+	@field:SerializedName("price")
+	val price: Int,
+
+	@field:SerializedName("subtotal")
+	val subtotal: Int,
+
+	@field:SerializedName("product_image")
+	val productImage: String? = null,
+
+	@field:SerializedName("store_name")
+	val storeName: String,
+
+	@field:SerializedName("product_price")
+	val productPrice: Int,
+
+	@field:SerializedName("product_name")
+	val productName: String
+)
+
+data class Orders(
 
     @field:SerializedName("receipt_num")
 	val receiptNum: String,
@@ -28,8 +55,14 @@ data class OrdersItem(
     @field:SerializedName("updated_at")
 	val updatedAt: String,
 
+    @field:SerializedName("etd")
+	val etd: String,
+
     @field:SerializedName("street")
 	val street: String,
+
+    @field:SerializedName("cancel_date")
+	val cancelDate: String,
 
     @field:SerializedName("longitude")
 	val longitude: String,
@@ -39,6 +72,9 @@ data class OrdersItem(
 
     @field:SerializedName("order_items")
 	val orderItems: List<OrderItemsItem>,
+
+    @field:SerializedName("auto_completed_at")
+	val autoCompletedAt: String,
 
     @field:SerializedName("is_store_location")
 	val isStoreLocation: Boolean,
@@ -51,6 +87,9 @@ data class OrdersItem(
 
     @field:SerializedName("payment_method_id")
 	val paymentMethodId: Int,
+
+    @field:SerializedName("cancel_reason")
+	val cancelReason: String,
 
     @field:SerializedName("total_amount")
 	val totalAmount: String,
@@ -88,4 +127,3 @@ data class OrdersItem(
     @field:SerializedName("city_id")
 	val cityId: Int
 )
-

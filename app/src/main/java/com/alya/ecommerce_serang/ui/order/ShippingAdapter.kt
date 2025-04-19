@@ -3,8 +3,8 @@ package com.alya.ecommerce_serang.ui.order
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.alya.ecommerce_serang.data.api.response.order.CourierCostsItem
-import com.alya.ecommerce_serang.data.api.response.order.ServicesItem
+import com.alya.ecommerce_serang.data.api.response.customer.order.CourierCostsItem
+import com.alya.ecommerce_serang.data.api.response.customer.order.ServicesItem
 import com.alya.ecommerce_serang.databinding.ItemShippingOrderBinding
 
 class ShippingAdapter(

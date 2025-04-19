@@ -15,6 +15,8 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.alya.ecommerce_serang.data.api.dto.CategoryItem
+import com.alya.ecommerce_serang.data.api.dto.Preorder
+import com.alya.ecommerce_serang.data.api.dto.Product
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.repository.ProductRepository
 import com.alya.ecommerce_serang.data.repository.Result
@@ -22,12 +24,14 @@ import com.alya.ecommerce_serang.databinding.ActivityStoreProductDetailBinding
 import com.alya.ecommerce_serang.utils.viewmodel.ProductViewModel
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
+import com.bumptech.glide.Glide
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import java.io.File
 import java.io.FileOutputStream
 import kotlin.getValue
+import androidx.core.net.toUri
 
 class StoreProductDetailActivity : AppCompatActivity() {
 
@@ -37,6 +41,7 @@ class StoreProductDetailActivity : AppCompatActivity() {
     private var imageUri: Uri? = null
     private var sppirtUri: Uri? = null
     private var halalUri: Uri? = null
+    private var productId: Int? = null
 
     private val viewModel: ProductViewModel by viewModels {
         BaseViewModelFactory {
@@ -79,9 +84,50 @@ class StoreProductDetailActivity : AppCompatActivity() {
         binding = ActivityStoreProductDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        setupHeader()
+        val isEditing = intent.getBooleanExtra("is_editing", false)
+        productId = intent.getIntExtra("product_id", -1)
 
-        // Fetch categories
+        binding.header.headerTitle.text = if (isEditing) "Ubah Produk" else "Tambah Produk"
+
+//        if (isEditing && productId != null) {
+//            viewModel.productDetail.observe(this) { product ->
+//                product?.let {
+//                    populateForm(it)
+//                }
+//            }
+//            viewModel.loadProductDetail(productId!!)
+//        }
+
+        setupCategorySpinner()
+        setupImagePickers()
+
+        var conditionList = listOf("Baru", "Pernah Dipakai")
+        val adapterCondition = ArrayAdapter(this, android.R.layout.simple_spinner_item, conditionList)
+        adapterCondition.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.spinnerKondisiProduk.adapter = adapterCondition
+
+        // Setup Pre-Order visibility
+        binding.switchIsPreOrder.setOnCheckedChangeListener { _, isChecked ->
+            binding.layoutDurasi.visibility = if (isChecked) View.VISIBLE else View.GONE
+            validateForm()
+        }
+
+        validateForm()
+
+        binding.btnSaveProduct.setOnClickListener {
+            if (isEditing) {
+                updateProduct(productId)
+            } else {
+                addProduct()
+            }
+        }
+
+        binding.header.headerLeftIcon.setOnClickListener {
+            onBackPressedDispatcher.onBackPressed()
+        }
+    }
+
+    private fun setupCategorySpinner() {
         viewModel.loadCategories()
         viewModel.categoryList.observe(this) { result ->
             if (result is Result.Success) {
@@ -91,13 +137,9 @@ class StoreProductDetailActivity : AppCompatActivity() {
                 binding.spinnerKategoriProduk.adapter = adapter
             }
         }
+    }
 
-        // Setup Pre-Order visibility
-        binding.switchIsPreOrder.setOnCheckedChangeListener { _, isChecked ->
-            binding.layoutDurasi.visibility = if (isChecked) View.VISIBLE else View.GONE
-            validateForm()
-        }
-
+    private fun setupImagePickers() {
         binding.tvTambahFoto.setOnClickListener {
             val intent = Intent(Intent.ACTION_PICK).apply { type = "image/*" }
             imagePickerLauncher.launch(intent)
@@ -125,15 +167,37 @@ class StoreProductDetailActivity : AppCompatActivity() {
             halalUri = null
             binding.switcherHalal.showPrevious()
         }
+    }
+
+    private fun populateForm(product: Product) {
+        binding.edtNamaProduk.setText(product.name)
+        binding.edtDeskripsiProduk.setText(product.description)
+        binding.edtHargaProduk.setText(product.price.toString())
+        binding.edtStokProduk.setText(product.stock.toString())
+        binding.edtMinOrder.setText(product.minOrder.toString())
+        binding.edtBeratProduk.setText(product.weight.toString())
+        binding.switchIsPreOrder.isChecked = product.isPreOrder ?: false
+        binding.switchIsActive.isChecked = product.status == "active"
+        binding.spinnerKondisiProduk.setSelection(if (product.condition == "Baru") 0 else 1)
+
+        product.categoryId?.let {
+            binding.spinnerKategoriProduk.setSelection(categoryList.indexOfFirst { it.id == product.categoryId })
+        }
+
+        Glide.with(this).load(product.image).into(binding.ivPreviewFoto)
+        binding.switcherFotoProduk.showNext()
+
+        product.sppirt?.let {
+            binding.tvSppirtName.text = getFileName(it.toUri())
+            binding.switcherSppirt.showNext()
+        }
+
+        product.halal?.let {
+            binding.tvHalalName.text = getFileName(it.toUri())
+            binding.switcherHalal.showNext()
+        }
 
         validateForm()
-
-        binding.btnSaveProduct.setOnClickListener {
-            if (!binding.btnSaveProduct.isEnabled) {
-                return@setOnClickListener
-            }
-            submitProduct()
-        }
     }
 
     private fun isValidFile(uri: Uri): Boolean {
@@ -143,6 +207,36 @@ class StoreProductDetailActivity : AppCompatActivity() {
 
     private fun getFileName(uri: Uri): String {
         return uri.lastPathSegment?.split("/")?.last() ?: "unknown_file"
+    }
+
+    private fun uriToNamedFile(uri: Uri, context: Context, prefix: String): File {
+        val extension = context.contentResolver.getType(uri)?.substringAfter("/") ?: "jpg"
+        val filename = "$prefix-${System.currentTimeMillis()}.$extension"
+        val file = File(context.cacheDir, filename)
+
+        context.contentResolver.openInputStream(uri)?.use { input ->
+            FileOutputStream(file).use { output -> input.copyTo(output) }
+        }
+
+        return file
+    }
+
+    fun getMimeType(file: File): String {
+        val extension = file.extension
+        return when (extension.lowercase()) {
+            "jpg", "jpeg" -> "image/jpeg"
+            "png" -> "image/png"
+            "pdf" -> "application/pdf"
+            else -> "application/octet-stream"
+        }
+    }
+
+    fun createPartFromFile(field: String, file: File?): MultipartBody.Part? {
+        return file?.let {
+            val mimeType = getMimeType(it).toMediaTypeOrNull()
+            val requestBody = RequestBody.create(mimeType, it)
+            MultipartBody.Part.createFormData(field, it.name, requestBody)
+        }
     }
 
     private fun validateForm() {
@@ -164,19 +258,7 @@ class StoreProductDetailActivity : AppCompatActivity() {
         )
     }
 
-    private fun uriToNamedFile(uri: Uri, context: Context, prefix: String): File {
-        val extension = context.contentResolver.getType(uri)?.substringAfter("/") ?: "jpg"
-        val filename = "$prefix-${System.currentTimeMillis()}.$extension"
-        val file = File(context.cacheDir, filename)
-
-        context.contentResolver.openInputStream(uri)?.use { input ->
-            FileOutputStream(file).use { output -> input.copyTo(output) }
-        }
-
-        return file
-    }
-
-    private fun submitProduct() {
+    private fun addProduct() {
         val name = binding.edtNamaProduk.text.toString()
         val description = binding.edtDeskripsiProduk.text.toString()
         val price = binding.edtHargaProduk.text.toString().toInt()
@@ -186,6 +268,7 @@ class StoreProductDetailActivity : AppCompatActivity() {
         val isPreOrder = binding.switchIsPreOrder.isChecked
         val duration = if (isPreOrder) binding.edtDurasi.text.toString().toInt() else 0
         val status = if (binding.switchIsActive.isChecked) "active" else "inactive"
+        val condition = binding.spinnerKondisiProduk.selectedItem.toString()
         val categoryId = categoryList.getOrNull(binding.spinnerKategoriProduk.selectedItemPosition)?.id ?: 0
 
         val imageFile = imageUri?.let { uriToNamedFile(it, this, "productimg") }
@@ -199,8 +282,10 @@ class StoreProductDetailActivity : AppCompatActivity() {
         val sppirtPart = sppirtFile?.let { createPartFromFile("sppirt", it) }
         val halalPart = halalFile?.let { createPartFromFile("halal", it) }
 
+        val preorder = Preorder(productId = productId, duration = duration)
+
         viewModel.addProduct(
-            name, description, price, stock, minOrder, weight, isPreOrder, duration, categoryId, status, imagePart, sppirtPart, halalPart
+            name, description, price, stock, minOrder, weight, isPreOrder, preorder, categoryId, status, condition, imagePart, sppirtPart, halalPart
         )
 
         viewModel.productCreationResult.observe(this) { result ->
@@ -208,7 +293,7 @@ class StoreProductDetailActivity : AppCompatActivity() {
                 is Result.Loading -> binding.btnSaveProduct.isEnabled = false
                 is Result.Success -> {
                     val product = result.data.product
-                    Toast.makeText(this, "Product Created: ${product?.productName}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Product Created: ${product?.name}", Toast.LENGTH_SHORT).show()
                     finish()
                 }
                 is Result.Error -> {
@@ -219,26 +304,24 @@ class StoreProductDetailActivity : AppCompatActivity() {
         }
     }
 
-    fun getMimeType(file: File): String {
-        val extension = file.extension
-        return when (extension.lowercase()) {
-            "jpg", "jpeg" -> "image/jpeg"
-            "png" -> "image/png"
-            "pdf" -> "application/pdf"
-            else -> "application/octet-stream"
-        }
-    }
+    private fun updateProduct(productId: Int?) {
+        val updatedProduct = mapOf(
+            "name" to binding.edtNamaProduk.text.toString(),
+            "description" to binding.edtDeskripsiProduk.text.toString(),
+            "price" to binding.edtHargaProduk.text.toString(),
+            "stock" to binding.edtStokProduk.text.toString().toInt(),
+            "min_order" to binding.edtMinOrder.text.toString().toInt(),
+            "weight" to binding.edtBeratProduk.text.toString().toInt(),
+            "is_pre_order" to binding.switchIsPreOrder.isChecked,
+            "duration" to binding.edtDurasi.text.toString().toInt(),
+            "category_id" to categoryList[binding.spinnerKategoriProduk.selectedItemPosition].id,
+            "status" to if (binding.switchIsActive.isChecked) "active" else "inactive",
+            "condition" to binding.spinnerKondisiProduk.selectedItem.toString(),
+            "productimg" to imageUri?.path,
+            "sppirt" to sppirtUri?.path,
+            "halal" to halalUri?.path
+        )
 
-    fun createPartFromFile(field: String, file: File?): MultipartBody.Part? {
-        return file?.let {
-            val mimeType = getMimeType(it).toMediaTypeOrNull()
-            val requestBody = RequestBody.create(mimeType, it)
-            MultipartBody.Part.createFormData(field, it.name, requestBody)
-        }
-    }
-
-    private fun setupHeader() {
-        binding.header.headerTitle.text = "Tambah Produk"
-        binding.header.headerLeftIcon.setOnClickListener { onBackPressedDispatcher.onBackPressed() }
+        viewModel.updateProduct(productId, updatedProduct)
     }
 }

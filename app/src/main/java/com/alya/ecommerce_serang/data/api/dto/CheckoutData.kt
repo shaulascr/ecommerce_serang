@@ -1,6 +1,6 @@
 package com.alya.ecommerce_serang.data.api.dto
 
-import com.alya.ecommerce_serang.data.api.response.cart.CartItemsItem
+import com.alya.ecommerce_serang.data.api.response.customer.cart.CartItemsItem
 
 data class CheckoutData(
     val orderRequest: Any, // Can be OrderRequest or OrderRequestBuy

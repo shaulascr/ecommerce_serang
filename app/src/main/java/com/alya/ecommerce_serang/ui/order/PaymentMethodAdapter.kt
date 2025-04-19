@@ -4,7 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.alya.ecommerce_serang.R
-import com.alya.ecommerce_serang.data.api.response.product.PaymentInfoItem
+import com.alya.ecommerce_serang.data.api.response.customer.product.PaymentInfoItem
 import com.alya.ecommerce_serang.databinding.ItemPaymentMethodBinding
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions

@@ -2,8 +2,8 @@ package com.alya.ecommerce_serang.ui.order.address
 
 import android.content.Context
 import android.widget.ArrayAdapter
-import com.alya.ecommerce_serang.data.api.response.order.CitiesItem
-import com.alya.ecommerce_serang.data.api.response.order.ProvincesItem
+import com.alya.ecommerce_serang.data.api.response.customer.order.CitiesItem
+import com.alya.ecommerce_serang.data.api.response.customer.order.ProvincesItem
 
 // UI adapters and helpers
 class ProvinceAdapter(

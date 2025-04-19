@@ -5,8 +5,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.alya.ecommerce_serang.data.api.dto.CreateAddressRequest
-import com.alya.ecommerce_serang.data.api.response.order.CitiesItem
-import com.alya.ecommerce_serang.data.api.response.order.ProvincesItem
+import com.alya.ecommerce_serang.data.api.response.customer.order.CitiesItem
+import com.alya.ecommerce_serang.data.api.response.customer.order.ProvincesItem
 import com.alya.ecommerce_serang.data.repository.OrderRepository
 import com.alya.ecommerce_serang.data.repository.Result
 import kotlinx.coroutines.flow.MutableStateFlow

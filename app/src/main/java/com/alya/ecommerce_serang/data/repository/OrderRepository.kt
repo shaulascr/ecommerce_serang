@@ -5,16 +5,16 @@ import com.alya.ecommerce_serang.data.api.dto.CourierCostRequest
 import com.alya.ecommerce_serang.data.api.dto.CreateAddressRequest
 import com.alya.ecommerce_serang.data.api.dto.OrderRequest
 import com.alya.ecommerce_serang.data.api.dto.OrderRequestBuy
-import com.alya.ecommerce_serang.data.api.response.cart.DataItem
-import com.alya.ecommerce_serang.data.api.response.order.CourierCostResponse
-import com.alya.ecommerce_serang.data.api.response.order.CreateOrderResponse
-import com.alya.ecommerce_serang.data.api.response.order.ListCityResponse
-import com.alya.ecommerce_serang.data.api.response.order.ListProvinceResponse
-import com.alya.ecommerce_serang.data.api.response.product.ProductResponse
-import com.alya.ecommerce_serang.data.api.response.product.StoreProduct
-import com.alya.ecommerce_serang.data.api.response.product.StoreResponse
-import com.alya.ecommerce_serang.data.api.response.profile.AddressResponse
-import com.alya.ecommerce_serang.data.api.response.profile.CreateAddressResponse
+import com.alya.ecommerce_serang.data.api.response.customer.cart.DataItem
+import com.alya.ecommerce_serang.data.api.response.customer.order.CourierCostResponse
+import com.alya.ecommerce_serang.data.api.response.customer.order.CreateOrderResponse
+import com.alya.ecommerce_serang.data.api.response.customer.order.ListCityResponse
+import com.alya.ecommerce_serang.data.api.response.customer.order.ListProvinceResponse
+import com.alya.ecommerce_serang.data.api.response.customer.product.ProductResponse
+import com.alya.ecommerce_serang.data.api.response.customer.product.StoreProduct
+import com.alya.ecommerce_serang.data.api.response.customer.product.StoreResponse
+import com.alya.ecommerce_serang.data.api.response.customer.profile.AddressResponse
+import com.alya.ecommerce_serang.data.api.response.customer.profile.CreateAddressResponse
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
 import retrofit2.Response
 

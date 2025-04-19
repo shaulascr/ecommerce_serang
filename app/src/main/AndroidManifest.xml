@@ -22,7 +22,7 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
-            android:name=".data.api.response.cart.CartActivity"
+            android:name=".data.api.response.customer.cart.CartActivity"
             android:exported="false" />
         <activity
             android:name=".ui.order.address.EditAddressActivity"

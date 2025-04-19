@@ -481,66 +481,66 @@
 
             </LinearLayout>
 
-<!--            &lt;!&ndash; Kondisi Produk &ndash;&gt;-->
-<!--            <LinearLayout-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:orientation="vertical"-->
-<!--                android:layout_marginBottom="24dp">-->
+            <!-- Kondisi Produk -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginBottom="24dp">
 
-<!--                &lt;!&ndash; Label Kondisi Produk &ndash;&gt;-->
-<!--                <LinearLayout-->
-<!--                    android:layout_width="match_parent"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:orientation="horizontal">-->
+                <!-- Label Kondisi Produk -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
 
-<!--                    <TextView-->
-<!--                        android:layout_width="wrap_content"-->
-<!--                        android:layout_height="wrap_content"-->
-<!--                        android:text="Kondisi Produk"-->
-<!--                        style="@style/body_medium"-->
-<!--                        android:layout_marginEnd="4dp"/>-->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Kondisi Produk"
+                        style="@style/body_medium"
+                        android:layout_marginEnd="4dp"/>
 
-<!--                    <TextView-->
-<!--                        android:layout_width="0dp"-->
-<!--                        android:layout_height="wrap_content"-->
-<!--                        android:layout_weight="1"-->
-<!--                        android:text="*"-->
-<!--                        style="@style/body_medium"-->
-<!--                        android:textColor="@color/red_required"-->
-<!--                        android:layout_gravity="end"/>-->
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="*"
+                        style="@style/body_medium"
+                        android:textColor="@color/red_required"
+                        android:layout_gravity="end"/>
 
-<!--                </LinearLayout>-->
+                </LinearLayout>
 
-<!--                &lt;!&ndash; Spinner Dropdown dengan Chevron &ndash;&gt;-->
-<!--                <LinearLayout-->
-<!--                    android:layout_width="match_parent"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:orientation="horizontal"-->
-<!--                    android:background="@drawable/bg_text_field"-->
-<!--                    android:gravity="center_vertical"-->
-<!--                    android:layout_marginTop="10dp">-->
+                <!-- Spinner Dropdown dengan Chevron -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:background="@drawable/bg_text_field"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="10dp">
 
-<!--                    <Spinner-->
-<!--                        android:id="@+id/spinner_kondisi_produk"-->
-<!--                        android:layout_width="0dp"-->
-<!--                        android:layout_height="wrap_content"-->
-<!--                        android:layout_weight="1"-->
-<!--                        android:padding="8dp"-->
-<!--                        style="@style/body_small"-->
-<!--                        android:background="@null"/>-->
+                    <Spinner
+                        android:id="@+id/spinner_kondisi_produk"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:padding="8dp"
+                        style="@style/body_small"
+                        android:background="@null"/>
 
-<!--                    &lt;!&ndash; Chevron Down Icon &ndash;&gt;-->
-<!--                    <ImageView-->
-<!--                        android:layout_width="16dp"-->
-<!--                        android:layout_height="16dp"-->
-<!--                        android:src="@drawable/ic_down"-->
-<!--                        android:layout_marginEnd="8dp"-->
-<!--                        android:contentDescription="Chevron Down" />-->
+                    <!-- Chevron Down Icon -->
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@drawable/ic_down"
+                        android:layout_marginEnd="8dp"
+                        android:contentDescription="Chevron Down" />
 
-<!--                </LinearLayout>-->
+                </LinearLayout>
 
-<!--            </LinearLayout>-->
+            </LinearLayout>
 
             <!-- Pre-Order -->
             <LinearLayout

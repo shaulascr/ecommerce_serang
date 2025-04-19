@@ -5,11 +5,13 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.alya.ecommerce_serang.data.api.dto.CategoryItem
+import com.alya.ecommerce_serang.data.api.dto.Preorder
 import com.alya.ecommerce_serang.data.api.dto.ProductsItem
-import com.alya.ecommerce_serang.data.api.response.product.CreateProductResponse
-import com.alya.ecommerce_serang.data.api.response.product.Product
-import com.alya.ecommerce_serang.data.api.response.product.ReviewsItem
-import com.alya.ecommerce_serang.data.api.response.product.StoreProduct
+import com.alya.ecommerce_serang.data.api.response.store.product.CreateProductResponse
+import com.alya.ecommerce_serang.data.api.response.customer.product.Product
+import com.alya.ecommerce_serang.data.api.response.customer.product.ReviewsItem
+import com.alya.ecommerce_serang.data.api.response.customer.product.StoreProduct
+import com.alya.ecommerce_serang.data.api.response.store.product.UpdateProductResponse
 import com.alya.ecommerce_serang.data.repository.ProductRepository
 import com.alya.ecommerce_serang.data.repository.Result
 import kotlinx.coroutines.launch
@@ -19,6 +21,9 @@ class ProductViewModel(private val repository: ProductRepository) : ViewModel() 
 
     private val _productCreationResult = MutableLiveData<Result<CreateProductResponse>>()
     val productCreationResult: LiveData<Result<CreateProductResponse>> get() = _productCreationResult
+
+    private val _productUpdateResult = MutableLiveData<Result<UpdateProductResponse>>()
+    val productUpdateResult: LiveData<Result<UpdateProductResponse>> get() = _productUpdateResult
 
     private val _productDetail = MutableLiveData<Product?>()
     val productDetail: LiveData<Product?> get() = _productDetail
@@ -49,6 +54,12 @@ class ProductViewModel(private val repository: ProductRepository) : ViewModel() 
         }
     }
 
+    fun loadPreorderProducts(productId: Int) {
+        viewModelScope.launch {
+
+        }
+    }
+
     fun loadMyStoreProducts() {
         viewModelScope.launch {
             _productList.value = Result.Loading
@@ -76,9 +87,10 @@ class ProductViewModel(private val repository: ProductRepository) : ViewModel() 
         minOrder: Int,
         weight: Int,
         isPreOrder: Boolean,
-        duration: Int,
+        preorder: Preorder,
         categoryId: Int,
         status: String,
+        condition: String,
         imagePart: MultipartBody.Part?,
         sppirtPart: MultipartBody.Part?,
         halalPart: MultipartBody.Part?
@@ -86,9 +98,28 @@ class ProductViewModel(private val repository: ProductRepository) : ViewModel() 
         _productCreationResult.value = Result.Loading
         viewModelScope.launch {
             val result = repository.addProduct(
-                name, description, price, stock, minOrder, weight, isPreOrder, duration, categoryId, status, imagePart, sppirtPart, halalPart
+                name, description, price, stock, minOrder, weight, isPreOrder, preorder, categoryId, status, condition, imagePart, sppirtPart, halalPart
             )
             _productCreationResult.value = result
+        }
+    }
+
+    fun updateProduct(productId: Int?, updatedProduct: Map<String, Any?>) {
+        _productUpdateResult.value = Result.Loading
+        viewModelScope.launch {
+            try {
+                val response = repository.updateProduct(productId, updatedProduct)
+                _productUpdateResult.value = Result.Success(response)
+            } catch (e: Exception) {
+                _productUpdateResult.value = Result.Error(e)
+            }
+        }
+    }
+
+    fun deleteProduct(productId: Int) {
+        viewModelScope.launch {
+            val result = repository.deleteProduct(productId)
+            // handle the response (loading, success, or error)
         }
     }
 

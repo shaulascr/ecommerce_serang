@@ -1,4 +1,4 @@
-package com.alya.ecommerce_serang.data.api.response.profile
+package com.alya.ecommerce_serang.data.api.response.customer.profile
 
 import com.alya.ecommerce_serang.data.api.dto.UserProfile
 import com.google.gson.annotations.SerializedName

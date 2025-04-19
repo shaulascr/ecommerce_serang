@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.alya.ecommerce_serang.data.api.response.profile.AddressesItem
+import com.alya.ecommerce_serang.data.api.response.customer.profile.AddressesItem
 import com.alya.ecommerce_serang.data.repository.OrderRepository
 import kotlinx.coroutines.launch
 
