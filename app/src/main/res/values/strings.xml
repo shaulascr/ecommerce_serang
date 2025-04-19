@@ -67,7 +67,7 @@
     <string name="no_available_orders">Tidak ada order</string>
     <string name="item_count_prod">%d produk</string>
     <string name="show_more_product">%d produk lainnya</string>
-<!--    status order-->
+    <!--    status order-->
     <string name="all_orders">Semua Pesanan </string>
     <string name="pending_orders">Menunggu Tagihan</string>
     <string name="unpaid_orders">Konfrimasi Bayar</string>
@@ -92,9 +92,6 @@
     <string name="claim_complaint">Ajukan Komplain </string>
     <string name="claim_order">Pesanan Diterima </string>
     <string name="add_review">Beri Ulasan </string>
-
-
-
 
 
 </resources>

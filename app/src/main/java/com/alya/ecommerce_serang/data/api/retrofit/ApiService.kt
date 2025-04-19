@@ -33,14 +33,18 @@ import com.alya.ecommerce_serang.data.api.response.product.StoreResponse
 import com.alya.ecommerce_serang.data.api.response.profile.AddressResponse
 import com.alya.ecommerce_serang.data.api.response.profile.CreateAddressResponse
 import com.alya.ecommerce_serang.data.api.response.profile.ProfileResponse
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
+import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.PUT
+import retrofit2.http.Part
 import retrofit2.http.Path
 
 interface ApiService {
@@ -97,6 +101,14 @@ interface ApiService {
     @POST("order/addevidence")
     suspend fun addEvidence(
         @Body request : AddEvidenceRequest,
+    ): Response<AddEvidenceResponse>
+
+    @Multipart
+    @POST("order/addevidence")
+    suspend fun addEvidenceMultipart(
+        @Part("order_id") orderId: RequestBody,
+        @Part("amount") amount: RequestBody,
+        @Part evidence: MultipartBody.Part
     ): Response<AddEvidenceResponse>
 
     @GET("order/{status}")

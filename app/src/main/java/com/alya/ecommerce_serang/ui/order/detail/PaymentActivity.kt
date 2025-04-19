@@ -1,5 +1,6 @@
 package com.alya.ecommerce_serang.ui.order.detail
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -14,6 +15,7 @@ import com.alya.ecommerce_serang.utils.SessionManager
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import java.util.TimeZone
 
 class PaymentActivity : AppCompatActivity() {
     private lateinit var binding: ActivityPaymentBinding
@@ -64,11 +66,12 @@ class PaymentActivity : AppCompatActivity() {
 
         // Setup button upload bukti bayar
         binding.btnUploadPaymentProof.setOnClickListener {
-            // Intent ke activity upload bukti bayar
-//            val intent = Intent(this, UploadPaymentProofActivity::class.java)
+//             Intent ke activity upload bukti bayar
+            val intent = Intent(this, AddEvidencePaymentActivity::class.java)
             intent.putExtra("ORDER_ID", orderId)
             intent.putExtra("PAYMENT_INFO_ID", paymentInfoId)
-            Log.d(TAG, "Received Order ID: $orderId, Payment Info ID: $paymentInfoId")
+            intent.putExtra("TOTAL_AMOUNT", binding.tvTotalAmount.text.toString())
+            Log.d(TAG, "Received Order ID: $orderId, Payment Info ID: $paymentInfoId, Total Amount: ${binding.tvTotalAmount.text}")
 
             startActivity(intent)
         }
@@ -127,9 +130,10 @@ class PaymentActivity : AppCompatActivity() {
         Log.d(TAG, "Setting up payment due date from updated at: $createdAt")
 
         try {
-            // Parse the created date
-            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-            val createdDate = dateFormat.parse(createdAt) ?: return
+            // Parse the ISO 8601 date
+            val isoDateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
+            isoDateFormat.timeZone = TimeZone.getTimeZone("UTC")
+            val createdDate = isoDateFormat.parse(createdAt) ?: return
 
             // Add 24 hours to get due date
             val calendar = Calendar.getInstance()
@@ -139,9 +143,8 @@ class PaymentActivity : AppCompatActivity() {
 
             // Format due date for display
             val dueDateFormat = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
-            binding.tvDueDate.text = "Jatuh tempo ${dueDateFormat.format(dueDate)}"
+            binding.tvDueDate.text = "Jatuh tempo: ${dueDateFormat.format(dueDate)}"
             Log.d(TAG, "Due Date: ${dueDateFormat.format(dueDate)}")
-
 
             // Calculate remaining time
             val now = Calendar.getInstance().time
@@ -152,12 +155,12 @@ class PaymentActivity : AppCompatActivity() {
                 val minutes = (diff % (60 * 60 * 1000)) / (60 * 1000)
                 binding.tvRemainingTime.text = "$hours jam $minutes menit"
                 Log.d(TAG, "Remaining Time: $hours hours $minutes minutes")
-
             } else {
                 binding.tvRemainingTime.text = "Waktu habis"
             }
         } catch (e: Exception) {
-            binding.tvDueDate.text = "Jatuh tempo -"
+            Log.e(TAG, "Error parsing date", e)
+            binding.tvDueDate.text = "Jatuh tempo: -"
             binding.tvRemainingTime.text = "-"
         }
     }

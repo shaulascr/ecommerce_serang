@@ -1,7 +1,7 @@
 package com.alya.ecommerce_serang.data.api.dto
 
 import com.google.gson.annotations.SerializedName
-import retrofit2.http.Multipart
+import okhttp3.MultipartBody
 
 data class AddEvidenceRequest (
     @SerializedName("orer_id")
@@ -11,5 +11,5 @@ data class AddEvidenceRequest (
     val amount : String,
 
     @SerializedName("evidence")
-    val evidence: Multipart
+    val evidence: MultipartBody.Part
 )

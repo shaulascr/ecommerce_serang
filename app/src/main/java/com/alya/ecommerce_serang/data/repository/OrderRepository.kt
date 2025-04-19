@@ -1,7 +1,7 @@
 package com.alya.ecommerce_serang.data.repository
 
 import android.util.Log
-import com.alya.ecommerce_serang.data.api.dto.AddEvidenceRequest
+import com.alya.ecommerce_serang.data.api.dto.AddEvidenceMultipartRequest
 import com.alya.ecommerce_serang.data.api.dto.CourierCostRequest
 import com.alya.ecommerce_serang.data.api.dto.CreateAddressRequest
 import com.alya.ecommerce_serang.data.api.dto.OrderRequest
@@ -246,30 +246,59 @@ class OrderRepository(private val apiService: ApiService) {
         }
     }
 
-    suspend fun uploadPaymentProof(request : AddEvidenceRequest): Result<AddEvidenceResponse> {
-        return try {
-            Log.d("OrderRepository", "Add Evidence : $request")
-            val response = apiService.addEvidence(request)
+//    suspend fun uploadPaymentProof(request : AddEvidenceRequest): Result<AddEvidenceResponse> {
+//        return try {
+//            Log.d("OrderRepository", "Add Evidence : $request")
+//            val response = apiService.addEvidence(request)
+//
+//            if (response.isSuccessful) {
+//                val addEvidenceResponse = response.body()
+//                if (addEvidenceResponse != null) {
+//                    Log.d("OrderRepository", "Add Evidence successfully: ${addEvidenceResponse.message}")
+//                    Result.Success(addEvidenceResponse)
+//                } else {
+//                    Log.e("OrderRepository", "Response body was null")
+//                    Result.Error(Exception("Empty response from server"))
+//                }
+//            } else {
+//                val errorBody = response.errorBody()?.string() ?: "Unknown error"
+//                Log.e("OrderRepository", "Error Add Evidence : $errorBody")
+//                Result.Error(Exception(errorBody))
+//            }
+//        } catch (e: Exception) {
+//            Log.e("OrderRepository", "Exception Add Evidence ", e)
+//            Result.Error(e)
+//        }
+//    }
+suspend fun uploadPaymentProof(request: AddEvidenceMultipartRequest): Result<AddEvidenceResponse> {
+    return try {
+        Log.d("OrderRepository", "Uploading payment proof...")
 
-            if (response.isSuccessful) {
-                val addEvidenceResponse = response.body()
-                if (addEvidenceResponse != null) {
-                    Log.d("OrderRepository", "Add Evidence successfully: ${addEvidenceResponse.message}")
-                    Result.Success(addEvidenceResponse)
-                } else {
-                    Log.e("OrderRepository", "Response body was null")
-                    Result.Error(Exception("Empty response from server"))
-                }
+        val response = apiService.addEvidenceMultipart(
+            orderId = request.orderId,
+            amount = request.amount,
+            evidence = request.evidence
+        )
+
+        if (response.isSuccessful) {
+            val addEvidenceResponse = response.body()
+            if (addEvidenceResponse != null) {
+                Log.d("OrderRepository", "Payment proof uploaded successfully: ${addEvidenceResponse.message}")
+                Result.Success(addEvidenceResponse)
             } else {
-                val errorBody = response.errorBody()?.string() ?: "Unknown error"
-                Log.e("OrderRepository", "Error Add Evidence : $errorBody")
-                Result.Error(Exception(errorBody))
+                Log.e("OrderRepository", "Response body was null")
+                Result.Error(Exception("Empty response from server"))
             }
-        } catch (e: Exception) {
-            Log.e("OrderRepository", "Exception Add Evidence ", e)
-            Result.Error(e)
+        } else {
+            val errorBody = response.errorBody()?.string() ?: "Unknown error"
+            Log.e("OrderRepository", "Error uploading payment proof: $errorBody")
+            Result.Error(Exception(errorBody))
         }
+    } catch (e: Exception) {
+        Log.e("OrderRepository", "Exception uploading payment proof", e)
+        Result.Error(e)
     }
+}
 
     suspend fun getOrderList(status: String): Result<OrderListResponse> {
         return try {

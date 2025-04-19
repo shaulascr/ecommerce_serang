@@ -5,9 +5,12 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.alya.ecommerce_serang.data.api.dto.AddEvidenceMultipartRequest
+import com.alya.ecommerce_serang.data.api.response.order.AddEvidenceResponse
 import com.alya.ecommerce_serang.data.api.response.order.OrderListItemsItem
 import com.alya.ecommerce_serang.data.api.response.order.Orders
 import com.alya.ecommerce_serang.data.repository.OrderRepository
+import com.alya.ecommerce_serang.data.repository.Result
 import kotlinx.coroutines.launch
 
 class PaymentViewModel(private val repository: OrderRepository) : ViewModel() {
@@ -31,6 +34,9 @@ class PaymentViewModel(private val repository: OrderRepository) : ViewModel() {
     private val _error = MutableLiveData<String>()
     val error: LiveData<String> get() = _error
 
+    private val _uploadResult = MutableLiveData<Result<AddEvidenceResponse>>()
+    val uploadResult: LiveData<com.alya.ecommerce_serang.data.repository.Result<AddEvidenceResponse>> = _uploadResult
+
     fun getOrderDetails(orderId: Int) {
         _isLoading.value = true
         viewModelScope.launch {
@@ -47,6 +53,19 @@ class PaymentViewModel(private val repository: OrderRepository) : ViewModel() {
                 Log.e(TAG, "Error fetching order details", e)
             } finally {
                 _isLoading.value = false
+            }
+        }
+    }
+
+    fun uploadPaymentProof(request: AddEvidenceMultipartRequest) {
+        viewModelScope.launch {
+            _uploadResult.value = com.alya.ecommerce_serang.data.repository.Result.Loading
+            try {
+                val result = repository.uploadPaymentProof(request)
+                _uploadResult.value = result
+            } catch (e: Exception) {
+                Log.e("PaymentProofViewModel", "Error uploading payment proof", e)
+                _uploadResult.value = com.alya.ecommerce_serang.data.repository.Result.Error(e)
             }
         }
     }
