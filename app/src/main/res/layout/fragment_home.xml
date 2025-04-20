@@ -6,34 +6,28 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.home.HomeFragment">
 
+    <include
+        android:id="@+id/searchContainer"
+        layout="@layout/view_search"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Home content in ScrollView -->
     <ScrollView
         android:id="@+id/home"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/searchContainer"
+        app:layout_constraintBottom_toBottomOf="parent">
 
+        <!-- Your existing home content here -->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <include
-                android:id="@+id/searchContainer"
-                layout="@layout/view_search"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <ProgressBar
-                android:id="@+id/progressBar"
-                style="?android:attr/progressBarStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:visibility="gone"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:visibility="visible" />
+            <!-- Remove searchContainer from here, it's now at the top level -->
 
             <androidx.viewpager2.widget.ViewPager2
                 android:id="@+id/banners"
@@ -41,7 +35,7 @@
                 android:layout_height="132dp"
                 android:layout_marginTop="4dp"
                 android:orientation="vertical"
-                app:layout_constraintTop_toBottomOf="@id/searchContainer"
+                app:layout_constraintTop_toTopOf="parent"
                 tools:layout_editor_absoluteX="16dp" />
 
             <TextView
@@ -122,6 +116,58 @@
                 tools:listitem="@layout/item_section_horizontal" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/searchResultsRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/searchContainer"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- All other search-related elements at the top level -->
+    <LinearLayout
+        android:id="@+id/searchHistoryHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/searchContainer">
+        <!-- ... -->
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/searchHistoryRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/searchHistoryHeader"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <TextView
+        android:id="@+id/noResultsText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="No results found"
+        android:textSize="16sp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/searchContainer" />
+
+    <ProgressBar
+        android:id="@+id/searchProgressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/searchContainer" />
 
     <include
         android:id="@+id/loading"

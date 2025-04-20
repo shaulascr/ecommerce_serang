@@ -4,19 +4,19 @@ import android.util.Log
 import com.alya.ecommerce_serang.data.api.dto.CartItem
 import com.alya.ecommerce_serang.data.api.dto.CategoryItem
 import com.alya.ecommerce_serang.data.api.dto.ProductsItem
-import com.alya.ecommerce_serang.data.api.response.product.CreateProductResponse
+import com.alya.ecommerce_serang.data.api.dto.SearchRequest
 import com.alya.ecommerce_serang.data.api.response.cart.AddCartResponse
+import com.alya.ecommerce_serang.data.api.response.product.CreateProductResponse
 import com.alya.ecommerce_serang.data.api.response.product.ProductResponse
 import com.alya.ecommerce_serang.data.api.response.product.ReviewsItem
+import com.alya.ecommerce_serang.data.api.response.product.Search
 import com.alya.ecommerce_serang.data.api.response.product.StoreProduct
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
-import com.alya.ecommerce_serang.utils.SessionManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
-import java.io.File
 
 class ProductRepository(private val apiService: ApiService) {
     suspend fun getAllProducts(): Result<List<ProductsItem>> =
@@ -191,6 +191,70 @@ class ProductRepository(private val apiService: ApiService) {
             Result.Error(e)
         }
     }
+
+    suspend fun searchProducts(query: String): Result<List<ProductsItem>> =
+        withContext(Dispatchers.IO) {
+            try {
+                // First save the search query
+                saveSearchQuery(query)
+
+                // Then fetch all products
+                val response = apiService.getAllProduct()
+
+                if (response.isSuccessful) {
+                    val allProducts = response.body()?.products ?: emptyList()
+
+                    // Filter products based on the search query
+                    val filteredProducts = allProducts.filter { product ->
+                        product.name.contains(query, ignoreCase = true) ||
+                                (product.description?.contains(query, ignoreCase = true) ?: false)
+                    }
+
+                    Log.d(TAG, "Found ${filteredProducts.size} products matching '$query'")
+                    Result.Success(filteredProducts)
+                } else {
+                    Result.Error(Exception("Failed to fetch products for search. Code: ${response.code()}"))
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error searching products", e)
+                Result.Error(e)
+            }
+        }
+
+    suspend fun saveSearchQuery(query: String): Result<Search?> =
+        withContext(Dispatchers.IO) {
+            try {
+                val response = apiService.saveSearchQuery(SearchRequest(query))
+
+                if (response.isSuccessful) {
+                    Result.Success(response.body()?.search)
+                } else {
+                    Log.e(TAG, "Failed to save search query. Code: ${response.code()}")
+                    Result.Error(Exception("Failed to save search query"))
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error saving search query", e)
+                Result.Error(e)
+            }
+        }
+
+    suspend fun getSearchHistory(): Result<List<String>> =
+        withContext(Dispatchers.IO) {
+            try {
+                val response = apiService.getSearchHistory()
+
+                if (response.isSuccessful) {
+                    val searches = response.body()?.data?.map { it.searchQuery } ?: emptyList()
+                    Result.Success(searches)
+                } else {
+                    Log.e(TAG, "Failed to fetch search history. Code: ${response.code()}")
+                    Result.Error(Exception("Failed to fetch search history"))
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error fetching search history", e)
+                Result.Error(e)
+            }
+        }
 
 
     companion object {

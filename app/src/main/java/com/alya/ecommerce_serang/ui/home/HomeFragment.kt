@@ -6,12 +6,14 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.dto.CategoryItem
@@ -63,6 +65,8 @@ class HomeFragment : Fragment() {
         initUi()
         setupRecyclerView()
         observeData()
+        setupSearchView()
+
     }
 
     private fun setupRecyclerView() {
@@ -95,6 +99,40 @@ class HomeFragment : Fragment() {
         }
     }
 
+    private fun setupSearchView() {
+        binding.searchContainer.search.apply {
+            // When user clicks the search box, navigate to search fragment
+            setOnClickListener {
+                findNavController().navigate(
+                    HomeFragmentDirections.actionHomeFragmentToSearchHomeFragment(null)
+                )
+            }
+
+// Handle search action if user presses search on keyboard
+            setOnEditorActionListener { _, actionId, _ ->
+                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                    val query = text.toString().trim()
+                    if (query.isNotEmpty()) {
+                        findNavController().navigate(
+                            HomeFragmentDirections.actionHomeFragmentToSearchHomeFragment(query)
+                        )
+                    }
+                    return@setOnEditorActionListener true
+                }
+                false
+            }
+        }
+
+        // Setup cart and notification buttons
+        binding.searchContainer.btnCart.setOnClickListener {
+            // Navigate to cart
+        }
+
+        binding.searchContainer.btnNotification.setOnClickListener {
+            // Navigate to notifications
+        }
+    }
+
     private fun observeData() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -109,7 +147,7 @@ class HomeFragment : Fragment() {
                             binding.loading.root.isVisible = false
                             binding.error.root.isVisible = false
                             binding.home.isVisible = true
-                            productAdapter?.updateLimitedProducts(state.products) // Ensure productAdapter is initialized
+                            productAdapter?.updateLimitedProducts(state.products)
                         }
                         is HomeUiState.Error -> {
                             binding.loading.root.isVisible = false
@@ -125,17 +163,15 @@ class HomeFragment : Fragment() {
             }
         }
 
-    viewLifecycleOwner.lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.categories.collect { categories ->
                     Log.d("Categories", "Updated Categories: $categories")
-                    categories.forEach { Log.d("Category Image", "Category: ${it.name}, Image: ${it.image}") }
                     categoryAdapter?.updateLimitedCategory(categories)
                 }
             }
         }
     }
-
 
     private fun initUi() {
         // For LightStatusBar
@@ -161,7 +197,6 @@ class HomeFragment : Fragment() {
         )
     }
 
-
     private fun handleProductClick(product: ProductsItem) {
         val intent = Intent(requireContext(), DetailProductActivity::class.java)
         intent.putExtra("PRODUCT_ID", product.id) // Pass product ID
@@ -169,7 +204,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun handleCategoryProduct(category: CategoryItem) {
-
+        // Your implementation
     }
 
     override fun onDestroyView() {
@@ -179,7 +214,7 @@ class HomeFragment : Fragment() {
         _binding = null
     }
 
-    private fun showLoading(isLoading: Boolean) {
-        binding.progressBar.isVisible = isLoading
-    }
+//    private fun showLoading(isLoading: Boolean) {
+//        binding.progressBar.isVisible = isLoading
+//    }
 }

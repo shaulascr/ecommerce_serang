@@ -9,7 +9,11 @@
         android:id="@+id/homeFragment"
         android:name="com.alya.ecommerce_serang.ui.home.HomeFragment"
         android:label="fragment_home"
-        tools:layout="@layout/fragment_home" />
+        tools:layout="@layout/fragment_home">
+        <action
+            android:id="@+id/action_homeFragment_to_searchHomeFragment"
+            app:destination="@id/searchHomeFragment" />
+    </fragment>
     <fragment
         android:id="@+id/profileFragment"
         android:name="com.alya.ecommerce_serang.ui.profile.ProfileFragment"
@@ -20,6 +24,16 @@
         android:name="com.alya.ecommerce_serang.ui.chat.ChatFragment"
         android:label="fragment_chat"
         tools:layout="@layout/fragment_chat" />
+    <fragment
+        android:id="@+id/searchHomeFragment"
+        android:name="com.alya.ecommerce_serang.ui.home.SearchHomeFragment"
+        android:label="Search"
+        tools:layout="@layout/fragment_search_home">
+        <argument
+            android:name="query"
+            app:argType="string"
+            app:nullable="true" />
+    </fragment>
     <activity
         android:id="@+id/registerActivity"
         android:name="com.alya.ecommerce_serang.ui.auth.RegisterActivity"

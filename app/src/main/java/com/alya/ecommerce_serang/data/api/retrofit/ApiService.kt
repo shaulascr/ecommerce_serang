@@ -10,11 +10,9 @@ import com.alya.ecommerce_serang.data.api.dto.OrderRequest
 import com.alya.ecommerce_serang.data.api.dto.OrderRequestBuy
 import com.alya.ecommerce_serang.data.api.dto.OtpRequest
 import com.alya.ecommerce_serang.data.api.dto.RegisterRequest
+import com.alya.ecommerce_serang.data.api.dto.SearchRequest
 import com.alya.ecommerce_serang.data.api.dto.UpdateCart
-import com.alya.ecommerce_serang.data.api.response.product.CreateProductResponse
 import com.alya.ecommerce_serang.data.api.response.ViewStoreProductsResponse
-import okhttp3.MultipartBody
-import okhttp3.RequestBody
 import com.alya.ecommerce_serang.data.api.response.auth.LoginResponse
 import com.alya.ecommerce_serang.data.api.response.auth.OtpResponse
 import com.alya.ecommerce_serang.data.api.response.auth.RegisterResponse
@@ -32,21 +30,22 @@ import com.alya.ecommerce_serang.data.api.response.order.OrderDetailResponse
 import com.alya.ecommerce_serang.data.api.response.order.OrderListResponse
 import com.alya.ecommerce_serang.data.api.response.product.AllProductResponse
 import com.alya.ecommerce_serang.data.api.response.product.CategoryResponse
+import com.alya.ecommerce_serang.data.api.response.product.CreateProductResponse
+import com.alya.ecommerce_serang.data.api.response.product.CreateSearchResponse
 import com.alya.ecommerce_serang.data.api.response.product.DetailStoreProductResponse
 import com.alya.ecommerce_serang.data.api.response.product.ProductResponse
 import com.alya.ecommerce_serang.data.api.response.product.ReviewProductResponse
+import com.alya.ecommerce_serang.data.api.response.product.SearchHistoryResponse
 import com.alya.ecommerce_serang.data.api.response.product.StoreResponse
 import com.alya.ecommerce_serang.data.api.response.profile.AddressResponse
 import com.alya.ecommerce_serang.data.api.response.profile.CreateAddressResponse
 import com.alya.ecommerce_serang.data.api.response.profile.ProfileResponse
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.Body
-import retrofit2.http.Field
-import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
-import retrofit2.http.Header
-import retrofit2.http.HeaderMap
 import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.PUT
@@ -202,4 +201,12 @@ interface ApiService {
         @Part("description") description: RequestBody,
         @Part complaintimg: MultipartBody.Part
     ): Response<ComplaintResponse>
+
+    @POST("search")
+    suspend fun saveSearchQuery(
+        @Body searchRequest: SearchRequest
+    ): Response<CreateSearchResponse>
+
+    @GET("search")
+    suspend fun getSearchHistory(): Response<SearchHistoryResponse>
 }

@@ -8,7 +8,11 @@ data class RegisterRequest (
     val password: String?,
     val username: String?,
     val phone: String?,
-    @SerializedName("birth_date") val birthDate: String?,
-    @SerializedName("userimg") val image: String?,
+    @SerializedName("birth_date")
+    val birthDate: String?,
+
+    @SerializedName("userimg")
+    val image: String?,
+
     val otp: String? = null
 )
