@@ -75,7 +75,6 @@
                 <Button
                     android:id="@+id/btn_edit_profile"
                     android:text="Ubah Profil Toko"
-                    android:textColor="@color/blue_500"
                     style="@style/button.small.secondary.short"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
@@ -83,7 +82,7 @@
 
                 <View
                     android:id="@+id/line_profile"
-                    android:layout_width="380dp"
+                    android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:layout_marginTop="10dp"
                     android:background="@color/black_50"
