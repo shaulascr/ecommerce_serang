@@ -10,6 +10,7 @@ import com.alya.ecommerce_serang.data.api.dto.OrderRequestBuy
 import com.alya.ecommerce_serang.data.api.dto.UserProfile
 import com.alya.ecommerce_serang.data.api.response.cart.DataItem
 import com.alya.ecommerce_serang.data.api.response.order.AddEvidenceResponse
+import com.alya.ecommerce_serang.data.api.response.order.ComplaintResponse
 import com.alya.ecommerce_serang.data.api.response.order.CompletedOrderResponse
 import com.alya.ecommerce_serang.data.api.response.order.CourierCostResponse
 import com.alya.ecommerce_serang.data.api.response.order.CreateOrderResponse
@@ -23,7 +24,16 @@ import com.alya.ecommerce_serang.data.api.response.product.StoreResponse
 import com.alya.ecommerce_serang.data.api.response.profile.AddressResponse
 import com.alya.ecommerce_serang.data.api.response.profile.CreateAddressResponse
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.Response
+import java.io.File
 
 class OrderRepository(private val apiService: ApiService) {
 
@@ -350,5 +360,76 @@ suspend fun uploadPaymentProof(request: AddEvidenceMultipartRequest): Result<Add
             Result.Error(e)
         }
     }
+
+    fun submitComplaint(
+        orderId: String,
+        reason: String,
+        imageFile: File?
+    ): Flow<Result<ComplaintResponse>> = flow {
+        emit(Result.Loading)
+
+        try {
+            // Debug logging
+            Log.d("OrderRepository", "Submitting complaint for order: $orderId")
+            Log.d("OrderRepository", "Reason: $reason")
+            Log.d("OrderRepository", "Image file: ${imageFile?.absolutePath ?: "null"}")
+
+            // Create form data for the multipart request
+            // Explicitly convert orderId to string to ensure correct formatting
+            val orderIdRequestBody = orderId.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+            val reasonRequestBody = reason.toRequestBody("text/plain".toMediaTypeOrNull())
+
+            // Create the image part for the API
+            val imagePart = if (imageFile != null && imageFile.exists()) {
+                // Use the actual image file
+                // Use asRequestBody() for files which is more efficient
+                val imageRequestBody = imageFile.asRequestBody("image/*".toMediaTypeOrNull())
+                MultipartBody.Part.createFormData(
+                    "complaintimg",
+                    imageFile.name,
+                    imageRequestBody
+                )
+            } else {
+                // Create a simple empty part if no image
+                val dummyRequestBody = "".toRequestBody("text/plain".toMediaTypeOrNull())
+                MultipartBody.Part.createFormData(
+                    "complaintimg",
+                    "",
+                    dummyRequestBody
+                )
+            }
+
+            // Log request details before making the API call
+            Log.d("OrderRepository", "Making API call to add complaint")
+            Log.d("OrderRepository", "orderId: $orderId (as string)")
+
+            val response = apiService.addComplaint(
+                orderIdRequestBody,
+                reasonRequestBody,
+                imagePart
+            )
+
+            Log.d("OrderRepository", "Response code: ${response.code()}")
+            Log.d("OrderRepository", "Response message: ${response.message()}")
+
+            if (response.isSuccessful && response.body() != null) {
+                val complaintResponse = response.body() as ComplaintResponse
+                emit(Result.Success(complaintResponse))
+            } else {
+                // Get the error message from the response if possible
+                val errorBody = response.errorBody()?.string()
+                val errorMessage = if (!errorBody.isNullOrEmpty()) {
+                    "Server error: $errorBody"
+                } else {
+                    "Failed to submit complaint: ${response.code()} ${response.message()}"
+                }
+                Log.e("OrderRepository", errorMessage)
+                emit(Result.Error(Exception(errorMessage)))
+            }
+        } catch (e: Exception) {
+            Log.e("OrderRepository", "Error submitting complaint: ${e.message}")
+            emit(Result.Error(e))
+        }
+    }.flowOn(Dispatchers.IO)
 
 }

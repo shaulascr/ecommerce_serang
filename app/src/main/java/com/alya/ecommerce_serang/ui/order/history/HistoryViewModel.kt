@@ -12,6 +12,7 @@ import com.alya.ecommerce_serang.data.repository.OrderRepository
 import com.alya.ecommerce_serang.data.repository.Result
 import com.alya.ecommerce_serang.ui.order.address.ViewState
 import kotlinx.coroutines.launch
+import java.io.File
 
 class HistoryViewModel(private val repository: OrderRepository) : ViewModel()  {
 
@@ -24,6 +25,15 @@ class HistoryViewModel(private val repository: OrderRepository) : ViewModel()  {
 
     private val _orderCompletionStatus = MutableLiveData<Result<CompletedOrderResponse>>()
     val orderCompletionStatus: LiveData<Result<CompletedOrderResponse>> = _orderCompletionStatus
+
+    private val _isLoading = MutableLiveData<Boolean>()
+    val isLoading: LiveData<Boolean> = _isLoading
+
+    private val _message = MutableLiveData<String>()
+    val message: LiveData<String> = _message
+
+    private val _isSuccess = MutableLiveData<Boolean>()
+    val isSuccess: LiveData<Boolean> = _isSuccess
 
     fun getOrderList(status: String) {
         _orders.value = ViewState.Loading
@@ -51,12 +61,42 @@ class HistoryViewModel(private val repository: OrderRepository) : ViewModel()  {
         }
     }
     fun confirmOrderCompleted(orderId: Int, status: String) {
+        Log.d(TAG, "Confirming order completed: orderId=$orderId, status=$status")
         viewModelScope.launch {
             _orderCompletionStatus.value = Result.Loading
             val request = CompletedOrderRequest(orderId, status)
 
+            Log.d(TAG, "Sending order completion request: $request")
             val result = repository.confirmOrderCompleted(request)
+            Log.d(TAG, "Order completion result: $result")
             _orderCompletionStatus.value = result
+        }
+    }
+
+    fun cancelOrderWithImage(orderId: String, reason: String, imageFile: File?) {
+        Log.d(TAG, "Cancelling order with image: orderId=$orderId, reason=$reason, hasImage=${imageFile != null}")
+        viewModelScope.launch {
+            repository.submitComplaint(orderId, reason, imageFile).collect { result ->
+                when (result) {
+                    is Result.Loading -> {
+                        Log.d(TAG, "Submitting complaint: Loading")
+                        _isLoading.value = true
+                    }
+                    is Result.Success -> {
+                        Log.d(TAG, "Complaint submitted successfully: ${result.data.message}")
+                        _message.value = result.data.message
+                        _isSuccess.value = true
+                        _isLoading.value = false
+                    }
+                    is Result.Error -> {
+                        val errorMessage = result.exception.message ?: "Error submitting complaint"
+                        Log.e(TAG, "Error submitting complaint: $errorMessage", result.exception)
+                        _message.value = errorMessage
+                        _isSuccess.value = false
+                        _isLoading.value = false
+                    }
+                }
+            }
         }
     }
 }

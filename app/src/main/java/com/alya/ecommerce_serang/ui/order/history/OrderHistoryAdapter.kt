@@ -1,17 +1,31 @@
 package com.alya.ecommerce_serang.ui.order.history
 
+import android.app.Activity
+import android.app.Dialog
 import android.content.Intent
+import android.graphics.Color
+import android.net.Uri
+import android.provider.MediaStore
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.Window
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
+import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
+import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.response.order.OrdersItem
 import com.alya.ecommerce_serang.ui.order.detail.PaymentActivity
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.textfield.TextInputLayout
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -128,6 +142,13 @@ class OrderHistoryAdapter(
                         visibility = View.VISIBLE
                         text = itemView.context.getString(R.string.dl_pending)
                     }
+                    btnLeft.apply {
+                        visibility = View.VISIBLE
+                        text = itemView.context.getString(R.string.canceled_order_btn)
+                        setOnClickListener {
+                            showCancelOrderDialog(order.orderId.toString())
+                        }
+                    }
                     deadlineDate.apply {
                         visibility = View.VISIBLE
                         text = formatDate(order.createdAt)
@@ -146,6 +167,7 @@ class OrderHistoryAdapter(
                         visibility = View.VISIBLE
                         text = itemView.context.getString(R.string.canceled_order_btn)
                         setOnClickListener {
+                            showCancelOrderDialog(order.orderId.toString())
                         }
                     }
 
@@ -177,7 +199,13 @@ class OrderHistoryAdapter(
                         visibility = View.VISIBLE
                         text = itemView.context.getString(R.string.dl_processed)
                     }
-
+                    btnLeft.apply {
+                        visibility = View.VISIBLE
+                        text = itemView.context.getString(R.string.canceled_order_btn)
+                        setOnClickListener {
+                            showCancelOrderDialog(order.orderId.toString())
+                        }
+                    }
                 }
                 "shipped" -> {
                     // Untuk status shipped, tampilkan "Lacak Pengiriman" dan "Terima Barang"
@@ -193,6 +221,7 @@ class OrderHistoryAdapter(
                         visibility = View.VISIBLE
                         text = itemView.context.getString(R.string.claim_complaint)
                         setOnClickListener {
+                            showCancelOrderDialog(order.orderId.toString())
                             // Handle click event
                         }
                     }
@@ -316,6 +345,159 @@ class OrderHistoryAdapter(
             } catch (e: Exception) {
                 Log.e("ShipmentDateFormatting", "Error formatting shipment date: ${e.message}")
                 dateString
+            }
+        }
+
+        private fun showCancelOrderDialog(orderId: String) {
+            val context = itemView.context
+            val dialog = Dialog(context)
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+            dialog.setContentView(R.layout.dialog_cancel_order)
+            dialog.setCancelable(true)
+
+            // Set the dialog width to match parent
+            val window = dialog.window
+            window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+
+            // Get references to the views in the dialog
+            val spinnerCancelReason = dialog.findViewById<AutoCompleteTextView>(R.id.spinnerCancelReason)
+            val tilCancelReason = dialog.findViewById<TextInputLayout>(R.id.tilCancelReason)
+            val btnCancelDialog = dialog.findViewById<MaterialButton>(R.id.btnCancelDialog)
+            val btnConfirmCancel = dialog.findViewById<MaterialButton>(R.id.btnConfirmCancel)
+            val ivComplaintImage = dialog.findViewById<ImageView>(R.id.ivComplaintImage)
+            val tvSelectImage = dialog.findViewById<TextView>(R.id.tvSelectImage)
+
+            // Set up the reasons dropdown
+            val reasons = context.resources.getStringArray(R.array.cancellation_reasons)
+            val adapter = ArrayAdapter(context, android.R.layout.simple_dropdown_item_1line, reasons)
+            spinnerCancelReason.setAdapter(adapter)
+
+            // For storing the selected image URI
+            var selectedImageUri: Uri? = null
+
+            // Set click listener for image selection
+            ivComplaintImage.setOnClickListener {
+                // Create an intent to open the image picker
+                val galleryIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+                (context as? Activity)?.startActivityForResult(galleryIntent, REQUEST_IMAGE_PICK)
+
+                // Set up result handler in the activity
+                val activity = context as? Activity
+                activity?.let {
+                    // Remove any existing callbacks to avoid memory leaks
+                    if (imagePickCallback != null) {
+                        imagePickCallback = null
+                    }
+
+                    // Create a new callback for this specific dialog
+                    imagePickCallback = { uri ->
+                        selectedImageUri = uri
+
+                        // Load and display the selected image
+                        ivComplaintImage.setImageURI(uri)
+                        tvSelectImage.visibility = View.GONE
+                    }
+                }
+            }
+
+            // Set click listeners for buttons
+            btnCancelDialog.setOnClickListener {
+                dialog.dismiss()
+            }
+
+            btnConfirmCancel.setOnClickListener {
+                val reason = spinnerCancelReason.text.toString().trim()
+
+                if (reason.isEmpty()) {
+                    tilCancelReason.error = context.getString(R.string.please_select_cancellation_reason)
+                    return@setOnClickListener
+                }
+
+                // Clear error if any
+                tilCancelReason.error = null
+
+                // Convert selected image to file if available
+                val imageFile = selectedImageUri?.let { uri ->
+                    try {
+                        // Get the file path from URI
+                        val filePathColumn = arrayOf(MediaStore.Images.Media.DATA)
+                        val cursor = context.contentResolver.query(uri, filePathColumn, null, null, null)
+                        cursor?.use {
+                            if (it.moveToFirst()) {
+                                val columnIndex = it.getColumnIndex(filePathColumn[0])
+                                val filePath = it.getString(columnIndex)
+                                return@let File(filePath)
+                            }
+                        }
+                        null
+                    } catch (e: Exception) {
+                        Log.e("OrderHistoryAdapter", "Error getting file from URI: ${e.message}")
+                        null
+                    }
+                }
+
+                // Show loading indicator
+                val loadingView = View(context).apply {
+                    layoutParams = ViewGroup.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT
+                    )
+                    setBackgroundColor(Color.parseColor("#80000000"))
+
+                    val progressBar = ProgressBar(context).apply {
+                        layoutParams = ViewGroup.LayoutParams(
+                            ViewGroup.LayoutParams.WRAP_CONTENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT
+                        )
+                    }
+
+//                    addView(progressBar)
+//                    (progressBar.layoutParams as? ViewGroup.MarginLayoutParams)?.apply {
+//                        gravity = Gravity.CENTER
+//                    }
+                }
+
+                dialog.addContentView(loadingView, loadingView.layoutParams)
+
+                // Call the ViewModel to cancel the order with image
+                viewModel.cancelOrderWithImage(orderId, reason, imageFile)
+
+                // Observe for success/failure
+                viewModel.isSuccess.observe(itemView.findViewTreeLifecycleOwner()!!) { isSuccess ->
+                    // Remove loading indicator
+                    (loadingView.parent as? ViewGroup)?.removeView(loadingView)
+
+                    if (isSuccess) {
+                        Toast.makeText(context, context.getString(R.string.order_canceled_successfully), Toast.LENGTH_SHORT).show()
+                        dialog.dismiss()
+
+                        // Find the order in the list and remove it or update its status
+                        val position = orders.indexOfFirst { it.orderId.toString() == orderId }
+                        if (position != -1) {
+                            orders.removeAt(position)
+                            notifyItemRemoved(position)
+                            notifyItemRangeChanged(position, orders.size)
+                        }
+                    } else {
+                        Toast.makeText(context, viewModel.message.value ?: context.getString(R.string.failed_to_cancel_order), Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+            dialog.show()
+        }
+    }
+
+    companion object {
+        private const val REQUEST_IMAGE_PICK = 100
+        private var imagePickCallback: ((Uri) -> Unit)? = null
+
+        // This method should be called from the activity's onActivityResult
+        fun handleImageResult(requestCode: Int, resultCode: Int, data: Intent?) {
+            if (requestCode == REQUEST_IMAGE_PICK && resultCode == Activity.RESULT_OK && data != null) {
+                val selectedImageUri = data.data
+                selectedImageUri?.let { uri ->
+                    imagePickCallback?.invoke(uri)
+                }
             }
         }
     }

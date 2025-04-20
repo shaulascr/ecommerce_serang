@@ -93,5 +93,29 @@
     <string name="claim_order">Pesanan Diterima </string>
     <string name="add_review">Beri Ulasan </string>
 
+    <string name="warning_icon">Warning Icon</string>
+    <string name="cancel_order_confirmation">Apakah anda yakin ingin membatalkan pesanan?</string>
+    <string name="reason_for_cancellation">Alasan Batalkan Pesanan</string>
+    <string name="cancel">Kembali</string>
+    <string name="confirm">Batalkan Pesanan</string>
+    <string name="order_canceled_successfully">Order canceled successfully</string>
+    <string name="failed_to_cancel_order">Failed to cancel order</string>
+    <string name="please_select_cancellation_reason">Please select a reason for cancellation</string>
+    <string name="upload_evidence">Unggah Bukti Komplain</string>
+    <string name="complaint_image">Complaint evidence image</string>
+    <string name="tap_to_select_image">Tekan untuk unggah foto</string>
+    <string name="please_select_image">Please select an image as evidence</string>
+    <string name="image_too_large">Image is too large. Please select a smaller image.</string>
+
+    <!-- Cancellation Reasons -->
+    <string-array name="cancellation_reasons">
+        <item>Found a better price elsewhere</item>
+        <item>Changed my mind about the product</item>
+        <item>Ordered the wrong item</item>
+        <item>Shipping time is too long</item>
+        <item>Financial reasons</item>
+        <item>Other reason</item>
+    </string-array>
+
 
 </resources>

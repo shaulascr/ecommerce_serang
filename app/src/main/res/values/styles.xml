@@ -7,4 +7,22 @@
         <item name="android:padding">12dp</item>
         <!-- Add more style attributes as needed -->
     </style>
+
+    <style name="RoundedBorderStyle">
+        <!-- This style can be applied to views -->
+<!--        <item name="android:background">@drawable/bg_button_outline</item>-->
+        <item name="strokeColor">@color/blue_500</item>
+        <item name="strokeWidth">2dp</item>
+        <item name="cornerRadius">8dp</item>
+        <item name="backgroundTint">@android:color/transparent</item>
+    </style>
+
+    <style name="RoundedBorderStyleFilled">
+        <!-- This style can be applied to views -->
+        <!--        <item name="android:background">@drawable/bg_button_outline</item>-->
+        <item name="strokeColor">@color/blue_500</item>
+        <item name="strokeWidth">2dp</item>
+        <item name="cornerRadius">8dp</item>
+        <item name="backgroundTint">@color/blue_500</item>
+    </style>
 </resources>

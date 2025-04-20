@@ -19,6 +19,7 @@ import com.alya.ecommerce_serang.data.api.response.cart.AddCartResponse
 import com.alya.ecommerce_serang.data.api.response.cart.ListCartResponse
 import com.alya.ecommerce_serang.data.api.response.cart.UpdateCartResponse
 import com.alya.ecommerce_serang.data.api.response.order.AddEvidenceResponse
+import com.alya.ecommerce_serang.data.api.response.order.ComplaintResponse
 import com.alya.ecommerce_serang.data.api.response.order.CompletedOrderResponse
 import com.alya.ecommerce_serang.data.api.response.order.CourierCostResponse
 import com.alya.ecommerce_serang.data.api.response.order.CreateOrderResponse
@@ -187,4 +188,12 @@ interface ApiService {
     suspend fun confirmOrder(
         @Body confirmOrder : CompletedOrderRequest
     ): Response<CompletedOrderResponse>
+
+    @Multipart
+    @POST("addcomplaint")
+    suspend fun addComplaint(
+        @Part("order_id") orderId: RequestBody,
+        @Part("description") description: RequestBody,
+        @Part complaintimg: MultipartBody.Part
+    ): Response<ComplaintResponse>
 }
