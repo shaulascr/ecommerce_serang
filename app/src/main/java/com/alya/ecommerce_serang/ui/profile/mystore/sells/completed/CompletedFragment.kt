@@ -1,4 +1,4 @@
-package com.alya.ecommerce_serang.ui.profile.mystore.sells.all_sells
+package com.alya.ecommerce_serang.ui.profile.mystore.sells.completed
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -9,18 +9,18 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.alya.ecommerce_serang.R
-import com.alya.ecommerce_serang.databinding.FragmentAllSellsBinding
+import com.alya.ecommerce_serang.databinding.FragmentCompletedBinding
 import com.alya.ecommerce_serang.utils.viewmodel.SellsViewModel
 
-class AllSellsFragment : Fragment() {
+class CompletedFragment : Fragment() {
     private lateinit var viewModel: SellsViewModel
-    private lateinit var binding: FragmentAllSellsBinding
+    private lateinit var binding: FragmentCompletedBinding
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        binding = FragmentAllSellsBinding.inflate(inflater, container, false)
+        binding = FragmentCompletedBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -30,12 +30,12 @@ class AllSellsFragment : Fragment() {
         viewModel = ViewModelProvider(this).get(SellsViewModel::class.java)
 
 //        val adapter = SellsAdapter()
-//        binding.rvAllSells.layoutManager = LinearLayoutManager(context)
-//        binding.rvAllSells.adapter = adapter
+//        binding.rvCompleted.layoutManager = LinearLayoutManager(context)
+//        binding.rvCompleted.adapter = adapter
 //
-//        viewModel.loadAllSells()
-//        viewModel.sellsList.observe(viewLifecycleOwner, Observer { sells ->
-//            adapter.submitList(sells)
+//        viewModel.loadOrdersByStatus("delivered")
+//        viewModel.sellsList.observe(viewLifecycleOwner, Observer { completed ->
+//            adapter.submitList(completed)
 //        })
     }
 }

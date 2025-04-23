@@ -5,6 +5,8 @@ import com.alya.ecommerce_serang.data.api.dto.CourierCostRequest
 import com.alya.ecommerce_serang.data.api.dto.CreateAddressRequest
 import com.alya.ecommerce_serang.data.api.dto.OrderRequest
 import com.alya.ecommerce_serang.data.api.dto.OrderRequestBuy
+import com.alya.ecommerce_serang.data.api.dto.OrdersItem
+import com.alya.ecommerce_serang.data.api.dto.ProductsItem
 import com.alya.ecommerce_serang.data.api.response.customer.cart.DataItem
 import com.alya.ecommerce_serang.data.api.response.customer.order.CourierCostResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.CreateOrderResponse
@@ -207,4 +209,33 @@ class OrderRepository(private val apiService: ApiService) {
         return if (response.isSuccessful) response.body() else null
     }
 
+    suspend fun fetchSells(): List<OrdersItem?> {
+        return try {
+            val response = apiService.getAllOrders() // Replace with the actual method from your ApiService
+            if (response.isSuccessful) {
+                response.body()?.orders ?: emptyList() // Assuming the response body has 'orders'
+            } else {
+                Log.e("OrderRepository", "Error fetching all sells. Code: ${response.code()}")
+                emptyList()
+            }
+        } catch (e: Exception) {
+            Log.e("OrderRepository", "Exception fetching sells", e)
+            emptyList()
+        }
+    }
+
+    suspend fun fetchOrdersByStatus(status: String): List<OrdersItem?> {
+        return try {
+            val response = apiService.getOrdersByStatus(status) // Replace with actual method for status-based fetch
+            if (response.isSuccessful) {
+                response.body()?.orders?.filterNotNull() ?: emptyList() // Assuming the response body has 'orders'
+            } else {
+                Log.e("OrderRepository", "Error fetching orders by status ($status). Code: ${response.code()}")
+                emptyList()
+            }
+        } catch (e: Exception) {
+            Log.e("OrderRepository", "Exception fetching orders by status", e)
+            emptyList()
+        }
+    }
 }

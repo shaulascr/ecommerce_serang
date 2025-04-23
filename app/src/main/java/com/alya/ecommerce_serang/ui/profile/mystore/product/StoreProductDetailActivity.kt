@@ -169,30 +169,30 @@ class StoreProductDetailActivity : AppCompatActivity() {
         }
     }
 
-    private fun populateForm(product: Product) {
-        binding.edtNamaProduk.setText(product.name)
-        binding.edtDeskripsiProduk.setText(product.description)
-        binding.edtHargaProduk.setText(product.price.toString())
-        binding.edtStokProduk.setText(product.stock.toString())
-        binding.edtMinOrder.setText(product.minOrder.toString())
-        binding.edtBeratProduk.setText(product.weight.toString())
-        binding.switchIsPreOrder.isChecked = product.isPreOrder ?: false
-        binding.switchIsActive.isChecked = product.status == "active"
-        binding.spinnerKondisiProduk.setSelection(if (product.condition == "Baru") 0 else 1)
+    private fun populateForm(product: Product?) {
+        binding.edtNamaProduk.setText(product?.name)
+        binding.edtDeskripsiProduk.setText(product?.description)
+        binding.edtHargaProduk.setText(product?.price.toString())
+        binding.edtStokProduk.setText(product?.stock.toString())
+        binding.edtMinOrder.setText(product?.minOrder.toString())
+        binding.edtBeratProduk.setText(product?.weight.toString())
+        binding.switchIsPreOrder.isChecked = product?.isPreOrder ?: false
+        binding.switchIsActive.isChecked = product?.status == "active"
+        binding.spinnerKondisiProduk.setSelection(if (product?.condition == "Baru") 0 else 1)
 
-        product.categoryId?.let {
+        product?.categoryId?.let {
             binding.spinnerKategoriProduk.setSelection(categoryList.indexOfFirst { it.id == product.categoryId })
         }
 
-        Glide.with(this).load(product.image).into(binding.ivPreviewFoto)
+        Glide.with(this).load(product?.image).into(binding.ivPreviewFoto)
         binding.switcherFotoProduk.showNext()
 
-        product.sppirt?.let {
+        product?.sppirt?.let {
             binding.tvSppirtName.text = getFileName(it.toUri())
             binding.switcherSppirt.showNext()
         }
 
-        product.halal?.let {
+        product?.halal?.let {
             binding.tvHalalName.text = getFileName(it.toUri())
             binding.switcherHalal.showNext()
         }

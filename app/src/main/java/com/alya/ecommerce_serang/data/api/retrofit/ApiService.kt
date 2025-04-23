@@ -32,6 +32,7 @@ import com.alya.ecommerce_serang.data.api.response.customer.product.StoreRespons
 import com.alya.ecommerce_serang.data.api.response.customer.profile.AddressResponse
 import com.alya.ecommerce_serang.data.api.response.customer.profile.CreateAddressResponse
 import com.alya.ecommerce_serang.data.api.response.customer.profile.ProfileResponse
+import com.alya.ecommerce_serang.data.api.response.store.orders.OrderListResponse
 import com.alya.ecommerce_serang.data.api.response.store.product.DeleteProductResponse
 import com.alya.ecommerce_serang.data.api.response.store.product.UpdateProductResponse
 import retrofit2.Call
@@ -171,4 +172,12 @@ interface ApiService {
     @GET("provinces")
     suspend fun getListProv(
     ): Response<ListProvinceResponse>
+
+    @GET("mystore/orders")
+    suspend fun getAllOrders(): Response<OrderListResponse>
+
+    @GET("mystore/orders/{status}")
+    suspend fun getOrdersByStatus(
+        @Query("status") status: String
+    ): Response<OrderListResponse>
 }

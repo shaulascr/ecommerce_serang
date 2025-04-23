@@ -1,17 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<androidx.recyclerview.widget.RecyclerView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rv_all_sells"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="13dp"
-    tools:context=".ui.profile.mystore.sells.all_sells.AllSellsFragment">
-
-    <TextView
-        android:id="@+id/tv_semua_pesanan"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Semua Pesanan"
-        style="@style/label_medium_prominent"
-        android:textColor="@color/black_300"/>
-
-</FrameLayout>
+    android:layout_height="match_parent"/>

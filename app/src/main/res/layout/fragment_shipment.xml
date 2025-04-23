@@ -1,17 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.recyclerview.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/rv_shipment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.profile.mystore.sells.shipment.ShipmentFragment"
-    android:padding="13dp">
-
-    <TextView
-        android:id="@+id/tv_perlu_dikirim"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Perlu Dikirim"
-        style="@style/label_medium_prominent"
-        android:textColor="@color/black_300"/>
-
-</FrameLayout>
+    tools:listitem="@layout/item_sells_shipment" />
