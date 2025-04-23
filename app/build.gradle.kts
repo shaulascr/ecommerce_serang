@@ -2,10 +2,10 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
-    id("kotlin-kapt")
-    id ("androidx.navigation.safeargs")
+    alias(libs.plugins.ksp)  // Use KSP instead of kapt
+    id("androidx.navigation.safeargs")
     id("kotlin-parcelize")
-//    id("com.google.dagger.hilt.android")
+    alias(libs.plugins.dagger.hilt)  // Use alias from catalog
 }
 
 val localProperties = Properties().apply {
@@ -96,11 +96,27 @@ dependencies {
 
 
 //    implementation(libs.hilt.android)
-//    kapt("com.google.dagger:hilt-compiler:2.48")
-//
-//    // For ViewModel injection (if needed)
-//    implementation(libs.androidx.hilt.lifecycle.viewmodel)
-//    kapt("androidx.hilt:hilt-compiler:1.0.0")
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+
+    // Androidx Hilt
+    implementation(libs.androidx.hilt.navigation.fragment)
+    implementation(libs.androidx.hilt.work)
+    ksp(libs.androidx.hilt.compiler)
+
+    implementation("androidx.work:work-runtime-ktx:2.8.1")
+    implementation("androidx.work:work-runtime:2.8.1")
+
+    implementation("io.ktor:ktor-client-android:3.0.1")
+    implementation("io.ktor:ktor-client-core:3.0.1")
+    implementation("io.ktor:ktor-client-websockets:3.0.1")
+    implementation("io.ktor:ktor-client-logging:3.0.1")
+    implementation("io.ktor:ktor-client-okhttp:3.0.1")
+    implementation("io.ktor:ktor-client-content-negotiation:3.0.1")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:3.0.1")
+
+    implementation("io.socket:socket.io-client:2.1.0") // or latest version
+
 }
 
 

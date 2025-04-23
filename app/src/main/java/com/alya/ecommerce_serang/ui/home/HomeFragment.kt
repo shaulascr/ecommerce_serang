@@ -21,6 +21,7 @@ import com.alya.ecommerce_serang.data.api.dto.ProductsItem
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.repository.ProductRepository
 import com.alya.ecommerce_serang.databinding.FragmentHomeBinding
+import com.alya.ecommerce_serang.ui.notif.NotificationActivity
 import com.alya.ecommerce_serang.ui.product.DetailProductActivity
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.HorizontalMarginItemDecoration
@@ -131,7 +132,8 @@ class HomeFragment : Fragment() {
         }
 
         binding.searchContainer.btnNotification.setOnClickListener {
-            // Navigate to notifications
+            val intent = Intent(requireContext(), NotificationActivity::class.java)
+            startActivity(intent)
         }
     }
 

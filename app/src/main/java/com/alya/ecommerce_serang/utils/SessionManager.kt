@@ -3,6 +3,7 @@ package com.alya.ecommerce_serang.utils
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
+import androidx.core.content.edit
 
 class SessionManager(context: Context) {
     private var sharedPreferences: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -10,12 +11,14 @@ class SessionManager(context: Context) {
     companion object {
         private const val PREFS_NAME = "app_prefs"
         private const val USER_TOKEN = "user_token"
+        private const val USER_ID = "user_id"  // New constant for storing user ID
+
     }
 
     fun saveToken(token: String) {
-        val editor = sharedPreferences.edit()
-        editor.putString(USER_TOKEN, token)
-        editor.apply()
+        sharedPreferences.edit() {
+            putString(USER_TOKEN, token)
+        }
     }
 
     fun getToken(): String? {
@@ -24,9 +27,35 @@ class SessionManager(context: Context) {
         return token
     }
 
+    fun saveUserId(userId: String) {
+        sharedPreferences.edit() {
+            putString(USER_ID, userId)
+        }
+        Log.d("SessionManager", "Saved user ID: $userId")
+    }
+
+    fun getUserId(): String? {
+        val userId = sharedPreferences.getString(USER_ID, null)
+        Log.d("SessionManager", "Retrieved user ID: $userId")
+        return userId
+    }
+
+    fun clearUserId() {
+        sharedPreferences.edit() {
+            remove(USER_ID)
+        }
+    }
+
     fun clearToken() {
-        val editor = sharedPreferences.edit()
-        editor.remove(USER_TOKEN)
-        editor.apply()
+        sharedPreferences.edit() {
+            remove(USER_TOKEN)
+        }
+    }
+
+    //clear data when log out
+    fun clearAll() {
+        sharedPreferences.edit() {
+            clear()
+        }
     }
 }
