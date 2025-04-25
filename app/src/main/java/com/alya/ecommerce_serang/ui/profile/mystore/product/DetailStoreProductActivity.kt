@@ -20,7 +20,7 @@ import com.alya.ecommerce_serang.data.api.dto.Product
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.repository.ProductRepository
 import com.alya.ecommerce_serang.data.repository.Result
-import com.alya.ecommerce_serang.databinding.ActivityStoreProductDetailBinding
+import com.alya.ecommerce_serang.databinding.ActivityDetailStoreProductBinding
 import com.alya.ecommerce_serang.utils.viewmodel.ProductViewModel
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
@@ -33,9 +33,9 @@ import java.io.FileOutputStream
 import kotlin.getValue
 import androidx.core.net.toUri
 
-class StoreProductDetailActivity : AppCompatActivity() {
+class DetailStoreProductActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityStoreProductDetailBinding
+    private lateinit var binding: ActivityDetailStoreProductBinding
     private lateinit var sessionManager: SessionManager
     private lateinit var categoryList: List<CategoryItem>
     private var imageUri: Uri? = null
@@ -81,7 +81,7 @@ class StoreProductDetailActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityStoreProductDetailBinding.inflate(layoutInflater)
+        binding = ActivityDetailStoreProductBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         val isEditing = intent.getBooleanExtra("is_editing", false)

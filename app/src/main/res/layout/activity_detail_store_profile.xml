@@ -142,6 +142,36 @@
 
                 </LinearLayout>
 
+                <!-- Toko Aktif -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Toko Aktif"
+                            style="@style/label_large"/>
+
+                        <Switch
+                            android:id="@+id/switch_is_active"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="end"
+                            tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
             </LinearLayout>
 
             <!-- Alamat Toko -->
@@ -164,32 +194,6 @@
 
                 <ImageView
                     android:id="@+id/iv_address"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@drawable/ic_navigate_next"/>
-
-            </LinearLayout>
-
-            <!-- Status Toko -->
-            <LinearLayout
-                android:id="@+id/layout_status"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingVertical="10dp"
-                android:paddingHorizontal="@dimen/horizontal_safe_area"
-                android:gravity="center">
-
-                <TextView
-                    style="@style/label_large"
-                    android:id="@+id/tv_status"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Atur Status Toko" />
-
-                <ImageView
-                    android:id="@+id/iv_status"
                     android:layout_width="20dp"
                     android:layout_height="20dp"
                     android:src="@drawable/ic_navigate_next"/>

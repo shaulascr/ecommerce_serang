@@ -3,13 +3,11 @@ package com.alya.ecommerce_serang.ui.profile.mystore.product
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
-import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.dto.ProductsItem
 import com.alya.ecommerce_serang.databinding.FragmentProductOptionsBottomSheetBinding
 import com.alya.ecommerce_serang.utils.viewmodel.ProductViewModel
@@ -32,7 +30,7 @@ class ProductOptionsBottomSheetFragment(private val product: ProductsItem) : Bot
         super.onViewCreated(view, savedInstanceState)
 
         binding.btnEditProduct.setOnClickListener {
-            val intent = Intent(requireContext(), StoreProductDetailActivity::class.java)
+            val intent = Intent(requireContext(), DetailStoreProductActivity::class.java)
             intent.putExtra("product_id", product.id)
             intent.putExtra("is_editing", true)
             startActivity(intent)

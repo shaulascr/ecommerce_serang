@@ -8,9 +8,12 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
 
     <application
         android:allowBackup="true"
+        android:enableOnBackInvokedCallback="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
@@ -46,7 +49,7 @@
             android:name=".ui.profile.mystore.profile.payment_info.PaymentInfoActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.profile.mystore.profile.address.StoreAddressActivity"
+            android:name=".ui.profile.mystore.profile.address.DetailStoreAddressActivity"
             android:exported="false" />
         <activity
             android:name=".ui.profile.mystore.product.ProductActivity"
@@ -70,7 +73,7 @@
             android:name=".ui.profile.mystore.balance.BalanceTopUpActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.profile.mystore.product.StoreProductDetailActivity"
+            android:name=".ui.profile.mystore.product.DetailStoreProductActivity"
             android:exported="false" />
         <activity
             android:name=".ui.profile.mystore.profile.DetailStoreProfileActivity"

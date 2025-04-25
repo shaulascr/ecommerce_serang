@@ -8,8 +8,8 @@ import android.view.ViewGroup
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.databinding.FragmentAllSellsBinding
+import com.alya.ecommerce_serang.ui.profile.mystore.sells.SellsAdapter
 import com.alya.ecommerce_serang.utils.viewmodel.SellsViewModel
 
 class AllSellsFragment : Fragment() {
@@ -29,13 +29,13 @@ class AllSellsFragment : Fragment() {
 
         viewModel = ViewModelProvider(this).get(SellsViewModel::class.java)
 
-//        val adapter = SellsAdapter()
-//        binding.rvAllSells.layoutManager = LinearLayoutManager(context)
-//        binding.rvAllSells.adapter = adapter
-//
-//        viewModel.loadAllSells()
-//        viewModel.sellsList.observe(viewLifecycleOwner, Observer { sells ->
-//            adapter.submitList(sells)
-//        })
+        val adapter = SellsAdapter()
+        binding.rvAllSells.layoutManager = LinearLayoutManager(context)
+        binding.rvAllSells.adapter = adapter
+
+        viewModel.loadOrdersByStatus("all")
+        viewModel.sellsList.observe(viewLifecycleOwner, Observer { sells ->
+            adapter.submitList(sells)
+        })
     }
 }

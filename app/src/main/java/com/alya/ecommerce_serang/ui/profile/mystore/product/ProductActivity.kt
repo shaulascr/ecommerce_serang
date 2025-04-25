@@ -73,7 +73,7 @@ class ProductActivity : AppCompatActivity() {
         }
 
         binding.header.headerRightText.setOnClickListener {
-            val intent = Intent(this, StoreProductDetailActivity::class.java)
+            val intent = Intent(this, DetailStoreProductActivity::class.java)
             intent.putExtra("is_editing", false)
             startActivity(intent)
         }
