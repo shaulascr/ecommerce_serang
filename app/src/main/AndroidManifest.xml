@@ -6,13 +6,13 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-<!--    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />-->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32"/>
 
     <application
         android:allowBackup="true"
+        android:enableOnBackInvokedCallback="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
@@ -23,6 +23,15 @@
         android:theme="@style/Theme.Ecommerce_serang"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
+        <activity
+            android:name=".ui.order.detail.AddEvidencePaymentActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.order.history.HistoryActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.order.detail.PaymentActivity"
+            android:exported="false" />
         <activity
             android:name=".ui.order.detail.AddEvidencePaymentActivity"
             android:exported="false" />
@@ -57,7 +66,7 @@
             android:name=".ui.profile.mystore.profile.payment_info.PaymentInfoActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.profile.mystore.profile.address.StoreAddressActivity"
+            android:name=".ui.profile.mystore.profile.address.DetailStoreAddressActivity"
             android:exported="false" />
         <activity
             android:name=".ui.profile.mystore.product.ProductActivity"
@@ -81,7 +90,7 @@
             android:name=".ui.profile.mystore.balance.BalanceTopUpActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.profile.mystore.product.StoreProductDetailActivity"
+            android:name=".ui.profile.mystore.product.DetailStoreProductActivity"
             android:exported="false" />
         <activity
             android:name=".ui.profile.mystore.profile.DetailStoreProfileActivity"

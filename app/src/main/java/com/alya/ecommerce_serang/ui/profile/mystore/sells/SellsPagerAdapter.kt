@@ -6,7 +6,7 @@ import com.alya.ecommerce_serang.ui.profile.mystore.sells.all_sells.AllSellsFrag
 import com.alya.ecommerce_serang.ui.profile.mystore.sells.cancellation.CancellationFragment
 import com.alya.ecommerce_serang.ui.profile.mystore.sells.failed_payment.FailedPaymentFragment
 import com.alya.ecommerce_serang.ui.profile.mystore.sells.failed_shipment.FailedShipmentFragment
-import com.alya.ecommerce_serang.ui.profile.mystore.sells.finished.FinishedFragment
+import com.alya.ecommerce_serang.ui.profile.mystore.sells.completed.CompletedFragment
 import com.alya.ecommerce_serang.ui.profile.mystore.sells.order.OrderFragment
 import com.alya.ecommerce_serang.ui.profile.mystore.sells.payment.PaymentFragment
 import com.alya.ecommerce_serang.ui.profile.mystore.sells.shipment.ShipmentFragment
@@ -24,7 +24,7 @@ class SellsPagerAdapter(fragment: Fragment, private val itemCount: Int) :
             2 -> PaymentFragment()
             3 -> ShipmentFragment()
             4 -> ShippedFragment()
-            5 -> FinishedFragment()
+            5 -> CompletedFragment()
             6 -> CancellationFragment()
             7 -> FailedPaymentFragment()
             8 -> FailedShipmentFragment()

@@ -8,10 +8,10 @@ import androidx.lifecycle.viewModelScope
 import com.alya.ecommerce_serang.data.api.dto.CheckoutData
 import com.alya.ecommerce_serang.data.api.dto.OrderRequest
 import com.alya.ecommerce_serang.data.api.dto.OrderRequestBuy
-import com.alya.ecommerce_serang.data.api.response.cart.CartItemsItem
-import com.alya.ecommerce_serang.data.api.response.cart.DataItem
-import com.alya.ecommerce_serang.data.api.response.product.PaymentInfoItem
-import com.alya.ecommerce_serang.data.api.response.profile.AddressesItem
+import com.alya.ecommerce_serang.data.api.response.customer.cart.CartItemsItem
+import com.alya.ecommerce_serang.data.api.response.customer.cart.DataItem
+import com.alya.ecommerce_serang.data.api.response.customer.product.PaymentInfoItem
+import com.alya.ecommerce_serang.data.api.response.customer.profile.AddressesItem
 import com.alya.ecommerce_serang.data.repository.OrderRepository
 import com.alya.ecommerce_serang.data.repository.Result
 import kotlinx.coroutines.launch

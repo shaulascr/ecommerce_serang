@@ -64,8 +64,8 @@ class MyStoreActivity : AppCompatActivity() {
 
     private fun myStoreProfileOverview(store: Store){
 
-        binding.tvStoreName.setText(store.storeName.toString())
-        binding.tvStoreType.setText(store.storeType.toString())
+        binding.tvStoreName.text = store.storeName
+        binding.tvStoreType.text = store.storeType
 
         store.storeImage.let {
             Glide.with(this)

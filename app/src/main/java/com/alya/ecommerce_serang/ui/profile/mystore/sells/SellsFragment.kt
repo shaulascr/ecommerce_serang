@@ -24,7 +24,9 @@ class SellsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = ViewModelProvider(this).get(SellsViewModel::class.java)
+
+//        val repository = OrderRepository(ApiService.create())
+        viewModel = ViewModelProvider(this)[SellsViewModel::class.java]
 
         val tabs = listOf(
             "Semua Pesanan", "Perlu Tagihan", "Konfirmasi Pembayaran",

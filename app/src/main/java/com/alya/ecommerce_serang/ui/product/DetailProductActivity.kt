@@ -16,9 +16,9 @@ import com.alya.ecommerce_serang.BuildConfig.BASE_URL
 import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.dto.CartItem
 import com.alya.ecommerce_serang.data.api.dto.ProductsItem
-import com.alya.ecommerce_serang.data.api.response.product.Product
-import com.alya.ecommerce_serang.data.api.response.product.ReviewsItem
-import com.alya.ecommerce_serang.data.api.response.product.StoreProduct
+import com.alya.ecommerce_serang.data.api.response.customer.product.Product
+import com.alya.ecommerce_serang.data.api.response.customer.product.ReviewsItem
+import com.alya.ecommerce_serang.data.api.response.customer.product.StoreProduct
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
 import com.alya.ecommerce_serang.data.repository.ProductRepository

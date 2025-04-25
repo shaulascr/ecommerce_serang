@@ -94,6 +94,8 @@ dependencies {
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
     implementation("de.hdodenhof:circleimageview:3.1.0")
 
+    //maps
+    implementation("org.osmdroid:osmdroid-android:6.0.3")
 
 //    implementation(libs.hilt.android)
 //    kapt("com.google.dagger:hilt-compiler:2.48")

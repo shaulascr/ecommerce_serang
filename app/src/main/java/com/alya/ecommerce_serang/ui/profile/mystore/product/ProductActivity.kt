@@ -36,7 +36,6 @@ class ProductActivity : AppCompatActivity() {
 
         setupHeader()
         setupRecyclerView()
-
         observeViewModel()
 
         binding.progressBar.visibility = View.VISIBLE
@@ -59,7 +58,7 @@ class ProductActivity : AppCompatActivity() {
                 }
                 is Result.Error -> {
                     binding.progressBar.visibility = View.GONE
-                    Toast.makeText(this, "Failed to load products: ${result.exception.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Gagal memuat produk: ${result.exception.message}", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -74,7 +73,9 @@ class ProductActivity : AppCompatActivity() {
         }
 
         binding.header.headerRightText.setOnClickListener {
-            startActivity(Intent(this, StoreProductDetailActivity::class.java))
+            val intent = Intent(this, DetailStoreProductActivity::class.java)
+            intent.putExtra("is_editing", false)
+            startActivity(intent)
         }
     }
 

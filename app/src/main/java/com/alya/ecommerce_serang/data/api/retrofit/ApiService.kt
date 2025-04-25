@@ -11,47 +11,49 @@ import com.alya.ecommerce_serang.data.api.dto.OrderRequestBuy
 import com.alya.ecommerce_serang.data.api.dto.OtpRequest
 import com.alya.ecommerce_serang.data.api.dto.RegisterRequest
 import com.alya.ecommerce_serang.data.api.dto.UpdateCart
-import com.alya.ecommerce_serang.data.api.response.product.CreateProductResponse
-import com.alya.ecommerce_serang.data.api.response.ViewStoreProductsResponse
+import com.alya.ecommerce_serang.data.api.response.store.product.CreateProductResponse
+import com.alya.ecommerce_serang.data.api.response.store.product.ViewStoreProductsResponse
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import com.alya.ecommerce_serang.data.api.response.auth.LoginResponse
 import com.alya.ecommerce_serang.data.api.response.auth.OtpResponse
 import com.alya.ecommerce_serang.data.api.response.auth.RegisterResponse
-import com.alya.ecommerce_serang.data.api.response.cart.AddCartResponse
-import com.alya.ecommerce_serang.data.api.response.cart.ListCartResponse
-import com.alya.ecommerce_serang.data.api.response.cart.UpdateCartResponse
+import com.alya.ecommerce_serang.data.api.response.customer.cart.AddCartResponse
+import com.alya.ecommerce_serang.data.api.response.customer.cart.ListCartResponse
+import com.alya.ecommerce_serang.data.api.response.customer.cart.UpdateCartResponse
 import com.alya.ecommerce_serang.data.api.response.order.AddEvidenceResponse
 import com.alya.ecommerce_serang.data.api.response.order.ComplaintResponse
 import com.alya.ecommerce_serang.data.api.response.order.CompletedOrderResponse
-import com.alya.ecommerce_serang.data.api.response.order.CourierCostResponse
-import com.alya.ecommerce_serang.data.api.response.order.CreateOrderResponse
-import com.alya.ecommerce_serang.data.api.response.order.ListCityResponse
-import com.alya.ecommerce_serang.data.api.response.order.ListProvinceResponse
+import com.alya.ecommerce_serang.data.api.response.customer.order.CourierCostResponse
+import com.alya.ecommerce_serang.data.api.response.customer.order.CreateOrderResponse
+import com.alya.ecommerce_serang.data.api.response.customer.order.ListCityResponse
+import com.alya.ecommerce_serang.data.api.response.customer.order.ListProvinceResponse
 import com.alya.ecommerce_serang.data.api.response.order.OrderDetailResponse
 import com.alya.ecommerce_serang.data.api.response.order.OrderListResponse
-import com.alya.ecommerce_serang.data.api.response.product.AllProductResponse
-import com.alya.ecommerce_serang.data.api.response.product.CategoryResponse
-import com.alya.ecommerce_serang.data.api.response.product.DetailStoreProductResponse
-import com.alya.ecommerce_serang.data.api.response.product.ProductResponse
-import com.alya.ecommerce_serang.data.api.response.product.ReviewProductResponse
-import com.alya.ecommerce_serang.data.api.response.product.StoreResponse
-import com.alya.ecommerce_serang.data.api.response.profile.AddressResponse
-import com.alya.ecommerce_serang.data.api.response.profile.CreateAddressResponse
-import com.alya.ecommerce_serang.data.api.response.profile.ProfileResponse
+import com.alya.ecommerce_serang.data.api.response.customer.product.AllProductResponse
+import com.alya.ecommerce_serang.data.api.response.customer.product.CategoryResponse
+import com.alya.ecommerce_serang.data.api.response.customer.product.DetailStoreProductResponse
+import com.alya.ecommerce_serang.data.api.response.customer.product.ProductResponse
+import com.alya.ecommerce_serang.data.api.response.customer.product.ReviewProductResponse
+import com.alya.ecommerce_serang.data.api.response.customer.product.StoreResponse
+import com.alya.ecommerce_serang.data.api.response.customer.profile.AddressResponse
+import com.alya.ecommerce_serang.data.api.response.customer.profile.CreateAddressResponse
+import com.alya.ecommerce_serang.data.api.response.customer.profile.ProfileResponse
+import com.alya.ecommerce_serang.data.api.response.store.orders.OrderListResponse
+import com.alya.ecommerce_serang.data.api.response.store.product.DeleteProductResponse
+import com.alya.ecommerce_serang.data.api.response.store.product.UpdateProductResponse
 import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
-import retrofit2.http.Header
-import retrofit2.http.HeaderMap
 import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Part
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface ApiService {
     @POST("registeruser")
@@ -158,10 +160,22 @@ interface ApiService {
         @Part("duration") duration: RequestBody,
         @Part("category_id") categoryId: RequestBody,
         @Part("status") status: RequestBody,
+        @Part("condition") condition: RequestBody,
         @Part image: MultipartBody.Part?,
         @Part sppirt: MultipartBody.Part?,
         @Part halal: MultipartBody.Part?
     ): Response<CreateProductResponse>
+
+    @PUT("store/editproduct/{id}")
+    suspend fun updateProduct(
+        @Path("id") productId: Int?,
+        @Body updatedProduct: Map<String, Any?>
+    ): Response<UpdateProductResponse>
+
+    @DELETE("store/deleteproduct/{id}")
+    suspend fun deleteProduct(
+        @Path("id") productId: Int
+    ): Response<DeleteProductResponse>
 
     @GET("cart_item")
     suspend fun getCart (): Response<ListCartResponse>
@@ -189,6 +203,26 @@ interface ApiService {
     @GET("provinces")
     suspend fun getListProv(
     ): Response<ListProvinceResponse>
+
+    @GET("mystore/orders")
+    suspend fun getAllOrders(): Response<OrderListResponse>
+
+    @GET("mystore/orders/{status}")
+    suspend fun getOrdersByStatus(
+        @Query("status") status: String
+    ): Response<OrderListResponse>
+    @PUT("store/order/update")
+    suspend fun confirmOrder(
+        @Body confirmOrder : CompletedOrderRequest
+    ): Response<CompletedOrderResponse>
+
+    @Multipart
+    @POST("addcomplaint")
+    suspend fun addComplaint(
+        @Part("order_id") orderId: RequestBody,
+        @Part("description") description: RequestBody,
+        @Part complaintimg: MultipartBody.Part
+    ): Response<ComplaintResponse>
 
     @PUT("store/order/update")
     suspend fun confirmOrder(

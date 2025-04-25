@@ -1,13 +1,16 @@
 package com.alya.ecommerce_serang.ui.profile.mystore.product
 
+import android.app.AlertDialog
+import android.content.Intent
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.alya.ecommerce_serang.R
+import android.widget.Toast
+import androidx.lifecycle.ViewModelProvider
 import com.alya.ecommerce_serang.data.api.dto.ProductsItem
 import com.alya.ecommerce_serang.databinding.FragmentProductOptionsBottomSheetBinding
+import com.alya.ecommerce_serang.utils.viewmodel.ProductViewModel
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 class ProductOptionsBottomSheetFragment(private val product: ProductsItem) : BottomSheetDialogFragment() {
@@ -27,15 +30,25 @@ class ProductOptionsBottomSheetFragment(private val product: ProductsItem) : Bot
         super.onViewCreated(view, savedInstanceState)
 
         binding.btnEditProduct.setOnClickListener {
-            // Handle editing product
-            // Example: Open the edit activity or fragment
+            val intent = Intent(requireContext(), DetailStoreProductActivity::class.java)
+            intent.putExtra("product_id", product.id)
+            intent.putExtra("is_editing", true)
+            startActivity(intent)
             dismiss()
         }
 
         binding.btnDeleteProduct.setOnClickListener {
-            // Handle deleting product
-            // Example: Show confirmation dialog
-            dismiss()
+            AlertDialog.Builder(requireContext())
+                .setTitle("Hapus Produk?")
+                .setMessage("Produk yang dihapus tidak dapat dikembalikan.")
+                .setPositiveButton("Ya, Hapus") { _, _ ->
+                    val viewModel = ViewModelProvider(this).get(ProductViewModel::class.java)
+                    viewModel.deleteProduct(product.id)
+                    Toast.makeText(context, "Produk berhasil dihapus", Toast.LENGTH_SHORT).show()
+                    dismiss()
+                }
+                .setNegativeButton("Batalkan", null)
+                .show()
         }
     }
 

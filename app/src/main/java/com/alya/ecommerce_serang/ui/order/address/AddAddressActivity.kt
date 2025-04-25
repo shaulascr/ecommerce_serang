@@ -19,8 +19,8 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.alya.ecommerce_serang.data.api.dto.CreateAddressRequest
 import com.alya.ecommerce_serang.data.api.dto.UserProfile
-import com.alya.ecommerce_serang.data.api.response.order.CitiesItem
-import com.alya.ecommerce_serang.data.api.response.order.ProvincesItem
+import com.alya.ecommerce_serang.data.api.response.customer.order.CitiesItem
+import com.alya.ecommerce_serang.data.api.response.customer.order.ProvincesItem
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
 import com.alya.ecommerce_serang.data.repository.OrderRepository

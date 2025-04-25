@@ -4,7 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.alya.ecommerce_serang.R
-import com.alya.ecommerce_serang.data.api.response.cart.CartItemsItem
+import com.alya.ecommerce_serang.data.api.response.customer.cart.CartItemsItem
 import com.alya.ecommerce_serang.databinding.ItemOrderProductBinding
 import com.bumptech.glide.Glide
 import java.text.NumberFormat

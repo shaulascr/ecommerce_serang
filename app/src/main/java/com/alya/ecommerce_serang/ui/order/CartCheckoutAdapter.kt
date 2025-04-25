@@ -6,7 +6,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.dto.CheckoutData
-import com.alya.ecommerce_serang.data.api.response.cart.CartItemsItem
+import com.alya.ecommerce_serang.data.api.response.customer.cart.CartItemsItem
 import com.alya.ecommerce_serang.databinding.ItemOrderProductBinding
 import com.alya.ecommerce_serang.databinding.ItemOrderSellerBinding
 import com.bumptech.glide.Glide

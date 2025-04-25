@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.alya.ecommerce_serang.R
-import com.alya.ecommerce_serang.data.api.response.profile.AddressesItem
+import com.alya.ecommerce_serang.data.api.response.customer.profile.AddressesItem
 import com.google.android.material.card.MaterialCardView
 
 class AddressAdapter(

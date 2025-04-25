@@ -3,20 +3,20 @@ package com.alya.ecommerce_serang.data.repository
 import android.util.Log
 import com.alya.ecommerce_serang.data.api.dto.CartItem
 import com.alya.ecommerce_serang.data.api.dto.CategoryItem
+import com.alya.ecommerce_serang.data.api.dto.Preorder
 import com.alya.ecommerce_serang.data.api.dto.ProductsItem
-import com.alya.ecommerce_serang.data.api.response.product.CreateProductResponse
-import com.alya.ecommerce_serang.data.api.response.cart.AddCartResponse
-import com.alya.ecommerce_serang.data.api.response.product.ProductResponse
-import com.alya.ecommerce_serang.data.api.response.product.ReviewsItem
-import com.alya.ecommerce_serang.data.api.response.product.StoreProduct
+import com.alya.ecommerce_serang.data.api.response.store.product.CreateProductResponse
+import com.alya.ecommerce_serang.data.api.response.customer.cart.AddCartResponse
+import com.alya.ecommerce_serang.data.api.response.customer.product.ProductResponse
+import com.alya.ecommerce_serang.data.api.response.customer.product.ReviewsItem
+import com.alya.ecommerce_serang.data.api.response.customer.product.StoreProduct
+import com.alya.ecommerce_serang.data.api.response.store.product.UpdateProductResponse
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
-import com.alya.ecommerce_serang.utils.SessionManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
-import java.io.File
 
 class ProductRepository(private val apiService: ApiService) {
     suspend fun getAllProducts(): Result<List<ProductsItem>> =
@@ -158,9 +158,10 @@ class ProductRepository(private val apiService: ApiService) {
         minOrder: Int,
         weight: Int,
         isPreOrder: Boolean,
-        duration: Int,
+        preorder: Preorder,
         categoryId: Int,
         status: String,
+        condition: String,
         imagePart: MultipartBody.Part?,
         sppirtPart: MultipartBody.Part?,
         halalPart: MultipartBody.Part?
@@ -174,9 +175,10 @@ class ProductRepository(private val apiService: ApiService) {
                 minOrder = RequestBody.create("text/plain".toMediaTypeOrNull(), minOrder.toString()),
                 weight = RequestBody.create("text/plain".toMediaTypeOrNull(), weight.toString()),
                 isPreOrder = RequestBody.create("text/plain".toMediaTypeOrNull(), isPreOrder.toString()),
-                duration = RequestBody.create("text/plain".toMediaTypeOrNull(), duration.toString()),
+                duration = RequestBody.create("text/plain".toMediaTypeOrNull(), preorder.duration.toString()),
                 categoryId = RequestBody.create("text/plain".toMediaTypeOrNull(), categoryId.toString()),
                 status = RequestBody.create("text/plain".toMediaTypeOrNull(), status),
+                condition = RequestBody.create("text/plain".toMediaTypeOrNull(), condition),
                 image = imagePart,
                 sppirt = sppirtPart,
                 halal = halalPart
@@ -192,6 +194,31 @@ class ProductRepository(private val apiService: ApiService) {
         }
     }
 
+    suspend fun updateProduct(productId: Int?, updatedProduct: Map<String, Any?>) : UpdateProductResponse {
+        // Build the request with the updated fields
+        val response = apiService.updateProduct(productId, updatedProduct)
+        if (response.isSuccessful) {
+            return response.body()!!
+        } else {
+            throw Exception("Gagal memperbarui produk: ${response.code()}")
+        }
+    }
+
+
+    suspend fun deleteProduct(productId: Int): Result<Unit> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = apiService.deleteProduct(productId)
+                if (response.isSuccessful) {
+                    Result.Success(Unit)
+                } else {
+                    Result.Error(Exception("Gagal menghapus produk: ${response.code()}"))
+                }
+            } catch (e: Exception) {
+                Result.Error(e)
+            }
+        }
+    }
 
     companion object {
         private const val TAG = "ProductRepository"
