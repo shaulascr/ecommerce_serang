@@ -51,7 +51,7 @@ class OrderAdapter : RecyclerView.Adapter<OrderAdapter.OrderViewHolder>() {
 
         fun bind(order: OrdersItem?) {
             tvOrderNumber.text = "No. Pesanan: ${order?.orderId}"
-            tvOrderCustomer.text = order?.username
+            tvOrderCustomer.text = order?.userId.toString()
             tvOrderDue.text = order?.createdAt + 7
             tvOrderQty.text = "${order?.orderItems?.size} produk"
             tvOrderPrice.text = "Rp${order?.totalAmount}"

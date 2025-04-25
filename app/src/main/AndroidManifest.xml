@@ -33,16 +33,7 @@
             android:name=".ui.order.detail.PaymentActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.order.detail.AddEvidencePaymentActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.order.history.HistoryActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.order.detail.PaymentActivity"
-            android:exported="false" />
-        <activity
-            android:name=".data.api.response.cart.CartActivity"
+            android:name=".data.api.response.customer.cart.CartActivity"
             android:exported="false" />
         <activity
             android:name=".ui.order.address.EditAddressActivity"

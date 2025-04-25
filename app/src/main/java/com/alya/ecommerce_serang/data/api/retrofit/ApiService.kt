@@ -28,8 +28,8 @@ import com.alya.ecommerce_serang.data.api.response.customer.order.CourierCostRes
 import com.alya.ecommerce_serang.data.api.response.customer.order.CreateOrderResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.ListCityResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.ListProvinceResponse
-import com.alya.ecommerce_serang.data.api.response.order.OrderDetailResponse
-import com.alya.ecommerce_serang.data.api.response.order.OrderListResponse
+import com.alya.ecommerce_serang.data.api.response.customer.order.OrderDetailResponse
+import com.alya.ecommerce_serang.data.api.response.customer.order.OrderListResponse
 import com.alya.ecommerce_serang.data.api.response.customer.product.AllProductResponse
 import com.alya.ecommerce_serang.data.api.response.customer.product.CategoryResponse
 import com.alya.ecommerce_serang.data.api.response.customer.product.DetailStoreProductResponse
@@ -39,12 +39,12 @@ import com.alya.ecommerce_serang.data.api.response.customer.product.StoreRespons
 import com.alya.ecommerce_serang.data.api.response.customer.profile.AddressResponse
 import com.alya.ecommerce_serang.data.api.response.customer.profile.CreateAddressResponse
 import com.alya.ecommerce_serang.data.api.response.customer.profile.ProfileResponse
-import com.alya.ecommerce_serang.data.api.response.store.orders.OrderListResponse
 import com.alya.ecommerce_serang.data.api.response.store.product.DeleteProductResponse
 import com.alya.ecommerce_serang.data.api.response.store.product.UpdateProductResponse
 import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
@@ -211,18 +211,6 @@ interface ApiService {
     suspend fun getOrdersByStatus(
         @Query("status") status: String
     ): Response<OrderListResponse>
-    @PUT("store/order/update")
-    suspend fun confirmOrder(
-        @Body confirmOrder : CompletedOrderRequest
-    ): Response<CompletedOrderResponse>
-
-    @Multipart
-    @POST("addcomplaint")
-    suspend fun addComplaint(
-        @Part("order_id") orderId: RequestBody,
-        @Part("description") description: RequestBody,
-        @Part complaintimg: MultipartBody.Part
-    ): Response<ComplaintResponse>
 
     @PUT("store/order/update")
     suspend fun confirmOrder(
@@ -236,4 +224,5 @@ interface ApiService {
         @Part("description") description: RequestBody,
         @Part complaintimg: MultipartBody.Part
     ): Response<ComplaintResponse>
+
 }

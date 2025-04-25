@@ -61,7 +61,7 @@ class SellsAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     // Determine the view type based on the order status
     override fun getItemViewType(position: Int): Int {
         val order = orderList[position]
-        return when (order?.status) {
+        return when (order?.shipmentStatus) {
             "pending" -> TYPE_PENDING
             "paid" -> TYPE_PAYMENT
             "shipped" -> TYPE_SHIPMENT
@@ -94,7 +94,7 @@ class SellsAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
         fun bind(order: OrdersItem?) {
             tvOrderNumber.text = "Order #${order?.orderId}"
-            tvOrderCustomer.text = order?.username
+            tvOrderCustomer.text = order?.userId.toString()
             tvOrderPrice.text = "Total: ${order?.totalAmount}"
         }
     }
@@ -107,7 +107,7 @@ class SellsAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
         fun bind(order: OrdersItem?) {
             tvPaymentNumber.text = "Order #${order?.orderId}"
-            tvPaymentCustomer.text = order?.username
+            tvPaymentCustomer.text = order?.userId.toString()
             tvPaymentPrice.text = "Paid: ${order?.totalAmount}"
         }
     }
@@ -119,7 +119,7 @@ class SellsAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
         fun bind(order: OrdersItem?) {
             tvShipmentNumber.text = "Shipment #${order?.orderId}"
-            tvShipmentLocation.text = "Location: ${order?.address?.subdistrict}"
+            tvShipmentLocation.text = "Location: ${order?.addressId.toString()}"
         }
     }
 

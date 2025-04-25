@@ -8,8 +8,8 @@ import androidx.lifecycle.viewModelScope
 import com.alya.ecommerce_serang.data.api.dto.AddEvidenceMultipartRequest
 import com.alya.ecommerce_serang.data.api.response.order.AddEvidenceResponse
 import com.alya.ecommerce_serang.data.api.response.order.CompletedOrderResponse
-import com.alya.ecommerce_serang.data.api.response.order.OrderListItemsItem
-import com.alya.ecommerce_serang.data.api.response.order.Orders
+import com.alya.ecommerce_serang.data.api.response.customer.order.OrderListItemsItem
+import com.alya.ecommerce_serang.data.api.response.customer.order.Orders
 import com.alya.ecommerce_serang.data.repository.OrderRepository
 import com.alya.ecommerce_serang.data.repository.Result
 import kotlinx.coroutines.launch
