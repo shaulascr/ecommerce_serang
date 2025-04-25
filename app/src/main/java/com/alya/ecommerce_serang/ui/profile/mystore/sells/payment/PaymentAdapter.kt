@@ -54,8 +54,8 @@ class PaymentAdapter : RecyclerView.Adapter<PaymentAdapter.PaymentViewHolder>() 
             tvPaymentDue.text = order?.createdAt + 7
             tvPaymentQty.text = "${order?.orderItems?.size} produk"
             tvPaymentPrice.text = "Rp${order?.totalAmount}"
-            tvPaymentCustomer.text = order?.username
-            tvPaymentLocation.text = order?.address?.subdistrict
+            tvPaymentCustomer.text = order?.userId.toString()
+            tvPaymentLocation.text = order?.addressId.toString()
         }
     }
 }

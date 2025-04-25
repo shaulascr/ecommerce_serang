@@ -6,8 +6,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.alya.ecommerce_serang.data.api.dto.CompletedOrderRequest
+import com.alya.ecommerce_serang.data.api.dto.OrdersItem
 import com.alya.ecommerce_serang.data.api.response.order.CompletedOrderResponse
-import com.alya.ecommerce_serang.data.api.response.order.OrdersItem
 import com.alya.ecommerce_serang.data.repository.OrderRepository
 import com.alya.ecommerce_serang.data.repository.Result
 import com.alya.ecommerce_serang.ui.order.address.ViewState

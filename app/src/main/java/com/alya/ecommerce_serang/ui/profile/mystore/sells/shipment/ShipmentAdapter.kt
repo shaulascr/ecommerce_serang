@@ -49,8 +49,8 @@ class ShipmentAdapter : RecyclerView.Adapter<ShipmentAdapter.ShipmentViewHolder>
         fun bind(order: OrdersItem) {
             tvShipmentNumber.text = "No. Pesanan: ${order.orderId}"
             tvShipmentDue.text = order.createdAt + 7
-            tvShipmentCustomer.text = order.username
-            tvShipmentLocation.text = order.address?.subdistrict
+            tvShipmentCustomer.text = order.userId.toString()
+            tvShipmentLocation.text = order.addressId.toString()
         }
     }
 }
