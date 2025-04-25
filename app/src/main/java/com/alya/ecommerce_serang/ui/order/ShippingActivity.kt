@@ -2,10 +2,11 @@ package com.alya.ecommerce_serang.ui.order
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.repository.OrderRepository
@@ -18,6 +19,7 @@ class ShippingActivity : AppCompatActivity() {
     private lateinit var binding: ActivityShippingBinding
     private lateinit var sessionManager: SessionManager
     private lateinit var shippingAdapter: ShippingAdapter
+    private val TAG = "ShippingActivity"
 
     private val viewModel: ShippingViewModel by viewModels {
         BaseViewModelFactory {
@@ -40,8 +42,11 @@ class ShippingActivity : AppCompatActivity() {
         val productId = intent.getIntExtra(EXTRA_PRODUCT_ID, 0)
         val quantity = intent.getIntExtra(EXTRA_QUANTITY, 1)
 
+        Log.d(TAG, "Received data: addressId=$addressId, productId=$productId, quantity=$quantity")
+
         // Validate required information
         if (addressId <= 0 || productId <= 0) {
+            Log.e(TAG, "Missing required shipping information: addressId=$addressId, productId=$productId")
             Toast.makeText(this, "Missing required shipping information", Toast.LENGTH_SHORT).show()
             finish()
             return
@@ -51,9 +56,10 @@ class ShippingActivity : AppCompatActivity() {
         setupToolbar()
         setupRecyclerView()
         setupObservers()
+        setupRetryButton() // Add a retry button for error cases
 
         // Load shipping options
-        viewModel.loadShippingOptions(addressId, productId, quantity)
+        loadShippingOptions(addressId, productId, quantity)
     }
 
     private fun setupToolbar() {
@@ -65,6 +71,7 @@ class ShippingActivity : AppCompatActivity() {
     private fun setupRecyclerView() {
         shippingAdapter = ShippingAdapter { courierCostsItem, service ->
             // Handle shipping method selection
+            Log.d(TAG, "Selected shipping: ${courierCostsItem.courier} - ${service.service} - ${service.cost} - ${service.etd}")
             returnSelectedShipping(
                 courierCostsItem.courier,
                 service.service,
@@ -79,29 +86,65 @@ class ShippingActivity : AppCompatActivity() {
         }
     }
 
+    private fun setupRetryButton() {
+        // If you have a retry button in your layout
+//        binding.btnRetry?.setOnClickListener {
+//            val addressId = intent.getIntExtra(EXTRA_ADDRESS_ID, 0)
+//            val productId = intent.getIntExtra(EXTRA_PRODUCT_ID, 0)
+//            val quantity = intent.getIntExtra(EXTRA_QUANTITY, 1)
+//            loadShippingOptions(addressId, productId, quantity)
+//        }
+    }
+
+    private fun loadShippingOptions(addressId: Int, productId: Int, quantity: Int) {
+        // Show loading state
+        binding.progressBar?.visibility = View.VISIBLE
+        binding.rvShipmentOrder.visibility = View.GONE
+//        binding.layoutEmptyShipping?.visibility = View.GONE
+
+        // Load shipping options
+        Log.d(TAG, "Loading shipping options: addressId=$addressId, productId=$productId, quantity=$quantity")
+        viewModel.loadShippingOptions(addressId, productId, quantity)
+    }
+
     private fun setupObservers() {
         // Observe shipping options
         viewModel.shippingOptions.observe(this) { courierOptions ->
+            Log.d(TAG, "Received ${courierOptions.size} shipping options")
             shippingAdapter.submitList(courierOptions)
             updateEmptyState(courierOptions.isEmpty() || courierOptions.all { it.services.isEmpty() })
         }
 
         // Observe loading state
         viewModel.isLoading.observe(this) { isLoading ->
-//            binding.progressBar.isVisible = isLoading
+            binding.progressBar?.visibility = if (isLoading) View.VISIBLE else View.GONE
+            Log.d(TAG, "Loading state: $isLoading")
         }
 
         // Observe error messages
         viewModel.errorMessage.observe(this) { message ->
             if (message.isNotEmpty()) {
+                Log.e(TAG, "Error: $message")
                 Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+
+                // Show error view if you have one
+//                binding.layoutError?.visibility = View.VISIBLE
+//                binding.tvErrorMessage?.text = message
+            } else {
+//                binding.layoutError?.visibility = View.GONE
             }
         }
     }
 
     private fun updateEmptyState(isEmpty: Boolean) {
-//        binding.layoutEmptyShipping.isVisible = isEmpty
-        binding.rvShipmentOrder.isVisible = !isEmpty
+        Log.d(TAG, "Updating empty state: isEmpty=$isEmpty")
+//        binding.layoutEmptyShipping?.visibility = if (isEmpty) View.VISIBLE else View.GONE
+        binding.rvShipmentOrder.visibility = if (isEmpty) View.GONE else View.VISIBLE
+
+        // If empty, show appropriate message
+        if (isEmpty) {
+//            binding.tvEmptyMessage?.text = "No shipping options available for this address and product"
+        }
     }
 
     private fun returnSelectedShipping(
@@ -116,11 +159,13 @@ class ShippingActivity : AppCompatActivity() {
             putExtra(EXTRA_SHIP_PRICE, shipPrice)
             putExtra(EXTRA_SHIP_ETD, shipEtd)
         }
+        Log.d(TAG, "Returning selected shipping: name=$shipName, service=$shipService, price=$shipPrice, etd=$shipEtd")
         setResult(RESULT_OK, intent)
         finish()
     }
 
     companion object {
+
         // Constants for intent extras
         const val EXTRA_ADDRESS_ID = "extra_address_id"
         const val EXTRA_PRODUCT_ID = "extra_product_id"

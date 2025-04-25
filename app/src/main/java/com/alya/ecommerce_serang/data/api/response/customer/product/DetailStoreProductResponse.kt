@@ -13,6 +13,8 @@ data class DetailStoreProductResponse(
 
 data class PaymentInfoItem(
 
+	val id: Int = 1,
+
 	@field:SerializedName("qris_image")
 	val qrisImage: String,
 

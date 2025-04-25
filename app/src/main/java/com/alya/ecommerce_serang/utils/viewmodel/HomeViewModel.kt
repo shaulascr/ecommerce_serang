@@ -52,23 +52,6 @@ class HomeViewModel (
         loadProducts()
         loadCategories()
     }
-
-//    private fun fetchUserData() {
-//        viewModelScope.launch {
-//            try {
-//                val response = apiService.getProtectedData() // Example API request
-//                if (response.isSuccessful) {
-//                    val data = response.body()
-//                    Log.d("HomeFragment", "User Data: $data")
-//                    // Update UI with data
-//                } else {
-//                    Log.e("HomeFragment", "Error: ${response.message()}")
-//                }
-//            } catch (e: Exception) {
-//                Log.e("HomeFragment", "Exception: ${e.message}")
-//            }
-//        }
-//    }
 }
 
 sealed class HomeUiState {

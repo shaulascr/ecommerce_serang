@@ -7,7 +7,7 @@ data class CourierCostRequest(
     val addressId: Int,
 
     @SerializedName("items")
-    val itemCost: CostProduct
+    val itemCost: List<CostProduct>
 )
 
 data class CostProduct (

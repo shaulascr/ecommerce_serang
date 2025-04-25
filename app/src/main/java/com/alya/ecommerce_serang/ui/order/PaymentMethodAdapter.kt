@@ -14,8 +14,8 @@ class PaymentMethodAdapter(
     private val onPaymentSelected: (PaymentInfoItem) -> Unit
 ) : RecyclerView.Adapter<PaymentMethodAdapter.PaymentMethodViewHolder>() {
 
-    // Track the selected position
-    private var selectedPosition = -1
+    // Selected payment name
+    private var selectedPaymentName: String? = null
 
     class PaymentMethodViewHolder(val binding: ItemPaymentMethodBinding) :
         RecyclerView.ViewHolder(binding.root)
@@ -38,14 +38,23 @@ class PaymentMethodAdapter(
             // Set payment method name
             tvPaymentMethodName.text = payment.name
 
-            // Set radio button state
-            rbPaymentMethod.isChecked = selectedPosition == position
+//            // Set bank account number if available
+//            if (!payment.bankNum.isNullOrEmpty()) {
+//                tvPaymentAccountNumber.visibility = View.VISIBLE
+//                tvPaymentAccountNumber.text = payment.bankNum
+//            } else {
+//                tvPaymentAccountNumber.visibility = View.GONE
+//            }
+
+            // Set radio button state based on selected payment name
+            rbPaymentMethod.isChecked = payment.name == selectedPaymentName
 
             // Load payment icon if available
-            if (payment.qrisImage.isNotEmpty()) {
+            if (!payment.qrisImage.isNullOrEmpty()) {
                 Glide.with(ivPaymentMethod.context)
                     .load(payment.qrisImage)
-                    .apply(RequestOptions()
+                    .apply(
+                        RequestOptions()
                         .placeholder(R.drawable.outline_store_24)
                         .error(R.drawable.outline_store_24))
                     .into(ivPaymentMethod)
@@ -56,35 +65,21 @@ class PaymentMethodAdapter(
 
             // Handle click on the entire item
             root.setOnClickListener {
-                selectPayment(position)
                 onPaymentSelected(payment)
+                setSelectedPaymentName(payment.name)
             }
 
             // Handle click on the radio button
             rbPaymentMethod.setOnClickListener {
-                selectPayment(position)
                 onPaymentSelected(payment)
+                setSelectedPaymentName(payment.name)
             }
         }
     }
 
-    // Helper method to handle payment selection
-    private fun selectPayment(position: Int) {
-        if (selectedPosition != position) {
-            val previousPosition = selectedPosition
-            selectedPosition = position
-
-            // Update UI for previous and new selection
-            notifyItemChanged(previousPosition)
-            notifyItemChanged(position)
-        }
-    }
-
-    //selected by name
+    // Set selected payment by name and refresh the UI
     fun setSelectedPaymentName(paymentName: String) {
-        val position = paymentMethods.indexOfFirst { it.name == paymentName }
-        if (position != -1 && position != selectedPosition) {
-            selectPayment(position)
-        }
+        selectedPaymentName = paymentName
+        notifyDataSetChanged() // Update all items to reflect selection change
     }
 }

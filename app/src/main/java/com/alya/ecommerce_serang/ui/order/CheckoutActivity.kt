@@ -3,11 +3,15 @@ package com.alya.ecommerce_serang.ui.order
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
+import android.view.ViewGroup
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.alya.ecommerce_serang.data.api.dto.CheckoutData
 import com.alya.ecommerce_serang.data.api.dto.OrderRequest
 import com.alya.ecommerce_serang.data.api.dto.OrderRequestBuy
@@ -42,6 +46,7 @@ class CheckoutActivity : AppCompatActivity() {
 
         sessionManager = SessionManager(this)
 
+
         // Setup UI components
         setupToolbar()
         setupObservers()
@@ -74,6 +79,11 @@ class CheckoutActivity : AppCompatActivity() {
                 finish()
             }
         }
+
+        viewModel.getPaymentMethods { paymentMethods ->
+            // Logging is just for debugging
+            Log.d("CheckoutActivity", "Loaded ${paymentMethods.size} payment methods")
+        }
     }
 
     private fun setupToolbar() {
@@ -87,13 +97,6 @@ class CheckoutActivity : AppCompatActivity() {
         viewModel.checkoutData.observe(this) { data ->
             setupProductRecyclerView(data)
             updateOrderSummary()
-
-            // Load payment methods
-            viewModel.getPaymentMethods { paymentMethods ->
-                if (paymentMethods.isNotEmpty()) {
-                    setupPaymentMethodsRecyclerView(paymentMethods)
-                }
-            }
         }
 
         // Observe address details
@@ -102,13 +105,23 @@ class CheckoutActivity : AppCompatActivity() {
             binding.tvAddress.text = "${address?.street}, ${address?.subdistrict}"
         }
 
-        // Observe payment details
-        viewModel.paymentDetails.observe(this) { payment ->
-            if (payment != null) {
-                // Update selected payment in adapter by name instead of ID
-                paymentAdapter?.setSelectedPaymentName(payment.name)
+        viewModel.availablePaymentMethods.observe(this) { paymentMethods ->
+            if (paymentMethods.isNotEmpty()) {
+                setupPaymentMethodsRecyclerView(paymentMethods)
             }
         }
+
+// Observe selected payment
+        viewModel.selectedPayment.observe(this) { selectedPayment ->
+            if (selectedPayment != null) {
+                // Update the adapter to show the selected payment
+                paymentAdapter?.setSelectedPaymentName(selectedPayment.name)
+
+                // Optional: Update other UI elements to show the selected payment
+                // For example: binding.tvSelectedPaymentMethod.text = selectedPayment.name
+            }
+        }
+
 
         // Observe loading state
         viewModel.isLoading.observe(this) { isLoading ->
@@ -133,6 +146,53 @@ class CheckoutActivity : AppCompatActivity() {
         }
     }
 
+    private fun setupPaymentMethodsRecyclerView(paymentMethods: List<PaymentInfoItem>) {
+        if (paymentMethods.isEmpty()) {
+            Log.e("CheckoutActivity", "Payment methods list is empty")
+            Toast.makeText(this, "No payment methods available", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Debug logging
+        Log.d("CheckoutActivity", "Setting up payment methods: ${paymentMethods.size} methods available")
+
+        paymentAdapter = PaymentMethodAdapter(paymentMethods) { payment ->
+            // We're using a hardcoded ID for now
+            viewModel.setPaymentMethod(1)
+        }
+
+        binding.rvPaymentMethods.apply {
+            layoutManager = LinearLayoutManager(this@CheckoutActivity)
+            adapter = paymentAdapter
+        }
+    }
+
+    private fun updatePaymentMethodsAdapter(paymentMethods: List<PaymentInfoItem>, selectedId: Int?) {
+        Log.d("CheckoutActivity", "Updating payment adapter with ${paymentMethods.size} methods")
+
+        // Simple test adapter
+        val testAdapter = object : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+            override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+                val textView = TextView(parent.context)
+                textView.setPadding(16, 16, 16, 16)
+                textView.textSize = 16f
+                return object : RecyclerView.ViewHolder(textView) {}
+            }
+
+            override fun getItemCount() = paymentMethods.size
+
+            override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+                val payment = paymentMethods[position]
+                (holder.itemView as TextView).text = "Payment: ${payment.name}"
+            }
+        }
+
+        binding.rvPaymentMethods.apply {
+            layoutManager = LinearLayoutManager(this@CheckoutActivity)
+            adapter = testAdapter
+        }
+    }
+
     private fun setupProductRecyclerView(checkoutData: CheckoutData) {
         val adapter = if (checkoutData.isBuyNow || checkoutData.cartItems.size <= 1) {
             CheckoutSellerAdapter(checkoutData)
@@ -144,21 +204,6 @@ class CheckoutActivity : AppCompatActivity() {
             layoutManager = LinearLayoutManager(this@CheckoutActivity)
             this.adapter = adapter
             isNestedScrollingEnabled = false
-        }
-    }
-
-    private fun setupPaymentMethodsRecyclerView(paymentMethods: List<PaymentInfoItem>) {
-        paymentAdapter = PaymentMethodAdapter(paymentMethods) { payment ->
-            // When a payment method is selected
-            // Since PaymentInfoItem doesn't have an id field, we'll use the name as identifier
-            // You might need to convert the name to an ID if your backend expects an integer
-            val paymentId = payment.name.toIntOrNull() ?: 0
-            viewModel.setPaymentMethod(paymentId)
-        }
-
-        binding.rvPaymentMethods.apply {
-            layoutManager = LinearLayoutManager(this@CheckoutActivity)
-            adapter = paymentAdapter
         }
     }
 
@@ -251,6 +296,9 @@ class CheckoutActivity : AppCompatActivity() {
             val addressId = result.data?.getIntExtra(AddressActivity.EXTRA_ADDRESS_ID, 0) ?: 0
             if (addressId > 0) {
                 viewModel.setSelectedAddress(addressId)
+
+                // You might want to show a toast or some UI feedback
+                Toast.makeText(this, "Address selected successfully", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -299,7 +347,7 @@ class CheckoutActivity : AppCompatActivity() {
         }
 
         // Check if payment method is selected
-        if (viewModel.paymentDetails.value == null) {
+        if (viewModel.selectedPayment.value == null) {
             Toast.makeText(this, "Silakan pilih metode pembayaran", Toast.LENGTH_SHORT).show()
             return false
         }

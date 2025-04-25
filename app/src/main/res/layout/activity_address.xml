@@ -24,6 +24,7 @@
             app:title="Alamat Pengiriman " />
 
         <TextView
+            android:id="@+id/add_address_click"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAlignment="textEnd"

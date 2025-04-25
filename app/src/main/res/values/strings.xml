@@ -61,4 +61,61 @@
     <string name="add_to_cart">Keranjang</string>
     <string name="beli_sekarang">Beli Sekarang</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="batas_tagihan">Batas Tagihan :</string>
+    <string name="total_order">Total: </string>
+    <string name="dl_date_wait">23:59 15 April 2025</string>
+    <string name="no_available_orders">Tidak ada order</string>
+    <string name="item_count_prod">%d produk</string>
+    <string name="show_more_product">%d produk lainnya</string>
+    <!--    status order-->
+    <string name="all_orders">Semua Pesanan </string>
+    <string name="pending_orders">Menunggu Tagihan</string>
+    <string name="unpaid_orders">Konfrimasi Bayar</string>
+    <string name="processed_orders">Diproses</string>
+    <string name="paid_orders">Sudah Dibayar</string>
+    <string name="delivered_orders">Pesanan Sampai</string>
+    <string name="completed_orders">Selesai</string>
+    <string name="shipped_orders">Dikirim</string>
+    <string name="canceled_orders">Dibatalkan</string>
+    <!--    deadline label -->
+    <string name="dl_pending">Batas Tagihan</string>
+    <string name="dl_unpaid">Batas Pembayaran</string>
+    <string name="dl_processed">Batas Pengiriman</string>
+    <string name="dal_paid">Semua Pesanan </string>
+    <string name="dl_delivered">Semua Pesanan </string>
+    <string name="dl_completed">Semua Pesanan </string>
+    <string name="dl_shipped">Tanggal Pesanan Sampai</string>
+    <string name="dl_canceled">Semua Pesanan </string>
+
+    <string name="sent_evidence">Kirim Bukti Pembayaran </string>
+    <string name="canceled_order_btn">Batalkan Pesanan </string>
+    <string name="claim_complaint">Ajukan Komplain </string>
+    <string name="claim_order">Pesanan Diterima </string>
+    <string name="add_review">Beri Ulasan </string>
+
+    <string name="warning_icon">Warning Icon</string>
+    <string name="cancel_order_confirmation">Apakah anda yakin ingin membatalkan pesanan?</string>
+    <string name="reason_for_cancellation">Alasan Batalkan Pesanan</string>
+    <string name="cancel">Kembali</string>
+    <string name="confirm">Batalkan Pesanan</string>
+    <string name="order_canceled_successfully">Order canceled successfully</string>
+    <string name="failed_to_cancel_order">Failed to cancel order</string>
+    <string name="please_select_cancellation_reason">Please select a reason for cancellation</string>
+    <string name="upload_evidence">Unggah Bukti Komplain</string>
+    <string name="complaint_image">Complaint evidence image</string>
+    <string name="tap_to_select_image">Tekan untuk unggah foto</string>
+    <string name="please_select_image">Please select an image as evidence</string>
+    <string name="image_too_large">Image is too large. Please select a smaller image.</string>
+
+    <!-- Cancellation Reasons -->
+    <string-array name="cancellation_reasons">
+        <item>Found a better price elsewhere</item>
+        <item>Changed my mind about the product</item>
+        <item>Ordered the wrong item</item>
+        <item>Shipping time is too long</item>
+        <item>Financial reasons</item>
+        <item>Other reason</item>
+    </string-array>
+
+
 </resources>

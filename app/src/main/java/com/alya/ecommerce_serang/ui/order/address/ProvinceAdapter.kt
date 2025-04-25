@@ -1,6 +1,7 @@
 package com.alya.ecommerce_serang.ui.order.address
 
 import android.content.Context
+import android.util.Log
 import android.widget.ArrayAdapter
 import com.alya.ecommerce_serang.data.api.response.customer.order.CitiesItem
 import com.alya.ecommerce_serang.data.api.response.customer.order.ProvincesItem
@@ -20,6 +21,8 @@ class ProvinceAdapter(
         clear()
         addAll(provinces.map { it.province })
         notifyDataSetChanged()
+
+        Log.d("ProvinceAdapter", "Updated with ${provinces.size} provinces")
     }
 
     fun getProvinceId(position: Int): Int? {

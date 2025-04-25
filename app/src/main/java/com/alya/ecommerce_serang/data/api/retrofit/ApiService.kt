@@ -1,6 +1,8 @@
 package com.alya.ecommerce_serang.data.api.retrofit
 
+import com.alya.ecommerce_serang.data.api.dto.AddEvidenceRequest
 import com.alya.ecommerce_serang.data.api.dto.CartItem
+import com.alya.ecommerce_serang.data.api.dto.CompletedOrderRequest
 import com.alya.ecommerce_serang.data.api.dto.CourierCostRequest
 import com.alya.ecommerce_serang.data.api.dto.CreateAddressRequest
 import com.alya.ecommerce_serang.data.api.dto.LoginRequest
@@ -19,10 +21,15 @@ import com.alya.ecommerce_serang.data.api.response.auth.RegisterResponse
 import com.alya.ecommerce_serang.data.api.response.customer.cart.AddCartResponse
 import com.alya.ecommerce_serang.data.api.response.customer.cart.ListCartResponse
 import com.alya.ecommerce_serang.data.api.response.customer.cart.UpdateCartResponse
+import com.alya.ecommerce_serang.data.api.response.order.AddEvidenceResponse
+import com.alya.ecommerce_serang.data.api.response.order.ComplaintResponse
+import com.alya.ecommerce_serang.data.api.response.order.CompletedOrderResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.CourierCostResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.CreateOrderResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.ListCityResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.ListProvinceResponse
+import com.alya.ecommerce_serang.data.api.response.order.OrderDetailResponse
+import com.alya.ecommerce_serang.data.api.response.order.OrderListResponse
 import com.alya.ecommerce_serang.data.api.response.customer.product.AllProductResponse
 import com.alya.ecommerce_serang.data.api.response.customer.product.CategoryResponse
 import com.alya.ecommerce_serang.data.api.response.customer.product.DetailStoreProductResponse
@@ -38,12 +45,13 @@ import com.alya.ecommerce_serang.data.api.response.store.product.UpdateProductRe
 import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.Body
-import retrofit2.http.DELETE
+import retrofit2.http.Field
+import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
 import retrofit2.http.Multipart
 import retrofit2.http.POST
-import retrofit2.http.Part
 import retrofit2.http.PUT
+import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -92,6 +100,29 @@ interface ApiService {
     suspend fun postOrder(
         @Body request: OrderRequest
     ): Response<CreateOrderResponse>
+
+    @GET("order/detail/{id}")
+    suspend fun getDetailOrder(
+        @Path("id") orderId: Int
+    ): Response<OrderDetailResponse>
+
+    @POST("order/addevidence")
+    suspend fun addEvidence(
+        @Body request : AddEvidenceRequest,
+    ): Response<AddEvidenceResponse>
+
+    @Multipart
+    @POST("order/addevidence")
+    suspend fun addEvidenceMultipart(
+        @Part("order_id") orderId: RequestBody,
+        @Part("amount") amount: RequestBody,
+        @Part evidence: MultipartBody.Part
+    ): Response<AddEvidenceResponse>
+
+    @GET("order/{status}")
+    suspend fun getOrderList(
+        @Path("status") status: String
+    ):Response<OrderListResponse>
 
     @POST("order")
     suspend fun postOrderBuyNow(
@@ -180,4 +211,29 @@ interface ApiService {
     suspend fun getOrdersByStatus(
         @Query("status") status: String
     ): Response<OrderListResponse>
+    @PUT("store/order/update")
+    suspend fun confirmOrder(
+        @Body confirmOrder : CompletedOrderRequest
+    ): Response<CompletedOrderResponse>
+
+    @Multipart
+    @POST("addcomplaint")
+    suspend fun addComplaint(
+        @Part("order_id") orderId: RequestBody,
+        @Part("description") description: RequestBody,
+        @Part complaintimg: MultipartBody.Part
+    ): Response<ComplaintResponse>
+
+    @PUT("store/order/update")
+    suspend fun confirmOrder(
+        @Body confirmOrder : CompletedOrderRequest
+    ): Response<CompletedOrderResponse>
+
+    @Multipart
+    @POST("addcomplaint")
+    suspend fun addComplaint(
+        @Part("order_id") orderId: RequestBody,
+        @Part("description") description: RequestBody,
+        @Part complaintimg: MultipartBody.Part
+    ): Response<ComplaintResponse>
 }
