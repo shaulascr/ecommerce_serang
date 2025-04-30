@@ -1,6 +1,5 @@
 package com.alya.ecommerce_serang.ui.chat
 
-import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -9,49 +8,66 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.text.Editable
 import android.text.TextWatcher
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
+import android.util.Log
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import androidx.fragment.app.viewModels
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.alya.ecommerce_serang.BuildConfig.BASE_URL
 import com.alya.ecommerce_serang.R
-import com.alya.ecommerce_serang.databinding.FragmentChatBinding
+import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
+import com.alya.ecommerce_serang.data.repository.ProductRepository
+import com.alya.ecommerce_serang.data.repository.UserRepository
+import com.alya.ecommerce_serang.databinding.ActivityChatBinding
+import com.alya.ecommerce_serang.ui.auth.LoginActivity
+import com.alya.ecommerce_serang.ui.product.ProductUserViewModel
+import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.Constants
+import com.alya.ecommerce_serang.utils.SessionManager
 import com.bumptech.glide.Glide
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import java.io.File
-import java.text.SimpleDateFormat
 import java.util.Locale
+import javax.inject.Inject
 
-
-/**
- * A simple [Fragment] subclass.
- * Use the [ChatFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 @AndroidEntryPoint
-class ChatFragment : Fragment() {
+class ChatActivity : AppCompatActivity() {
 
-    private var _binding: FragmentChatBinding? = null
-    private val binding get() = _binding!!
+    private lateinit var binding: ActivityChatBinding
 
-    private val viewModel: ChatViewModel by viewModels()
-    private val args: ChatFragmentArgs by navArgs()
+    @Inject
+    lateinit var sessionManager: SessionManager
+    private lateinit var socketService: SocketIOService
 
+
+    @Inject
     private lateinit var chatAdapter: ChatAdapter
+
+    private val viewModel: ChatViewModel by viewModels {
+        BaseViewModelFactory {
+            val apiService = ApiConfig.getApiService(sessionManager)
+            val userRepository = UserRepository(apiService)
+            ChatViewModel(userRepository, socketService, sessionManager)
+        }
+    }
 
     // For image attachment
     private var tempImageUri: Uri? = null
+
+    // Chat parameters from intent
+    private var chatRoomId: Int = 0
+    private var storeId: Int = 0
+    private var productId: Int = 0
 
     // Typing indicator handler
     private val typingHandler = android.os.Handler(android.os.Looper.getMainLooper())
@@ -80,29 +96,59 @@ class ChatFragment : Fragment() {
         }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentChatBinding.inflate(inflater, container, false)
-        return binding.root
-    }
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityChatBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+        // Get parameters from intent
+        chatRoomId = intent.getIntExtra(Constants.EXTRA_CHAT_ROOM_ID, 0)
+        storeId = intent.getIntExtra(Constants.EXTRA_STORE_ID, 0)
+        productId = intent.getIntExtra(Constants.EXTRA_PRODUCT_ID, 0)
 
+        // Check if user is logged in
+        val userId = sessionManager.getUserId()
+        val token = sessionManager.getToken()
+
+        if (userId.isNullOrEmpty() || token.isNullOrEmpty()) {
+            // User not logged in, redirect to login
+            Toast.makeText(this, "Please login first", Toast.LENGTH_SHORT).show()
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish()
+            return
+        }
+
+        Log.d(TAG, "Chat Activity started - User ID: $userId, Chat Room: $chatRoomId")
+
+        // Initialize ViewModel
+        initViewModel()
+
+        // Setup UI components
         setupRecyclerView()
         setupListeners()
         setupTypingIndicator()
         observeViewModel()
     }
 
+    private fun initViewModel() {
+        // Set chat parameters to ViewModel
+        viewModel.setChatParameters(
+            chatRoomId = chatRoomId,
+            storeId = storeId,
+            productId = productId,
+            productName = intent.getStringExtra(Constants.EXTRA_PRODUCT_NAME) ?: "",
+            productPrice = intent.getStringExtra(Constants.EXTRA_PRODUCT_PRICE) ?: "",
+            productImage = intent.getStringExtra(Constants.EXTRA_PRODUCT_IMAGE) ?: "",
+            productRating = intent.getFloatExtra(Constants.EXTRA_PRODUCT_RATING, 0f),
+            storeName = intent.getStringExtra(Constants.EXTRA_STORE_NAME) ?: ""
+        )
+    }
+
     private fun setupRecyclerView() {
         chatAdapter = ChatAdapter()
         binding.recyclerChat.apply {
             adapter = chatAdapter
-            layoutManager = LinearLayoutManager(requireContext()).apply {
+            layoutManager = LinearLayoutManager(this@ChatActivity).apply {
                 stackFromEnd = true
             }
         }
@@ -111,7 +157,7 @@ class ChatFragment : Fragment() {
     private fun setupListeners() {
         // Back button
         binding.btnBack.setOnClickListener {
-            requireActivity().onBackPressed()
+            onBackPressed()
         }
 
         // Options button
@@ -122,7 +168,7 @@ class ChatFragment : Fragment() {
         // Send button
         binding.btnSend.setOnClickListener {
             val message = binding.editTextMessage.text.toString().trim()
-            if (message.isNotEmpty() || viewModel.state.value.hasAttachment) {
+            if (message.isNotEmpty() || viewModel.state.value?.hasAttachment ?: false) {
                 viewModel.sendMessage(message)
                 binding.editTextMessage.text.clear()
             }
@@ -151,7 +197,7 @@ class ChatFragment : Fragment() {
     }
 
     private fun observeViewModel() {
-        viewLifecycleOwner.lifecycleScope.launch {
+        lifecycleScope.launch {
             viewModel.state.collectLatest { state ->
                 // Update messages
                 chatAdapter.submitList(state.messages)
@@ -170,7 +216,7 @@ class ChatFragment : Fragment() {
 
                 // Load product image
                 if (state.productImageUrl.isNotEmpty()) {
-                    Glide.with(requireContext())
+                    Glide.with(this@ChatActivity)
                         .load(BASE_URL + state.productImageUrl)
                         .centerCrop()
                         .placeholder(R.drawable.placeholder_image)
@@ -179,7 +225,7 @@ class ChatFragment : Fragment() {
                 }
 
                 // Show/hide loading indicators
-                binding.progressBar.visibility = if (state.isLoading) View.VISIBLE else View.GONE
+//                binding.progressBar.visibility = if (state.isLoading) View.VISIBLE else View.GONE
                 binding.btnSend.isEnabled = !state.isSending
 
                 // Update attachment hint
@@ -198,7 +244,7 @@ class ChatFragment : Fragment() {
 
                 // Show error if any
                 state.error?.let { error ->
-                    Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@ChatActivity, error, Toast.LENGTH_SHORT).show()
                     viewModel.clearError()
                 }
             }
@@ -233,13 +279,13 @@ class ChatFragment : Fragment() {
             getString(R.string.cancel)
         )
 
-        androidx.appcompat.app.AlertDialog.Builder(requireContext())
+        AlertDialog.Builder(this)
             .setTitle(getString(R.string.options))
             .setItems(options) { dialog, which ->
                 when (which) {
-                    0 -> Toast.makeText(requireContext(), R.string.block_user_selected, Toast.LENGTH_SHORT).show()
-                    1 -> Toast.makeText(requireContext(), R.string.report_selected, Toast.LENGTH_SHORT).show()
-                    2 -> Toast.makeText(requireContext(), R.string.clear_chat_selected, Toast.LENGTH_SHORT).show()
+                    0 -> Toast.makeText(this, R.string.block_user_selected, Toast.LENGTH_SHORT).show()
+                    1 -> Toast.makeText(this, R.string.report_selected, Toast.LENGTH_SHORT).show()
+                    2 -> Toast.makeText(this, R.string.clear_chat_selected, Toast.LENGTH_SHORT).show()
                 }
                 dialog.dismiss()
             }
@@ -248,12 +294,12 @@ class ChatFragment : Fragment() {
 
     private fun checkPermissionsAndShowImagePicker() {
         if (ContextCompat.checkSelfPermission(
-                requireContext(),
+                this,
                 Manifest.permission.READ_EXTERNAL_STORAGE
             ) != PackageManager.PERMISSION_GRANTED
         ) {
             ActivityCompat.requestPermissions(
-                requireActivity(),
+                this,
                 arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.CAMERA),
                 Constants.REQUEST_STORAGE_PERMISSION
             )
@@ -269,7 +315,7 @@ class ChatFragment : Fragment() {
             getString(R.string.cancel)
         )
 
-        androidx.appcompat.app.AlertDialog.Builder(requireContext())
+        AlertDialog.Builder(this)
             .setTitle(getString(R.string.select_attachment))
             .setItems(options) { dialog, which ->
                 when (which) {
@@ -284,12 +330,12 @@ class ChatFragment : Fragment() {
     private fun openCamera() {
         val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
         val imageFileName = "IMG_${timeStamp}.jpg"
-        val storageDir = requireContext().getExternalFilesDir(null)
+        val storageDir = getExternalFilesDir(null)
         val imageFile = File(storageDir, imageFileName)
 
         tempImageUri = FileProvider.getUriForFile(
-            requireContext(),
-            "${requireContext().packageName}.fileprovider",
+            this,
+            "${applicationContext.packageName}.fileprovider",
             imageFile
         )
 
@@ -308,7 +354,7 @@ class ChatFragment : Fragment() {
     private fun handleSelectedImage(uri: Uri) {
         // Get the file from Uri
         val filePathColumn = arrayOf(MediaStore.Images.Media.DATA)
-        val cursor = requireContext().contentResolver.query(uri, filePathColumn, null, null, null)
+        val cursor = contentResolver.query(uri, filePathColumn, null, null, null)
         cursor?.moveToFirst()
         val columnIndex = cursor?.getColumnIndex(filePathColumn[0])
         val filePath = cursor?.getString(columnIndex ?: 0)
@@ -316,7 +362,7 @@ class ChatFragment : Fragment() {
 
         if (filePath != null) {
             viewModel.setSelectedImageFile(File(filePath))
-            Toast.makeText(requireContext(), R.string.image_selected, Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.image_selected, Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -330,14 +376,17 @@ class ChatFragment : Fragment() {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 showImagePickerOptions()
             } else {
-                Toast.makeText(requireContext(), R.string.permission_denied, Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, R.string.permission_denied, Toast.LENGTH_SHORT).show()
             }
         }
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
+    override fun onDestroy() {
+        super.onDestroy()
         typingHandler.removeCallbacks(stopTypingRunnable)
-        _binding = null
+    }
+
+    companion object {
+        private const val TAG = "ChatActivity"
     }
 }

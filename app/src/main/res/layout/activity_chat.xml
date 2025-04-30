@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".ui.chat.ChatFragment">
+    tools:context=".ui.chat.ChatActivity">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/chatToolbar"
@@ -34,7 +35,7 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_marginStart="8dp"
-                android:src="@drawable/placeholder_image"
+                android:src="@drawable/ic_person"
                 app:layout_constraintStart_toEndOf="@+id/btnBack"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent" />
@@ -79,20 +80,6 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.appcompat.widget.Toolbar>
 
-    <!-- Connection Status -->
-    <TextView
-        android:id="@+id/tvConnectionStatus"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#FFC107"
-        android:padding="4dp"
-        android:textAlignment="center"
-        android:textColor="#000000"
-        android:text="Connecting..."
-        android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@+id/chatToolbar"
-        tools:visibility="visible" />
-
     <!-- Product Card -->
     <androidx.cardview.widget.CardView
         android:id="@+id/cardProduct"
@@ -101,7 +88,7 @@
         android:layout_margin="8dp"
         app:cardCornerRadius="8dp"
         app:cardElevation="4dp"
-        app:layout_constraintTop_toBottomOf="@+id/tvConnectionStatus">
+        app:layout_constraintTop_toBottomOf="@+id/chatToolbar">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -180,18 +167,6 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- Progress Bar -->
-    <ProgressBar
-        android:id="@+id/progressBar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:visibility="visible" />
-
     <!-- Chat messages -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerChat"
@@ -200,22 +175,8 @@
         android:clipToPadding="false"
         android:paddingTop="8dp"
         android:paddingBottom="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/tvTypingIndicator"
-        app:layout_constraintTop_toBottomOf="@+id/cardProduct" />
-
-    <!-- Typing indicator -->
-    <TextView
-        android:id="@+id/tvTypingIndicator"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="4dp"
-        android:text="User is typing..."
-        android:textColor="#666666"
-        android:textSize="12sp"
-        android:textStyle="italic"
-        android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/layoutChatInput"
-        tools:visibility="visible" />
+        app:layout_constraintTop_toBottomOf="@+id/cardProduct" />
 
     <!-- Chat input area -->
     <LinearLayout
@@ -244,7 +205,6 @@
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
             android:layout_weight="1"
-            android:background="@drawable/bg_edit_text_rounded"
             android:hint="Tulis pesan"
             android:inputType="textMultiLine"
             android:maxLines="4"
@@ -259,6 +219,58 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Send"
             android:src="@drawable/ic_send" />
+    </LinearLayout>
+
+
+    <TextView
+        android:id="@+id/tvTypingIndicator"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="4dp"
+        android:text="User is typing..."
+        android:textColor="#666666"
+        android:textSize="12sp"
+        android:textStyle="italic"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/layoutChatInput"
+        tools:visibility="visible" />
+    <!-- Bottom navigation -->
+    <LinearLayout
+        android:id="@+id/bottomNavigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#FFFFFF"
+        android:elevation="8dp"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <ImageButton
+            android:id="@+id/btnHome"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Home"
+            android:src="@drawable/ic_home" />
+
+        <ImageButton
+            android:id="@+id/btnMenu"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Menu"
+            android:src="@drawable/ic_menu" />
+
+        <ImageButton
+            android:id="@+id/btnNotification"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Notification"
+            android:src="@drawable/ic_notification" />
     </LinearLayout>
 
 

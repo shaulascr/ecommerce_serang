@@ -12,6 +12,7 @@ import com.alya.ecommerce_serang.data.api.dto.OtpRequest
 import com.alya.ecommerce_serang.data.api.dto.RegisterRequest
 import com.alya.ecommerce_serang.data.api.dto.SearchRequest
 import com.alya.ecommerce_serang.data.api.dto.UpdateCart
+import com.alya.ecommerce_serang.data.api.dto.UpdateChatRequest
 import com.alya.ecommerce_serang.data.api.response.ViewStoreProductsResponse
 import com.alya.ecommerce_serang.data.api.response.auth.LoginResponse
 import com.alya.ecommerce_serang.data.api.response.auth.OtpResponse
@@ -19,6 +20,9 @@ import com.alya.ecommerce_serang.data.api.response.auth.RegisterResponse
 import com.alya.ecommerce_serang.data.api.response.cart.AddCartResponse
 import com.alya.ecommerce_serang.data.api.response.cart.ListCartResponse
 import com.alya.ecommerce_serang.data.api.response.cart.UpdateCartResponse
+import com.alya.ecommerce_serang.data.api.response.chat.ChatHistoryResponse
+import com.alya.ecommerce_serang.data.api.response.chat.SendChatResponse
+import com.alya.ecommerce_serang.data.api.response.chat.UpdateChatResponse
 import com.alya.ecommerce_serang.data.api.response.order.AddEvidenceResponse
 import com.alya.ecommerce_serang.data.api.response.order.ComplaintResponse
 import com.alya.ecommerce_serang.data.api.response.order.CompletedOrderResponse
@@ -209,4 +213,23 @@ interface ApiService {
 
     @GET("search")
     suspend fun getSearchHistory(): Response<SearchHistoryResponse>
+
+    @Multipart
+    @POST("sendchat")
+    suspend fun sendChatLine(
+        @Part("store_id") storeId: RequestBody,
+        @Part("message") message: RequestBody,
+        @Part("product_id") productId: RequestBody,
+        @Part("chatimg") chatimg: MultipartBody.Part
+    ): Response<SendChatResponse>
+
+    @PUT("chatstatus")
+    suspend fun updateChatStatus(
+        @Body request: UpdateChatRequest
+    ): Response<UpdateChatResponse>
+
+    @GET("chatdetail/{chatRoomId}")
+    suspend fun getChatDetail(
+        @Path("chatRoomId") chatRoomId: Int
+    ): Response<ChatHistoryResponse>
 }
