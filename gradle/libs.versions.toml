@@ -1,8 +1,10 @@
 [versions]
 agp = "8.5.2"
 glide = "4.16.0"
-hiltAndroid = "2.51"
+hiltAndroid = "2.48"  # Updated from 2.44 for better compatibility
 hiltLifecycleViewmodel = "1.0.0-alpha03"
+hiltCompiler = "2.48"  # Added for consistency
+ksp = "1.9.0-1.0.13"
 kotlin = "1.9.0"
 
 coreKtx = "1.10.1"
@@ -45,7 +47,15 @@ androidx-navigation-ui-ktx = { group = "androidx.navigation", name = "navigation
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 play-services-maps = { module = "com.google.android.gms:play-services-maps", version.ref = "playServicesMaps" }
 
+hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hiltCompiler" }
+androidx-hilt-common = { module = "androidx.hilt:hilt-common", version = "1.0.0" }
+androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version = "1.0.0" }
+androidx-hilt-navigation-fragment = { module = "androidx.hilt:hilt-navigation-fragment", version = "1.0.0" }
+androidx-hilt-work = { module = "androidx.hilt:hilt-work", version = "1.0.0" }
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+dagger-hilt = { id = "com.google.dagger.hilt.android", version.ref = "hiltAndroid" }
 

@@ -41,4 +41,9 @@
     <color name="gray_1">#E8ECF2</color>
     <color name="soft_gray">#7D8FAB</color>
     <color name="blue1">#489EC6</color>
+
+    <color name="bottom_navigation_icon_color_active">#489EC6</color>
+    <color name="bottom_navigation_icon_color_inactive">#8E8E8E</color>
+    <color name="bottom_navigation_text_color_active">#489EC6</color>
+    <color name="bottom_navigation_text_color_inactive">#8E8E8E</color>
 </resources>

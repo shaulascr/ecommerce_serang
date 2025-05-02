@@ -1,5 +1,6 @@
 package com.alya.ecommerce_serang.ui.auth
 
+import android.app.DatePickerDialog
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -7,6 +8,9 @@ import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import com.alya.ecommerce_serang.data.api.dto.RegisterRequest
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.repository.Result
@@ -16,6 +20,9 @@ import com.alya.ecommerce_serang.ui.MainActivity
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
 import com.alya.ecommerce_serang.utils.viewmodel.RegisterViewModel
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 class RegisterActivity : AppCompatActivity() {
     private lateinit var binding: ActivityRegisterBinding
@@ -30,17 +37,45 @@ class RegisterActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        sessionManager = SessionManager(this)
-        if (!sessionManager.getToken().isNullOrEmpty()) {
-            // User already logged in, redirect to MainActivity
-            startActivity(Intent(this, MainActivity::class.java))
-            finish()
-        }
-
-        enableEdgeToEdge()
         binding = ActivityRegisterBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        sessionManager = SessionManager(this)
+        Log.d("RegisterActivity", "Token in storage: '${sessionManager.getToken()}'")
+        Log.d("RegisterActivity", "User ID in storage: '${sessionManager.getUserId()}'")
+
+        try {
+            // Use the new isLoggedIn method
+            if (sessionManager.isLoggedIn()) {
+                Log.d("RegisterActivity", "User logged in, redirecting to MainActivity")
+                startActivity(Intent(this, MainActivity::class.java))
+                finish()
+                return
+            } else {
+                Log.d("RegisterActivity", "User not logged in, showing RegisterActivity")
+            }
+        } catch (e: Exception) {
+            // Handle any exceptions
+            Log.e("RegisterActivity", "Error checking login status: ${e.message}", e)
+            // Clear potentially corrupt data
+            sessionManager.clearAll()
+        }
+
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
+        enableEdgeToEdge()
+
+        // Apply insets to your root layout
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, windowInsets ->
+            val systemBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(
+                systemBars.left,
+                systemBars.top,
+                systemBars.right,
+                systemBars.bottom
+            )
+            windowInsets
+        }
+
 
         // Observe OTP state
         observeOtpState()
@@ -53,7 +88,7 @@ class RegisterActivity : AppCompatActivity() {
             val phone = binding.etNumberPhone.text.toString()
             val username = binding.etUsername.text.toString()
             val name = binding.etFullname.text.toString()
-            val image = "not yet"
+            val image = null
 
             val userData = RegisterRequest(name, email, password, username, phone, birthDate, image)
 
@@ -94,6 +129,9 @@ class RegisterActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        binding.etBirthDate.setOnClickListener{
+            showDatePicker()
+        }
     }
 
     private fun observeOtpState() {
@@ -139,5 +177,22 @@ class RegisterActivity : AppCompatActivity() {
                     }
                 }
             }
+    }
+
+    private fun showDatePicker() {
+        val calendar = Calendar.getInstance()
+        val year = calendar.get(Calendar.YEAR)
+        val month = calendar.get(Calendar.MONTH)
+        val day = calendar.get(Calendar.DAY_OF_MONTH)
+
+        DatePickerDialog(
+            this,
+            { _, selectedYear, selectedMonth, selectedDay ->
+                calendar.set(selectedYear, selectedMonth, selectedDay)
+                val sdf = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+                binding.etBirthDate.setText(sdf.format(calendar.time))
+            },
+            year, month, day
+        ).show()
     }
 }

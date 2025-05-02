@@ -9,8 +9,12 @@ import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.alya.ecommerce_serang.BuildConfig.BASE_URL
 import com.alya.ecommerce_serang.R
@@ -24,6 +28,7 @@ import com.alya.ecommerce_serang.data.api.retrofit.ApiService
 import com.alya.ecommerce_serang.data.repository.ProductRepository
 import com.alya.ecommerce_serang.data.repository.Result
 import com.alya.ecommerce_serang.databinding.ActivityDetailProductBinding
+import com.alya.ecommerce_serang.ui.chat.ChatActivity
 import com.alya.ecommerce_serang.ui.home.HorizontalProductAdapter
 import com.alya.ecommerce_serang.ui.order.CheckoutActivity
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
@@ -41,7 +46,6 @@ class DetailProductActivity : AppCompatActivity() {
     private var reviewsAdapter: ReviewsAdapter? = null
     private var currentQuantity = 1
 
-
     private val viewModel: ProductUserViewModel by viewModels {
         BaseViewModelFactory {
             val apiService = ApiConfig.getApiService(sessionManager)
@@ -56,6 +60,22 @@ class DetailProductActivity : AppCompatActivity() {
 
         sessionManager = SessionManager(this)
         apiService = ApiConfig.getApiService(sessionManager)
+
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
+        enableEdgeToEdge()
+
+        // Apply insets to your root layout
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, windowInsets ->
+            val systemBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(
+                systemBars.left,
+                systemBars.top,
+                systemBars.right,
+                systemBars.bottom
+            )
+            windowInsets
+        }
 
         setupUI()
         setupObservers()
@@ -199,6 +219,9 @@ class DetailProductActivity : AppCompatActivity() {
         binding.tvDescription.text = product.description
 
 
+        binding.btnChat.setOnClickListener{
+            navigateToChat()
+        }
 
         val fullImageUrl = when (val img = product.image) {
             is String -> {
@@ -362,8 +385,30 @@ class DetailProductActivity : AppCompatActivity() {
         )
     }
 
+    private fun navigateToChat(){
+        val productDetail = viewModel.productDetail.value ?: return
+        val storeDetail = viewModel.storeDetail.value
+
+        if (storeDetail !is Result.Success || storeDetail.data == null) {
+            Toast.makeText(this, "Store information not available", Toast.LENGTH_SHORT).show()
+            return
+        }
+        ChatActivity.createIntent(
+            context = this,
+            storeId = productDetail.storeId,
+            productId = productDetail.productId,
+            productName = productDetail.productName,
+            productPrice = productDetail.price,
+            productImage = productDetail.image,
+            productRating = productDetail.rating,
+            storeName = storeDetail.data.storeName,
+            chatRoomId = 0
+            )
+
+    }
+
     companion object {
-        const val EXTRA_PRODUCT_ID = "extra_product_id"
+        private const val EXTRA_PRODUCT_ID = "extra_product_id"
 
         fun start(context: Context, productId: Int) {
             val intent = Intent(context, DetailProductActivity::class.java)

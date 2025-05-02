@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingStart="60dp"
+    android:paddingTop="4dp"
+    android:paddingEnd="8dp"
+    android:paddingBottom="4dp">
+
+    <LinearLayout
+        android:id="@+id/layoutMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_message_sent"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/tvMessage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxWidth="270dp"
+            android:textColor="@android:color/black"
+            android:textSize="14sp"
+            tools:text="Beli 1, 60 rb bisa teh?" />
+
+        <ImageView
+            android:id="@+id/imgAttachment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:adjustViewBounds="true"
+            android:maxWidth="220dp"
+            android:scaleType="fitCenter"
+            android:visibility="gone"
+            tools:src="@drawable/placeholder_image"
+            tools:visibility="visible" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvTimestamp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:layout_marginEnd="4dp"
+        android:textColor="#888888"
+        android:textSize="10sp"
+        app:layout_constraintEnd_toStartOf="@+id/imgStatus"
+        app:layout_constraintTop_toBottomOf="@+id/layoutMessage"
+        tools:text="12:30" />
+
+    <ImageView
+        android:id="@+id/imgStatus"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:src="@drawable/placeholder_image"
+        app:layout_constraintBottom_toBottomOf="@+id/tvTimestamp"
+        app:layout_constraintEnd_toEndOf="@+id/layoutMessage"
+        app:layout_constraintTop_toTopOf="@+id/tvTimestamp" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
