@@ -76,7 +76,7 @@ class ChatAdapter : ListAdapter<ChatUiMessage, RecyclerView.ViewHolder>(ChatMess
             binding.imgStatus.setImageResource(statusIcon)
 
             // Handle attachment if exists
-            if (message.attachment.isNotEmpty()) {
+            if (message.attachment?.isNotEmpty() == true) {
                 binding.imgAttachment.visibility = View.VISIBLE
                 Glide.with(binding.root.context)
                     .load(BASE_URL + message.attachment)
@@ -101,7 +101,7 @@ class ChatAdapter : ListAdapter<ChatUiMessage, RecyclerView.ViewHolder>(ChatMess
             binding.tvTimestamp.text = message.time
 
             // Handle attachment if exists
-            if (message.attachment.isNotEmpty()) {
+            if (message.attachment?.isNotEmpty() == true) {
                 binding.imgAttachment.visibility = View.VISIBLE
                 Glide.with(binding.root.context)
                     .load(BASE_URL + message.attachment)

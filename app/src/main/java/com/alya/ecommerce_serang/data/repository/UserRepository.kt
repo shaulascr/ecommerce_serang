@@ -3,19 +3,10 @@ package com.alya.ecommerce_serang.data.repository
 import com.alya.ecommerce_serang.data.api.dto.LoginRequest
 import com.alya.ecommerce_serang.data.api.dto.OtpRequest
 import com.alya.ecommerce_serang.data.api.dto.RegisterRequest
-import com.alya.ecommerce_serang.data.api.dto.UpdateChatRequest
 import com.alya.ecommerce_serang.data.api.dto.UserProfile
 import com.alya.ecommerce_serang.data.api.response.auth.LoginResponse
 import com.alya.ecommerce_serang.data.api.response.auth.OtpResponse
-import com.alya.ecommerce_serang.data.api.response.chat.ChatHistoryResponse
-import com.alya.ecommerce_serang.data.api.response.chat.SendChatResponse
-import com.alya.ecommerce_serang.data.api.response.chat.UpdateChatResponse
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.MultipartBody
-import okhttp3.RequestBody.Companion.asRequestBody
-import okhttp3.RequestBody.Companion.toRequestBody
-import java.io.File
 
 class UserRepository(private val apiService: ApiService) {
 
@@ -65,100 +56,101 @@ class UserRepository(private val apiService: ApiService) {
         }
     }
 
-    suspend fun sendChatMessage(
-        storeId: Int,
-        message: String,
-        productId: Int,
-        imageFile: File? = null
-    ): Result<SendChatResponse> {
-        return try {
-            // Create request bodies for text fields
-            val storeIdBody = storeId.toString().toRequestBody("text/plain".toMediaTypeOrNull())
-            val messageBody = message.toRequestBody("text/plain".toMediaTypeOrNull())
-            val productIdBody = productId.toString().toRequestBody("text/plain".toMediaTypeOrNull())
-
-            // Create multipart body for the image file
-            val imageMultipart = if (imageFile != null && imageFile.exists()) {
-                val requestFile = imageFile.asRequestBody("image/*".toMediaTypeOrNull())
-                MultipartBody.Part.createFormData("chatimg", imageFile.name, requestFile)
-            } else {
-                // Create an empty part if no image is provided
-                val emptyRequest = "".toRequestBody("text/plain".toMediaTypeOrNull())
-                MultipartBody.Part.createFormData("chatimg", "", emptyRequest)
-            }
-
-            // Make the API call
-            val response = apiService.sendChatLine(
-                storeId = storeIdBody,
-                message = messageBody,
-                productId = productIdBody,
-                chatimg = imageMultipart
-            )
-
-            if (response.isSuccessful) {
-                response.body()?.let {
-                    Result.Success(it)
-                } ?: Result.Error(Exception("Send chat response is empty"))
-            } else {
-                Result.Error(Exception(response.errorBody()?.string() ?: "Unknown error"))
-            }
-        } catch (e: Exception) {
-            Result.Error(e)
-        }
-    }
-
-    /**
-     * Updates the status of a message (sent, delivered, read)
-     *
-     * @param messageId The ID of the message to update
-     * @param status The new status to set
-     * @return Result containing the updated message details or error
-     */
-    suspend fun updateMessageStatus(
-        messageId: Int,
-        status: String
-    ): Result<UpdateChatResponse> {
-        return try {
-            val requestBody = UpdateChatRequest(
-                id = messageId,
-                status = status
-            )
-
-            val response = apiService.updateChatStatus(requestBody)
-
-            if (response.isSuccessful) {
-                response.body()?.let {
-                    Result.Success(it)
-                } ?: Result.Error(Exception("Update status response is empty"))
-            } else {
-                Result.Error(Exception(response.errorBody()?.string() ?: "Unknown error"))
-            }
-        } catch (e: Exception) {
-            Result.Error(e)
-        }
-    }
-
-    /**
-     * Gets the chat history for a specific chat room
-     *
-     * @param chatRoomId The ID of the chat room
-     * @return Result containing the list of chat messages or error
-     */
-    suspend fun getChatHistory(chatRoomId: Int): Result<ChatHistoryResponse> {
-        return try {
-            val response = apiService.getChatDetail(chatRoomId)
-
-            if (response.isSuccessful) {
-                response.body()?.let {
-                    Result.Success(it)
-                } ?: Result.Error(Exception("Chat history response is empty"))
-            } else {
-                Result.Error(Exception(response.errorBody()?.string() ?: "Unknown error"))
-            }
-        } catch (e: Exception) {
-            Result.Error(e)
-        }
-    }
+//    suspend fun sendChatMessage(
+//        storeId: Int,
+//        message: String,
+//        productId: Int,
+//        imageFile: File? = null
+//    ): Result<SendChatResponse> {
+//        return try {
+//            // Create multipart request builder
+//            val requestBodyBuilder = MultipartBody.Builder().setType(MultipartBody.FORM)
+//
+//            // Add text fields
+//            requestBodyBuilder.addFormDataPart("store_id", storeId.toString())
+//            requestBodyBuilder.addFormDataPart("message", message)
+//            requestBodyBuilder.addFormDataPart("product_id", productId.toString())
+//
+//            // Add image if it exists
+//            if (imageFile != null && imageFile.exists()) {
+//                val requestFile = imageFile.asRequestBody("image/*".toMediaTypeOrNull())
+//                requestBodyBuilder.addFormDataPart("chatimg", imageFile.name, requestFile)
+//            }
+//
+//            // Build the final request body
+//            val requestBody = requestBodyBuilder.build()
+//
+//            // Make the API call using a custom endpoint that takes a plain MultipartBody
+//            val response = apiService.sendChatLineWithBody(requestBody)
+//
+//            if (response.isSuccessful) {
+//                response.body()?.let {
+//                    Result.Success(it)
+//                } ?: Result.Error(Exception("Send chat response is empty"))
+//            } else {
+//                val errorBody = response.errorBody()?.string() ?: "Unknown error"
+//                Log.e("ChatRepository", "HTTP Error: ${response.code()}, Body: $errorBody")
+//                Result.Error(Exception("API Error: ${response.code()} - $errorBody"))
+//            }
+//        } catch (e: Exception) {
+//            Log.e("ChatRepository", "Exception sending message", e)
+//            e.printStackTrace()
+//            Result.Error(e)
+//        }
+//    }
+//
+//    /**
+//     * Updates the status of a message (sent, delivered, read)
+//     *
+//     * @param messageId The ID of the message to update
+//     * @param status The new status to set
+//     * @return Result containing the updated message details or error
+//     */
+//    suspend fun updateMessageStatus(
+//        messageId: Int,
+//        status: String
+//    ): Result<UpdateChatResponse> {
+//        return try {
+//            val requestBody = UpdateChatRequest(
+//                id = messageId,
+//                status = status
+//            )
+//
+//            val response = apiService.updateChatStatus(requestBody)
+//
+//            if (response.isSuccessful) {
+//                response.body()?.let {
+//                    Result.Success(it)
+//                } ?: Result.Error(Exception("Update status response is empty"))
+//            } else {
+//                Result.Error(Exception(response.errorBody()?.string() ?: "Unknown error"))
+//            }
+//        } catch (e: Exception) {
+//            Result.Error(e)
+//        }
+//    }
+//
+//    /**
+//     * Gets the chat history for a specific chat room
+//     *
+//     * @param chatRoomId The ID of the chat room
+//     * @return Result containing the list of chat messages or error
+//     */
+//    suspend fun getChatHistory(chatRoomId: Int): Result<ChatHistoryResponse> {
+//        return try {
+//            val response = apiService.getChatDetail(chatRoomId)
+//
+//            if (response.isSuccessful) {
+//                response.body()?.let {
+//                    Result.Success(it)
+//                } ?: Result.Error(Exception("Chat history response is empty"))
+//            } else {
+//                Result.Error(Exception(response.errorBody()?.string() ?: "Unknown error"))
+//            }
+//        } catch (e: Exception) {
+//            Result.Error(e)
+//        }
+//    }
 
 
 }

@@ -1,7 +1,6 @@
 package com.alya.ecommerce_serang.data.api.response.chat
 
 import com.google.gson.annotations.SerializedName
-import java.io.File
 
 data class ChatHistoryResponse(
 
@@ -15,7 +14,7 @@ data class ChatHistoryResponse(
 data class ChatItem(
 
 	@field:SerializedName("attachment")
-	val attachment: File? = null,
+	val attachment: String? = null,
 
 	@field:SerializedName("product_id")
 	val productId: Int,

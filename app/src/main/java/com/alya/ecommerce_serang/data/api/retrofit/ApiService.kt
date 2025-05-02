@@ -223,12 +223,13 @@ interface ApiService {
         @Part chatimg: MultipartBody.Part?
     ): Response<SendChatResponse>
 
+
     @PUT("chatstatus")
     suspend fun updateChatStatus(
         @Body request: UpdateChatRequest
     ): Response<UpdateChatResponse>
 
-    @GET("chatdetail/{chatRoomId}")
+    @GET("chat/{chatRoomId}")
     suspend fun getChatDetail(
         @Path("chatRoomId") chatRoomId: Int
     ): Response<ChatHistoryResponse>

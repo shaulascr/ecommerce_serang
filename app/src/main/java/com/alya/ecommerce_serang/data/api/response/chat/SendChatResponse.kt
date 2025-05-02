@@ -14,7 +14,7 @@ data class SendChatResponse(
 data class ChatLine(
 
 	@field:SerializedName("attachment")
-	val attachment: String,
+	val attachment: String? = null,
 
 	@field:SerializedName("product_id")
 	val productId: Int,

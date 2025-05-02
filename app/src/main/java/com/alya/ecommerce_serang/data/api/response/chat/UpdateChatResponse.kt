@@ -14,7 +14,7 @@ data class UpdateChatResponse(
 data class Address(
 
 	@field:SerializedName("attachment")
-	val attachment: Any,
+	val attachment: String? = null,
 
 	@field:SerializedName("product_id")
 	val productId: Int,

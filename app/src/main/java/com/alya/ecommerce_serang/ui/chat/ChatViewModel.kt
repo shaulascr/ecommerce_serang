@@ -7,8 +7,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.alya.ecommerce_serang.data.api.response.chat.ChatItem
 import com.alya.ecommerce_serang.data.api.response.chat.ChatLine
+import com.alya.ecommerce_serang.data.repository.ChatRepository
 import com.alya.ecommerce_serang.data.repository.Result
-import com.alya.ecommerce_serang.data.repository.UserRepository
 import com.alya.ecommerce_serang.utils.Constants
 import com.alya.ecommerce_serang.utils.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,7 +20,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ChatViewModel @Inject constructor(
-    private val chatRepository: UserRepository,
+    private val chatRepository: ChatRepository,
     private val socketService: SocketIOService,
     private val sessionManager: SessionManager
 ) : ViewModel() {
@@ -37,9 +37,8 @@ class ChatViewModel @Inject constructor(
     // Store and product parameters
     private var storeId: Int = 0
     private var productId: Int = 0
-    private var currentUserId: Int? = 0
+    private var currentUserId: Int? = null
     private var defaultUserId: Int = 0
-
 
     // Product details for display
     private var productName: String = ""
@@ -52,7 +51,7 @@ class ChatViewModel @Inject constructor(
     private var selectedImageFile: File? = null
 
     init {
-        // Try to get current user ID from SessionManager
+        // Try to get current user ID from the repository
         viewModelScope.launch {
             when (val result = chatRepository.fetchUserProfile()) {
                 is Result.Success -> {
@@ -60,7 +59,7 @@ class ChatViewModel @Inject constructor(
                     Log.e(TAG, "User ID: $currentUserId")
 
                     // Move the validation and subsequent logic inside the coroutine
-                    if (currentUserId == 0) {
+                    if (currentUserId == null || currentUserId == 0) {
                         Log.e(TAG, "Error: User ID is not set or invalid")
                         updateState { it.copy(error = "User authentication error. Please login again.") }
                     } else {
@@ -188,7 +187,7 @@ class ChatViewModel @Inject constructor(
     /**
      * Loads chat history
      */
-    fun loadChatHistory(chatRoomId : Int) {
+    fun loadChatHistory(chatRoomId: Int) {
         if (chatRoomId <= 0) {
             Log.e(TAG, "Cannot load chat history: Chat room ID is 0")
             return
@@ -198,7 +197,7 @@ class ChatViewModel @Inject constructor(
             updateState { it.copy(isLoading = true) }
 
             when (val result = chatRepository.getChatHistory(chatRoomId)) {
-                is com.alya.ecommerce_serang.data.repository.Result.Success -> {
+                is Result.Success -> {
                     val messages = result.data.chat.map { chatLine ->
                         convertChatLineToUiMessageHistory(chatLine)
                     }
@@ -218,7 +217,7 @@ class ChatViewModel @Inject constructor(
                         .filter { it.senderId != currentUserId && it.status != Constants.STATUS_READ }
                         .forEach { updateMessageStatus(it.id, Constants.STATUS_READ) }
                 }
-                is com.alya.ecommerce_serang.data.repository.Result.Error -> {
+                is Result.Error -> {
                     updateState {
                         it.copy(
                             isLoading = false,
@@ -238,7 +237,7 @@ class ChatViewModel @Inject constructor(
      * Sends a chat message
      */
     fun sendMessage(message: String) {
-        if (message.isBlank() && selectedImageFile == null) return
+        if (message.isBlank()) return
 
         if (storeId == 0 || productId == 0) {
             Log.e(TAG, "Cannot send message: Store ID or Product ID is 0")
@@ -255,7 +254,7 @@ class ChatViewModel @Inject constructor(
                 productId = productId,
                 imageFile = selectedImageFile
             )) {
-                is com.alya.ecommerce_serang.data.repository.Result.Success -> {
+                is Result.Success -> {
                     // Add new message to the list
                     val chatLine = result.data.chatLine
                     val newMessage = convertChatLineToUiMessage(chatLine)
@@ -293,16 +292,22 @@ class ChatViewModel @Inject constructor(
                     // Clear the image attachment
                     selectedImageFile = null
                 }
-                is com.alya.ecommerce_serang.data.repository.Result.Error -> {
+                is Result.Error -> {
+                    val errorMsg = if (result.exception.message.isNullOrEmpty() || result.exception.message == "{}") {
+                        "Failed to send message. Please try again."
+                    } else {
+                        result.exception.message
+                    }
+
                     updateState {
                         it.copy(
                             isSending = false,
-                            error = result.exception.message
+                            error = errorMsg
                         )
                     }
                     Log.e(TAG, "Error sending message: ${result.exception.message}")
                 }
-                is com.alya.ecommerce_serang.data.repository.Result.Loading -> {
+                is Result.Loading -> {
                     updateState { it.copy(isSending = true) }
                 }
             }
@@ -317,7 +322,7 @@ class ChatViewModel @Inject constructor(
             try {
                 val result = chatRepository.updateMessageStatus(messageId, status)
 
-                if (result is com.alya.ecommerce_serang.data.repository.Result.Success) {
+                if (result is Result.Success) {
                     // Update local message status
                     val currentMessages = _state.value?.messages ?: listOf()
                     val updatedMessages = currentMessages.map { message ->
@@ -330,7 +335,7 @@ class ChatViewModel @Inject constructor(
                     updateState { it.copy(messages = updatedMessages) }
 
                     Log.d(TAG, "Message status updated: $messageId -> $status")
-                } else if (result is com.alya.ecommerce_serang.data.repository.Result.Error) {
+                } else if (result is Result.Error) {
                     Log.e(TAG, "Error updating message status: ${result.exception.message}")
                 }
             } catch (e: Exception) {
@@ -386,7 +391,7 @@ class ChatViewModel @Inject constructor(
         return ChatUiMessage(
             id = chatLine.id,
             message = chatLine.message,
-            attachment = chatLine.attachment,
+            attachment = chatLine.attachment ?: "", // Handle null attachment
             status = chatLine.status,
             time = formattedTime,
             isSentByMe = chatLine.senderId == currentUserId
@@ -408,7 +413,7 @@ class ChatViewModel @Inject constructor(
         }
 
         return ChatUiMessage(
-            attachment = "",
+            attachment = chatItem.attachment, // Handle null attachment
             id = chatItem.id,
             message = chatItem.message,
             status = chatItem.status,
@@ -451,7 +456,7 @@ data class ChatUiState(
 data class ChatUiMessage(
     val id: Int,
     val message: String,
-    val attachment: String,
+    val attachment: String?,
     val status: String,
     val time: String,
     val isSentByMe: Boolean

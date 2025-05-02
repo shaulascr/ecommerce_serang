@@ -27,6 +27,8 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.alya.ecommerce_serang.BuildConfig.BASE_URL
 import com.alya.ecommerce_serang.R
+import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
+import com.alya.ecommerce_serang.data.api.retrofit.ApiService
 import com.alya.ecommerce_serang.databinding.ActivityChatBinding
 import com.alya.ecommerce_serang.ui.auth.LoginActivity
 import com.alya.ecommerce_serang.utils.Constants
@@ -46,6 +48,9 @@ class ChatActivity : AppCompatActivity() {
 
     @Inject
     lateinit var sessionManager: SessionManager
+
+    @Inject
+    lateinit var apiService: ApiService
 
     private lateinit var chatAdapter: ChatAdapter
 
@@ -92,8 +97,10 @@ class ChatActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         sessionManager = SessionManager(this)
+        apiService = ApiConfig.getApiService(sessionManager)
+
         Log.d("ChatActivity", "Token in storage: '${sessionManager.getToken()}'")
-        Log.d("ChatActivity", "User ID in storage: '${sessionManager.getUserId()}'")
+//        Log.d("ChatActivity", "User ID in storage: '${sessionManager.getUserId()}'")
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
         enableEdgeToEdge()
@@ -121,7 +128,6 @@ class ChatActivity : AppCompatActivity() {
 
 
         // Check if user is logged in
-        val userId = sessionManager.getUserId()
         val token = sessionManager.getToken()
 
         if (token.isEmpty()) {
