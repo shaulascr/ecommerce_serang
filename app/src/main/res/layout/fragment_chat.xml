@@ -3,8 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".ui.chat.ChatFragment">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/chatToolbar"
@@ -235,7 +234,7 @@
             android:layout_gravity="center_vertical"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Attachment"
-            android:src="@drawable/ic_attachment" />
+            android:src="@drawable/baseline_attach_file_24" />
 
         <EditText
             android:id="@+id/editTextMessage"
@@ -244,7 +243,7 @@
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
             android:layout_weight="1"
-            android:background="@drawable/bg_edit_text_rounded"
+            android:background="@drawable/bg_edit_text_background"
             android:hint="Tulis pesan"
             android:inputType="textMultiLine"
             android:maxLines="4"
@@ -258,7 +257,7 @@
             android:layout_gravity="center_vertical"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Send"
-            android:src="@drawable/ic_send" />
+            android:src="@drawable/baseline_attach_file_24" />
     </LinearLayout>
 
 

@@ -13,7 +13,7 @@
         android:id="@+id/imgAvatar"
         android:layout_width="32dp"
         android:layout_height="32dp"
-        android:src="@drawable/profile_placeholder"
+        android:src="@drawable/ic_person"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/layoutMessage" />
 

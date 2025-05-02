@@ -10,9 +10,10 @@ import com.alya.ecommerce_serang.BuildConfig.BASE_URL
 import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.databinding.ItemMessageReceivedBinding
 import com.alya.ecommerce_serang.databinding.ItemMessageSentBinding
+import com.alya.ecommerce_serang.utils.Constants
 import com.bumptech.glide.Glide
 
-class ChatAdapter : ListAdapter<ChatUiMessage, RecyclerView.ViewHolder>(ChatDiffCallback()) {
+class ChatAdapter : ListAdapter<ChatUiMessage, RecyclerView.ViewHolder>(ChatMessageDiffCallback()) {
 
     companion object {
         private const val VIEW_TYPE_MESSAGE_SENT = 1
@@ -67,10 +68,10 @@ class ChatAdapter : ListAdapter<ChatUiMessage, RecyclerView.ViewHolder>(ChatDiff
 
             // Show message status
             val statusIcon = when (message.status) {
-                Constants.STATUS_SENT -> R.drawable.ic_check
-                Constants.STATUS_DELIVERED -> R.drawable.ic_double_check
-                Constants.STATUS_READ -> R.drawable.ic_double_check_read
-                else -> R.drawable.ic_check
+                Constants.STATUS_SENT -> R.drawable.check_single_24
+                Constants.STATUS_DELIVERED -> R.drawable.check_double_24
+                Constants.STATUS_READ -> R.drawable.check_double_read_24
+                else -> R.drawable.check_single_24
             }
             binding.imgStatus.setImageResource(statusIcon)
 
@@ -114,7 +115,7 @@ class ChatAdapter : ListAdapter<ChatUiMessage, RecyclerView.ViewHolder>(ChatDiff
 
             // Load avatar image
             Glide.with(binding.root.context)
-                .load(R.drawable.ic_person) // Replace with actual avatar URL if available
+                .load(R.drawable.placeholder_image) // Replace with actual avatar URL if available
                 .circleCrop()
                 .into(binding.imgAvatar)
         }
@@ -122,9 +123,9 @@ class ChatAdapter : ListAdapter<ChatUiMessage, RecyclerView.ViewHolder>(ChatDiff
 }
 
 /**
- * DiffCallback for optimizing RecyclerView updates
+ * DiffUtil callback for optimizing RecyclerView updates
  */
-class ChatDiffCallback : DiffUtil.ItemCallback<ChatUiMessage>() {
+class ChatMessageDiffCallback : DiffUtil.ItemCallback<ChatUiMessage>() {
     override fun areItemsTheSame(oldItem: ChatUiMessage, newItem: ChatUiMessage): Boolean {
         return oldItem.id == newItem.id
     }

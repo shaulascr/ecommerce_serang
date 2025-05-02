@@ -19,10 +19,11 @@ class SessionManager(context: Context) {
         sharedPreferences.edit() {
             putString(USER_TOKEN, token)
         }
+        Log.d("SessionManager", "Saved token: $token")
     }
 
-    fun getToken(): String? {
-        val token = sharedPreferences.getString(USER_TOKEN, null)
+    fun getToken(): String {
+        val token = sharedPreferences.getString(USER_TOKEN, "") ?: ""
         Log.d("SessionManager", "Retrieved token: $token")
         return token
     }
@@ -34,10 +35,14 @@ class SessionManager(context: Context) {
         Log.d("SessionManager", "Saved user ID: $userId")
     }
 
-    fun getUserId(): String? {
-        val userId = sharedPreferences.getString(USER_ID, null)
+    fun getUserId(): String {
+        val userId = sharedPreferences.getString(USER_ID, "") ?: ""
         Log.d("SessionManager", "Retrieved user ID: $userId")
         return userId
+    }
+
+    fun isLoggedIn(): Boolean {
+        return getToken().isNotEmpty()
     }
 
     fun clearUserId() {
@@ -51,6 +56,8 @@ class SessionManager(context: Context) {
             remove(USER_TOKEN)
         }
     }
+
+
 
     //clear data when log out
     fun clearAll() {

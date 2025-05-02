@@ -28,6 +28,7 @@ import com.alya.ecommerce_serang.data.api.retrofit.ApiService
 import com.alya.ecommerce_serang.data.repository.ProductRepository
 import com.alya.ecommerce_serang.data.repository.Result
 import com.alya.ecommerce_serang.databinding.ActivityDetailProductBinding
+import com.alya.ecommerce_serang.ui.chat.ChatActivity
 import com.alya.ecommerce_serang.ui.home.HorizontalProductAdapter
 import com.alya.ecommerce_serang.ui.order.CheckoutActivity
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
@@ -44,7 +45,6 @@ class DetailProductActivity : AppCompatActivity() {
     private var productAdapter: HorizontalProductAdapter? = null
     private var reviewsAdapter: ReviewsAdapter? = null
     private var currentQuantity = 1
-
 
     private val viewModel: ProductUserViewModel by viewModels {
         BaseViewModelFactory {
@@ -219,6 +219,9 @@ class DetailProductActivity : AppCompatActivity() {
         binding.tvDescription.text = product.description
 
 
+        binding.btnChat.setOnClickListener{
+            navigateToChat()
+        }
 
         val fullImageUrl = when (val img = product.image) {
             is String -> {
@@ -382,8 +385,30 @@ class DetailProductActivity : AppCompatActivity() {
         )
     }
 
+    private fun navigateToChat(){
+        val productDetail = viewModel.productDetail.value ?: return
+        val storeDetail = viewModel.storeDetail.value
+
+        if (storeDetail !is Result.Success || storeDetail.data == null) {
+            Toast.makeText(this, "Store information not available", Toast.LENGTH_SHORT).show()
+            return
+        }
+        ChatActivity.createIntent(
+            context = this,
+            storeId = productDetail.storeId,
+            productId = productDetail.productId,
+            productName = productDetail.productName,
+            productPrice = productDetail.price,
+            productImage = productDetail.image,
+            productRating = productDetail.rating,
+            storeName = storeDetail.data.storeName,
+            chatRoomId = 0
+            )
+
+    }
+
     companion object {
-        const val EXTRA_PRODUCT_ID = "extra_product_id"
+        private const val EXTRA_PRODUCT_ID = "extra_product_id"
 
         fun start(context: Context, productId: Int) {
             val intent = Intent(context, DetailProductActivity::class.java)

@@ -220,7 +220,7 @@ interface ApiService {
         @Part("store_id") storeId: RequestBody,
         @Part("message") message: RequestBody,
         @Part("product_id") productId: RequestBody,
-        @Part("chatimg") chatimg: MultipartBody.Part
+        @Part chatimg: MultipartBody.Part?
     ): Response<SendChatResponse>
 
     @PUT("chatstatus")

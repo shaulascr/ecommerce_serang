@@ -11,12 +11,14 @@ import com.alya.ecommerce_serang.data.repository.Result
 import com.alya.ecommerce_serang.data.repository.UserRepository
 import com.alya.ecommerce_serang.utils.Constants
 import com.alya.ecommerce_serang.utils.SessionManager
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import java.io.File
 import java.util.Locale
 import java.util.TimeZone
 import javax.inject.Inject
 
+@HiltViewModel
 class ChatViewModel @Inject constructor(
     private val chatRepository: UserRepository,
     private val socketService: SocketIOService,
@@ -29,11 +31,15 @@ class ChatViewModel @Inject constructor(
     private val _state = MutableLiveData(ChatUiState())
     val state: LiveData<ChatUiState> = _state
 
-    // Chat parameters
-    private var chatRoomId: Int = 0
+    private val _chatRoomId = MutableLiveData<Int>(0)
+    val chatRoomId: LiveData<Int> = _chatRoomId
+
+    // Store and product parameters
     private var storeId: Int = 0
     private var productId: Int = 0
-    private var currentUserId: Int = 0
+    private var currentUserId: Int? = 0
+    private var defaultUserId: Int = 0
+
 
     // Product details for display
     private var productName: String = ""
@@ -47,14 +53,29 @@ class ChatViewModel @Inject constructor(
 
     init {
         // Try to get current user ID from SessionManager
-        currentUserId = sessionManager.getUserId()?.toIntOrNull() ?: 0
+        viewModelScope.launch {
+            when (val result = chatRepository.fetchUserProfile()) {
+                is Result.Success -> {
+                    currentUserId = result.data?.userId
+                    Log.e(TAG, "User ID: $currentUserId")
 
-        if (currentUserId == 0) {
-            Log.e(TAG, "Error: User ID is not set or invalid")
-            updateState { it.copy(error = "User authentication error. Please login again.") }
-        } else {
-            // Set up socket listeners
-            setupSocketListeners()
+                    // Move the validation and subsequent logic inside the coroutine
+                    if (currentUserId == 0) {
+                        Log.e(TAG, "Error: User ID is not set or invalid")
+                        updateState { it.copy(error = "User authentication error. Please login again.") }
+                    } else {
+                        // Set up socket listeners
+                        setupSocketListeners()
+                    }
+                }
+                is Result.Error -> {
+                    Log.e(TAG, "Error fetching user profile: ${result.exception.message}")
+                    updateState { it.copy(error = "User authentication error. Please login again.") }
+                }
+                is Result.Loading -> {
+                    // Handle loading state if needed
+                }
+            }
         }
     }
 
@@ -62,7 +83,6 @@ class ChatViewModel @Inject constructor(
      * Set chat parameters received from activity
      */
     fun setChatParameters(
-        chatRoomId: Int,
         storeId: Int,
         productId: Int,
         productName: String,
@@ -71,7 +91,6 @@ class ChatViewModel @Inject constructor(
         productRating: Float,
         storeName: String
     ) {
-        this.chatRoomId = chatRoomId
         this.storeId = storeId
         this.productId = productId
         this.productName = productName
@@ -92,8 +111,23 @@ class ChatViewModel @Inject constructor(
         }
 
         // Connect to socket and load chat history
-        socketService.connect()
-        loadChatHistory()
+        val existingChatRoomId = _chatRoomId.value ?: 0
+        if (existingChatRoomId > 0) {
+            // If we already have a chat room ID, we can load the chat history
+            loadChatHistory(existingChatRoomId)
+
+            // And join the Socket.IO room
+            joinSocketRoom(existingChatRoomId)
+        }
+    }
+
+    fun joinSocketRoom(roomId: Int) {
+        if (roomId <= 0) {
+            Log.e(TAG, "Cannot join room: Invalid room ID")
+            return
+        }
+
+        socketService.joinRoom()
     }
 
     /**
@@ -134,7 +168,7 @@ class ChatViewModel @Inject constructor(
             // Listen for typing status updates
             socketService.typingStatus.collect { typingStatus ->
                 typingStatus?.let {
-                    if (typingStatus.roomId == chatRoomId && typingStatus.userId != currentUserId) {
+                    if (typingStatus.roomId == (_chatRoomId.value ?: 0) && typingStatus.userId != currentUserId) {
                         updateState { it.copy(isOtherUserTyping = typingStatus.isTyping) }
                     }
                 }
@@ -154,8 +188,8 @@ class ChatViewModel @Inject constructor(
     /**
      * Loads chat history
      */
-    fun loadChatHistory() {
-        if (chatRoomId == 0) {
+    fun loadChatHistory(chatRoomId : Int) {
+        if (chatRoomId <= 0) {
             Log.e(TAG, "Cannot load chat history: Chat room ID is 0")
             return
         }
@@ -242,6 +276,17 @@ class ChatViewModel @Inject constructor(
 
                     Log.d(TAG, "Message sent successfully: ${chatLine.id}")
 
+                    // Update the chat room ID if it's the first message
+                    // This is the key part - we get the chat room ID from the response
+                    val newChatRoomId = chatLine.chatRoomId
+                    if ((_chatRoomId.value ?: 0) == 0 && newChatRoomId > 0) {
+                        Log.d(TAG, "Chat room created: $newChatRoomId")
+                        _chatRoomId.value = newChatRoomId
+
+                        // Now that we have a chat room ID, we can join the Socket.IO room
+                        joinSocketRoom(newChatRoomId)
+                    }
+
                     // Emit the message via Socket.IO for real-time updates
                     socketService.sendMessage(chatLine)
 
@@ -308,9 +353,10 @@ class ChatViewModel @Inject constructor(
      * Sends typing status to the other user
      */
     fun sendTypingStatus(isTyping: Boolean) {
-        if (chatRoomId == 0) return
+        val roomId = _chatRoomId.value ?: 0
+        if (roomId <= 0) return
 
-        socketService.sendTypingStatus(chatRoomId, isTyping)
+        socketService.sendTypingStatus(roomId, isTyping)
     }
 
     /**

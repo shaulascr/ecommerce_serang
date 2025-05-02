@@ -1,6 +1,8 @@
 package com.alya.ecommerce_serang.ui.chat
 
+import android.Manifest
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -19,24 +21,21 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.alya.ecommerce_serang.BuildConfig.BASE_URL
 import com.alya.ecommerce_serang.R
-import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
-import com.alya.ecommerce_serang.data.repository.ProductRepository
-import com.alya.ecommerce_serang.data.repository.UserRepository
 import com.alya.ecommerce_serang.databinding.ActivityChatBinding
 import com.alya.ecommerce_serang.ui.auth.LoginActivity
-import com.alya.ecommerce_serang.ui.product.ProductUserViewModel
-import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.Constants
 import com.alya.ecommerce_serang.utils.SessionManager
 import com.bumptech.glide.Glide
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
 
@@ -47,27 +46,18 @@ class ChatActivity : AppCompatActivity() {
 
     @Inject
     lateinit var sessionManager: SessionManager
-    private lateinit var socketService: SocketIOService
 
-
-    @Inject
     private lateinit var chatAdapter: ChatAdapter
 
-    private val viewModel: ChatViewModel by viewModels {
-        BaseViewModelFactory {
-            val apiService = ApiConfig.getApiService(sessionManager)
-            val userRepository = UserRepository(apiService)
-            ChatViewModel(userRepository, socketService, sessionManager)
-        }
-    }
+    private val viewModel: ChatViewModel by viewModels()
 
     // For image attachment
     private var tempImageUri: Uri? = null
 
-    // Chat parameters from intent
-    private var chatRoomId: Int = 0
-    private var storeId: Int = 0
-    private var productId: Int = 0
+//    // Chat parameters from intent
+//    private var chatRoomId: Int = 0
+//    private var storeId: Int = 0
+//    private var productId: Int = 0
 
     // Typing indicator handler
     private val typingHandler = android.os.Handler(android.os.Looper.getMainLooper())
@@ -101,16 +91,40 @@ class ChatActivity : AppCompatActivity() {
         binding = ActivityChatBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        sessionManager = SessionManager(this)
+        Log.d("ChatActivity", "Token in storage: '${sessionManager.getToken()}'")
+        Log.d("ChatActivity", "User ID in storage: '${sessionManager.getUserId()}'")
+
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        enableEdgeToEdge()
+
+        // Apply insets to your root layout
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, windowInsets ->
+            val systemBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(
+                systemBars.left,
+                systemBars.top,
+                systemBars.right,
+                systemBars.bottom
+            )
+            windowInsets
+        }
+
         // Get parameters from intent
-        chatRoomId = intent.getIntExtra(Constants.EXTRA_CHAT_ROOM_ID, 0)
-        storeId = intent.getIntExtra(Constants.EXTRA_STORE_ID, 0)
-        productId = intent.getIntExtra(Constants.EXTRA_PRODUCT_ID, 0)
+        val storeId = intent.getIntExtra(Constants.EXTRA_STORE_ID, 0)
+        val productId = intent.getIntExtra(Constants.EXTRA_PRODUCT_ID, 0)
+        val productName = intent.getStringExtra(Constants.EXTRA_PRODUCT_NAME) ?: ""
+        val productPrice = intent.getStringExtra(Constants.EXTRA_PRODUCT_PRICE) ?: ""
+        val productImage = intent.getStringExtra(Constants.EXTRA_PRODUCT_IMAGE) ?: ""
+        val productRating = intent.getFloatExtra(Constants.EXTRA_PRODUCT_RATING, 0f)
+        val storeName = intent.getStringExtra(Constants.EXTRA_STORE_NAME) ?: ""
+
 
         // Check if user is logged in
         val userId = sessionManager.getUserId()
         val token = sessionManager.getToken()
 
-        if (userId.isNullOrEmpty() || token.isNullOrEmpty()) {
+        if (token.isEmpty()) {
             // User not logged in, redirect to login
             Toast.makeText(this, "Please login first", Toast.LENGTH_SHORT).show()
             startActivity(Intent(this, LoginActivity::class.java))
@@ -118,30 +132,23 @@ class ChatActivity : AppCompatActivity() {
             return
         }
 
-        Log.d(TAG, "Chat Activity started - User ID: $userId, Chat Room: $chatRoomId")
-
-        // Initialize ViewModel
-        initViewModel()
-
+        // Set chat parameters to ViewModel
+        viewModel.setChatParameters(
+            storeId = storeId,
+            productId = productId,
+            productName = productName,
+            productPrice = productPrice,
+            productImage = productImage,
+            productRating = productRating,
+            storeName = storeName
+        )
         // Setup UI components
         setupRecyclerView()
         setupListeners()
         setupTypingIndicator()
         observeViewModel()
-    }
 
-    private fun initViewModel() {
-        // Set chat parameters to ViewModel
-        viewModel.setChatParameters(
-            chatRoomId = chatRoomId,
-            storeId = storeId,
-            productId = productId,
-            productName = intent.getStringExtra(Constants.EXTRA_PRODUCT_NAME) ?: "",
-            productPrice = intent.getStringExtra(Constants.EXTRA_PRODUCT_PRICE) ?: "",
-            productImage = intent.getStringExtra(Constants.EXTRA_PRODUCT_IMAGE) ?: "",
-            productRating = intent.getFloatExtra(Constants.EXTRA_PRODUCT_RATING, 0f),
-            storeName = intent.getStringExtra(Constants.EXTRA_STORE_NAME) ?: ""
-        )
+
     }
 
     private fun setupRecyclerView() {
@@ -153,6 +160,7 @@ class ChatActivity : AppCompatActivity() {
             }
         }
     }
+
 
     private fun setupListeners() {
         // Back button
@@ -168,7 +176,8 @@ class ChatActivity : AppCompatActivity() {
         // Send button
         binding.btnSend.setOnClickListener {
             val message = binding.editTextMessage.text.toString().trim()
-            if (message.isNotEmpty() || viewModel.state.value?.hasAttachment ?: false) {
+            val currentState = viewModel.state.value
+            if (message.isNotEmpty() || (currentState != null && currentState.hasAttachment)) {
                 viewModel.sendMessage(message)
                 binding.editTextMessage.text.clear()
             }
@@ -197,79 +206,64 @@ class ChatActivity : AppCompatActivity() {
     }
 
     private fun observeViewModel() {
-        lifecycleScope.launch {
-            viewModel.state.collectLatest { state ->
-                // Update messages
-                chatAdapter.submitList(state.messages)
+        viewModel.chatRoomId.observe(this, Observer { chatRoomId ->
+            if (chatRoomId > 0) {
+                // Chat room has been created, now we can join the Socket.IO room
+                viewModel.joinSocketRoom(chatRoomId)
 
-                // Scroll to bottom if new message
-                if (state.messages.isNotEmpty()) {
-                    binding.recyclerChat.scrollToPosition(state.messages.size - 1)
-                }
+                // Now we can also load chat history
+                viewModel.loadChatHistory(chatRoomId)
+                Log.d(TAG, "Chat Activity started - Chat Room: $chatRoomId")
 
-                // Update product info
-                binding.tvProductName.text = state.productName
-                binding.tvProductPrice.text = state.productPrice
-                binding.ratingBar.rating = state.productRating
-                binding.tvRating.text = state.productRating.toString()
-                binding.tvSellerName.text = state.storeName
-
-                // Load product image
-                if (state.productImageUrl.isNotEmpty()) {
-                    Glide.with(this@ChatActivity)
-                        .load(BASE_URL + state.productImageUrl)
-                        .centerCrop()
-                        .placeholder(R.drawable.placeholder_image)
-                        .error(R.drawable.placeholder_image)
-                        .into(binding.imgProduct)
-                }
-
-                // Show/hide loading indicators
-//                binding.progressBar.visibility = if (state.isLoading) View.VISIBLE else View.GONE
-                binding.btnSend.isEnabled = !state.isSending
-
-                // Update attachment hint
-                if (state.hasAttachment) {
-                    binding.editTextMessage.hint = getString(R.string.image_attached)
-                } else {
-                    binding.editTextMessage.hint = getString(R.string.write_message)
-                }
-
-                // Show typing indicator
-                binding.tvTypingIndicator.visibility =
-                    if (state.isOtherUserTyping) View.VISIBLE else View.GONE
-
-                // Handle connection state
-                handleConnectionState(state.connectionState)
-
-                // Show error if any
-                state.error?.let { error ->
-                    Toast.makeText(this@ChatActivity, error, Toast.LENGTH_SHORT).show()
-                    viewModel.clearError()
-                }
             }
-        }
+        })
+        // Observe state changes using LiveData
+        viewModel.state.observe(this, Observer { state ->
+            // Update messages
+            chatAdapter.submitList(state.messages)
+
+            // Scroll to bottom if new message
+            if (state.messages.isNotEmpty()) {
+                binding.recyclerChat.scrollToPosition(state.messages.size - 1)
+            }
+
+            // Update product info
+            binding.tvProductName.text = state.productName
+            binding.tvProductPrice.text = state.productPrice
+            binding.ratingBar.rating = state.productRating
+            binding.tvRating.text = state.productRating.toString()
+            binding.tvSellerName.text = state.storeName
+
+            // Load product image
+            if (state.productImageUrl.isNotEmpty()) {
+                Glide.with(this@ChatActivity)
+                    .load(BASE_URL + state.productImageUrl)
+                    .centerCrop()
+                    .placeholder(R.drawable.placeholder_image)
+                    .error(R.drawable.placeholder_image)
+                    .into(binding.imgProduct)
+            }
+
+            // Update attachment hint
+            if (state.hasAttachment) {
+                binding.editTextMessage.hint = getString(R.string.image_attached)
+            } else {
+                binding.editTextMessage.hint = getString(R.string.write_message)
+            }
+
+            // Show typing indicator
+            binding.tvTypingIndicator.visibility =
+                if (state.isOtherUserTyping) View.VISIBLE else View.GONE
+
+            // Show error if any
+            state.error?.let { error ->
+                Toast.makeText(this@ChatActivity, error, Toast.LENGTH_SHORT).show()
+                viewModel.clearError()
+            }
+        })
     }
 
-    private fun handleConnectionState(state: ConnectionState) {
-        when (state) {
-            is ConnectionState.Connected -> {
-                binding.tvConnectionStatus.visibility = View.GONE
-            }
-            is ConnectionState.Connecting -> {
-                binding.tvConnectionStatus.visibility = View.VISIBLE
-                binding.tvConnectionStatus.text = getString(R.string.connecting)
-            }
-            is ConnectionState.Disconnected -> {
-                binding.tvConnectionStatus.visibility = View.VISIBLE
-                binding.tvConnectionStatus.text = getString(R.string.disconnected_reconnecting)
-            }
-            is ConnectionState.Error -> {
-                binding.tvConnectionStatus.visibility = View.VISIBLE
-                binding.tvConnectionStatus.text = getString(R.string.connection_error, state.message)
-            }
-        }
-    }
+
 
     private fun showOptionsMenu() {
         val options = arrayOf(
@@ -388,5 +382,56 @@ class ChatActivity : AppCompatActivity() {
 
     companion object {
         private const val TAG = "ChatActivity"
+
+        /**
+         * Create an intent to start the ChatActivity
+         */
+        fun createIntent(
+            context: Activity,
+            storeId: Int,
+            productId: Int,
+            productName: String?,
+            productPrice: String,
+            productImage: String?,
+            productRating: String?,
+            storeName: String?,
+            chatRoomId: Int = 0
+        ){
+            val intent =  Intent(context, ChatActivity::class.java).apply {
+                putExtra(Constants.EXTRA_STORE_ID, storeId)
+                putExtra(Constants.EXTRA_PRODUCT_ID, productId)
+                putExtra(Constants.EXTRA_PRODUCT_NAME, productName)
+                putExtra(Constants.EXTRA_PRODUCT_PRICE, productPrice)
+                putExtra(Constants.EXTRA_PRODUCT_IMAGE, productImage)
+                putExtra(Constants.EXTRA_PRODUCT_RATING, productRating)
+                putExtra(Constants.EXTRA_STORE_NAME, storeName)
+
+                if (chatRoomId > 0) {
+                    putExtra(Constants.EXTRA_CHAT_ROOM_ID, chatRoomId)
+                }
+            }
+            context.startActivity(intent)
+        }
     }
 }
+
+//if implement typing status
+//    private fun handleConnectionState(state: ConnectionState) {
+//        when (state) {
+//            is ConnectionState.Connected -> {
+//                binding.tvConnectionStatus.visibility = View.GONE
+//            }
+//            is ConnectionState.Connecting -> {
+//                binding.tvConnectionStatus.visibility = View.VISIBLE
+//                binding.tvConnectionStatus.text = getString(R.string.connecting)
+//            }
+//            is ConnectionState.Disconnected -> {
+//                binding.tvConnectionStatus.visibility = View.VISIBLE
+//                binding.tvConnectionStatus.text = getString(R.string.disconnected_reconnecting)
+//            }
+//            is ConnectionState.Error -> {
+//                binding.tvConnectionStatus.visibility = View.VISIBLE
+//                binding.tvConnectionStatus.text = getString(R.string.connection_error, state.message)
+//            }
+//        }
+//    }

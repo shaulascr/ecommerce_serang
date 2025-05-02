@@ -10,4 +10,10 @@
         android:layout_height="match_parent"
         android:text="Hello" />
 
+    <Button
+        android:id="@+id/btn_trial"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="trial button"/>
+
 </FrameLayout>

@@ -10,7 +10,6 @@ import androidx.core.app.NotificationManagerCompat
 import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
-import com.alya.ecommerce_serang.data.repository.UserRepository
 import com.alya.ecommerce_serang.utils.SessionManager
 import dagger.Module
 import dagger.Provides
@@ -39,12 +38,6 @@ object NotificationModule {
     @Singleton
     fun provideApiService(sessionManager: SessionManager): ApiService {
         return ApiConfig.getApiService(sessionManager)
-    }
-
-    @Provides
-    @Singleton
-    fun provideUserRepository(apiService: ApiService): UserRepository {
-        return UserRepository(apiService)
     }
 
     @Singleton

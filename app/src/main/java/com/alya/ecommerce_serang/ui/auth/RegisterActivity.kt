@@ -37,12 +37,27 @@ class RegisterActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        binding = ActivityRegisterBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         sessionManager = SessionManager(this)
-        if (!sessionManager.getToken().isNullOrEmpty()) {
-            // User already logged in, redirect to MainActivity
-            startActivity(Intent(this, MainActivity::class.java))
-            finish()
+        Log.d("RegisterActivity", "Token in storage: '${sessionManager.getToken()}'")
+        Log.d("RegisterActivity", "User ID in storage: '${sessionManager.getUserId()}'")
+
+        try {
+            // Use the new isLoggedIn method
+            if (sessionManager.isLoggedIn()) {
+                Log.d("RegisterActivity", "User logged in, redirecting to MainActivity")
+                startActivity(Intent(this, MainActivity::class.java))
+                finish()
+                return
+            } else {
+                Log.d("RegisterActivity", "User not logged in, showing RegisterActivity")
+            }
+        } catch (e: Exception) {
+            // Handle any exceptions
+            Log.e("RegisterActivity", "Error checking login status: ${e.message}", e)
+            // Clear potentially corrupt data
+            sessionManager.clearAll()
         }
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -61,8 +76,7 @@ class RegisterActivity : AppCompatActivity() {
             windowInsets
         }
 
-        binding = ActivityRegisterBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+
         // Observe OTP state
         observeOtpState()
 
