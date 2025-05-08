@@ -4,12 +4,14 @@ import android.util.Log
 import com.alya.ecommerce_serang.data.api.dto.UpdateChatRequest
 import com.alya.ecommerce_serang.data.api.dto.UserProfile
 import com.alya.ecommerce_serang.data.api.response.chat.ChatHistoryResponse
+import com.alya.ecommerce_serang.data.api.response.chat.ChatItemList
 import com.alya.ecommerce_serang.data.api.response.chat.SendChatResponse
 import com.alya.ecommerce_serang.data.api.response.chat.UpdateChatResponse
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
-import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
 import javax.inject.Inject
 
@@ -36,55 +38,56 @@ class ChatRepository @Inject constructor(
     suspend fun sendChatMessage(
         storeId: Int,
         message: String,
-        productId: Int,
-        imageFile: File? = null
+        productId: Int? = null,
+        imageFile: File? = null,
+        chatRoomId: Int? = null // Not used in the actual API call but kept for compatibility
     ): Result<SendChatResponse> {
         return try {
-            // Create request bodies for text fields
-            val storeIdBody = RequestBody.create("text/plain".toMediaTypeOrNull(), storeId.toString())
-            val messageBody = RequestBody.create("text/plain".toMediaTypeOrNull(), message)
-            val productIdBody = RequestBody.create("text/plain".toMediaTypeOrNull(), productId.toString())
+            // Create multipart request parts
+            val storeIdPart = storeId.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+            val messagePart = message.toRequestBody("text/plain".toMediaTypeOrNull())
 
-            // Create multipart body for the image file
-            val imageMultipart = if (imageFile != null && imageFile.exists()) {
-                // Log detailed file information
-                Log.d(TAG, "Image file: ${imageFile.absolutePath}")
-                Log.d(TAG, "Image file size: ${imageFile.length()} bytes")
-                Log.d(TAG, "Image file exists: ${imageFile.exists()}")
-                Log.d(TAG, "Image file can read: ${imageFile.canRead()}")
-
-                val requestFile = RequestBody.create("image/*".toMediaTypeOrNull(), imageFile)
-                MultipartBody.Part.createFormData("chatimg", imageFile.name, requestFile)
+            // Add product ID part if provided
+            val productIdPart = if (productId != null && productId > 0) {
+                productId.toString().toRequestBody("text/plain".toMediaTypeOrNull())
             } else {
-                // Pass null when no image is provided
                 null
             }
 
-            // Log request info
-            Log.d(TAG, "Sending message to store ID: $storeId, product ID: $productId")
-            Log.d(TAG, "Message content: $message")
-            Log.d(TAG, "Has image: ${imageFile != null && imageFile.exists()}")
+            // Create image part if file is provided
+            val imagePart = if (imageFile != null && imageFile.exists()) {
+                val requestFile = imageFile.asRequestBody("image/*".toMediaTypeOrNull())
+                MultipartBody.Part.createFormData("chatimg", imageFile.name, requestFile)
+            } else {
+                null
+            }
 
-            // Make the API call
+            // Debug log the request parameters
+            Log.d("ChatRepository", "Sending chat with: storeId=$storeId, productId=$productId, " +
+                    "message length=${message.length}, hasImage=${imageFile != null}")
+
+            // Make API call using your actual endpoint and parameter names
             val response = apiService.sendChatLine(
-                storeId = storeIdBody,
-                message = messageBody,
-                productId = productIdBody,
-                chatimg = imageMultipart
+                storeId = storeIdPart,
+                message = messagePart,
+                productId = productIdPart,
+                chatimg = imagePart
             )
 
             if (response.isSuccessful) {
-                response.body()?.let {
-                    Result.Success(it)
-                } ?: Result.Error(Exception("Send chat response is empty"))
+                val body = response.body()
+                if (body != null) {
+                    Result.Success(body)
+                } else {
+                    Result.Error(Exception("Empty response body"))
+                }
             } else {
-                val errorBody = response.errorBody()?.string() ?: "Unknown error"
-                Log.e(TAG, "HTTP Error: ${response.code()}, Body: $errorBody")
+                val errorBody = response.errorBody()?.string() ?: "{}"
+                Log.e("ChatRepository", "API Error: ${response.code()} - $errorBody")
                 Result.Error(Exception("API Error: ${response.code()} - $errorBody"))
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Exception sending message", e)
-            e.printStackTrace()
+            Log.e("ChatRepository", "Exception sending message", e)
             Result.Error(e)
         }
     }
@@ -125,6 +128,21 @@ class ChatRepository @Inject constructor(
                 Result.Error(Exception(response.errorBody()?.string() ?: "Unknown error"))
             }
         } catch (e: Exception) {
+            Result.Error(e)
+        }
+    }
+
+    suspend fun getListChat(): Result<List<ChatItemList>> {
+        return try {
+            val response = apiService.getChatList()
+
+            if (response.isSuccessful){
+                val chat = response.body()?.chat ?: emptyList()
+                Result.Success(chat)
+            } else {
+                Result.Error(Exception("Failed to fetch categories. Code: ${response.code()}"))
+            }
+        } catch (e: Exception){
             Result.Error(e)
         }
     }

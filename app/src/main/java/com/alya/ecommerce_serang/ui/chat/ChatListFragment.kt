@@ -1,14 +1,15 @@
 package com.alya.ecommerce_serang.ui.chat
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.repository.ChatRepository
+import com.alya.ecommerce_serang.data.repository.Result
 import com.alya.ecommerce_serang.databinding.FragmentChatListBinding
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
@@ -30,6 +31,7 @@ class ChatListFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         sessionManager = SessionManager(requireContext())
+        socketService = SocketIOService(sessionManager)
 
     }
 
@@ -44,13 +46,43 @@ class ChatListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setupView()
+        viewModel.getChatList()
+        observeChatList()
     }
 
-    private fun setupView(){
-        binding.btnTrial.setOnClickListener{
-            val intent = Intent(requireContext(), ChatActivity::class.java)
-            startActivity(intent)
+    private fun observeChatList() {
+        viewModel.chatList.observe(viewLifecycleOwner) { result ->
+            when (result) {
+                is Result.Success -> {
+                    val adapter = ChatListAdapter(result.data) { chatItem ->
+                        // Use the ChatActivity.createIntent factory method for proper navigation
+                        ChatActivity.createIntent(
+                            context = requireActivity(),
+                            storeId = chatItem.storeId,
+                            productId = 0, // Default value since we don't have it in ChatListItem
+                            productName = null, // Null is acceptable as per ChatActivity
+                            productPrice = "",
+                            productImage = null,
+                            productRating = null,
+                            storeName = chatItem.storeName,
+                            chatRoomId = chatItem.chatRoomId
+                        )
+                    }
+                    binding.chatListRecyclerView.adapter = adapter
+                }
+                is Result.Error -> {
+                    Toast.makeText(requireContext(), "Failed to load chats", Toast.LENGTH_SHORT).show()
+                }
+                Result.Loading -> {
+                    // Optional: show progress bar
+                }
+            }
         }
+    }
+
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

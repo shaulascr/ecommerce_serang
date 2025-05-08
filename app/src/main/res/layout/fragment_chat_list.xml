@@ -1,19 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
     tools:context=".ui.chat.ChatListFragment">
 
     <TextView
+        android:id="@+id/chatHeaderTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Pesan"
+        android:textSize="24sp"
+        android:padding="16dp"
+        android:layout_marginHorizontal="8dp"
+        android:fontFamily="@font/dmsans_bold" />
+
+    <com.google.android.material.divider.MaterialDivider
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        app:dividerColor="@color/black_100"
+        />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/chatListRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="Hello" />
+        android:padding="8dp"
+        android:clipToPadding="false"
+        tools:listitem="@layout/item_chat"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
 
-    <Button
-        android:id="@+id/btn_trial"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="trial button"/>
-
-</FrameLayout>
+</LinearLayout>

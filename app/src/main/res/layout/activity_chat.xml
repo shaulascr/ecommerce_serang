@@ -92,14 +92,15 @@
         app:layout_constraintTop_toBottomOf="@+id/chatToolbar">
 
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/product_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="16dp">
 
             <ImageView
                 android:id="@+id/imgProduct"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
                 android:scaleType="centerCrop"
                 android:src="@drawable/placeholder_image"
                 app:layout_constraintDimensionRatio="1:1"

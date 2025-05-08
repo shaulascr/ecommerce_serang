@@ -100,7 +100,6 @@ class ChatActivity : AppCompatActivity() {
         apiService = ApiConfig.getApiService(sessionManager)
 
         Log.d("ChatActivity", "Token in storage: '${sessionManager.getToken()}'")
-//        Log.d("ChatActivity", "User ID in storage: '${sessionManager.getUserId()}'")
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
         enableEdgeToEdge()
@@ -125,7 +124,7 @@ class ChatActivity : AppCompatActivity() {
         val productImage = intent.getStringExtra(Constants.EXTRA_PRODUCT_IMAGE) ?: ""
         val productRating = intent.getFloatExtra(Constants.EXTRA_PRODUCT_RATING, 0f)
         val storeName = intent.getStringExtra(Constants.EXTRA_STORE_NAME) ?: ""
-
+        val chatRoomId = intent.getIntExtra(Constants.EXTRA_CHAT_ROOM_ID, 0)
 
         // Check if user is logged in
         val token = sessionManager.getToken()
@@ -148,13 +147,18 @@ class ChatActivity : AppCompatActivity() {
             productRating = productRating,
             storeName = storeName
         )
+
         // Setup UI components
         setupRecyclerView()
         setupListeners()
         setupTypingIndicator()
         observeViewModel()
 
-
+        // If opened from ChatListFragment with a valid chatRoomId
+        if (chatRoomId > 0) {
+            // Directly set the chatRoomId and load chat history
+            viewModel._chatRoomId.value = chatRoomId
+        }
     }
 
     private fun setupRecyclerView() {
@@ -234,21 +238,30 @@ class ChatActivity : AppCompatActivity() {
             }
 
             // Update product info
-            binding.tvProductName.text = state.productName
-            binding.tvProductPrice.text = state.productPrice
-            binding.ratingBar.rating = state.productRating
-            binding.tvRating.text = state.productRating.toString()
-            binding.tvSellerName.text = state.storeName
+            if (!state.productName.isNullOrEmpty()) {
+                binding.tvProductName.text = state.productName
+                binding.tvProductPrice.text = state.productPrice
+                binding.ratingBar.rating = state.productRating
+                binding.tvRating.text = state.productRating.toString()
+                binding.tvSellerName.text = state.storeName
 
-            // Load product image
-            if (state.productImageUrl.isNotEmpty()) {
-                Glide.with(this@ChatActivity)
-                    .load(BASE_URL + state.productImageUrl)
-                    .centerCrop()
-                    .placeholder(R.drawable.placeholder_image)
-                    .error(R.drawable.placeholder_image)
-                    .into(binding.imgProduct)
+                // Load product image
+                if (!state.productImageUrl.isNullOrEmpty()) {
+                    Glide.with(this@ChatActivity)
+                        .load(BASE_URL + state.productImageUrl)
+                        .centerCrop()
+                        .placeholder(R.drawable.placeholder_image)
+                        .error(R.drawable.placeholder_image)
+                        .into(binding.imgProduct)
+                }
+
+                // Make sure the product section is visible
+                binding.productContainer.visibility = View.VISIBLE
+            } else {
+                // Hide the product section if info is missing
+                binding.productContainer.visibility = View.GONE
             }
+
 
             // Update attachment hint
             if (state.hasAttachment) {
@@ -352,17 +365,70 @@ class ChatActivity : AppCompatActivity() {
     }
 
     private fun handleSelectedImage(uri: Uri) {
-        // Get the file from Uri
-        val filePathColumn = arrayOf(MediaStore.Images.Media.DATA)
-        val cursor = contentResolver.query(uri, filePathColumn, null, null, null)
-        cursor?.moveToFirst()
-        val columnIndex = cursor?.getColumnIndex(filePathColumn[0])
-        val filePath = cursor?.getString(columnIndex ?: 0)
-        cursor?.close()
+        try {
+            Log.d(TAG, "Processing selected image: $uri")
 
-        if (filePath != null) {
-            viewModel.setSelectedImageFile(File(filePath))
-            Toast.makeText(this, R.string.image_selected, Toast.LENGTH_SHORT).show()
+            // First try the direct approach to get the file path
+            var filePath: String? = null
+
+            // For newer Android versions, we need to handle content URIs properly
+            if (uri.scheme == "content") {
+                val cursor = contentResolver.query(uri, null, null, null, null)
+                cursor?.use {
+                    if (it.moveToFirst()) {
+                        val columnIndex = it.getColumnIndex(MediaStore.Images.Media.DATA)
+                        if (columnIndex != -1) {
+                            filePath = it.getString(columnIndex)
+                            Log.d(TAG, "Found file path from cursor: $filePath")
+                        }
+                    }
+                }
+
+                // If we couldn't get the path directly, create a copy in our cache directory
+                if (filePath == null) {
+                    contentResolver.openInputStream(uri)?.use { inputStream ->
+                        val fileName = "img_${System.currentTimeMillis()}.jpg"
+                        val outputFile = File(cacheDir, fileName)
+
+                        outputFile.outputStream().use { outputStream ->
+                            inputStream.copyTo(outputStream)
+                        }
+
+                        filePath = outputFile.absolutePath
+                        Log.d(TAG, "Created temp file from input stream: $filePath")
+                    }
+                }
+            } else if (uri.scheme == "file") {
+                // Direct file URI
+                filePath = uri.path
+                Log.d(TAG, "Got file path directly from URI: $filePath")
+            }
+
+            // Process the file path
+            if (filePath != null) {
+                val file = File(filePath)
+                if (file.exists()) {
+                    // Check file size (limit to 5MB)
+                    if (file.length() > 5 * 1024 * 1024) {
+                        Toast.makeText(this, "Image too large (max 5MB), please select a smaller image", Toast.LENGTH_SHORT).show()
+                        return
+                    }
+
+                    // Set the file to the ViewModel
+                    viewModel.setSelectedImageFile(file)
+                    Toast.makeText(this, R.string.image_selected, Toast.LENGTH_SHORT).show()
+                    Log.d(TAG, "Successfully set image file: ${file.absolutePath}, size: ${file.length()} bytes")
+                } else {
+                    Log.e(TAG, "File does not exist: $filePath")
+                    Toast.makeText(this, "Could not access the selected image", Toast.LENGTH_SHORT).show()
+                }
+            } else {
+                Log.e(TAG, "Could not get file path from URI: $uri")
+                Toast.makeText(this, "Could not process the selected image", Toast.LENGTH_SHORT).show()
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error handling selected image", e)
+            Toast.makeText(this, "Error processing image: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -395,21 +461,32 @@ class ChatActivity : AppCompatActivity() {
         fun createIntent(
             context: Activity,
             storeId: Int,
-            productId: Int,
-            productName: String?,
-            productPrice: String,
-            productImage: String?,
-            productRating: String?,
-            storeName: String?,
+            productId: Int = 0,
+            productName: String? = null,
+            productPrice: String = "",
+            productImage: String? = null,
+            productRating: String? = null,
+            storeName: String? = null,
             chatRoomId: Int = 0
-        ){
-            val intent =  Intent(context, ChatActivity::class.java).apply {
+        ) {
+            val intent = Intent(context, ChatActivity::class.java).apply {
                 putExtra(Constants.EXTRA_STORE_ID, storeId)
                 putExtra(Constants.EXTRA_PRODUCT_ID, productId)
                 putExtra(Constants.EXTRA_PRODUCT_NAME, productName)
                 putExtra(Constants.EXTRA_PRODUCT_PRICE, productPrice)
                 putExtra(Constants.EXTRA_PRODUCT_IMAGE, productImage)
-                putExtra(Constants.EXTRA_PRODUCT_RATING, productRating)
+
+                // Convert productRating string to float if provided
+                if (productRating != null) {
+                    try {
+                        putExtra(Constants.EXTRA_PRODUCT_RATING, productRating.toFloat())
+                    } catch (e: NumberFormatException) {
+                        putExtra(Constants.EXTRA_PRODUCT_RATING, 0f)
+                    }
+                } else {
+                    putExtra(Constants.EXTRA_PRODUCT_RATING, 0f)
+                }
+
                 putExtra(Constants.EXTRA_STORE_NAME, storeName)
 
                 if (chatRoomId > 0) {

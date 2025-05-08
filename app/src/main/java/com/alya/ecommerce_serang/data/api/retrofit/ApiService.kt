@@ -1,5 +1,6 @@
 package com.alya.ecommerce_serang.data.api.retrofit
 
+
 import com.alya.ecommerce_serang.data.api.dto.AddEvidenceRequest
 import com.alya.ecommerce_serang.data.api.dto.CartItem
 import com.alya.ecommerce_serang.data.api.dto.CompletedOrderRequest
@@ -12,24 +13,17 @@ import com.alya.ecommerce_serang.data.api.dto.OtpRequest
 import com.alya.ecommerce_serang.data.api.dto.RegisterRequest
 import com.alya.ecommerce_serang.data.api.dto.SearchRequest
 import com.alya.ecommerce_serang.data.api.dto.UpdateCart
-import com.alya.ecommerce_serang.data.api.response.store.product.CreateProductResponse
-import com.alya.ecommerce_serang.data.api.response.store.product.ViewStoreProductsResponse
 import com.alya.ecommerce_serang.data.api.dto.UpdateChatRequest
-
-import okhttp3.MultipartBody
-import okhttp3.RequestBody
 import com.alya.ecommerce_serang.data.api.response.auth.LoginResponse
 import com.alya.ecommerce_serang.data.api.response.auth.OtpResponse
 import com.alya.ecommerce_serang.data.api.response.auth.RegisterResponse
+import com.alya.ecommerce_serang.data.api.response.chat.ChatHistoryResponse
+import com.alya.ecommerce_serang.data.api.response.chat.ChatListResponse
+import com.alya.ecommerce_serang.data.api.response.chat.SendChatResponse
+import com.alya.ecommerce_serang.data.api.response.chat.UpdateChatResponse
 import com.alya.ecommerce_serang.data.api.response.customer.cart.AddCartResponse
 import com.alya.ecommerce_serang.data.api.response.customer.cart.ListCartResponse
 import com.alya.ecommerce_serang.data.api.response.customer.cart.UpdateCartResponse
-import com.alya.ecommerce_serang.data.api.response.chat.ChatHistoryResponse
-import com.alya.ecommerce_serang.data.api.response.chat.SendChatResponse
-import com.alya.ecommerce_serang.data.api.response.chat.UpdateChatResponse
-import com.alya.ecommerce_serang.data.api.response.order.AddEvidenceResponse
-import com.alya.ecommerce_serang.data.api.response.order.ComplaintResponse
-import com.alya.ecommerce_serang.data.api.response.order.CompletedOrderResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.CourierCostResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.CreateOrderResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.ListCityResponse
@@ -45,21 +39,22 @@ import com.alya.ecommerce_serang.data.api.response.customer.product.StoreRespons
 import com.alya.ecommerce_serang.data.api.response.customer.profile.AddressResponse
 import com.alya.ecommerce_serang.data.api.response.customer.profile.CreateAddressResponse
 import com.alya.ecommerce_serang.data.api.response.customer.profile.ProfileResponse
+import com.alya.ecommerce_serang.data.api.response.order.AddEvidenceResponse
+import com.alya.ecommerce_serang.data.api.response.order.ComplaintResponse
+import com.alya.ecommerce_serang.data.api.response.order.CompletedOrderResponse
+import com.alya.ecommerce_serang.data.api.response.product.CreateSearchResponse
+import com.alya.ecommerce_serang.data.api.response.product.SearchHistoryResponse
+import com.alya.ecommerce_serang.data.api.response.store.product.CreateProductResponse
 import com.alya.ecommerce_serang.data.api.response.store.product.DeleteProductResponse
 import com.alya.ecommerce_serang.data.api.response.store.product.UpdateProductResponse
-import com.alya.ecommerce_serang.data.api.response.product.SearchHistoryResponse
-import com.alya.ecommerce_serang.data.api.response.product.CreateSearchResponse
-
-
+import com.alya.ecommerce_serang.data.api.response.store.product.ViewStoreProductsResponse
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
-import retrofit2.http.Field
-import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
-import retrofit2.http.Header
-import retrofit2.http.HeaderMap
 import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.PUT
@@ -250,10 +245,9 @@ interface ApiService {
     suspend fun sendChatLine(
         @Part("store_id") storeId: RequestBody,
         @Part("message") message: RequestBody,
-        @Part("product_id") productId: RequestBody,
+        @Part("product_id") productId: RequestBody?,
         @Part chatimg: MultipartBody.Part?
     ): Response<SendChatResponse>
-
 
     @PUT("chatstatus")
     suspend fun updateChatStatus(
@@ -264,4 +258,8 @@ interface ApiService {
     suspend fun getChatDetail(
         @Path("chatRoomId") chatRoomId: Int
     ): Response<ChatHistoryResponse>
+
+    @GET("chat")
+    suspend fun getChatList(
+    ): Response<ChatListResponse>
 }
