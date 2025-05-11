@@ -28,6 +28,7 @@ import com.alya.ecommerce_serang.data.api.retrofit.ApiService
 import com.alya.ecommerce_serang.data.repository.ProductRepository
 import com.alya.ecommerce_serang.data.repository.Result
 import com.alya.ecommerce_serang.databinding.ActivityDetailProductBinding
+import com.alya.ecommerce_serang.ui.cart.CartActivity
 import com.alya.ecommerce_serang.ui.chat.ChatActivity
 import com.alya.ecommerce_serang.ui.home.HorizontalProductAdapter
 import com.alya.ecommerce_serang.ui.order.CheckoutActivity
@@ -205,7 +206,17 @@ class DetailProductActivity : AppCompatActivity() {
             }
         }
 
+        val searchContainerView = binding.searchContainer
+        searchContainerView.btnCart.setOnClickListener{
+            navigateToCart()
+        }
+
         setupRecyclerViewOtherProducts()
+    }
+
+    private fun navigateToCart() {
+        val intent = Intent(this, CartActivity::class.java)
+        startActivity(intent)
     }
 
     private fun updateUI(product: Product){
@@ -296,6 +307,7 @@ class DetailProductActivity : AppCompatActivity() {
 
     private fun showAddToCartPopup(productId: Int) {
         showQuantityDialog(productId, false)
+
     }
 
     private fun showQuantityDialog(productId: Int, isBuyNow: Boolean) {

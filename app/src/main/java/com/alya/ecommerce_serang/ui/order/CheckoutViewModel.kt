@@ -9,7 +9,7 @@ import com.alya.ecommerce_serang.data.api.dto.CheckoutData
 import com.alya.ecommerce_serang.data.api.dto.OrderRequest
 import com.alya.ecommerce_serang.data.api.dto.OrderRequestBuy
 import com.alya.ecommerce_serang.data.api.response.customer.cart.CartItemsItem
-import com.alya.ecommerce_serang.data.api.response.customer.cart.DataItem
+import com.alya.ecommerce_serang.data.api.response.customer.cart.DataItemCart
 import com.alya.ecommerce_serang.data.api.response.customer.product.PaymentInfoItem
 import com.alya.ecommerce_serang.data.api.response.customer.profile.AddressesItem
 import com.alya.ecommerce_serang.data.repository.OrderRepository
@@ -100,7 +100,7 @@ class CheckoutViewModel(private val repository: OrderRepository) : ViewModel() {
                 if (cartResult is Result.Success) {
                     // Find matching cart items
                     val matchingItems = mutableListOf<CartItemsItem>()
-                    var storeData: DataItem? = null
+                    var storeData: DataItemCart? = null
 
                     for (store in cartResult.data) {
                         val storeItems = store.cartItems.filter { it.cartItemId in cartItemIds }

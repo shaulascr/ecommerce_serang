@@ -2,28 +2,30 @@ package com.alya.ecommerce_serang.data.repository
 
 import android.util.Log
 import com.alya.ecommerce_serang.data.api.dto.AddEvidenceMultipartRequest
+import com.alya.ecommerce_serang.data.api.dto.CartItem
 import com.alya.ecommerce_serang.data.api.dto.CompletedOrderRequest
 import com.alya.ecommerce_serang.data.api.dto.CourierCostRequest
 import com.alya.ecommerce_serang.data.api.dto.CreateAddressRequest
 import com.alya.ecommerce_serang.data.api.dto.OrderRequest
 import com.alya.ecommerce_serang.data.api.dto.OrderRequestBuy
 import com.alya.ecommerce_serang.data.api.dto.OrdersItem
+import com.alya.ecommerce_serang.data.api.dto.UpdateCart
 import com.alya.ecommerce_serang.data.api.dto.UserProfile
-import com.alya.ecommerce_serang.data.api.response.customer.cart.DataItem
+import com.alya.ecommerce_serang.data.api.response.customer.cart.DataItemCart
+import com.alya.ecommerce_serang.data.api.response.customer.order.CourierCostResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.CreateOrderResponse
+import com.alya.ecommerce_serang.data.api.response.customer.order.ListCityResponse
+import com.alya.ecommerce_serang.data.api.response.customer.order.ListProvinceResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.OrderDetailResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.OrderListResponse
 import com.alya.ecommerce_serang.data.api.response.customer.product.ProductResponse
-import com.alya.ecommerce_serang.data.api.response.order.AddEvidenceResponse
-import com.alya.ecommerce_serang.data.api.response.order.ComplaintResponse
-import com.alya.ecommerce_serang.data.api.response.order.CompletedOrderResponse
-import com.alya.ecommerce_serang.data.api.response.customer.order.CourierCostResponse
-import com.alya.ecommerce_serang.data.api.response.customer.order.ListCityResponse
-import com.alya.ecommerce_serang.data.api.response.customer.order.ListProvinceResponse
 import com.alya.ecommerce_serang.data.api.response.customer.product.StoreProduct
 import com.alya.ecommerce_serang.data.api.response.customer.product.StoreResponse
 import com.alya.ecommerce_serang.data.api.response.customer.profile.AddressResponse
 import com.alya.ecommerce_serang.data.api.response.customer.profile.CreateAddressResponse
+import com.alya.ecommerce_serang.data.api.response.order.AddEvidenceResponse
+import com.alya.ecommerce_serang.data.api.response.order.ComplaintResponse
+import com.alya.ecommerce_serang.data.api.response.order.CompletedOrderResponse
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -155,7 +157,7 @@ class OrderRepository(private val apiService: ApiService) {
         }
     }
 
-    suspend fun getCart(): Result<List<DataItem>> {
+    suspend fun getCart(): Result<List<DataItemCart>> {
         return try {
             val response = apiService.getCart()
 
@@ -174,6 +176,42 @@ class OrderRepository(private val apiService: ApiService) {
             }
         } catch (e: Exception) {
             Log.e("Order Repository", "Exception fetching cart", e)
+            Result.Error(e)
+        }
+    }
+
+
+
+    suspend fun updateCart(updateCart: UpdateCart): Result<String> {
+        return try {
+            val response = apiService.updateCart(updateCart)
+
+            if (response.isSuccessful) {
+                Result.Success(response.body()?.message ?: "Cart updated successfully")
+            } else {
+                val errorMsg = response.errorBody()?.string() ?: "Failed to update cart"
+                Log.e("Order Repository", "Error updating cart: $errorMsg")
+                Result.Error(Exception(errorMsg))
+            }
+        } catch (e: Exception) {
+            Log.e("Order Repository", "Exception updating cart", e)
+            Result.Error(e)
+        }
+    }
+
+    suspend fun deleteCartItem(cartItemId: Int): Result<String> {
+        return try {
+            val response = apiService.deleteCart(cartItemId)
+
+            if (response.isSuccessful) {
+                Result.Success(response.body()?.message ?: "Item removed from cart")
+            } else {
+                val errorMsg = response.errorBody()?.string() ?: "Failed to remove item from cart"
+                Log.e("Order Repository", "Error deleting cart item: $errorMsg")
+                Result.Error(Exception(errorMsg))
+            }
+        } catch (e: Exception) {
+            Log.e("Order Repository", "Exception deleting cart item", e)
             Result.Error(e)
         }
     }

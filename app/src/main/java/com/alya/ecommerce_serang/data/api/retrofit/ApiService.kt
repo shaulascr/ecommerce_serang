@@ -11,6 +11,7 @@ import com.alya.ecommerce_serang.data.api.dto.OrderRequest
 import com.alya.ecommerce_serang.data.api.dto.OrderRequestBuy
 import com.alya.ecommerce_serang.data.api.dto.OtpRequest
 import com.alya.ecommerce_serang.data.api.dto.RegisterRequest
+import com.alya.ecommerce_serang.data.api.dto.ReviewProductItem
 import com.alya.ecommerce_serang.data.api.dto.SearchRequest
 import com.alya.ecommerce_serang.data.api.dto.UpdateCart
 import com.alya.ecommerce_serang.data.api.dto.UpdateChatRequest
@@ -22,10 +23,12 @@ import com.alya.ecommerce_serang.data.api.response.chat.ChatListResponse
 import com.alya.ecommerce_serang.data.api.response.chat.SendChatResponse
 import com.alya.ecommerce_serang.data.api.response.chat.UpdateChatResponse
 import com.alya.ecommerce_serang.data.api.response.customer.cart.AddCartResponse
+import com.alya.ecommerce_serang.data.api.response.customer.cart.DeleteCartResponse
 import com.alya.ecommerce_serang.data.api.response.customer.cart.ListCartResponse
 import com.alya.ecommerce_serang.data.api.response.customer.cart.UpdateCartResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.CourierCostResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.CreateOrderResponse
+import com.alya.ecommerce_serang.data.api.response.customer.order.CreateReviewResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.ListCityResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.ListProvinceResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.OrderDetailResponse
@@ -197,6 +200,11 @@ interface ApiService {
         @Body updateCart: UpdateCart
     ): Response<UpdateCartResponse>
 
+    @DELETE("cart/delete/{id}")
+    suspend fun deleteCart(
+        @Path("id") cartItemId : Int
+    ):Response<DeleteCartResponse>
+
     @POST("couriercost")
     suspend fun countCourierCost(
         @Body courierCost : CourierCostRequest
@@ -231,6 +239,11 @@ interface ApiService {
         @Part("description") description: RequestBody,
         @Part complaintimg: MultipartBody.Part
     ): Response<ComplaintResponse>
+
+    @POST("review")
+    suspend fun createReview(
+        @Body contentReview : ReviewProductItem
+    ): Response<CreateReviewResponse>
 
     @POST("search")
     suspend fun saveSearchQuery(

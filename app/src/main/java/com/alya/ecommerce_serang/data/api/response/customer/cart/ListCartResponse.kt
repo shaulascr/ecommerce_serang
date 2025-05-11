@@ -4,14 +4,14 @@ import com.google.gson.annotations.SerializedName
 
 data class ListCartResponse(
 
-    @field:SerializedName("data")
-	val data: List<DataItem>,
+	@field:SerializedName("data")
+	val data: List<DataItemCart>,
 
-    @field:SerializedName("message")
+	@field:SerializedName("message")
 	val message: String
 )
 
-data class DataItem(
+data class DataItemCart(
 
     @field:SerializedName("store_id")
 	val storeId: Int,
