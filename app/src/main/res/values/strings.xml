@@ -117,5 +117,25 @@
         <item>Other reason</item>
     </string-array>
 
+    <!-- Chat Activity -->
+    <string name="image_attached">Image attached</string>
+    <string name="write_message">Tulis pesan</string>
+    <string name="options">Options</string>
+    <string name="block_user">Block User</string>
+    <string name="report">Report</string>
+    <string name="clear_chat">Clear Chat</string>
+    <string name="block_user_selected">Block user selected</string>
+    <string name="report_selected">Report selected</string>
+    <string name="clear_chat_selected">Clear chat selected</string>
+    <string name="permission_denied">Permission denied</string>
+    <string name="take_photo">Take Photo</string>
+    <string name="choose_from_gallery">Choose from Gallery</string>
+    <string name="select_attachment">Select Attachment</string>
+    <string name="image_selected">Image selected</string>
+    <string name="connecting">Connecting...</string>
+    <string name="disconnected_reconnecting">Disconnected. Reconnecting...</string>
+    <string name="connection_error">Connection error: %1$s</string>
+    <string name="typing">User is typing...</string>
+
 
 </resources>

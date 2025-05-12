@@ -58,6 +58,7 @@ class LoginActivity : AppCompatActivity() {
 
                     val sessionManager = SessionManager(this)
                     sessionManager.saveToken(accessToken)
+//                    sessionManager.saveUserId(response.userId)
 
                     Toast.makeText(this, "Login Successful", Toast.LENGTH_SHORT).show()
 

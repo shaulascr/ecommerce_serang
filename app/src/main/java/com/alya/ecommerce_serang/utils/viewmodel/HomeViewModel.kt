@@ -52,6 +52,8 @@ class HomeViewModel (
         loadProducts()
         loadCategories()
     }
+
+
 }
 
 sealed class HomeUiState {

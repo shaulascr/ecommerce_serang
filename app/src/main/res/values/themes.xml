@@ -1,16 +1,45 @@
 <resources>
     <!-- Base application theme. -->
     <style name="Theme.Ecommerce_serang" parent="Theme.Material3.Light.NoActionBar">
-        <!-- Customize your light theme here. -->
+        <!-- Primary Color Customization -->
         <item name="colorPrimary">@color/blue_500</item>
-        <item name="colorPrimaryDark">@color/white</item>
-        <item name="colorAccent">@color/black</item>
+        <item name="colorPrimaryVariant">@color/blue_600</item>
+        <item name="colorOnPrimary">@color/white</item>
+
+        <!-- Secondary Color Customization -->
+        <item name="colorSecondary">@color/blue_500</item>
+        <item name="colorSecondaryVariant">@color/blue_600</item>
+        <item name="colorOnSecondary">@color/white</item>
+
+        <!-- Surface and Background Colors -->
         <item name="colorSurface">@color/white</item>
         <item name="colorOnSurface">@color/black</item>
-        <item name="colorPrimaryContainer">@color/blue_500</item>
-        <item name="colorOnPrimaryContainer">@color/white</item>
+        <item name="android:colorBackground">@color/white</item>
+<!--        <item name="colorBackground">@color/white</item>-->
+
+        <!-- Container Colors -->
+        <item name="colorPrimaryContainer">@color/blue_50</item>
+        <item name="colorOnPrimaryContainer">@color/blue_500</item>
+
+        <!-- Status Bar and Navigation Bar -->
+
+        <!-- Remove Content Insets -->
         <item name="android:contentInsetStart">0dp</item>
         <item name="android:contentInsetLeft">0dp</item>
+
+        <!-- Bottom Navigation Specific -->
+        <item name="bottomNavigationStyle">@style/Widget.MaterialComponents.BottomNavigationView.Colored</item>
+        <item name="bottomAppBarStyle">@style/BottomAppBar</item>
+
+
+        <!-- Remove Purple Accent Color -->
+        <item name="colorAccent">@color/blue_500</item>
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+<!--        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>-->
     </style>
 
     <!-- Text Styles -->

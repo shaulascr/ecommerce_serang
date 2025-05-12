@@ -25,4 +25,39 @@
         <item name="cornerRadius">8dp</item>
         <item name="backgroundTint">@color/blue_500</item>
     </style>
+
+    <style name="SharpedBorderStyleOutline">
+        <item name="boxStrokeColor">@color/black_300</item>
+        <item name="boxStrokeWidth">1dp</item>
+        <item name="boxCornerRadiusTopStart">4dp</item>
+        <item name="boxCornerRadiusTopEnd">4dp</item>
+        <item name="boxCornerRadiusBottomStart">4dp</item>
+        <item name="boxCornerRadiusBottomEnd">4dp</item>
+        <item name="android:textColorHint">@color/black_300</item>
+    </style>
+
+        <style name="CustomBottomNavActiveIndicator" parent="@style/Widget.Material3.BottomNavigationView.ActiveIndicator">
+            <item name="android:width">40dp</item>
+            <item name="android:height">4dp</item>
+            <item name="shapeAppearanceOverlay">@style/CustomActiveIndicatorShape</item>
+        </style>
+
+        <style name="CustomActiveIndicatorShape">
+            <item name="cornerSize">2dp</item>
+        </style>
+
+    <style name="BottomNavigationTextStyle" parent="TextAppearance.MaterialComponents.Caption">
+        <item name="android:textSize">14sp</item>
+        <item name="fontFamily">@font/dmsans_semibold</item>
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:layout_marginTop">4dp</item>
+    </style>
+
+    <style name="BottomAppBar">
+        <item name="strokeColor">@color/light_gray</item>
+        <item name="strokeWidth">2dp</item>
+        <item name="color">@color/white</item>
+        <item name="cornerRadius">8dp</item>
+        <item name="backgroundTint">@color/white</item>
+    </style>
 </resources>
