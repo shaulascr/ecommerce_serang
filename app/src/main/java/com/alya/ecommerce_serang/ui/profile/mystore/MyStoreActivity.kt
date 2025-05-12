@@ -16,10 +16,7 @@ import com.alya.ecommerce_serang.ui.profile.mystore.balance.BalanceActivity
 import com.alya.ecommerce_serang.ui.profile.mystore.product.ProductActivity
 import com.alya.ecommerce_serang.ui.profile.mystore.profile.DetailStoreProfileActivity
 import com.alya.ecommerce_serang.ui.profile.mystore.review.ReviewFragment
-import com.alya.ecommerce_serang.ui.profile.mystore.sells.all_sells.AllSellsFragment
-import com.alya.ecommerce_serang.ui.profile.mystore.sells.order.OrderFragment
-import com.alya.ecommerce_serang.ui.profile.mystore.sells.payment.PaymentFragment
-import com.alya.ecommerce_serang.ui.profile.mystore.sells.shipment.ShipmentFragment
+import com.alya.ecommerce_serang.ui.profile.mystore.sells.SellsListFragment
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
 import com.alya.ecommerce_serang.utils.viewmodel.MyStoreViewModel
@@ -84,31 +81,19 @@ class MyStoreActivity : AppCompatActivity() {
         }
 
         binding.tvHistory.setOnClickListener {
-            supportFragmentManager.beginTransaction()
-                .replace(android.R.id.content, AllSellsFragment())
-                .addToBackStack(null)
-                .commit()
+            navigateToSellsFragment("all")
         }
 
         binding.layoutPerluTagihan.setOnClickListener {
-            supportFragmentManager.beginTransaction()
-                .replace(android.R.id.content, OrderFragment())
-                .addToBackStack(null)
-                .commit()
+            navigateToSellsFragment("pending")
         }
 
         binding.layoutPembayaran.setOnClickListener {
-            supportFragmentManager.beginTransaction()
-                .replace(android.R.id.content, PaymentFragment())
-                .addToBackStack(null)
-                .commit()
+            navigateToSellsFragment("paid")
         }
 
         binding.layoutPerluDikirim.setOnClickListener {
-            supportFragmentManager.beginTransaction()
-                .replace(android.R.id.content, ShipmentFragment())
-                .addToBackStack(null)
-                .commit()
+            navigateToSellsFragment("processed")
         }
 
         binding.layoutProductMenu.setOnClickListener {
@@ -128,5 +113,13 @@ class MyStoreActivity : AppCompatActivity() {
                 .addToBackStack(null)
                 .commit()
         }
+    }
+
+    private fun navigateToSellsFragment(status: String) {
+        val sellsFragment = SellsListFragment.newInstance(status)
+        supportFragmentManager.beginTransaction()
+            .replace(android.R.id.content, sellsFragment)
+            .addToBackStack(null)
+            .commit()
     }
 }
