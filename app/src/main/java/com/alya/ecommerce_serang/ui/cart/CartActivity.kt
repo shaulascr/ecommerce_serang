@@ -1,6 +1,5 @@
 package com.alya.ecommerce_serang.ui.cart
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
@@ -101,11 +100,15 @@ class CartActivity : AppCompatActivity() {
             if (viewModel.totalSelectedCount.value ?: 0 > 0) {
                 val selectedItems = viewModel.prepareCheckout()
                 if (selectedItems.isNotEmpty()) {
-                    // Navigate to checkout
-                    val intent = Intent(this, CheckoutActivity::class.java)
-                    // You would pass the selected items to the next activity
-                    // intent.putExtra("SELECTED_ITEMS", selectedItems)
-                    startActivity(intent)
+                    // Check if all items are from the same store
+                    val storeId = viewModel.activeStoreId.value
+                    if (storeId != null) {
+                        // Get cart item ids to pass to checkout
+                        val cartItemIds = selectedItems.map { it.cartItemId }
+                        CheckoutActivity.startForCart(this, cartItemIds)
+                    } else {
+                        Toast.makeText(this, "Please select items from a single store only", Toast.LENGTH_SHORT).show()
+                    }
                 }
             } else {
                 Toast.makeText(this, "Pilih produk terlebih dahulu", Toast.LENGTH_SHORT).show()
@@ -182,4 +185,7 @@ class CartActivity : AppCompatActivity() {
         val format = NumberFormat.getCurrencyInstance(Locale("id", "ID"))
         return format.format(amount).replace("Rp", "Rp ")
     }
+
+
 }
+

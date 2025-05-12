@@ -16,7 +16,7 @@ data class PaymentInfoItem(
 	val id: Int = 1,
 
 	@field:SerializedName("qris_image")
-	val qrisImage: String,
+	val qrisImage: String? = null,
 
 	@field:SerializedName("bank_num")
 	val bankNum: String,

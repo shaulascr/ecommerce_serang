@@ -70,7 +70,7 @@ data class OrderItemItem(
 
 data class Order(
 
-	@field:SerializedName("payment_method_id")
+	@field:SerializedName("payment_info_id")
 	val paymentMethodId: Int,
 
 	@field:SerializedName("auto_completed_at")

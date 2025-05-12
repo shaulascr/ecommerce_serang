@@ -285,10 +285,12 @@ class CartViewModel(private val repository: OrderRepository) : ViewModel() {
         val selectedItemsIds = _selectedItems.value ?: HashSet()
         val result = mutableListOf<CartItemsItem>()
 
-        _cartItems.value?.forEach { dataItem ->
-            dataItem.cartItems.forEach { cartItem ->
-                if (selectedItemsIds.contains(cartItem.cartItemId)) {
-                    result.add(cartItem)
+        if (activeStoreId != null){
+            _cartItems.value?.forEach { dataItem ->
+                dataItem.cartItems.forEach { cartItem ->
+                    if (selectedItemsIds.contains(cartItem.cartItemId)) {
+                        result.add(cartItem)
+                    }
                 }
             }
         }

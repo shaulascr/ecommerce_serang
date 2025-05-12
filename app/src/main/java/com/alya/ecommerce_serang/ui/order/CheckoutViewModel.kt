@@ -112,6 +112,10 @@ class CheckoutViewModel(private val repository: OrderRepository) : ViewModel() {
                     }
 
                     if (matchingItems.isNotEmpty() && storeData != null) {
+                        if (matchingItems.size != cartItemIds.size) {
+                            Log.w(TAG, "Not all requested cart items were found. Found ${matchingItems.size} out of ${cartItemIds.size}")
+                            // Consider showing a warning or adjusting the list
+                        }
                         // Create initial OrderRequest object
                         val orderRequest = OrderRequest(
                             addressId = 0, // Will be set when user selects address
@@ -133,6 +137,10 @@ class CheckoutViewModel(private val repository: OrderRepository) : ViewModel() {
                             isBuyNow = false,
                             cartItems = matchingItems
                         )
+                        Log.d(TAG, "Setting sellerId to: ${storeData.storeId}")
+
+                        calculateSubtotal()
+                        calculateTotal()
                     } else {
                         _errorMessage.value = "No matching cart items found"
                     }
@@ -153,6 +161,13 @@ class CheckoutViewModel(private val repository: OrderRepository) : ViewModel() {
             try {
                 val storeId = _checkoutData.value?.sellerId ?: return@launch
 
+                Log.d(TAG, "Attempting to fetch payment methods for storeId: $storeId")
+
+                if (storeId == null || storeId <= 0) {
+                    Log.e(TAG, "Invalid storeId: $storeId - cannot fetch payment methods")
+                    return@launch
+                }
+
                 // Use fetchStoreDetail instead of getStore
                 val storeResult = repository.fetchStoreDetail(storeId)
 
@@ -161,7 +176,7 @@ class CheckoutViewModel(private val repository: OrderRepository) : ViewModel() {
                     // This will be updated once the backend provides proper IDs
                     val paymentMethodsList = storeResult.data.paymentInfo.map { paymentInfo ->
                         PaymentInfoItem(
-                            id = 1, // Hardcoded payment ID
+                            id = paymentInfo.id ?: 1,
                             name = paymentInfo.name,
                             bankNum = paymentInfo.bankNum,
                             qrisImage = paymentInfo.qrisImage
@@ -170,7 +185,10 @@ class CheckoutViewModel(private val repository: OrderRepository) : ViewModel() {
 
                     Log.d(TAG, "Fetched ${paymentMethodsList.size} payment methods")
 
-                    _availablePaymentMethods.value = paymentMethodsList
+                    // Only update if we don't already have payment methods
+                    if (_availablePaymentMethods.value.isNullOrEmpty()) {
+                        _availablePaymentMethods.value = paymentMethodsList
+                    }
                     callback(paymentMethodsList)
                 } else {
                     _availablePaymentMethods.value = emptyList()
@@ -186,9 +204,6 @@ class CheckoutViewModel(private val repository: OrderRepository) : ViewModel() {
 
     // Updated setPaymentMethod function
     fun setPaymentMethod(paymentId: Int) {
-        // We'll use the hardcoded ID (1) for now
-        val currentPaymentId = 1
-
         viewModelScope.launch {
             try {
                 // Get the available payment methods
@@ -200,26 +215,30 @@ class CheckoutViewModel(private val repository: OrderRepository) : ViewModel() {
                     return@launch
                 }
 
-                // Use the first payment method (or specific one if you prefer)
-                val selectedPayment = paymentMethods.first()
+                val selectedPayment = paymentMethods.find { it.id == paymentId }
 
-                // Set the selected payment
+                if (selectedPayment == null) {
+                    Log.e(TAG, "Payment with ID $paymentId not found")
+                    return@launch
+                }
+
+                // Set the selected payment - IMPORTANT: do this first
                 _selectedPayment.value = selectedPayment
-                Log.d(TAG, "Payment selected: Name=${selectedPayment.name}")
+                Log.d(TAG, "Payment selected: ID=${selectedPayment.id}, Name=${selectedPayment.name}")
 
-                // Update the order request with the payment method ID (hardcoded for now)
+                // Update the order request with the payment method ID
                 val currentData = _checkoutData.value ?: return@launch
 
                 // Different handling for Buy Now vs Cart checkout
                 if (currentData.isBuyNow) {
                     // For Buy Now checkout
                     val buyRequest = currentData.orderRequest as OrderRequestBuy
-                    val updatedRequest = buyRequest.copy(paymentMethodId = currentPaymentId)
+                    val updatedRequest = buyRequest.copy(paymentMethodId = paymentId)
                     _checkoutData.value = currentData.copy(orderRequest = updatedRequest)
                 } else {
                     // For Cart checkout
                     val cartRequest = currentData.orderRequest as OrderRequest
-                    val updatedRequest = cartRequest.copy(paymentMethodId = currentPaymentId)
+                    val updatedRequest = cartRequest.copy(paymentMethodId = paymentId)
                     _checkoutData.value = currentData.copy(orderRequest = updatedRequest)
                 }
             } catch (e: Exception) {
@@ -298,6 +317,39 @@ class CheckoutViewModel(private val repository: OrderRepository) : ViewModel() {
 
             try {
                 val data = _checkoutData.value ?: throw Exception("No checkout data available")
+
+                if (data.orderRequest is OrderRequest) {
+                    val request = data.orderRequest
+
+                    // Check for required fields
+                    if (request.addressId <= 0) {
+                        _errorMessage.value = "Please select a delivery address"
+                        _isLoading.value = false
+                        return@launch
+                    }
+
+                    if (request.paymentMethodId <= 0) {
+                        _errorMessage.value = "Please select a payment method"
+                        _isLoading.value = false
+                        return@launch
+                    }
+
+                    if (request.shipPrice <= 0 || request.shipName.isBlank() || request.shipService.isBlank()) {
+                        _errorMessage.value = "Please select a shipping method"
+                        _isLoading.value = false
+                        return@launch
+                    }
+                } else if (data.orderRequest is OrderRequestBuy) {
+                    val request = data.orderRequest
+
+                    // Similar validation for buy now
+                    if (request.addressId <= 0 || request.paymentMethodId <= 0 ||
+                        request.shipPrice <= 0 || request.shipName.isBlank() || request.shipService.isBlank()) {
+                        _errorMessage.value = "Please complete all required checkout information"
+                        _isLoading.value = false
+                        return@launch
+                    }
+                }
 
                 val response = if (data.isBuyNow) {
                     // For Buy Now, use the dedicated endpoint

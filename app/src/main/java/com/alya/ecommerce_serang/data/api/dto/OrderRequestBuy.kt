@@ -6,7 +6,7 @@ data class OrderRequestBuy (
     @SerializedName("address_id")
     val addressId : Int,
 
-    @SerializedName("payment_method_id")
+    @SerializedName("payment_info_id")
     val paymentMethodId : Int,
 
     @SerializedName("ship_price")

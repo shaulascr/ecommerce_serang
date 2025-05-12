@@ -30,6 +30,7 @@ class CheckoutActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCheckoutBinding
     private lateinit var sessionManager: SessionManager
     private var paymentAdapter: PaymentMethodAdapter? = null
+    private var paymentMethodsLoaded = false
 
     private val viewModel: CheckoutViewModel by viewModels {
         BaseViewModelFactory {
@@ -80,10 +81,10 @@ class CheckoutActivity : AppCompatActivity() {
             }
         }
 
-        viewModel.getPaymentMethods { paymentMethods ->
-            // Logging is just for debugging
-            Log.d("CheckoutActivity", "Loaded ${paymentMethods.size} payment methods")
-        }
+//        viewModel.getPaymentMethods { paymentMethods ->
+//            // Logging is just for debugging
+//            Log.d("CheckoutActivity", "Loaded ${paymentMethods.size} payment methods")
+//        }
     }
 
     private fun setupToolbar() {
@@ -97,6 +98,12 @@ class CheckoutActivity : AppCompatActivity() {
         viewModel.checkoutData.observe(this) { data ->
             setupProductRecyclerView(data)
             updateOrderSummary()
+
+            if (data != null) {
+                viewModel.getPaymentMethods { paymentMethods ->
+                    Log.d("CheckoutActivity", "Loaded ${paymentMethods.size} payment methods")
+                }
+            }
         }
 
         // Observe address details
@@ -106,22 +113,26 @@ class CheckoutActivity : AppCompatActivity() {
         }
 
         viewModel.availablePaymentMethods.observe(this) { paymentMethods ->
-            if (paymentMethods.isNotEmpty()) {
+            if (paymentMethods.isNotEmpty() && !paymentMethodsLoaded) {
+                Log.d("CheckoutActivity", "Setting up payment methods: ${paymentMethods.size} methods available")
                 setupPaymentMethodsRecyclerView(paymentMethods)
+                paymentMethodsLoaded = true
             }
         }
 
-// Observe selected payment
         viewModel.selectedPayment.observe(this) { selectedPayment ->
             if (selectedPayment != null) {
-                // Update the adapter to show the selected payment
-                paymentAdapter?.setSelectedPaymentName(selectedPayment.name)
+                Log.d("CheckoutActivity", "Observer notified of selected payment: ${selectedPayment.name}")
 
-                // Optional: Update other UI elements to show the selected payment
-                // For example: binding.tvSelectedPaymentMethod.text = selectedPayment.name
+                // Update the adapter ONLY if it exists
+                paymentAdapter?.let { adapter ->
+                    // This line was causing issues - using setSelectedPayment instead of setSelectedPaymentName
+                    adapter.setSelectedPaymentId(selectedPayment.id)
+
+                    Log.d("CheckoutActivity", "Updated adapter with selected payment: ${selectedPayment.id}")
+                }
             }
         }
-
 
         // Observe loading state
         viewModel.isLoading.observe(this) { isLoading ->
@@ -156,14 +167,18 @@ class CheckoutActivity : AppCompatActivity() {
         // Debug logging
         Log.d("CheckoutActivity", "Setting up payment methods: ${paymentMethods.size} methods available")
 
-        paymentAdapter = PaymentMethodAdapter(paymentMethods) { payment ->
-            // We're using a hardcoded ID for now
-            viewModel.setPaymentMethod(1)
-        }
+        if (paymentAdapter == null) {
+            paymentAdapter = PaymentMethodAdapter(paymentMethods) { payment ->
+                Log.d("CheckoutActivity", "Payment selected in adapter: ${payment.name}")
 
-        binding.rvPaymentMethods.apply {
-            layoutManager = LinearLayoutManager(this@CheckoutActivity)
-            adapter = paymentAdapter
+                // Set this payment as selected in the ViewModel
+                viewModel.setPaymentMethod(payment.id)
+            }
+
+            binding.rvPaymentMethods.apply {
+                layoutManager = LinearLayoutManager(this@CheckoutActivity)
+                adapter = paymentAdapter
+            }
         }
     }
 
@@ -347,7 +362,13 @@ class CheckoutActivity : AppCompatActivity() {
         }
 
         // Check if payment method is selected
-        if (viewModel.selectedPayment.value == null) {
+        val paymentMethodId = if (checkoutData.isBuyNow) {
+            (checkoutData.orderRequest as OrderRequestBuy).paymentMethodId
+        } else {
+            (checkoutData.orderRequest as OrderRequest).paymentMethodId
+        }
+
+        if (paymentMethodId <= 0) {
             Toast.makeText(this, "Silakan pilih metode pembayaran", Toast.LENGTH_SHORT).show()
             return false
         }
