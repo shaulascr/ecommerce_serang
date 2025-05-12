@@ -16,7 +16,7 @@
         app:layout_constraintTop_toTopOf="parent"/>
 
     <LinearLayout
-        android:id="@+id/layout_order_header"
+        android:id="@+id/layout_sells_header"
         android:layout_width="220dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
@@ -25,7 +25,7 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/tv_order_title"
+            android:id="@+id/tv_sells_title"
             style="@style/label_medium_prominent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -33,7 +33,7 @@
             android:text="Pesanan Perlu Dibuat Tagihan"/>
 
         <TextView
-            android:id="@+id/tv_order_number"
+            android:id="@+id/tv_sells_number"
             style="@style/label_small"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -52,7 +52,7 @@
                 android:src="@drawable/ic_person"/>
 
             <TextView
-                android:id="@+id/tv_order_customer"
+                android:id="@+id/tv_sells_customer"
                 style="@style/label_small"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -84,7 +84,7 @@
             android:textColor="@color/black_300" />
 
         <TextView
-            android:id="@+id/tv_order_due"
+            android:id="@+id/tv_sells_due"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="25 Okt; 23.59"
@@ -97,11 +97,11 @@
 
     <!-- Order Detail -->
     <LinearLayout
-        android:id="@+id/layout_order_detail"
+        android:id="@+id/layout_sells_detail"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/layout_order_header"
+        app:layout_constraintTop_toBottomOf="@id/layout_sells_header"
         android:paddingHorizontal="16dp"
         android:layout_marginTop="8dp"
         android:orientation="vertical">
@@ -113,13 +113,13 @@
 
         <!-- Product Detail -->
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/layout_order_product_detail"
+            android:id="@+id/layout_sells_product_detail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingVertical="12dp">
 
             <com.google.android.material.imageview.ShapeableImageView
-                android:id="@+id/iv_order_product"
+                android:id="@+id/iv_sells_product"
                 android:layout_width="95dp"
                 android:layout_height="64dp"
                 android:src="@drawable/placeholder_image"
@@ -134,26 +134,26 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:layout_marginStart="13dp"
-                app:layout_constraintStart_toEndOf="@id/iv_order_product"
+                app:layout_constraintStart_toEndOf="@id/iv_sells_product"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
                 <TextView
-                    android:id="@+id/tv_order_product_name"
+                    android:id="@+id/tv_sells_product_name"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:maxLines="1"
                     android:text="Jaket Pink Fuschia"
                     style="@style/label_medium_prominent"/>
 
-                <TextView
-                    android:id="@+id/tv_order_product_variant"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:maxLines="1"
-                    android:text="S"
-                    style="@style/label_medium"
-                    android:textColor="@color/black_300"/>
+<!--                <TextView-->
+<!--                    android:id="@+id/tv_sells_product_variant"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:maxLines="1"-->
+<!--                    android:text="S"-->
+<!--                    style="@style/label_medium"-->
+<!--                    android:textColor="@color/black_300"/>-->
 
             </LinearLayout>
 
@@ -163,12 +163,12 @@
                 android:orientation="vertical"
                 android:layout_marginStart="13dp"
                 android:gravity="end"
-                app:layout_constraintStart_toEndOf="@id/iv_order_product"
+                app:layout_constraintStart_toEndOf="@id/iv_sells_product"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintBottom_toBottomOf="@id/iv_order_product">
+                app:layout_constraintBottom_toBottomOf="@id/iv_sells_product">
 
                 <TextView
-                    android:id="@+id/tv_order_product_qty"
+                    android:id="@+id/tv_sells_product_qty"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:maxLines="1"
@@ -178,7 +178,7 @@
                     android:textAlignment="textEnd"/>
 
                 <TextView
-                    android:id="@+id/tv_order_product_price"
+                    android:id="@+id/tv_sells_product_price"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:maxLines="1"
@@ -198,7 +198,7 @@
                 style="@style/label_small"
                 android:fontFamily="@font/dmsans_italic"
                 android:textColor="@color/black_300"
-                app:layout_constraintTop_toBottomOf="@id/iv_order_product"
+                app:layout_constraintTop_toBottomOf="@id/iv_sells_product"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 android:layout_marginVertical="8dp"
@@ -219,7 +219,7 @@
             android:paddingVertical="8dp">
 
             <TextView
-                android:id="@+id/tv_order_qty"
+                android:id="@+id/tv_sells_qty"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="2 produk"
@@ -240,7 +240,7 @@
                     android:textAlignment="textEnd"/>
 
                 <TextView
-                    android:id="@+id/tv_order_price"
+                    android:id="@+id/tv_sells_price"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Rp300.000"
@@ -287,6 +287,6 @@
         android:background="@color/black_50"
         android:layout_marginTop="16dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/layout_order_detail"/>
+        app:layout_constraintTop_toBottomOf="@id/layout_sells_detail"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

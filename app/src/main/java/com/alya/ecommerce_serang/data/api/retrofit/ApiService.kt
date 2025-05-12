@@ -211,18 +211,21 @@ interface ApiService {
     suspend fun getListProv(
     ): Response<ListProvinceResponse>
 
-    @GET("mystore/orders")
-    suspend fun getAllOrders(): Response<OrderListResponse>
-
-    @GET("mystore/orders/{status}")
-    suspend fun getOrdersByStatus(
-        @Query("status") status: String
-    ): Response<OrderListResponse>
+    @GET("order/{status}")
+    suspend fun getSellList(
+        @Path("status") status: String
+    ): Response<com.alya.ecommerce_serang.data.api.response.store.orders.OrderListResponse>
 
     @PUT("store/order/update")
     suspend fun confirmOrder(
         @Body confirmOrder : CompletedOrderRequest
     ): Response<CompletedOrderResponse>
+
+    @PUT("store/order/update")
+    suspend fun updateOrder(
+        @Query("order_id") orderId: Int?,
+        @Query("status") status: String
+    ): Response<com.alya.ecommerce_serang.data.api.response.store.orders.UpdateOrderItemResponse>
 
     @Multipart
     @POST("addcomplaint")
