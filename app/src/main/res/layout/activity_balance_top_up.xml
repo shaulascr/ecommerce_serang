@@ -322,7 +322,8 @@
             <Button
                 android:id="@+id/btn_send"
                 android:text="Kirim"
-                style="@style/button.large.disabled.long"/>
+                style="@style/button.large.disabled.long"
+                android:layout_marginBottom="16dp"/>
 
         </LinearLayout>
 

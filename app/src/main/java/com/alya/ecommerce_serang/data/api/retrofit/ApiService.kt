@@ -3,6 +3,7 @@ package com.alya.ecommerce_serang.data.api.retrofit
 
 import com.alya.ecommerce_serang.data.api.dto.AddEvidenceRequest
 import com.alya.ecommerce_serang.data.api.dto.CartItem
+import com.alya.ecommerce_serang.data.api.dto.CityResponse
 import com.alya.ecommerce_serang.data.api.dto.CompletedOrderRequest
 import com.alya.ecommerce_serang.data.api.dto.CourierCostRequest
 import com.alya.ecommerce_serang.data.api.dto.CreateAddressRequest
@@ -10,8 +11,10 @@ import com.alya.ecommerce_serang.data.api.dto.LoginRequest
 import com.alya.ecommerce_serang.data.api.dto.OrderRequest
 import com.alya.ecommerce_serang.data.api.dto.OrderRequestBuy
 import com.alya.ecommerce_serang.data.api.dto.OtpRequest
+import com.alya.ecommerce_serang.data.api.dto.ProvinceResponse
 import com.alya.ecommerce_serang.data.api.dto.RegisterRequest
 import com.alya.ecommerce_serang.data.api.dto.SearchRequest
+import com.alya.ecommerce_serang.data.api.dto.StoreAddressResponse
 import com.alya.ecommerce_serang.data.api.dto.UpdateCart
 import com.alya.ecommerce_serang.data.api.dto.UpdateChatRequest
 import com.alya.ecommerce_serang.data.api.response.auth.LoginResponse
@@ -48,6 +51,8 @@ import com.alya.ecommerce_serang.data.api.response.store.product.CreateProductRe
 import com.alya.ecommerce_serang.data.api.response.store.product.DeleteProductResponse
 import com.alya.ecommerce_serang.data.api.response.store.product.UpdateProductResponse
 import com.alya.ecommerce_serang.data.api.response.store.product.ViewStoreProductsResponse
+import com.alya.ecommerce_serang.data.api.response.store.profile.StoreDataResponse
+import com.alya.ecommerce_serang.data.api.response.store.topup.BalanceTopUpResponse
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Call
@@ -147,6 +152,8 @@ interface ApiService {
 
     @GET("mystore")
     suspend fun getStore (): Response<StoreResponse>
+    suspend fun getStoreData(): Response<StoreDataResponse>
+    suspend fun getStoreAddress(): Response<StoreAddressResponse>
 
     @GET("mystore/product") // Replace with actual endpoint
     suspend fun getStoreProduct(): Response<ViewStoreProductsResponse>
@@ -234,6 +241,54 @@ interface ApiService {
         @Part("description") description: RequestBody,
         @Part complaintimg: MultipartBody.Part
     ): Response<ComplaintResponse>
+
+    @Multipart
+    @POST("store/createtopup")
+    suspend fun addBalanceTopUp(
+        @Part topupimg: MultipartBody.Part,
+        @Part("amount") amount: RequestBody,
+        @Part("payment_info_id") paymentInfoId: RequestBody,
+        @Part("transaction_date") transactionDate: RequestBody,
+        @Part("bank_name") bankName: RequestBody,
+        @Part("bank_num") bankNum: RequestBody
+    ): Response<BalanceTopUpResponse>
+
+    @PUT("mystore/edit")
+    suspend fun updateStoreProfile(
+        @Body requestBody: okhttp3.RequestBody
+    ): Response<StoreDataResponse>
+
+    @Multipart
+    @PUT("mystore/edit")
+    suspend fun updateStoreProfileMultipart(
+        @Part("store_name") storeName: RequestBody,
+        @Part("store_status") storeStatus: RequestBody,
+        @Part("store_description") storeDescription: RequestBody,
+        @Part("is_on_leave") isOnLeave: RequestBody,
+        @Part("city_id") cityId: RequestBody,
+        @Part("province_id") provinceId: RequestBody,
+        @Part("street") street: RequestBody,
+        @Part("subdistrict") subdistrict: RequestBody,
+        @Part("detail") detail: RequestBody,
+        @Part("postal_code") postalCode: RequestBody,
+        @Part("latitude") latitude: RequestBody,
+        @Part("longitude") longitude: RequestBody,
+        @Part("user_phone") userPhone: RequestBody,
+        @Part storeimg: MultipartBody.Part?
+    ): Response<StoreDataResponse>
+
+    @GET("provinces")
+    suspend fun getProvinces(): Response<ProvinceResponse>
+
+    @GET("cities/{provinceId}")
+    suspend fun getCities(
+        @Path("provinceId") provinceId: String
+    ): Response<CityResponse>
+
+    @PUT("mystore/edit")
+    suspend fun updateStoreAddress(
+        @Body addressData: HashMap<String, Any?>
+    ): Response<StoreAddressResponse>
 
     @POST("search")
     suspend fun saveSearchQuery(

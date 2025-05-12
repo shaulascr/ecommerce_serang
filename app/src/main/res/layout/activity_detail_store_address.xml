@@ -26,7 +26,33 @@
             android:paddingHorizontal="@dimen/horizontal_safe_area"
             android:layout_marginTop="19dp">
 
-            <!-- Nama Lokasi -->
+            <!-- Error display -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tv_error"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/red_required"
+                    style="@style/body_medium"
+                    android:padding="12dp"
+                    android:background="#FFEEEE"
+                    android:visibility="gone"
+                    android:text="Error message goes here" />
+
+                <Button
+                    android:id="@+id/btn_retry"
+                    style="@style/button.small.active.short"
+                    android:text="Retry"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="8dp"
+                    android:visibility="gone"/>
+            </LinearLayout>
+
+            <!-- Provinsi -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -36,20 +62,95 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Nama Lokasi"
+                    android:text="Provinsi"
                     style="@style/body_medium"
                     android:layout_marginEnd="4dp"/>
 
-                <EditText
-                    android:id="@+id/edt_nama_lokasi"
+                <!-- Spinner Dropdown dengan Chevron -->
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/bg_text_field_disabled"
-                    android:text="Alamat Toko"
-                    android:padding="8dp"
-                    style="@style/body_small"
-                    android:layout_marginTop="10dp"
-                    android:enabled="false"/>
+                    android:orientation="horizontal"
+                    android:background="@drawable/bg_text_field"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="10dp">
+
+                    <Spinner
+                        android:id="@+id/spinner_province"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:padding="8dp"
+                        style="@style/body_small"
+                        android:background="@null"/>
+
+                    <ProgressBar
+                        android:id="@+id/province_progress_bar"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="center"
+                        android:visibility="gone"/>
+
+                    <!-- Chevron Down Icon -->
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@drawable/ic_down"
+                        android:layout_marginEnd="8dp"
+                        android:contentDescription="Chevron Down" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- Kota/Kabupaten -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginBottom="24dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Kota atau Kabupaten"
+                    style="@style/body_medium"
+                    android:layout_marginEnd="4dp"/>
+
+                <!-- Spinner Dropdown dengan Chevron -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:background="@drawable/bg_text_field"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="10dp">
+
+                    <Spinner
+                        android:id="@+id/spinner_city"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:padding="8dp"
+                        style="@style/body_small"
+                        android:background="@null"/>
+
+                    <ProgressBar
+                        android:id="@+id/city_progress_bar"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="center"
+                        android:visibility="gone"/>
+
+                    <!-- Chevron Down Icon -->
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@drawable/ic_down"
+                        android:layout_marginEnd="8dp"
+                        android:contentDescription="Chevron Down" />
+
+                </LinearLayout>
 
             </LinearLayout>
 
@@ -100,94 +201,6 @@
                     android:padding="8dp"
                     style="@style/body_small"
                     android:layout_marginTop="10dp"/>
-
-            </LinearLayout>
-
-            <!-- Kota/Kabupaten -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginBottom="24dp">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Kota atau Kabupaten"
-                    style="@style/body_medium"
-                    android:layout_marginEnd="4dp"/>
-
-                <!-- Spinner Dropdown dengan Chevron -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:background="@drawable/bg_text_field"
-                    android:gravity="center_vertical"
-                    android:layout_marginTop="10dp">
-
-                    <Spinner
-                        android:id="@+id/spinner_city"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:padding="8dp"
-                        style="@style/body_small"
-                        android:background="@null"/>
-
-                    <!-- Chevron Down Icon -->
-                    <ImageView
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:src="@drawable/ic_down"
-                        android:layout_marginEnd="8dp"
-                        android:contentDescription="Chevron Down" />
-
-                </LinearLayout>
-
-            </LinearLayout>
-
-            <!-- Provinsi -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginBottom="24dp">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Provinsi"
-                    style="@style/body_medium"
-                    android:layout_marginEnd="4dp"/>
-
-                <!-- Spinner Dropdown dengan Chevron -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:background="@drawable/bg_text_field"
-                    android:gravity="center_vertical"
-                    android:layout_marginTop="10dp">
-
-                    <Spinner
-                        android:id="@+id/spinner_province"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:padding="8dp"
-                        style="@style/body_small"
-                        android:background="@null"/>
-
-                    <!-- Chevron Down Icon -->
-                    <ImageView
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:src="@drawable/ic_down"
-                        android:layout_marginEnd="8dp"
-                        android:contentDescription="Chevron Down" />
-
-                </LinearLayout>
 
             </LinearLayout>
 
@@ -276,7 +289,15 @@
                 android:id="@+id/btn_save_address"
                 android:text="Simpan Perubahan"
                 style="@style/button.large.disabled.long"
-                android:enabled="false"/>
+                android:enabled="false"
+                android:layout_marginBottom="16dp"/>
+
+            <ProgressBar
+                android:id="@+id/progress_bar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="gone"/>
 
         </LinearLayout>
 
