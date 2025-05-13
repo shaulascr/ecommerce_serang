@@ -39,9 +39,6 @@
             android:name=".ui.order.review.CreateReviewActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.cart.MainActivity"
-            android:exported="false" />
-        <activity
             android:name=".ui.profile.mystore.profile.EditStoreProfileActivity"
             android:exported="false" />
         <activity

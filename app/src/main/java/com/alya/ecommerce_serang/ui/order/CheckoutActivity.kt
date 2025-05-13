@@ -192,7 +192,7 @@ class CheckoutActivity : AppCompatActivity() {
                 viewModel.setPaymentMethod(payment.id)
             }
 
-            binding.rvPaymentMethods.apply {
+            binding.rvPaymentInfo.apply {
                 layoutManager = LinearLayoutManager(this@CheckoutActivity)
                 adapter = paymentAdapter
             }
@@ -219,7 +219,7 @@ class CheckoutActivity : AppCompatActivity() {
             }
         }
 
-        binding.rvPaymentMethods.apply {
+        binding.rvPaymentInfo.apply {
             layoutManager = LinearLayoutManager(this@CheckoutActivity)
             adapter = testAdapter
         }
