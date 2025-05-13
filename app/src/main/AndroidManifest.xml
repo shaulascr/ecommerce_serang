@@ -52,7 +52,9 @@
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
-
+        <activity
+            android:name=".ui.profile.mystore.profile.shipping_service.ShippingServiceActivity"
+            android:exported="false"/>
         <activity
             android:name=".ui.notif.NotificationActivity"
             android:exported="false" />
