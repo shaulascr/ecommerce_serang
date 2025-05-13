@@ -203,48 +203,6 @@
 
             </LinearLayout>
 
-            <!-- Nomor Rekening -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginBottom="24dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Nomor Rekening"
-                        style="@style/body_medium"
-                        android:layout_marginEnd="4dp"/>
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="*"
-                        style="@style/body_medium"
-                        android:textColor="@color/red_required"
-                        android:layout_gravity="end"/>
-
-                </LinearLayout>
-
-                <EditText
-                    android:id="@+id/edt_no_rekening"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/bg_text_field"
-                    android:hint="Isi nomor rekening Anda di sini"
-                    android:padding="8dp"
-                    style="@style/body_small"
-                    android:layout_marginTop="10dp"/>
-
-            </LinearLayout>
-
             <!-- Tanggal Transaksi -->
             <LinearLayout
                 android:layout_width="match_parent"
@@ -322,7 +280,8 @@
             <Button
                 android:id="@+id/btn_send"
                 android:text="Kirim"
-                style="@style/button.large.disabled.long"/>
+                style="@style/button.large.disabled.long"
+                android:layout_marginBottom="16dp"/>
 
         </LinearLayout>
 

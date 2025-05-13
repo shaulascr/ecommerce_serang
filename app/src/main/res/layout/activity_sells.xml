@@ -1,14 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context=".ui.profile.mystore.sells.SellsActivity">
 
-    <FrameLayout
-        android:id="@+id/sells_fragment_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+    <include
+        android:id="@+id/header"
+        layout="@layout/header" />
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+    <!-- Search Bar -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:background="@color/white">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:background="@drawable/bg_text_field"
+            android:paddingHorizontal="6dp"
+            android:paddingVertical="10dp">
+
+            <ImageView
+                android:layout_width="14dp"
+                android:layout_height="14dp"
+                android:src="@drawable/ic_search"
+                android:contentDescription="Search Icon" />
+
+            <EditText
+                android:id="@+id/edt_search"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@null"
+                android:hint="Cari No. Pesanan, Nama Pemesan, Nama Produk, atau Lokasi di sini..."
+                android:inputType="text"
+                style="@style/body_small"
+                android:layout_marginStart="6dp"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/fragment_container_sells"
+        android:layout_width="match_parent"
+        android:layout_height="0dp" />
+
+</LinearLayout>

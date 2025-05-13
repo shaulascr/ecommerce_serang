@@ -42,6 +42,18 @@
             android:name=".ui.cart.MainActivity"
             android:exported="false" />
         <activity
+            android:name=".ui.profile.mystore.profile.EditStoreProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.profile.mystore.sells.shipment.DetailShipmentActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.profile.mystore.sells.payment.DetailPaymentActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.profile.mystore.sells.order.DetailOrderActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.chat.ChatActivity"
             android:exported="false" /> <!-- <provider -->
         <!-- android:name="androidx.startup.InitializationProvider" -->
@@ -52,7 +64,9 @@
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
-
+        <activity
+            android:name=".ui.profile.mystore.profile.shipping_service.ShippingServiceActivity"
+            android:exported="false"/>
         <activity
             android:name=".ui.notif.NotificationActivity"
             android:exported="false" />
@@ -103,12 +117,6 @@
             android:exported="false" />
         <activity
             android:name=".ui.profile.mystore.balance.BalanceActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.profile.mystore.sells.shipment.ShippingConfirmationActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.profile.mystore.sells.payment.ClaimPaymentActivity"
             android:exported="false" />
         <activity
             android:name=".ui.profile.mystore.balance.BalanceTopUpActivity"

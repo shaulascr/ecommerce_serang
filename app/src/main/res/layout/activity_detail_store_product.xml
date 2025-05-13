@@ -847,7 +847,8 @@
                 android:id="@+id/btn_save_product"
                 android:text="Simpan Produk"
                 style="@style/button.large.disabled.long"
-                android:enabled="false"/>
+                android:enabled="false"
+                android:layout_marginBottom="16dp"/>
 
         </LinearLayout>
 

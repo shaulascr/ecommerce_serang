@@ -2,7 +2,9 @@ package com.alya.ecommerce_serang.data.api.retrofit
 
 
 import com.alya.ecommerce_serang.data.api.dto.AddEvidenceRequest
+import com.alya.ecommerce_serang.data.api.dto.AddPaymentInfoResponse
 import com.alya.ecommerce_serang.data.api.dto.CartItem
+import com.alya.ecommerce_serang.data.api.dto.CityResponse
 import com.alya.ecommerce_serang.data.api.dto.CompletedOrderRequest
 import com.alya.ecommerce_serang.data.api.dto.CourierCostRequest
 import com.alya.ecommerce_serang.data.api.dto.CreateAddressRequest
@@ -10,9 +12,12 @@ import com.alya.ecommerce_serang.data.api.dto.LoginRequest
 import com.alya.ecommerce_serang.data.api.dto.OrderRequest
 import com.alya.ecommerce_serang.data.api.dto.OrderRequestBuy
 import com.alya.ecommerce_serang.data.api.dto.OtpRequest
+import com.alya.ecommerce_serang.data.api.dto.ProvinceResponse
 import com.alya.ecommerce_serang.data.api.dto.RegisterRequest
 import com.alya.ecommerce_serang.data.api.dto.ReviewProductItem
 import com.alya.ecommerce_serang.data.api.dto.SearchRequest
+import com.alya.ecommerce_serang.data.api.dto.ShippingServiceRequest
+import com.alya.ecommerce_serang.data.api.dto.StoreAddressResponse
 import com.alya.ecommerce_serang.data.api.dto.UpdateCart
 import com.alya.ecommerce_serang.data.api.dto.UpdateChatRequest
 import com.alya.ecommerce_serang.data.api.response.auth.LoginResponse
@@ -52,6 +57,10 @@ import com.alya.ecommerce_serang.data.api.response.store.product.CreateProductRe
 import com.alya.ecommerce_serang.data.api.response.store.product.DeleteProductResponse
 import com.alya.ecommerce_serang.data.api.response.store.product.UpdateProductResponse
 import com.alya.ecommerce_serang.data.api.response.store.product.ViewStoreProductsResponse
+import com.alya.ecommerce_serang.data.api.response.store.profile.GenericResponse
+import com.alya.ecommerce_serang.data.api.response.store.profile.StoreDataResponse
+import com.alya.ecommerce_serang.data.api.response.store.topup.BalanceTopUpResponse
+import com.alya.ecommerce_serang.data.api.response.store.topup.TopUpResponse
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Call
@@ -161,7 +170,16 @@ interface ApiService {
     ): Response<CreateAddressResponse>
 
     @GET("mystore")
-    suspend fun getStore (): Response<StoreResponse>
+    suspend fun getStore(): Response<StoreResponse>
+
+    @GET("mystore")
+    suspend fun getStoreData(): Response<StoreDataResponse>
+
+    @GET("mystore")
+    suspend fun getMyStoreData(): Response<com.alya.ecommerce_serang.data.api.response.store.StoreResponse>
+
+    @GET("mystore")
+    suspend fun getStoreAddress(): Response<StoreAddressResponse>
 
     @GET("mystore/product") // Replace with actual endpoint
     suspend fun getStoreProduct(): Response<ViewStoreProductsResponse>
@@ -231,18 +249,21 @@ interface ApiService {
     suspend fun getListProv(
     ): Response<ListProvinceResponse>
 
-    @GET("mystore/orders")
-    suspend fun getAllOrders(): Response<OrderListResponse>
-
-    @GET("mystore/orders/{status}")
-    suspend fun getOrdersByStatus(
-        @Query("status") status: String
-    ): Response<OrderListResponse>
+    @GET("order/{status}")
+    suspend fun getSellList(
+        @Path("status") status: String
+    ): Response<com.alya.ecommerce_serang.data.api.response.store.orders.OrderListResponse>
 
     @PUT("store/order/update")
     suspend fun confirmOrder(
         @Body confirmOrder : CompletedOrderRequest
     ): Response<CompletedOrderResponse>
+
+    @PUT("store/order/update")
+    suspend fun updateOrder(
+        @Query("order_id") orderId: Int?,
+        @Query("status") status: String
+    ): Response<com.alya.ecommerce_serang.data.api.response.store.orders.UpdateOrderItemResponse>
 
     @Multipart
     @POST("addcomplaint")
@@ -256,6 +277,89 @@ interface ApiService {
     suspend fun createReview(
         @Body contentReview : ReviewProductItem
     ): Response<CreateReviewResponse>
+
+    @GET("store/topup")
+    suspend fun getTopUpHistory(): Response<TopUpResponse>
+
+    @GET("store/topup")
+    suspend fun getFilteredTopUpHistory(@Query("date") date: String): Response<TopUpResponse>
+
+    @Multipart
+    @POST("store/createtopup")
+    suspend fun addBalanceTopUp(
+        @Part topupimg: MultipartBody.Part,
+        @Part("amount") amount: RequestBody,
+        @Part("payment_info_id") paymentInfoId: RequestBody,
+        @Part("transaction_date") transactionDate: RequestBody,
+        @Part("bank_name") bankName: RequestBody,
+        @Part("bank_num") bankNum: RequestBody
+    ): Response<BalanceTopUpResponse>
+
+    @Multipart
+    @PUT("mystore/edit")
+    suspend fun updateStoreProfileMultipart(
+        @Part("store_name") storeName: RequestBody,
+        @Part("store_status") storeStatus: RequestBody,
+        @Part("store_description") storeDescription: RequestBody,
+        @Part("is_on_leave") isOnLeave: RequestBody,
+        @Part("city_id") cityId: RequestBody,
+        @Part("province_id") provinceId: RequestBody,
+        @Part("street") street: RequestBody,
+        @Part("subdistrict") subdistrict: RequestBody,
+        @Part("detail") detail: RequestBody,
+        @Part("postal_code") postalCode: RequestBody,
+        @Part("latitude") latitude: RequestBody,
+        @Part("longitude") longitude: RequestBody,
+        @Part("user_phone") userPhone: RequestBody,
+        @Part storeimg: MultipartBody.Part?
+    ): Response<StoreDataResponse>
+
+    @Multipart
+    @POST("mystore/payment/add")
+    suspend fun addPaymentInfo(
+        @Part("bank_name") bankName: RequestBody,
+        @Part("bank_num") bankNum: RequestBody,
+        @Part("account_name") accountName: RequestBody,
+        @Part qris: MultipartBody.Part?
+    ): Response<GenericResponse>
+
+    @Multipart
+    @POST("mystore/payment/add")
+    suspend fun addPaymentInfoDirect(
+        @Part("bank_name") bankName: RequestBody,
+        @Part("bank_num") bankNum: RequestBody,
+        @Part("account_name") accountName: RequestBody,
+        @Part qris: MultipartBody.Part?
+    ): Response<AddPaymentInfoResponse>
+
+    @DELETE("mystore/payment/delete/{id}")
+    suspend fun deletePaymentInfo(
+        @Path("id") paymentMethodId: Int
+    ): Response<GenericResponse>
+
+    // Shipping Service API endpoints
+    @POST("mystore/shipping/add")
+    suspend fun addShippingService(
+        @Body request: ShippingServiceRequest
+    ): Response<GenericResponse>
+
+    @POST("mystore/shipping/delete")
+    suspend fun deleteShippingService(
+        @Body request: ShippingServiceRequest
+    ): Response<GenericResponse>
+
+    @GET("provinces")
+    suspend fun getProvinces(): Response<ProvinceResponse>
+
+    @GET("cities/{provinceId}")
+    suspend fun getCities(
+        @Path("provinceId") provinceId: String
+    ): Response<CityResponse>
+
+    @PUT("mystore/edit")
+    suspend fun updateStoreAddress(
+        @Body addressData: HashMap<String, Any?>
+    ): Response<StoreAddressResponse>
 
     @POST("search")
     suspend fun saveSearchQuery(
