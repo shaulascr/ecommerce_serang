@@ -15,6 +15,8 @@ import com.alya.ecommerce_serang.data.api.retrofit.ApiService
 import com.alya.ecommerce_serang.data.repository.MyStoreRepository
 import com.alya.ecommerce_serang.databinding.ActivityDetailStoreProfileBinding
 import com.alya.ecommerce_serang.ui.profile.mystore.profile.address.DetailStoreAddressActivity
+import com.alya.ecommerce_serang.ui.profile.mystore.profile.payment_info.PaymentInfoActivity
+import com.alya.ecommerce_serang.ui.profile.mystore.profile.shipping_service.ShippingServiceActivity
 import com.alya.ecommerce_serang.utils.viewmodel.MyStoreViewModel
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
@@ -59,7 +61,19 @@ class DetailStoreProfileActivity : AppCompatActivity() {
 
         binding.layoutAddress.setOnClickListener {
             val intent = Intent(this, DetailStoreAddressActivity::class.java)
-            startActivity(intent)
+            startActivityForResult(intent, ADDRESS_REQUEST_CODE)
+        }
+
+        // Set up payment method layout click listener
+        binding.layoutPaymentMethod.setOnClickListener {
+            val intent = Intent(this, PaymentInfoActivity::class.java)
+            startActivityForResult(intent, PAYMENT_INFO_REQUEST_CODE)
+        }
+
+        // Set up shipping services layout click listener
+        binding.layoutShipServices.setOnClickListener {
+            val intent = Intent(this, ShippingServiceActivity::class.java)
+            startActivityForResult(intent, SHIPPING_SERVICES_REQUEST_CODE)
         }
 
         viewModel.loadMyStore()
@@ -89,12 +103,28 @@ class DetailStoreProfileActivity : AppCompatActivity() {
 
             // Pass the result back to parent activity
             setResult(Activity.RESULT_OK)
+        } else if (requestCode == PAYMENT_INFO_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            // Refresh the profile data after payment method update
+            Toast.makeText(this, "Metode pembayaran berhasil diperbarui", Toast.LENGTH_SHORT).show()
+            viewModel.loadMyStore()
+
+            // Pass the result back to parent activity
+            setResult(Activity.RESULT_OK)
+        } else if (requestCode == SHIPPING_SERVICES_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            // Refresh the profile data after shipping services update
+            Toast.makeText(this, "Layanan pengiriman berhasil diperbarui", Toast.LENGTH_SHORT).show()
+            viewModel.loadMyStore()
+
+            // Pass the result back to parent activity
+            setResult(Activity.RESULT_OK)
         }
     }
 
     companion object {
         private const val EDIT_PROFILE_REQUEST_CODE = 100
         private const val ADDRESS_REQUEST_CODE = 101
+        private const val PAYMENT_INFO_REQUEST_CODE = 102
+        private const val SHIPPING_SERVICES_REQUEST_CODE = 103
     }
 
     private fun updateStoreProfile(store: Store){
@@ -105,7 +135,7 @@ class DetailStoreProfileActivity : AppCompatActivity() {
 
         // Update store image if available
         if (store.storeImage != null && store.storeImage.toString().isNotEmpty() && store.storeImage.toString() != "null") {
-            val imageUrl = "http:/192.168.100.156:3000${store.storeImage}"
+            val imageUrl = "http://192.168.100.156:3000${store.storeImage}"
             Log.d("DetailStoreProfile", "Loading image from: $imageUrl")
 
             Glide.with(this)

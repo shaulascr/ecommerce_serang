@@ -175,6 +175,7 @@
                     android:background="@drawable/bg_text_field"
                     android:padding="8dp"
                     style="@style/body_small"
+                    android:hint="Isi nama jalan di sini"
                     android:layout_marginTop="10dp"/>
 
             </LinearLayout>
@@ -200,6 +201,7 @@
                     android:background="@drawable/bg_text_field"
                     android:padding="8dp"
                     style="@style/body_small"
+                    android:hint="Isi nama kecamatan di sini"
                     android:layout_marginTop="10dp"/>
 
             </LinearLayout>
@@ -225,6 +227,7 @@
                     android:background="@drawable/bg_text_field"
                     android:padding="8dp"
                     style="@style/body_small"
+                    android:hint="Isi kode pos di sini"
                     android:layout_marginTop="10dp"/>
 
             </LinearLayout>
@@ -258,31 +261,91 @@
             </LinearLayout>
 
             <!-- Pinpoint Lokasi -->
+<!--            <LinearLayout-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:orientation="vertical"-->
+<!--                android:layout_marginBottom="24dp">-->
+
+<!--                <TextView-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:text="Pinpoint Lokasi"-->
+<!--                    style="@style/body_medium"-->
+<!--                    android:layout_marginEnd="4dp"/>-->
+
+<!--                &lt;!&ndash; Map &ndash;&gt;-->
+<!--                <org.osmdroid.views.MapView android:id="@+id/map"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="220dp" />-->
+
+<!--                <TextView-->
+<!--                    android:id="@+id/tv_location_display"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:text="Lokasi: Tidak dipilih"-->
+<!--                    style="@style/body_medium"/>-->
+
+<!--            </LinearLayout>-->
+
+            <!-- Coordinates -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginBottom="24dp">
+                android:orientation="horizontal"
+                android:layout_marginBottom="16dp">
 
-                <TextView
-                    android:layout_width="match_parent"
+                <!-- Latitude -->
+                <LinearLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="Pinpoint Lokasi"
-                    style="@style/body_medium"
-                    android:layout_marginEnd="4dp"/>
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginEnd="8dp">
 
-                <!-- Map -->
-                <org.osmdroid.views.MapView android:id="@+id/map"
-                    android:layout_width="match_parent"
-                    android:layout_height="220dp" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Latitude"
+                        style="@style/body_medium"
+                        android:layout_marginBottom="4dp"/>
 
-                <TextView
-                    android:id="@+id/tv_location_display"
-                    android:layout_width="match_parent"
+                    <EditText
+                        android:id="@+id/edt_latitude"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_text_field"
+                        android:padding="12dp"
+                        android:hint="Latitude"
+                        android:inputType="numberDecimal|numberSigned"
+                        style="@style/body_small"/>
+                </LinearLayout>
+
+                <!-- Longitude -->
+                <LinearLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="Lokasi: Tidak dipilih"
-                    style="@style/body_medium"/>
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginStart="8dp">
 
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Longitude"
+                        style="@style/body_medium"
+                        android:layout_marginBottom="4dp"/>
+
+                    <EditText
+                        android:id="@+id/edt_longitude"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_text_field"
+                        android:padding="12dp"
+                        android:hint="Longitude"
+                        android:inputType="numberDecimal|numberSigned"
+                        style="@style/body_small"/>
+                </LinearLayout>
             </LinearLayout>
 
             <Button

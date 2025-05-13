@@ -80,7 +80,7 @@ class BalanceTopUpActivity : AppCompatActivity() {
         // Setup back button
         val backButton = findViewById<ImageView>(R.id.header_left_icon)
         backButton.setOnClickListener {
-            finish()
+            onBackPressedDispatcher.onBackPressed()
         }
 
         // Setup photo selection

@@ -1,7 +1,6 @@
 package com.alya.ecommerce_serang.ui.profile.mystore.profile.address
 
 import android.app.Activity
-import android.app.AlertDialog
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -9,6 +8,7 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.alya.ecommerce_serang.BuildConfig
 import com.alya.ecommerce_serang.data.api.dto.City
@@ -56,7 +56,7 @@ class DetailStoreAddressActivity : AppCompatActivity() {
         binding.tvError.visibility = View.GONE
 
         // Set up header title
-        binding.header.headerTitle.text = "Alamat Toko"
+        binding.header.headerTitle.text = "Atur Alamat Toko"
 
         // Set up back button
         binding.header.headerLeftIcon.setOnClickListener {
@@ -182,6 +182,9 @@ class DetailStoreAddressActivity : AppCompatActivity() {
                 val lat = if (address.latitude == null || address.latitude.toString() == "NaN") 0.0 else address.latitude
                 val lng = if (address.longitude == null || address.longitude.toString() == "NaN") 0.0 else address.longitude
 
+                binding.edtLatitude.setText(lat.toString())
+                binding.edtLongitude.setText(lng.toString())
+
                 // Set selected province ID to trigger city loading
                 if (address.provinceId.isNotEmpty()) {
                     selectedProvinceId = address.provinceId
@@ -271,8 +274,8 @@ class DetailStoreAddressActivity : AppCompatActivity() {
             val subdistrict = binding.edtSubdistrict.text.toString()
             val detail = binding.edtDetailAddress.text.toString()
             val postalCode = binding.edtPostalCode.text.toString()
-            val latitudeStr = TODO()
-            val longitudeStr = TODO()
+            val latitudeStr = binding.edtLatitude.text.toString()
+            val longitudeStr = binding.edtLongitude.text.toString()
 
             // Validate required fields
             if (selectedProvinceId == null || binding.spinnerCity.selectedItemPosition <= 0 ||

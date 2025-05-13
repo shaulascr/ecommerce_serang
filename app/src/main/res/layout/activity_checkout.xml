@@ -284,7 +284,7 @@
                     android:layout_marginBottom="8dp" />
 
                 <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rv_payment_methods"
+                    android:id="@+id/rv_payment_info"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     tools:listitem="@layout/item_payment_method" />

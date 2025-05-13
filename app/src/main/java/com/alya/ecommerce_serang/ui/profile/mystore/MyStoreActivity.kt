@@ -2,10 +2,12 @@ package com.alya.ecommerce_serang.ui.profile.mystore
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.dto.Store
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
@@ -16,6 +18,7 @@ import com.alya.ecommerce_serang.ui.profile.mystore.balance.BalanceActivity
 import com.alya.ecommerce_serang.ui.profile.mystore.product.ProductActivity
 import com.alya.ecommerce_serang.ui.profile.mystore.profile.DetailStoreProfileActivity
 import com.alya.ecommerce_serang.ui.profile.mystore.review.ReviewFragment
+import com.alya.ecommerce_serang.ui.profile.mystore.sells.SellsActivity
 import com.alya.ecommerce_serang.ui.profile.mystore.sells.SellsListFragment
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
@@ -64,10 +67,17 @@ class MyStoreActivity : AppCompatActivity() {
         binding.tvStoreName.text = store.storeName
         binding.tvStoreType.text = store.storeType
 
-        store.storeImage.let {
+        if (store.storeImage != null && store.storeImage.toString().isNotEmpty() && store.storeImage.toString() != "null") {
+            val imageUrl = "http://192.168.100.156:3000${store.storeImage}"
+            Log.d("MyStoreActivity", "Loading store image from: $imageUrl")
+
             Glide.with(this)
-                .load(it)
+                .load(imageUrl)
+                .placeholder(R.drawable.placeholder_image)
+                .error(R.drawable.placeholder_image)
                 .into(binding.ivProfile)
+        } else {
+            Log.d("MyStoreActivity", "No store image available")
         }
     }
 
@@ -81,19 +91,26 @@ class MyStoreActivity : AppCompatActivity() {
         }
 
         binding.tvHistory.setOnClickListener {
-            navigateToSellsFragment("all")
+            val intent = Intent(this, SellsActivity::class.java)
+            startActivity(intent)
         }
 
         binding.layoutPerluTagihan.setOnClickListener {
-            navigateToSellsFragment("pending")
+            val intent = Intent(this, SellsActivity::class.java)
+            startActivity(intent)
+            //navigateToSellsFragment("pending")
         }
 
         binding.layoutPembayaran.setOnClickListener {
-            navigateToSellsFragment("paid")
+            val intent = Intent(this, SellsActivity::class.java)
+            startActivity(intent)
+            //navigateToSellsFragment("paid")
         }
 
         binding.layoutPerluDikirim.setOnClickListener {
-            navigateToSellsFragment("processed")
+            val intent = Intent(this, SellsActivity::class.java)
+            startActivity(intent)
+            //navigateToSellsFragment("processed")
         }
 
         binding.layoutProductMenu.setOnClickListener {
@@ -115,11 +132,24 @@ class MyStoreActivity : AppCompatActivity() {
         }
     }
 
-    private fun navigateToSellsFragment(status: String) {
-        val sellsFragment = SellsListFragment.newInstance(status)
-        supportFragmentManager.beginTransaction()
-            .replace(android.R.id.content, sellsFragment)
-            .addToBackStack(null)
-            .commit()
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == PROFILE_REQUEST_CODE && resultCode == RESULT_OK) {
+            // Refresh store data
+            viewModel.loadMyStore()
+            Toast.makeText(this, "Profil toko berhasil diperbarui", Toast.LENGTH_SHORT).show()
+        }
     }
+
+    companion object {
+        private const val PROFILE_REQUEST_CODE = 100
+    }
+
+//    private fun navigateToSellsFragment(status: String) {
+//        val sellsFragment = SellsListFragment.newInstance(status)
+//        supportFragmentManager.beginTransaction()
+//            .replace(android.R.id.content, sellsFragment)
+//            .addToBackStack(null)
+//            .commit()
+//    }
 }
