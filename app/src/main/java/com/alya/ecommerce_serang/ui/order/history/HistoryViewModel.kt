@@ -7,6 +7,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.alya.ecommerce_serang.data.api.dto.CompletedOrderRequest
 import com.alya.ecommerce_serang.data.api.dto.OrdersItem
+import com.alya.ecommerce_serang.data.api.response.customer.order.OrderListItemsItem
+import com.alya.ecommerce_serang.data.api.response.customer.order.Orders
 import com.alya.ecommerce_serang.data.api.response.order.CompletedOrderResponse
 import com.alya.ecommerce_serang.data.repository.OrderRepository
 import com.alya.ecommerce_serang.data.repository.Result
@@ -26,6 +28,13 @@ class HistoryViewModel(private val repository: OrderRepository) : ViewModel()  {
     private val _orderCompletionStatus = MutableLiveData<Result<CompletedOrderResponse>>()
     val orderCompletionStatus: LiveData<Result<CompletedOrderResponse>> = _orderCompletionStatus
 
+    private val _orderDetails = MutableLiveData<Orders>()
+    val orderDetails: LiveData<Orders> get() = _orderDetails
+
+    // LiveData untuk OrderItems
+    private val _orderItems = MutableLiveData<List<OrderListItemsItem>>()
+    val orderItems: LiveData<List<OrderListItemsItem>> get() = _orderItems
+
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading
 
@@ -34,6 +43,9 @@ class HistoryViewModel(private val repository: OrderRepository) : ViewModel()  {
 
     private val _isSuccess = MutableLiveData<Boolean>()
     val isSuccess: LiveData<Boolean> = _isSuccess
+
+    private val _error = MutableLiveData<String>()
+    val error: LiveData<String> get() = _error
 
     fun getOrderList(status: String) {
         _orders.value = ViewState.Loading
@@ -96,6 +108,26 @@ class HistoryViewModel(private val repository: OrderRepository) : ViewModel()  {
                         _isLoading.value = false
                     }
                 }
+            }
+        }
+    }
+
+    fun getOrderDetails(orderId: Int) {
+        _isLoading.value = true
+        viewModelScope.launch {
+            try {
+                val response = repository.getOrderDetails(orderId)
+                if (response != null) {
+                    _orderDetails.value = response.orders
+                    _orderItems.value = response.orders.orderItems
+                } else {
+                    _error.value = "Gagal memuat detail pesanan"
+                }
+            } catch (e: Exception) {
+                _error.value = "Terjadi kesalahan: ${e.message}"
+                Log.e(TAG, "Error fetching order details", e)
+            } finally {
+                _isLoading.value = false
             }
         }
     }

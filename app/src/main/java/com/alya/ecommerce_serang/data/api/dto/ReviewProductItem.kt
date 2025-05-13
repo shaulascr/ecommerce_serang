@@ -10,5 +10,13 @@ data class ReviewProductItem (
     val rating : Int,
 
     @SerializedName("review_text")
-    val reviewTxt : String
+    val reviewTxt : String = ""
+)
+
+data class ReviewUIItem(
+    val orderItemId: Int,
+    val productName: String,
+    val productImage: String,
+    var rating: Int = 5,  // Default rating is 5 stars
+    var reviewText: String = ""  // Empty by default, to be filled by user
 )

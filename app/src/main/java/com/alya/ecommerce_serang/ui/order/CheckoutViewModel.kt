@@ -10,7 +10,7 @@ import com.alya.ecommerce_serang.data.api.dto.OrderRequest
 import com.alya.ecommerce_serang.data.api.dto.OrderRequestBuy
 import com.alya.ecommerce_serang.data.api.response.customer.cart.CartItemsItem
 import com.alya.ecommerce_serang.data.api.response.customer.cart.DataItemCart
-import com.alya.ecommerce_serang.data.api.response.customer.product.PaymentInfoItem
+import com.alya.ecommerce_serang.data.api.response.customer.product.PaymentItemDetail
 import com.alya.ecommerce_serang.data.api.response.customer.profile.AddressesItem
 import com.alya.ecommerce_serang.data.repository.OrderRepository
 import com.alya.ecommerce_serang.data.repository.Result
@@ -24,12 +24,12 @@ class CheckoutViewModel(private val repository: OrderRepository) : ViewModel() {
     private val _addressDetails = MutableLiveData<AddressesItem?>()
     val addressDetails: LiveData<AddressesItem?> = _addressDetails
 
-    private val _availablePaymentMethods = MutableLiveData<List<PaymentInfoItem>>()
-    val availablePaymentMethods: LiveData<List<PaymentInfoItem>> = _availablePaymentMethods
+    private val _availablePaymentMethods = MutableLiveData<List<PaymentItemDetail>>()
+    val availablePaymentMethods: LiveData<List<PaymentItemDetail>> = _availablePaymentMethods
 
     // Selected payment method
-    private val _selectedPayment = MutableLiveData<PaymentInfoItem?>()
-    val selectedPayment: LiveData<PaymentInfoItem?> = _selectedPayment
+    private val _selectedPayment = MutableLiveData<PaymentItemDetail?>()
+    val selectedPayment: LiveData<PaymentItemDetail?> = _selectedPayment
 
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading
@@ -156,48 +156,45 @@ class CheckoutViewModel(private val repository: OrderRepository) : ViewModel() {
         }
     }
 
-    fun getPaymentMethods(callback: (List<PaymentInfoItem>) -> Unit) {
+    fun getPaymentMethods() {
         viewModelScope.launch {
             try {
-                val storeId = _checkoutData.value?.sellerId ?: return@launch
-
-                Log.d(TAG, "Attempting to fetch payment methods for storeId: $storeId")
-
-                if (storeId == null || storeId <= 0) {
-                    Log.e(TAG, "Invalid storeId: $storeId - cannot fetch payment methods")
+                val storeId = _checkoutData.value?.sellerId ?: run {
+                    Log.e(TAG, "StoreId is null - cannot fetch payment methods")
+                    _availablePaymentMethods.value = emptyList()
                     return@launch
                 }
 
-                // Use fetchStoreDetail instead of getStore
-                val storeResult = repository.fetchStoreDetail(storeId)
+                Log.d(TAG, "Attempting to fetch payment methods for storeId: $storeId")
 
-                if (storeResult is Result.Success && storeResult.data != null) {
-                    // For now, we'll use hardcoded payment ID (1) for all payment methods
-                    // This will be updated once the backend provides proper IDs
-                    val paymentMethodsList = storeResult.data.paymentInfo.map { paymentInfo ->
-                        PaymentInfoItem(
-                            id = paymentInfo.id ?: 1,
-                            name = paymentInfo.name,
-                            bankNum = paymentInfo.bankNum,
-                            qrisImage = paymentInfo.qrisImage
-                        )
-                    }
-
-                    Log.d(TAG, "Fetched ${paymentMethodsList.size} payment methods")
-
-                    // Only update if we don't already have payment methods
-                    if (_availablePaymentMethods.value.isNullOrEmpty()) {
-                        _availablePaymentMethods.value = paymentMethodsList
-                    }
-                    callback(paymentMethodsList)
-                } else {
+                if (storeId <= 0) {
+                    Log.e(TAG, "Invalid storeId: $storeId - cannot fetch payment methods")
                     _availablePaymentMethods.value = emptyList()
-                    callback(emptyList())
+                    return@launch
+                }
+
+                val result = repository.fetchPaymentStore(storeId)
+
+                when (result) {
+                    is Result.Success -> {
+                        val paymentMethods = result.data?.filterNotNull() ?: emptyList()
+
+                        Log.d(TAG, "Fetched ${paymentMethods.size} payment methods")
+
+                        // Update payment methods
+                        _availablePaymentMethods.value = paymentMethods
+                    }
+                    is Result.Error -> {
+                        Log.e(TAG, "Error fetching payment methods: ${result.exception.message}")
+                        _availablePaymentMethods.value = emptyList()
+                    }
+                    is Result.Loading -> {
+                        null
+                    }
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Error fetching payment methods", e)
+                Log.e(TAG, "Exception in getPaymentMethods", e)
                 _availablePaymentMethods.value = emptyList()
-                callback(emptyList())
             }
         }
     }
@@ -211,7 +208,7 @@ class CheckoutViewModel(private val repository: OrderRepository) : ViewModel() {
 
                 if (paymentMethods.isNullOrEmpty()) {
                     // If no payment methods available, try to fetch them
-                    getPaymentMethods { /* do nothing here */ }
+                    getPaymentMethods()
                     return@launch
                 }
 
@@ -224,7 +221,7 @@ class CheckoutViewModel(private val repository: OrderRepository) : ViewModel() {
 
                 // Set the selected payment - IMPORTANT: do this first
                 _selectedPayment.value = selectedPayment
-                Log.d(TAG, "Payment selected: ID=${selectedPayment.id}, Name=${selectedPayment.name}")
+                Log.d(TAG, "Payment selected: ID=${selectedPayment.id}, Name=${selectedPayment.bankName}")
 
                 // Update the order request with the payment method ID
                 val currentData = _checkoutData.value ?: return@launch

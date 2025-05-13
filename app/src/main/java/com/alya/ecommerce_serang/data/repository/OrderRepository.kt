@@ -8,15 +8,18 @@ import com.alya.ecommerce_serang.data.api.dto.CreateAddressRequest
 import com.alya.ecommerce_serang.data.api.dto.OrderRequest
 import com.alya.ecommerce_serang.data.api.dto.OrderRequestBuy
 import com.alya.ecommerce_serang.data.api.dto.OrdersItem
+import com.alya.ecommerce_serang.data.api.dto.ReviewProductItem
 import com.alya.ecommerce_serang.data.api.dto.UpdateCart
 import com.alya.ecommerce_serang.data.api.dto.UserProfile
 import com.alya.ecommerce_serang.data.api.response.customer.cart.DataItemCart
 import com.alya.ecommerce_serang.data.api.response.customer.order.CourierCostResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.CreateOrderResponse
+import com.alya.ecommerce_serang.data.api.response.customer.order.CreateReviewResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.ListCityResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.ListProvinceResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.OrderDetailResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.OrderListResponse
+import com.alya.ecommerce_serang.data.api.response.customer.product.PaymentItemDetail
 import com.alya.ecommerce_serang.data.api.response.customer.product.ProductResponse
 import com.alya.ecommerce_serang.data.api.response.customer.product.StoreProduct
 import com.alya.ecommerce_serang.data.api.response.customer.product.StoreResponse
@@ -179,8 +182,6 @@ class OrderRepository(private val apiService: ApiService) {
         }
     }
 
-
-
     suspend fun updateCart(updateCart: UpdateCart): Result<String> {
         return try {
             val response = apiService.updateCart(updateCart)
@@ -232,6 +233,27 @@ class OrderRepository(private val apiService: ApiService) {
             }
         } catch (e: Exception) {
             Log.e("Order Repository", "Exception fetching store details", e)
+            Result.Error(e)
+        }
+    }
+
+    suspend fun fetchPaymentStore(storeId: Int): Result<List<PaymentItemDetail?>> {
+        return try {
+            val response = apiService.getDetailStore(storeId)
+            if (response.isSuccessful) {
+                val store = response.body()?.payment
+                if (store != null) {
+                    Result.Success(store)
+                } else {
+                    Result.Error(Exception("Payment details not found"))
+                }
+            } else {
+                val errorMsg = response.errorBody()?.string() ?: "Unknown error"
+                Log.e("Order Repository", "Error fetching store: $errorMsg")
+                Result.Error(Exception(errorMsg))
+            }
+        } catch (e: Exception) {
+            Log.e("Order Repository", "Exception fetching payment details", e)
             Result.Error(e)
         }
     }
@@ -474,5 +496,28 @@ class OrderRepository(private val apiService: ApiService) {
             emit(Result.Error(e))
         }
     }.flowOn(Dispatchers.IO)
+
+    suspend fun createReviewProduct(review: ReviewProductItem): Result<CreateReviewResponse>{
+        return try{
+            Log.d("Order Repository", "Sending review item product: $review")
+            val response = apiService.createReview(review)
+
+            if (response.isSuccessful){
+                response.body()?.let { reviewProductResponse ->
+                    Log.d("Order Repository", " Successful create review. Review item rating: ${reviewProductResponse.rating}, orderItemId: ${reviewProductResponse.orderItemId}")
+                    Result.Success(reviewProductResponse)
+                } ?: run {
+                    Result.Error(Exception("Failed to create review"))
+                }
+            } else {
+                val errorMsg = response.errorBody()?.string() ?: "Unknown Error"
+                Log.e("Order Repository", "Error create review. Code ${response.code()}, Error: $errorMsg")
+                Result.Error(Exception(errorMsg))
+            }
+        } catch (e:Exception) {
+            Result.Error(e)
+        }
+
+    }
 
 }

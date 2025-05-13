@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.alya.ecommerce_serang.data.api.dto.CheckoutData
 import com.alya.ecommerce_serang.data.api.dto.OrderRequest
 import com.alya.ecommerce_serang.data.api.dto.OrderRequestBuy
-import com.alya.ecommerce_serang.data.api.response.customer.product.PaymentInfoItem
+import com.alya.ecommerce_serang.data.api.response.customer.product.PaymentItemDetail
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.repository.OrderRepository
 import com.alya.ecommerce_serang.databinding.ActivityCheckoutBinding
@@ -46,7 +46,6 @@ class CheckoutActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         sessionManager = SessionManager(this)
-
 
         // Setup UI components
         setupToolbar()
@@ -100,9 +99,7 @@ class CheckoutActivity : AppCompatActivity() {
             updateOrderSummary()
 
             if (data != null) {
-                viewModel.getPaymentMethods { paymentMethods ->
-                    Log.d("CheckoutActivity", "Loaded ${paymentMethods.size} payment methods")
-                }
+                viewModel.getPaymentMethods()
             }
         }
 
@@ -122,7 +119,7 @@ class CheckoutActivity : AppCompatActivity() {
 
         viewModel.selectedPayment.observe(this) { selectedPayment ->
             if (selectedPayment != null) {
-                Log.d("CheckoutActivity", "Observer notified of selected payment: ${selectedPayment.name}")
+                Log.d("CheckoutActivity", "Observer notified of selected payment: ${selectedPayment.bankName}")
 
                 // Update the adapter ONLY if it exists
                 paymentAdapter?.let { adapter ->
@@ -157,7 +154,7 @@ class CheckoutActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupPaymentMethodsRecyclerView(paymentMethods: List<PaymentInfoItem>) {
+    private fun setupPaymentMethodsRecyclerView(paymentMethods: List<PaymentItemDetail>) {
         if (paymentMethods.isEmpty()) {
             Log.e("CheckoutActivity", "Payment methods list is empty")
             Toast.makeText(this, "No payment methods available", Toast.LENGTH_SHORT).show()
@@ -169,7 +166,7 @@ class CheckoutActivity : AppCompatActivity() {
 
         if (paymentAdapter == null) {
             paymentAdapter = PaymentMethodAdapter(paymentMethods) { payment ->
-                Log.d("CheckoutActivity", "Payment selected in adapter: ${payment.name}")
+                Log.d("CheckoutActivity", "Payment selected in adapter: ${payment.bankName}")
 
                 // Set this payment as selected in the ViewModel
                 viewModel.setPaymentMethod(payment.id)
@@ -182,7 +179,7 @@ class CheckoutActivity : AppCompatActivity() {
         }
     }
 
-    private fun updatePaymentMethodsAdapter(paymentMethods: List<PaymentInfoItem>, selectedId: Int?) {
+    private fun updatePaymentMethodsAdapter(paymentMethods: List<PaymentItemDetail>, selectedId: Int?) {
         Log.d("CheckoutActivity", "Updating payment adapter with ${paymentMethods.size} methods")
 
         // Simple test adapter
@@ -198,7 +195,7 @@ class CheckoutActivity : AppCompatActivity() {
 
             override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
                 val payment = paymentMethods[position]
-                (holder.itemView as TextView).text = "Payment: ${payment.name}"
+                (holder.itemView as TextView).text = "Payment: ${payment.bankName}"
             }
         }
 

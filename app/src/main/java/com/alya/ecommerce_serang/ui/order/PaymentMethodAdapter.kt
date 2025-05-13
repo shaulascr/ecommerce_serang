@@ -6,14 +6,14 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.alya.ecommerce_serang.R
-import com.alya.ecommerce_serang.data.api.response.customer.product.PaymentInfoItem
+import com.alya.ecommerce_serang.data.api.response.customer.product.PaymentItemDetail
 import com.alya.ecommerce_serang.databinding.ItemPaymentMethodBinding
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 
 class PaymentMethodAdapter(
-    private val paymentMethods: List<PaymentInfoItem>,
-    private val onPaymentSelected: (PaymentInfoItem) -> Unit
+    private val paymentMethods: List<PaymentItemDetail>,
+    private val onPaymentSelected: (PaymentItemDetail) -> Unit
 ) : RecyclerView.Adapter<PaymentMethodAdapter.PaymentMethodViewHolder>() {
 
     // Track the selected payment by ID
@@ -38,13 +38,13 @@ class PaymentMethodAdapter(
 
         with(holder.binding) {
             // Set payment method name
-            tvPaymentMethodName.text = payment.name
+            tvPaymentMethodName.text = payment.bankName
 
             // Set radio button state based on selected payment ID
             rbPaymentMethod.isChecked = payment.id == selectedPaymentId
 
             // Debug log
-            Log.d("PaymentAdapter", "Binding item ${payment.name}, checked=${rbPaymentMethod.isChecked}")
+            Log.d("PaymentAdapter", "Binding item ${payment.bankName}, checked=${rbPaymentMethod.isChecked}")
 
             // Load payment icon if available
             if (!payment.qrisImage.isNullOrEmpty()) {
@@ -84,7 +84,7 @@ class PaymentMethodAdapter(
                     // Call the callback ONLY ONCE
                     onPaymentSelected(payment)
 
-                    Log.d("PaymentAdapter", "Payment selected: ${payment.name}")
+                    Log.d("PaymentAdapter", "Payment selected: ${payment.bankName}")
                 }
             }
 
@@ -118,7 +118,7 @@ class PaymentMethodAdapter(
     }
 
     // Set selected payment object
-    fun setSelectedPayment(payment: PaymentInfoItem) {
+    fun setSelectedPayment(payment: PaymentItemDetail) {
         setSelectedPaymentId(payment.id)
     }
 }

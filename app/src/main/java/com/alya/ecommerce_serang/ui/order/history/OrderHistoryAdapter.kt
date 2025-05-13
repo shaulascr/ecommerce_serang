@@ -22,9 +22,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.dto.OrdersItem
+import com.alya.ecommerce_serang.data.api.dto.ReviewUIItem
 import com.alya.ecommerce_serang.ui.order.detail.PaymentActivity
+import com.alya.ecommerce_serang.ui.order.review.CreateReviewActivity
+import com.alya.ecommerce_serang.ui.product.ReviewProductActivity
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputLayout
+import com.google.gson.Gson
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -236,7 +240,7 @@ class OrderHistoryAdapter(
                     }
                     deadlineDate.apply {
                         visibility = View.VISIBLE
-                        text = formatShipmentDate(order.updatedAt, order.etd.toInt())
+                        text = formatShipmentDate(order.updatedAt, order.etd ?: "0")
                     }
                 }
                 "delivered" -> {
@@ -262,6 +266,7 @@ class OrderHistoryAdapter(
                         visibility = View.VISIBLE
                         text = itemView.context.getString(R.string.add_review)
                         setOnClickListener {
+                            addReviewProduct(order)
                             // Handle click event
                         }
                     }
@@ -322,9 +327,11 @@ class OrderHistoryAdapter(
             }
         }
 
-        private fun formatShipmentDate(dateString: String, estimate: Int): String {
+        private fun formatShipmentDate(dateString: String, estimate: String): String {
             return try {
                 // Parse the input date
+                val estimateTD = if (estimate.isNullOrEmpty()) 0 else estimate.toInt()
+
                 val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
                 inputFormat.timeZone = TimeZone.getTimeZone("UTC")
 
@@ -339,7 +346,7 @@ class OrderHistoryAdapter(
                     calendar.time = it
 
                     // Add estimated days
-                    calendar.add(Calendar.DAY_OF_MONTH, estimate)
+                    calendar.add(Calendar.DAY_OF_MONTH, estimateTD)
                     outputFormat.format(calendar.time)
                 } ?: dateString
             } catch (e: Exception) {
@@ -485,10 +492,70 @@ class OrderHistoryAdapter(
             }
             dialog.show()
         }
+
+        private fun addReviewProduct(order: OrdersItem) {
+            // Use ViewModel to fetch order details
+            viewModel.getOrderDetails(order.orderId)
+
+            // Create loading dialog
+//            val loadingDialog = Dialog(itemView.context).apply {
+//                requestWindowFeature(Window.FEATURE_NO_TITLE)
+//                setContentView(R.layout.dialog_loading)
+//                window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+//                setCancelable(false)
+//            }
+//            loadingDialog.show()
+
+            viewModel.error.observe(itemView.findViewTreeLifecycleOwner()!!) { errorMsg ->
+                if (!errorMsg.isNullOrEmpty()) {
+                    Toast.makeText(itemView.context, errorMsg, Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            // Observe the order details result
+            viewModel.orderItems.observe(itemView.findViewTreeLifecycleOwner()!!) { orderItems ->
+                if (orderItems != null && orderItems.isNotEmpty()) {
+                    // For single item review
+                    if (orderItems.size == 1) {
+                        val item = orderItems[0]
+                        val intent = Intent(itemView.context, CreateReviewActivity::class.java).apply {
+                            putExtra("order_item_id", item.orderItemId)
+                            putExtra("product_name", item.productName)
+                            putExtra("product_image", item.productImage)
+                        }
+                        (itemView.context as Activity).startActivityForResult(intent, REQUEST_CODE_REVIEW)
+                    }
+                    // For multiple items
+                    else {
+                        val reviewItems = orderItems.map { item ->
+                            ReviewUIItem(
+                                orderItemId = item.orderItemId,
+                                productName = item.productName,
+                                productImage = item.productImage
+                            )
+                        }
+
+                        val itemsJson = Gson().toJson(reviewItems)
+                        val intent = Intent(itemView.context, ReviewProductActivity::class.java).apply {
+                            putExtra("order_items", itemsJson)
+                        }
+                        (itemView.context as Activity).startActivityForResult(intent, REQUEST_CODE_REVIEW)
+                    }
+                } else {
+                    Toast.makeText(
+                        itemView.context,
+                        "No items to review",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
+
     }
 
     companion object {
         private const val REQUEST_IMAGE_PICK = 100
+        const val REQUEST_CODE_REVIEW = 101
         private var imagePickCallback: ((Uri) -> Unit)? = null
 
         // This method should be called from the activity's onActivityResult
