@@ -329,7 +329,6 @@ class OrderHistoryAdapter(
 
         private fun formatShipmentDate(dateString: String, estimate: String): String {
             return try {
-                // Parse the input date
                 val estimateTD = if (estimate.isNullOrEmpty()) 0 else estimate.toInt()
 
                 val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())

@@ -1,10 +1,13 @@
 package com.alya.ecommerce_serang.ui.order.history
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -14,6 +17,7 @@ import com.alya.ecommerce_serang.data.repository.OrderRepository
 import com.alya.ecommerce_serang.data.repository.Result
 import com.alya.ecommerce_serang.databinding.FragmentOrderListBinding
 import com.alya.ecommerce_serang.ui.order.address.ViewState
+import com.alya.ecommerce_serang.ui.order.history.detailorder.DetailOrderStatusActivity
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
 
@@ -121,10 +125,21 @@ class OrderListFragment : Fragment() {
         viewModel.getOrderList(status)
     }
 
+    private val detailOrderLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            // Refresh order list when returning with OK result
+            viewModel.getOrderList(status)
+        }
+    }
+
     private fun navigateToOrderDetail(order: OrdersItem) {
-        // In a real app, you would navigate to order detail screen
-        // For example: findNavController().navigate(OrderListFragmentDirections.actionToOrderDetail(order.orderId))
-        Toast.makeText(requireContext(), "Order ID: ${order.orderId}", Toast.LENGTH_SHORT).show()
+        val intent = Intent(requireContext(), DetailOrderStatusActivity::class.java).apply {
+            putExtra("ORDER_ID", order.orderId)
+            putExtra("ORDER_STATUS", status) // Pass the current status
+        }
+        detailOrderLauncher.launch(intent)
     }
 
     override fun onDestroyView() {
@@ -148,4 +163,5 @@ class OrderListFragment : Fragment() {
             }
         }
     }
+
 }
