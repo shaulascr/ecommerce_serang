@@ -41,6 +41,7 @@ import com.alya.ecommerce_serang.data.api.response.customer.product.ReviewProduc
 import com.alya.ecommerce_serang.data.api.response.customer.product.StoreResponse
 import com.alya.ecommerce_serang.data.api.response.customer.profile.AddressResponse
 import com.alya.ecommerce_serang.data.api.response.customer.profile.CreateAddressResponse
+import com.alya.ecommerce_serang.data.api.response.customer.profile.EditProfileResponse
 import com.alya.ecommerce_serang.data.api.response.customer.profile.ProfileResponse
 import com.alya.ecommerce_serang.data.api.response.order.AddEvidenceResponse
 import com.alya.ecommerce_serang.data.api.response.order.ComplaintResponse
@@ -128,6 +129,17 @@ interface ApiService {
         @Part("amount") amount: RequestBody,
         @Part evidence: MultipartBody.Part
     ): Response<AddEvidenceResponse>
+
+    @Multipart
+    @PUT("profile/edit")
+    suspend fun editProfileCustomer(
+        @Part("username") username: RequestBody,
+        @Part("name") name: RequestBody,
+        @Part("phone") phone: RequestBody,
+        @Part("birth_date") birthDate: RequestBody,
+        @Part userimg: MultipartBody.Part,
+        @Part("email") email: RequestBody
+    ): Response<EditProfileResponse>
 
     @GET("order/{status}")
     suspend fun getOrderList(

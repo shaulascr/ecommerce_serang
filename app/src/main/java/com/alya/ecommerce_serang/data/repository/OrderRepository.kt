@@ -404,7 +404,7 @@ class OrderRepository(private val apiService: ApiService) {
 
     suspend fun confirmOrderCompleted(request: CompletedOrderRequest): Result<CompletedOrderResponse> {
         return try {
-            Log.d("OrderRepository", "Cinfroming order request completed: $request")
+            Log.d("OrderRepository", "Conforming order request completed: $request")
             val response = apiService.confirmOrder(request)
 
             if(response.isSuccessful) {

@@ -1,21 +1,29 @@
 package com.alya.ecommerce_serang.ui.profile
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import com.alya.ecommerce_serang.BuildConfig.BASE_URL
 import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.dto.UserProfile
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
 import com.alya.ecommerce_serang.data.repository.UserRepository
 import com.alya.ecommerce_serang.databinding.ActivityDetailProfileBinding
+import com.alya.ecommerce_serang.ui.profile.editprofile.EditProfileCustActivity
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
 import com.alya.ecommerce_serang.utils.viewmodel.ProfileViewModel
 import com.bumptech.glide.Glide
+import com.google.gson.Gson
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.TimeZone
@@ -24,12 +32,23 @@ class DetailProfileActivity : AppCompatActivity() {
     private lateinit var binding: ActivityDetailProfileBinding
     private lateinit var apiService: ApiService
     private lateinit var sessionManager: SessionManager
+    private var currentUserProfile: UserProfile? = null
+
 
     private val viewModel: ProfileViewModel by viewModels {
         BaseViewModelFactory {
             val apiService = ApiConfig.getApiService(sessionManager)
             val userRepository = UserRepository(apiService)
             ProfileViewModel(userRepository)
+        }
+    }
+
+    private val editProfileLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            // Refresh profile after edit
+            viewModel.loadUserProfile()
         }
     }
 
@@ -42,24 +61,61 @@ class DetailProfileActivity : AppCompatActivity() {
         apiService = ApiConfig.getApiService(sessionManager)
 
         enableEdgeToEdge()
-//        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-//            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-//            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-//            insets
-//        }
+
+        setupClickListeners()
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, windowInsets ->
+            val systemBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(
+                systemBars.left,
+                systemBars.top,
+                systemBars.right,
+                systemBars.bottom
+            )
+            windowInsets
+        }
 
         viewModel.loadUserProfile()
 
-        viewModel.userProfile.observe(this){ user ->
-            user?.let { updateProfile(it) }
+        viewModel.userProfile.observe(this) { user ->
+            Log.d("DetailProfileActivity", "Observed userProfile: $user")
+            user?.let {
+                updateProfile(it)
+            } ?: run {
+                Log.e("DetailProfileActivity", "Received null user profile from ViewModel")
+            }
         }
 
         viewModel.errorMessage.observe(this) { error ->
+            Log.e("DetailProfileActivity", "Error from ViewModel: $error")
             Toast.makeText(this, error, Toast.LENGTH_SHORT).show()
         }
     }
 
-    private fun updateProfile(user: UserProfile){
+    private fun setupClickListeners() {
+        binding.btnBack.setOnClickListener {
+            finish()
+        }
+
+        binding.btnUbahProfil.setOnClickListener {
+            currentUserProfile?.let { profile ->
+                val gson = Gson()
+                val userProfileJson = gson.toJson(currentUserProfile)
+                val intent = Intent(this, EditProfileCustActivity::class.java).apply {
+                    putExtra("user_profile_json", userProfileJson)
+                }
+                editProfileLauncher.launch(intent)
+            } ?: run {
+                Toast.makeText(this, "Profile data is not available", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun updateProfile(user: UserProfile) {
+        Log.d("DetailProfileActivity", "updateProfile called with user: $user")
+
+        // Store the user profile for later use
+        currentUserProfile = user
 
         binding.tvNameUser.setText(user.name.toString())
         binding.tvUsername.setText(user.username)
@@ -69,9 +125,16 @@ class DetailProfileActivity : AppCompatActivity() {
         Log.d("ProfileActivity", "Formatted Birth Date: ${formatDate(user.birthDate)}")
         binding.tvNumberPhoneUser.setText(user.phone)
 
-        if (user.image != null && user.image is String) {
+        val fullImageUrl = when (val img = user.image) {
+            is String -> {
+                if (img.startsWith("/")) BASE_URL + img.substring(1) else img
+            }
+            else -> R.drawable.placeholder_image // Default image for null
+        }
+
+        if (fullImageUrl != null && fullImageUrl is String) {
             Glide.with(this)
-                .load(user.image)
+                .load(fullImageUrl)
                 .placeholder(R.drawable.baseline_account_circle_24)
                 .into(binding.profileImage)
         }
@@ -91,6 +154,12 @@ class DetailProfileActivity : AppCompatActivity() {
             Log.e("ERROR", "Date parsing error: ${e.message}") // Log errors for debugging
             "Invalid Date"
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Refresh profile data when returning to this screen
+        viewModel.loadUserProfile()
     }
 
 }
