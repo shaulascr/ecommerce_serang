@@ -74,6 +74,8 @@ class ChatRepository @Inject constructor(
                 chatimg = imagePart
             )
 
+            Log.d("ChatRepository", "check data productId=$productIdPart, storeId=$storeIdPart, messageTxt=$messagePart, chatImg=$imagePart")
+
             if (response.isSuccessful) {
                 val body = response.body()
                 if (body != null) {

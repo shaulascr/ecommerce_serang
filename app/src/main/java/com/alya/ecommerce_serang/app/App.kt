@@ -11,6 +11,8 @@ import dagger.hilt.android.HiltAndroidApp
 class App : Application(){
     private val TAG = "AppSerang"
 
+//    var tokenTes: String? = null
+
     override fun onCreate() {
         super.onCreate()
 
@@ -30,6 +32,7 @@ class App : Application(){
                 }
 
                 val token = task.result
+//                tokenTes = token
                 Log.d(TAG, "FCM token retrieved: $token")
 
                 // Save token locally
@@ -42,7 +45,6 @@ class App : Application(){
     }
 
     private fun sendTokenToServer(token: String) {
-        // TODO: Implement your API call
         Log.d(TAG, "Would send token to server: $token")
     }
 }

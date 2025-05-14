@@ -28,6 +28,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var apiService: ApiService
     private lateinit var sessionManager: SessionManager
+
 //    private val viewModel: NotifViewModel by viewModels()
     private val navController by lazy {
         (supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment).navController
