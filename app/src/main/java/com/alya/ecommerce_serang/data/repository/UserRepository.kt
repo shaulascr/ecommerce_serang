@@ -7,18 +7,52 @@ import com.alya.ecommerce_serang.data.api.dto.LoginRequest
 import com.alya.ecommerce_serang.data.api.dto.OtpRequest
 import com.alya.ecommerce_serang.data.api.dto.RegisterRequest
 import com.alya.ecommerce_serang.data.api.dto.UserProfile
+import com.alya.ecommerce_serang.data.api.response.auth.HasStoreResponse
+import com.alya.ecommerce_serang.data.api.response.auth.ListStoreTypeResponse
 import com.alya.ecommerce_serang.data.api.response.auth.LoginResponse
 import com.alya.ecommerce_serang.data.api.response.auth.OtpResponse
+import com.alya.ecommerce_serang.data.api.response.auth.RegisterStoreResponse
+import com.alya.ecommerce_serang.data.api.response.customer.order.ListCityResponse
+import com.alya.ecommerce_serang.data.api.response.customer.order.ListProvinceResponse
 import com.alya.ecommerce_serang.data.api.response.customer.profile.EditProfileResponse
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
 import com.alya.ecommerce_serang.utils.FileUtils
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.File
 
 class UserRepository(private val apiService: ApiService) {
     //post data without message/response
     suspend fun requestOtpRep(email: String): OtpResponse {
         return apiService.getOTP(OtpRequest(email))
+    }
+
+    suspend fun listStoreType(): Result<ListStoreTypeResponse>{
+        return try{
+            val response = apiService.listTypeStore()
+            if (response.isSuccessful) {
+                response.body()?.let {
+                    Result.Success(it)
+                } ?: Result.Error(Exception("No store type"))
+            } else {
+                throw Exception("No response ${response.errorBody()?.string()}")
+            }
+        } catch (e:Exception){
+            Result.Error(e)
+        }
+    }
+
+    suspend fun getListProvinces(): ListProvinceResponse? {
+        val response = apiService.getListProv()
+        return if (response.isSuccessful) response.body() else null
+    }
+
+    suspend fun getListCities(provId : Int): ListCityResponse? {
+        val response = apiService.getCityProvId(provId)
+        return if (response.isSuccessful) response.body() else null
     }
 
     suspend fun registerUser(request: RegisterRequest): String {
@@ -29,6 +63,169 @@ class UserRepository(private val apiService: ApiService) {
             return responseBody.message // Get the message from RegisterResponse
         } else {
             throw Exception("Registration failed: ${response.errorBody()?.string()}")
+        }
+    }
+
+    suspend fun registerStoreUser(
+        context: Context,
+        description: String,
+        storeTypeId: Int,
+        latitude: String,
+        longitude: String,
+        street: String,
+        subdistrict: String,
+        cityId: Int,
+        provinceId: Int,
+        postalCode: Int,
+        detail: String?,
+        bankName: String,
+        bankNum: Int,
+        storeName: String,
+        storeImg: Uri?,
+        ktp: Uri?,
+        npwp: Uri?,
+        nib: Uri?,
+        persetujuan: Uri?,
+        couriers: List<String>,
+        qris: Uri?,
+        accountName: String
+    ): Result<RegisterStoreResponse> {
+        return try {
+            val descriptionPart = description.toRequestBody("text/plain".toMediaTypeOrNull())
+            val storeTypeIdPart = storeTypeId.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+            val latitudePart = latitude.toRequestBody("text/plain".toMediaTypeOrNull())
+            val longitudePart = longitude.toRequestBody("text/plain".toMediaTypeOrNull())
+            val streetPart = street.toRequestBody("text/plain".toMediaTypeOrNull())
+            val subdistrictPart = subdistrict.toRequestBody("text/plain".toMediaTypeOrNull())
+            val cityIdPart = cityId.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+            val provinceIdPart = provinceId.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+            val postalCodePart = postalCode.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+            val detailPart = detail?.toRequestBody("text/plain".toMediaTypeOrNull())
+            val bankNamePart = bankName.toRequestBody("text/plain".toMediaTypeOrNull())
+            val bankNumPart = bankNum.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+            val storeNamePart = storeName.toRequestBody("text/plain".toMediaTypeOrNull())
+            val accountNamePart = accountName.toRequestBody("text/plain".toMediaTypeOrNull())
+
+
+            // Create a Map for courier values
+            val courierMap = HashMap<String, RequestBody>()
+            couriers.forEach { courier ->
+                courierMap["couriers[]"] = courier.toRequestBody("text/plain".toMediaTypeOrNull())
+            }
+
+            // Convert URIs to MultipartBody.Part
+            val storeImgPart = storeImg?.let {
+                val inputStream = context.contentResolver.openInputStream(it)
+                val file = File(context.cacheDir, "store_img_${System.currentTimeMillis()}")
+                inputStream?.use { input ->
+                    file.outputStream().use { output ->
+                        input.copyTo(output)
+                    }
+                }
+                val mimeType = context.contentResolver.getType(it) ?: "application/octet-stream"
+                val requestFile = file.asRequestBody(mimeType.toMediaTypeOrNull())
+                MultipartBody.Part.createFormData("storeimg", file.name, requestFile)
+            }
+
+            val ktpPart = ktp?.let {
+                val inputStream = context.contentResolver.openInputStream(it)
+                val file = File(context.cacheDir, "ktp_${System.currentTimeMillis()}")
+                inputStream?.use { input ->
+                    file.outputStream().use { output ->
+                        input.copyTo(output)
+                    }
+                }
+                val mimeType = context.contentResolver.getType(it) ?: "application/octet-stream"
+                val requestFile = file.asRequestBody(mimeType.toMediaTypeOrNull())
+                MultipartBody.Part.createFormData("ktp", file.name, requestFile)
+            }
+
+            val npwpPart = npwp?.let {
+                val inputStream = context.contentResolver.openInputStream(it)
+                val file = File(context.cacheDir, "npwp_${System.currentTimeMillis()}")
+                inputStream?.use { input ->
+                    file.outputStream().use { output ->
+                        input.copyTo(output)
+                    }
+                }
+                val mimeType = context.contentResolver.getType(it) ?: "application/octet-stream"
+                val requestFile = file.asRequestBody(mimeType.toMediaTypeOrNull())
+                MultipartBody.Part.createFormData("npwp", file.name, requestFile)
+            }
+
+            val nibPart = nib?.let {
+                val inputStream = context.contentResolver.openInputStream(it)
+                val file = File(context.cacheDir, "nib_${System.currentTimeMillis()}")
+                inputStream?.use { input ->
+                    file.outputStream().use { output ->
+                        input.copyTo(output)
+                    }
+                }
+                val mimeType = context.contentResolver.getType(it) ?: "application/octet-stream"
+                val requestFile = file.asRequestBody(mimeType.toMediaTypeOrNull())
+                MultipartBody.Part.createFormData("nib", file.name, requestFile)
+            }
+
+            val persetujuanPart = persetujuan?.let {
+                val inputStream = context.contentResolver.openInputStream(it)
+                val file = File(context.cacheDir, "persetujuan_${System.currentTimeMillis()}")
+                inputStream?.use { input ->
+                    file.outputStream().use { output ->
+                        input.copyTo(output)
+                    }
+                }
+                val mimeType = context.contentResolver.getType(it) ?: "application/octet-stream"
+                val requestFile = file.asRequestBody(mimeType.toMediaTypeOrNull())
+                MultipartBody.Part.createFormData("persetujuan", file.name, requestFile)
+            }
+
+            val qrisPart = qris?.let {
+                val inputStream = context.contentResolver.openInputStream(it)
+                val file = File(context.cacheDir, "qris_${System.currentTimeMillis()}")
+                inputStream?.use { input ->
+                    file.outputStream().use { output ->
+                        input.copyTo(output)
+                    }
+                }
+                val mimeType = context.contentResolver.getType(it) ?: "application/octet-stream"
+                val requestFile = file.asRequestBody(mimeType.toMediaTypeOrNull())
+                MultipartBody.Part.createFormData("qris", file.name, requestFile)
+            }
+
+            // Make the API call
+            val response = apiService.registerStore(
+                descriptionPart,
+                storeTypeIdPart,
+                latitudePart,
+                longitudePart,
+                streetPart,
+                subdistrictPart,
+                cityIdPart,
+                provinceIdPart,
+                postalCodePart,
+                detailPart ?: "".toRequestBody("text/plain".toMediaTypeOrNull()),
+                bankNamePart,
+                bankNumPart,
+                storeNamePart,
+                storeImgPart,
+                ktpPart,
+                npwpPart,
+                nibPart,
+                persetujuanPart,
+                courierMap,
+                qrisPart,
+                accountNamePart
+            )
+
+            // Check if response is successful
+            if (response.isSuccessful) {
+                Result.Success(response.body() ?: throw Exception("Response body is null"))
+            } else {
+                Result.Error(Exception("Registration failed with code: ${response.code()}"))
+            }
+
+        } catch (e: Exception) {
+            Result.Error(e)
         }
     }
 
@@ -129,6 +326,10 @@ class UserRepository(private val apiService: ApiService) {
             e.printStackTrace()
             Result.Error(e)
         }
+    }
+    
+    suspend fun checkStore(): HasStoreResponse{
+        return apiService.checkStoreUser()
     }
 
     companion object{

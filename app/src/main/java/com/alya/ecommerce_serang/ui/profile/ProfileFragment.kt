@@ -15,6 +15,7 @@ import com.alya.ecommerce_serang.data.api.dto.UserProfile
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.repository.UserRepository
 import com.alya.ecommerce_serang.databinding.FragmentProfileBinding
+import com.alya.ecommerce_serang.ui.auth.RegisterStoreActivity
 import com.alya.ecommerce_serang.ui.order.history.HistoryActivity
 import com.alya.ecommerce_serang.ui.profile.mystore.MyStoreActivity
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
@@ -53,10 +54,21 @@ class ProfileFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         observeUserProfile()
         viewModel.loadUserProfile()
+        viewModel.checkStoreUser()
 
         binding.cardBukaToko.setOnClickListener{
-            val intentBuka = Intent(requireContext(), MyStoreActivity::class.java)
-            startActivity(intentBuka)
+            val hasStore = viewModel.checkStore.value
+//            val hasStore = false
+
+            Log.d("Profile Fragment", "Check store $hasStore")
+
+            if (hasStore == true){
+                val intentBuka = Intent(requireContext(), MyStoreActivity::class.java)
+                startActivity(intentBuka)
+            } else {
+                val intentBuka = Intent(requireContext(), RegisterStoreActivity::class.java)
+                startActivity(intentBuka)
+            }
         }
 
         binding.btnDetailProfile.setOnClickListener{

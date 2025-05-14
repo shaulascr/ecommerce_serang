@@ -21,9 +21,12 @@ import com.alya.ecommerce_serang.data.api.dto.StoreAddressResponse
 import com.alya.ecommerce_serang.data.api.dto.UpdateCart
 import com.alya.ecommerce_serang.data.api.dto.UpdateChatRequest
 import com.alya.ecommerce_serang.data.api.response.auth.CheckStoreResponse
+import com.alya.ecommerce_serang.data.api.response.auth.HasStoreResponse
+import com.alya.ecommerce_serang.data.api.response.auth.ListStoreTypeResponse
 import com.alya.ecommerce_serang.data.api.response.auth.LoginResponse
 import com.alya.ecommerce_serang.data.api.response.auth.OtpResponse
 import com.alya.ecommerce_serang.data.api.response.auth.RegisterResponse
+import com.alya.ecommerce_serang.data.api.response.auth.RegisterStoreResponse
 import com.alya.ecommerce_serang.data.api.response.chat.ChatHistoryResponse
 import com.alya.ecommerce_serang.data.api.response.chat.ChatListResponse
 import com.alya.ecommerce_serang.data.api.response.chat.SendChatResponse
@@ -73,6 +76,7 @@ import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Part
+import retrofit2.http.PartMap
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -85,16 +89,40 @@ interface ApiService {
     @GET("checkstore")
     suspend fun checkStore (): Response<CheckStoreResponse>
 
-//    @Multipart
-//    @POST("registerstore")
-//    suspend fun registerStore(
-//
-//    ): Response<>
+    @Multipart
+    @POST("registerstore")
+    suspend fun registerStore(
+        @Part("description") description: RequestBody,
+        @Part("store_type_id") storeTypeId: RequestBody,
+        @Part("latitude") latitude: RequestBody,
+        @Part("longitude") longitude: RequestBody,
+        @Part("street") street: RequestBody,
+        @Part("subdistrict") subdistrict: RequestBody,
+        @Part("city_id") cityId: RequestBody,
+        @Part("province_id") provinceId: RequestBody,
+        @Part("postal_code") postalCode: RequestBody,
+        @Part("detail") detail: RequestBody,
+        @Part("bank_name") bankName: RequestBody,
+        @Part("bank_num") bankNum: RequestBody,
+        @Part("store_name") storeName: RequestBody,
+        @Part storeimg: MultipartBody.Part?,
+        @Part ktp: MultipartBody.Part?,
+        @Part npwp: MultipartBody.Part?,
+        @Part nib: MultipartBody.Part?,
+        @Part persetujuan: MultipartBody.Part?,
+        @PartMap couriers: Map<String, @JvmSuppressWildcards RequestBody>,
+        @Part qris: MultipartBody.Part?,
+        @Part("account_name") accountName: RequestBody,
+    ): Response<RegisterStoreResponse>
 
     @POST("otp")
     suspend fun getOTP(
         @Body otpRequest: OtpRequest
     ):OtpResponse
+
+    @GET("checkstore")
+    suspend fun checkStoreUser(
+    ): HasStoreResponse
 
     @POST("login")
     suspend fun login(
@@ -104,6 +132,10 @@ interface ApiService {
     @GET("category")
     suspend fun allCategory(
     ): Response<CategoryResponse>
+
+    @GET("storetype")
+    suspend fun listTypeStore(
+    ): Response<ListStoreTypeResponse>
 
     @GET("product")
     suspend fun getAllProduct(): Response<AllProductResponse>
