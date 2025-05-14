@@ -6,6 +6,7 @@ plugins {
     id("androidx.navigation.safeargs")
     id("kotlin-parcelize")
     alias(libs.plugins.dagger.hilt)  // Use alias from catalog
+    id("com.google.gms.google-services")
 }
 
 val localProperties = Properties().apply {
@@ -22,8 +23,8 @@ android {
 
     defaultConfig {
         applicationId = "com.alya.ecommerce_serang"
-        minSdk = 21
-        targetSdk = 34
+        minSdk = 26
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -118,6 +119,11 @@ dependencies {
     implementation("io.ktor:ktor-serialization-kotlinx-json:3.0.1")
 
     implementation("io.socket:socket.io-client:2.1.0") // or latest version
+
+    //fcm token
+    implementation(platform("com.google.firebase:firebase-bom:33.13.0"))
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-messaging-ktx")
 
 }
 

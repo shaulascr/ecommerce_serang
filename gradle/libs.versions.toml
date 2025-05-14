@@ -1,13 +1,13 @@
 [versions]
 agp = "8.9.2"
 glide = "4.16.0"
-hiltAndroid = "2.48"  # Updated from 2.44 for better compatibility
+hiltAndroid = "2.56.2"  # Updated from 2.44 for better compatibility
 hiltLifecycleViewmodel = "1.0.0-alpha03"
-hiltCompiler = "2.48"  # Added for consistency
-ksp = "1.9.0-1.0.13"
-kotlin = "1.9.0"
+hiltCompiler = "2.56.2"  # Added for consistency
+ksp = "2.1.0-1.0.28"
+kotlin = "2.1.0"
 
-coreKtx = "1.10.1"
+coreKtx = "1.16.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
@@ -19,7 +19,7 @@ constraintlayout = "2.1.4"
 legacySupportV4 = "1.0.0"
 lifecycleLivedataKtx = "2.8.7"
 lifecycleViewmodelKtx = "2.8.7"
-fragmentKtx = "1.5.6"
+fragmentKtx = "1.7.0"
 navigationFragmentKtx = "2.8.5"
 navigationUiKtx = "2.8.5"
 playServicesLocation = "21.3.0"

@@ -20,6 +20,7 @@ import com.alya.ecommerce_serang.data.api.dto.ShippingServiceRequest
 import com.alya.ecommerce_serang.data.api.dto.StoreAddressResponse
 import com.alya.ecommerce_serang.data.api.dto.UpdateCart
 import com.alya.ecommerce_serang.data.api.dto.UpdateChatRequest
+import com.alya.ecommerce_serang.data.api.response.auth.CheckStoreResponse
 import com.alya.ecommerce_serang.data.api.response.auth.LoginResponse
 import com.alya.ecommerce_serang.data.api.response.auth.OtpResponse
 import com.alya.ecommerce_serang.data.api.response.auth.RegisterResponse
@@ -80,6 +81,15 @@ interface ApiService {
     suspend fun register (
         @Body registerRequest: RegisterRequest
     ): Response<RegisterResponse>
+
+    @GET("checkstore")
+    suspend fun checkStore (): Response<CheckStoreResponse>
+
+    @Multipart
+    @POST("registerstore")
+    suspend fun registerStore(
+
+    ): Response<>
 
     @POST("otp")
     suspend fun getOTP(

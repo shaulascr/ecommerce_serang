@@ -1,18 +1,48 @@
 package com.alya.ecommerce_serang.app
 
 import android.app.Application
+import android.content.Context
+import android.util.Log
+import com.google.firebase.FirebaseApp
+import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
 class App : Application(){
-//    override fun onCreate() {
-//        super.onCreate()
-//
-//        val sessionManager = SessionManager(this)
-//        if (sessionManager.getUserId() != null) {
-//            val serviceIntent = Intent(this, SimpleWebSocketService::class.java)
-//            startService(serviceIntent)
-//        }
-//    }
+    private val TAG = "AppSerang"
 
+    override fun onCreate() {
+        super.onCreate()
+
+        // Initialize Firebase
+        FirebaseApp.initializeApp(this)
+
+        // Request FCM token at app startup
+        retrieveFCMToken()
+    }
+
+    private fun retrieveFCMToken() {
+        FirebaseMessaging.getInstance().token
+            .addOnCompleteListener { task ->
+                if (!task.isSuccessful) {
+                    Log.e(TAG, "Failed to get FCM token", task.exception)
+                    return@addOnCompleteListener
+                }
+
+                val token = task.result
+                Log.d(TAG, "FCM token retrieved: $token")
+
+                // Save token locally
+                val sharedPreferences = getSharedPreferences("FCM_PREFS", Context.MODE_PRIVATE)
+                sharedPreferences.edit().putString("FCM_TOKEN", token).apply()
+
+                // Send to your server
+                sendTokenToServer(token)
+            }
+    }
+
+    private fun sendTokenToServer(token: String) {
+        // TODO: Implement your API call
+        Log.d(TAG, "Would send token to server: $token")
+    }
 }

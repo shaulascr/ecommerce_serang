@@ -7,6 +7,7 @@ import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import com.alya.ecommerce_serang.BuildConfig.BASE_URL
 import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.dto.Store
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
@@ -19,12 +20,10 @@ import com.alya.ecommerce_serang.ui.profile.mystore.product.ProductActivity
 import com.alya.ecommerce_serang.ui.profile.mystore.profile.DetailStoreProfileActivity
 import com.alya.ecommerce_serang.ui.profile.mystore.review.ReviewFragment
 import com.alya.ecommerce_serang.ui.profile.mystore.sells.SellsActivity
-import com.alya.ecommerce_serang.ui.profile.mystore.sells.SellsListFragment
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
 import com.alya.ecommerce_serang.utils.viewmodel.MyStoreViewModel
 import com.bumptech.glide.Glide
-import kotlin.getValue
 
 class MyStoreActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMyStoreBinding
@@ -68,7 +67,7 @@ class MyStoreActivity : AppCompatActivity() {
         binding.tvStoreType.text = store.storeType
 
         if (store.storeImage != null && store.storeImage.toString().isNotEmpty() && store.storeImage.toString() != "null") {
-            val imageUrl = "http://192.168.100.156:3000${store.storeImage}"
+            val imageUrl = "$BASE_URL${store.storeImage}"
             Log.d("MyStoreActivity", "Loading store image from: $imageUrl")
 
             Glide.with(this)
