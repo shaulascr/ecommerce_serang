@@ -85,11 +85,11 @@ interface ApiService {
     @GET("checkstore")
     suspend fun checkStore (): Response<CheckStoreResponse>
 
-    @Multipart
-    @POST("registerstore")
-    suspend fun registerStore(
-
-    ): Response<>
+//    @Multipart
+//    @POST("registerstore")
+//    suspend fun registerStore(
+//
+//    ): Response<>
 
     @POST("otp")
     suspend fun getOTP(
