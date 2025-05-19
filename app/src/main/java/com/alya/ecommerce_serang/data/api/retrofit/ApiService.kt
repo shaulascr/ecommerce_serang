@@ -3,6 +3,7 @@ package com.alya.ecommerce_serang.data.api.retrofit
 
 import com.alya.ecommerce_serang.data.api.dto.AddEvidenceRequest
 import com.alya.ecommerce_serang.data.api.dto.AddPaymentInfoResponse
+import com.alya.ecommerce_serang.data.api.dto.CancelOrderReq
 import com.alya.ecommerce_serang.data.api.dto.CartItem
 import com.alya.ecommerce_serang.data.api.dto.CityResponse
 import com.alya.ecommerce_serang.data.api.dto.CompletedOrderRequest
@@ -35,6 +36,7 @@ import com.alya.ecommerce_serang.data.api.response.customer.cart.AddCartResponse
 import com.alya.ecommerce_serang.data.api.response.customer.cart.DeleteCartResponse
 import com.alya.ecommerce_serang.data.api.response.customer.cart.ListCartResponse
 import com.alya.ecommerce_serang.data.api.response.customer.cart.UpdateCartResponse
+import com.alya.ecommerce_serang.data.api.response.customer.order.CancelOrderResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.CourierCostResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.CreateOrderResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.CreateReviewResponse
@@ -162,6 +164,11 @@ interface ApiService {
     suspend fun postOrder(
         @Body request: OrderRequest
     ): Response<CreateOrderResponse>
+
+    @POST("order/cancel")
+    suspend fun cancelOrder(
+        @Body cancelReq: CancelOrderReq
+    ): Response<CancelOrderResponse>
 
     @GET("order/detail/{id}")
     suspend fun getDetailOrder(

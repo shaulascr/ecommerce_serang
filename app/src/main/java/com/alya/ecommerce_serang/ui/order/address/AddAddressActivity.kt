@@ -398,7 +398,7 @@ class AddAddressActivity : AppCompatActivity() {
                 isRequestingLocation = false
                 Toast.makeText(this, "Timeout lokasi, menggunakan lokasi default", Toast.LENGTH_SHORT).show()
             }
-        }, 15000) // 15 seconds timeout
+        }, 60000) // 15 seconds timeout
 
         // Try getting last known location first
         try {

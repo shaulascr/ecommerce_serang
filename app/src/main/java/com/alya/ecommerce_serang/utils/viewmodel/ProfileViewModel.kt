@@ -27,6 +27,9 @@ class ProfileViewModel(private val userRepository: UserRepository) : ViewModel()
     private val _checkStore = MutableLiveData<Boolean>()
     val checkStore: LiveData<Boolean> = _checkStore
 
+    private val _logout = MutableLiveData<Boolean>()
+    val logout : LiveData<Boolean> = _checkStore
+
     fun loadUserProfile(){
         viewModelScope.launch {
             when (val result = userRepository.fetchUserProfile()){
@@ -56,8 +59,6 @@ class ProfileViewModel(private val userRepository: UserRepository) : ViewModel()
             }
         }
     }
-
-
 
     fun editProfileDirect(
         context: Context,
@@ -96,6 +97,17 @@ class ProfileViewModel(private val userRepository: UserRepository) : ViewModel()
             }
         }
     }
+
+    fun logout(){
+        viewModelScope.launch {
+            try{
+
+            } catch (e: Exception){
+
+            }
+        }
+    }
+
 
     companion object {
         private const val TAG = "ProfileViewModel"

@@ -2,6 +2,7 @@ package com.alya.ecommerce_serang.ui.order.history
 
 import android.app.Activity
 import android.app.Dialog
+import android.content.ContextWrapper
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
@@ -17,6 +18,7 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -24,6 +26,7 @@ import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.dto.OrdersItem
 import com.alya.ecommerce_serang.data.api.dto.ReviewUIItem
 import com.alya.ecommerce_serang.ui.order.detail.PaymentActivity
+import com.alya.ecommerce_serang.ui.order.history.cancelorder.CancelOrderBottomSheet
 import com.alya.ecommerce_serang.ui.order.review.CreateReviewActivity
 import com.alya.ecommerce_serang.ui.product.ReviewProductActivity
 import com.google.android.material.button.MaterialButton
@@ -150,7 +153,7 @@ class OrderHistoryAdapter(
                         visibility = View.VISIBLE
                         text = itemView.context.getString(R.string.canceled_order_btn)
                         setOnClickListener {
-                            showCancelOrderDialog(order.orderId.toString())
+                            showCancelOrderBottomSheet(order.orderId)
                         }
                     }
                     deadlineDate.apply {
@@ -171,7 +174,7 @@ class OrderHistoryAdapter(
                         visibility = View.VISIBLE
                         text = itemView.context.getString(R.string.canceled_order_btn)
                         setOnClickListener {
-                            showCancelOrderDialog(order.orderId.toString())
+                            showCancelOrderBottomSheet(order.orderId)
                         }
                     }
 
@@ -226,7 +229,6 @@ class OrderHistoryAdapter(
                         text = itemView.context.getString(R.string.claim_complaint)
                         setOnClickListener {
                             showCancelOrderDialog(order.orderId.toString())
-                            // Handle click event
                         }
                     }
                     btnRight.apply {
@@ -490,6 +492,48 @@ class OrderHistoryAdapter(
                 }
             }
             dialog.show()
+        }
+
+        private fun showCancelOrderBottomSheet(orderId : Int) {
+            val context = itemView.context
+
+            // We need a FragmentManager to show the bottom sheet
+            // Try to get it from the context
+            val fragmentActivity = when (context) {
+                is FragmentActivity -> context
+                is ContextWrapper -> {
+                    val baseContext = context.baseContext
+                    if (baseContext is FragmentActivity) {
+                        baseContext
+                    } else {
+                        // Log error and show a Toast instead if we can't get a FragmentManager
+                        Log.e("OrderHistoryAdapter", "Cannot show bottom sheet: Context is not a FragmentActivity")
+                        Toast.makeText(context, "Cannot show cancel order dialog", Toast.LENGTH_SHORT).show()
+                        return
+                    }
+                }
+                else -> {
+                    // Log error and show a Toast instead if we can't get a FragmentManager
+                    Log.e("OrderHistoryAdapter", "Cannot show bottom sheet: Context is not a FragmentActivity")
+                    Toast.makeText(context, "Cannot show cancel order dialog", Toast.LENGTH_SHORT).show()
+                    return
+                }
+            }
+
+            // Create and show the bottom sheet using the obtained FragmentManager
+            val bottomSheet = CancelOrderBottomSheet(
+                orderId = orderId,
+                onOrderCancelled = {
+                    // Handle the successful cancellation
+                    // Refresh the data
+                    viewModel.refreshOrders() // Assuming there's a method to refresh orders
+
+                    // Show a success message
+                    Toast.makeText(context, "Order cancelled successfully", Toast.LENGTH_SHORT).show()
+                }
+            )
+
+            bottomSheet.show(fragmentActivity.supportFragmentManager, CancelOrderBottomSheet.TAG)
         }
 
         private fun addReviewProduct(order: OrdersItem) {

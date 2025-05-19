@@ -1,5 +1,7 @@
 package com.alya.ecommerce_serang.ui.profile
 
+import android.app.AlertDialog
+import android.app.ProgressDialog
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -9,19 +11,24 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import com.alya.ecommerce_serang.BuildConfig.BASE_URL
 import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.dto.UserProfile
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.repository.UserRepository
 import com.alya.ecommerce_serang.databinding.FragmentProfileBinding
+import com.alya.ecommerce_serang.ui.auth.LoginActivity
 import com.alya.ecommerce_serang.ui.auth.RegisterStoreActivity
+import com.alya.ecommerce_serang.ui.order.address.AddressActivity
 import com.alya.ecommerce_serang.ui.order.history.HistoryActivity
 import com.alya.ecommerce_serang.ui.profile.mystore.MyStoreActivity
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
 import com.alya.ecommerce_serang.utils.viewmodel.ProfileViewModel
 import com.bumptech.glide.Glide
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class ProfileFragment : Fragment() {
 
@@ -85,6 +92,16 @@ class ProfileFragment : Fragment() {
             val intent = Intent(requireContext(), HistoryActivity::class.java)
             startActivity(intent)
         }
+
+        binding.cardLogout.setOnClickListener({
+            logout()
+
+        })
+
+        binding.cardAddress.setOnClickListener({
+            val intent = Intent(requireContext(), AddressActivity::class.java)
+            startActivity(intent)
+        })
     }
 
     private fun observeUserProfile() {
@@ -115,4 +132,41 @@ class ProfileFragment : Fragment() {
             .placeholder(R.drawable.placeholder_image)
             .into(profileImage)
     }
+
+    private fun logout(){
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("Konfirmasi")
+            .setMessage("Apakah anda yakin ingin keluar?")
+            .setPositiveButton("Ya") { _, _ ->
+                actionLogout()
+            }
+            .setNegativeButton("Tidak", null)
+            .show()
+    }
+
+    private fun actionLogout(){
+        val loadingDialog =  ProgressDialog(requireContext()).apply {
+            setMessage("Mohon ditunggu")
+            setCancelable(false)
+            show()
+        }
+
+        lifecycleScope.launch {
+            try {
+                delay(500)
+                loadingDialog.dismiss()
+                sessionManager.clearAll()
+                val intent = Intent(requireContext(), LoginActivity::class.java)
+                startActivity(intent)
+            } catch (e: Exception) {
+                Toast.makeText(
+                    requireContext(),
+                    "Gagal keluar: ${e.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+
 }

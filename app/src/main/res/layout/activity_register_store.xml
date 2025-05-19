@@ -231,13 +231,14 @@
                 android:text="10. Bank *"
                 android:textColor="@android:color/black" />
 
-            <Spinner
-                android:id="@+id/spinner_bank"
+            <EditText
+                android:id="@+id/et_bank_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:background="@android:drawable/btn_dropdown"
-                android:hint="Pilih jawaban Anda di sini"
+                android:background="@android:drawable/editbox_background"
+                android:hint="Isi jawaban Anda di sini"
+                android:inputType="text"
                 android:padding="12dp" />
 
             <TextView
