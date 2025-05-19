@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.alya.ecommerce_serang.data.api.dto.UserProfile
+import com.alya.ecommerce_serang.data.api.response.auth.HasStoreResponse
 import com.alya.ecommerce_serang.data.api.response.customer.profile.EditProfileResponse
 import com.alya.ecommerce_serang.data.repository.Result
 import com.alya.ecommerce_serang.data.repository.UserRepository
@@ -23,6 +24,12 @@ class ProfileViewModel(private val userRepository: UserRepository) : ViewModel()
     private val _editProfileResult = MutableLiveData<Result<EditProfileResponse>>()
     val editProfileResult: LiveData<Result<EditProfileResponse>> = _editProfileResult
 
+    private val _checkStore = MutableLiveData<Boolean>()
+    val checkStore: LiveData<Boolean> = _checkStore
+
+    private val _logout = MutableLiveData<Boolean>()
+    val logout : LiveData<Boolean> = _checkStore
+
     fun loadUserProfile(){
         viewModelScope.launch {
             when (val result = userRepository.fetchUserProfile()){
@@ -32,6 +39,28 @@ class ProfileViewModel(private val userRepository: UserRepository) : ViewModel()
             }
         }
     }
+
+    fun checkStoreUser(){
+        viewModelScope.launch {
+            try {
+                // Call the repository function to request OTP
+                val response: HasStoreResponse = userRepository.checkStore()
+
+                // Log and store success message
+                Log.d("RegisterViewModel", "OTP Response: ${response.hasStore}")
+                _checkStore.value = response.hasStore // Store the message for UI feedback
+
+            } catch (exception: Exception) {
+                // Handle any errors and update state
+                _checkStore.value = false
+
+                // Log the error for debugging
+                Log.e("RegisterViewModel", "Error:", exception)
+            }
+        }
+    }
+
+
 
     fun editProfileDirect(
         context: Context,
@@ -70,6 +99,17 @@ class ProfileViewModel(private val userRepository: UserRepository) : ViewModel()
             }
         }
     }
+
+    fun logout(){
+        viewModelScope.launch {
+            try{
+
+            } catch (e: Exception){
+
+            }
+        }
+    }
+
 
     companion object {
         private const val TAG = "ProfileViewModel"

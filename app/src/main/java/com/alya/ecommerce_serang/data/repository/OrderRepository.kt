@@ -2,16 +2,17 @@ package com.alya.ecommerce_serang.data.repository
 
 import android.util.Log
 import com.alya.ecommerce_serang.data.api.dto.AddEvidenceMultipartRequest
+import com.alya.ecommerce_serang.data.api.dto.CancelOrderReq
 import com.alya.ecommerce_serang.data.api.dto.CompletedOrderRequest
 import com.alya.ecommerce_serang.data.api.dto.CourierCostRequest
 import com.alya.ecommerce_serang.data.api.dto.CreateAddressRequest
 import com.alya.ecommerce_serang.data.api.dto.OrderRequest
 import com.alya.ecommerce_serang.data.api.dto.OrderRequestBuy
-import com.alya.ecommerce_serang.data.api.dto.OrdersItem
 import com.alya.ecommerce_serang.data.api.dto.ReviewProductItem
 import com.alya.ecommerce_serang.data.api.dto.UpdateCart
 import com.alya.ecommerce_serang.data.api.dto.UserProfile
 import com.alya.ecommerce_serang.data.api.response.customer.cart.DataItemCart
+import com.alya.ecommerce_serang.data.api.response.customer.order.CancelOrderResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.CourierCostResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.CreateOrderResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.CreateReviewResponse
@@ -489,6 +490,25 @@ class OrderRepository(private val apiService: ApiService) {
             Result.Error(e)
         }
 
+    }
+
+    suspend fun cancelOrder(cancelReq: CancelOrderReq): Result<CancelOrderResponse>{
+        return try{
+            val response= apiService.cancelOrder(cancelReq)
+
+            if (response.isSuccessful){
+                response.body()?.let { cancelOrderResponse ->
+                    Result.Success(cancelOrderResponse)
+                } ?: run {
+                    Result.Error(Exception("Failed to cancel order"))
+                }
+            } else {
+                val errorMsg = response.errorBody()?.string() ?: "Unknown Error"
+                Result.Error(Exception(errorMsg))
+            }
+        }catch (e: Exception){
+            Result.Error(e)
+        }
     }
 
 }

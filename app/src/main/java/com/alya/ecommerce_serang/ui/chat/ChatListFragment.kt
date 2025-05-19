@@ -21,6 +21,7 @@ class ChatListFragment : Fragment() {
     private val  binding get() = _binding!!
     private lateinit var socketService: SocketIOService
     private lateinit var sessionManager: SessionManager
+
     private val viewModel: com.alya.ecommerce_serang.ui.chat.ChatViewModel by viewModels {
         BaseViewModelFactory {
             val apiService = ApiConfig.getApiService(sessionManager)
@@ -65,7 +66,8 @@ class ChatListFragment : Fragment() {
                             productImage = null,
                             productRating = null,
                             storeName = chatItem.storeName,
-                            chatRoomId = chatItem.chatRoomId
+                            chatRoomId = chatItem.chatRoomId,
+                            storeImage = chatItem.storeImage
                         )
                     }
                     binding.chatListRecyclerView.adapter = adapter
@@ -84,5 +86,9 @@ class ChatListFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    companion object{
+
     }
 }

@@ -6,7 +6,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.alya.ecommerce_serang.data.api.dto.RegisterRequest
+import com.alya.ecommerce_serang.data.api.dto.VerifRegisReq
 import com.alya.ecommerce_serang.data.api.response.auth.OtpResponse
+import com.alya.ecommerce_serang.data.api.response.auth.VerifRegisterResponse
 import com.alya.ecommerce_serang.data.repository.Result
 import com.alya.ecommerce_serang.data.repository.UserRepository
 import kotlinx.coroutines.launch
@@ -20,6 +22,9 @@ class RegisterViewModel(private val repository: UserRepository) : ViewModel() {
     // MutableLiveData for handling OTP request state
     private val _otpState = MutableLiveData<Result<Unit>>()
     val otpState: LiveData<Result<Unit>> = _otpState
+
+    private val _checkValue = MutableLiveData<Result<Boolean>>()
+    val checkValue: LiveData<Result<Boolean>> = _checkValue
 
     // MutableLiveData to store messages from API responses
     private val _message = MutableLiveData<String>()
@@ -83,6 +88,26 @@ class RegisterViewModel(private val repository: UserRepository) : ViewModel() {
 
                 // Log the error for debugging
                 Log.e("RegisterViewModel", "User registration failed", exception)
+            }
+        }
+    }
+
+    fun checkValueReg(request: VerifRegisReq){
+        viewModelScope.launch {
+            try {
+                // Call the repository function to request OTP
+                val response: VerifRegisterResponse = repository.checkValue(request)
+
+                // Log and store success message
+                Log.d("RegisterViewModel", "OTP Response: ${response.available}")
+                _checkValue.value = Result.Success(response.available)// Store the message for UI feedback
+
+            } catch (exception: Exception) {
+                // Handle any errors and update state
+                _checkValue.value = Result.Error(exception)
+
+                // Log the error for debugging
+                Log.e("RegisterViewModel", "Error:", exception)
             }
         }
     }

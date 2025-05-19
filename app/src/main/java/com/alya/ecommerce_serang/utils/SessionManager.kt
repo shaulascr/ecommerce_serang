@@ -57,8 +57,6 @@ class SessionManager(context: Context) {
         }
     }
 
-
-
     //clear data when log out
     fun clearAll() {
         sharedPreferences.edit() {
