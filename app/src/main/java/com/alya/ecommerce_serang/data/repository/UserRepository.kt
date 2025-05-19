@@ -3,11 +3,13 @@ package com.alya.ecommerce_serang.data.repository
 import android.content.Context
 import android.net.Uri
 import android.util.Log
+import com.alya.ecommerce_serang.data.api.dto.FcmReq
 import com.alya.ecommerce_serang.data.api.dto.LoginRequest
 import com.alya.ecommerce_serang.data.api.dto.OtpRequest
 import com.alya.ecommerce_serang.data.api.dto.RegisterRequest
 import com.alya.ecommerce_serang.data.api.dto.UserProfile
 import com.alya.ecommerce_serang.data.api.dto.VerifRegisReq
+import com.alya.ecommerce_serang.data.api.response.auth.FcmTokenResponse
 import com.alya.ecommerce_serang.data.api.response.auth.HasStoreResponse
 import com.alya.ecommerce_serang.data.api.response.auth.ListStoreTypeResponse
 import com.alya.ecommerce_serang.data.api.response.auth.LoginResponse
@@ -336,6 +338,10 @@ class UserRepository(private val apiService: ApiService) {
 
     suspend fun checkValue(request: VerifRegisReq): VerifRegisterResponse{
         return apiService.verifValue(request)
+    }
+
+    suspend fun sendFcm(request: FcmReq): FcmTokenResponse{
+        return apiService.updateFcm(request)
     }
 
     companion object{

@@ -398,7 +398,7 @@ class RegisterStoreActivity : AppCompatActivity() {
         }
 
         binding.checkboxJnt.setOnCheckedChangeListener { _, isChecked ->
-            handleCourierSelection("jnt", isChecked)
+            handleCourierSelection("tiki", isChecked)
         }
 
         binding.checkboxPos.setOnCheckedChangeListener { _, isChecked ->
