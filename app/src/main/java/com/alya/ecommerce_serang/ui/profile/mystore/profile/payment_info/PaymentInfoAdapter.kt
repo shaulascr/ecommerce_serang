@@ -10,9 +10,11 @@ import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.alya.ecommerce_serang.BuildConfig.BASE_URL
 import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.dto.PaymentInfo
 import com.bumptech.glide.Glide
+import java.util.Properties
 
 class PaymentInfoAdapter(
     private val onDeleteClick: (PaymentInfo) -> Unit
@@ -48,7 +50,7 @@ class PaymentInfoAdapter(
                 val imageUrl = if (paymentInfo.qrisImage.startsWith("http")) {
                     paymentInfo.qrisImage
                 } else {
-                    "http://192.168.100.156:3000${paymentInfo.qrisImage}"
+                    "$BASE_URL${paymentInfo.qrisImage}"
                 }
 
                 Log.d("PaymentMethodAdapter", "Loading QRIS image from: $imageUrl")
