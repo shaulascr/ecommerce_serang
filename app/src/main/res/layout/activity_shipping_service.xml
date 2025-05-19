@@ -64,46 +64,6 @@
                 android:textSize="16sp"
                 android:paddingStart="8dp" />
 
-            <CheckBox
-                android:id="@+id/checkbox_sicepat"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="SiCepat"
-                android:textSize="16sp"
-                android:paddingStart="8dp" />
-
-            <CheckBox
-                android:id="@+id/checkbox_jnt"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="J&amp;T Express"
-                android:textSize="16sp"
-                android:paddingStart="8dp" />
-
-            <CheckBox
-                android:id="@+id/checkbox_ninja"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Ninja Express"
-                android:textSize="16sp"
-                android:paddingStart="8dp" />
-
-            <CheckBox
-                android:id="@+id/checkbox_antaraja"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="AnterAja"
-                android:textSize="16sp"
-                android:paddingStart="8dp" />
-
-            <CheckBox
-                android:id="@+id/checkbox_spx"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Shopee Express (SPX)"
-                android:textSize="16sp"
-                android:paddingStart="8dp" />
-
         </LinearLayout>
     </ScrollView>
 
