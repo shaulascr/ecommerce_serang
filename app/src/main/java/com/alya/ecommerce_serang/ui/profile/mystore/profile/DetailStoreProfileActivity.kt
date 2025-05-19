@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import com.alya.ecommerce_serang.BuildConfig.BASE_URL
 import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.dto.Store
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
@@ -135,7 +136,7 @@ class DetailStoreProfileActivity : AppCompatActivity() {
 
         // Update store image if available
         if (store.storeImage != null && store.storeImage.toString().isNotEmpty() && store.storeImage.toString() != "null") {
-            val imageUrl = "http://192.168.100.156:3000${store.storeImage}"
+            val imageUrl = "$BASE_URL${store.storeImage}"
             Log.d("DetailStoreProfile", "Loading image from: $imageUrl")
 
             Glide.with(this)
