@@ -21,6 +21,7 @@ import com.alya.ecommerce_serang.data.api.dto.ShippingServiceRequest
 import com.alya.ecommerce_serang.data.api.dto.StoreAddressResponse
 import com.alya.ecommerce_serang.data.api.dto.UpdateCart
 import com.alya.ecommerce_serang.data.api.dto.UpdateChatRequest
+import com.alya.ecommerce_serang.data.api.dto.VerifRegisReq
 import com.alya.ecommerce_serang.data.api.response.auth.CheckStoreResponse
 import com.alya.ecommerce_serang.data.api.response.auth.HasStoreResponse
 import com.alya.ecommerce_serang.data.api.response.auth.ListStoreTypeResponse
@@ -28,6 +29,7 @@ import com.alya.ecommerce_serang.data.api.response.auth.LoginResponse
 import com.alya.ecommerce_serang.data.api.response.auth.OtpResponse
 import com.alya.ecommerce_serang.data.api.response.auth.RegisterResponse
 import com.alya.ecommerce_serang.data.api.response.auth.RegisterStoreResponse
+import com.alya.ecommerce_serang.data.api.response.auth.VerifRegisterResponse
 import com.alya.ecommerce_serang.data.api.response.chat.ChatHistoryResponse
 import com.alya.ecommerce_serang.data.api.response.chat.ChatListResponse
 import com.alya.ecommerce_serang.data.api.response.chat.SendChatResponse
@@ -87,6 +89,11 @@ interface ApiService {
     suspend fun register (
         @Body registerRequest: RegisterRequest
     ): Response<RegisterResponse>
+
+    @POST("verif")
+    suspend fun verifValue (
+        @Body verifRegisReq: VerifRegisReq
+    ):VerifRegisterResponse
 
     @GET("checkstore")
     suspend fun checkStore (): Response<CheckStoreResponse>

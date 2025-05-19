@@ -7,11 +7,13 @@ import com.alya.ecommerce_serang.data.api.dto.LoginRequest
 import com.alya.ecommerce_serang.data.api.dto.OtpRequest
 import com.alya.ecommerce_serang.data.api.dto.RegisterRequest
 import com.alya.ecommerce_serang.data.api.dto.UserProfile
+import com.alya.ecommerce_serang.data.api.dto.VerifRegisReq
 import com.alya.ecommerce_serang.data.api.response.auth.HasStoreResponse
 import com.alya.ecommerce_serang.data.api.response.auth.ListStoreTypeResponse
 import com.alya.ecommerce_serang.data.api.response.auth.LoginResponse
 import com.alya.ecommerce_serang.data.api.response.auth.OtpResponse
 import com.alya.ecommerce_serang.data.api.response.auth.RegisterStoreResponse
+import com.alya.ecommerce_serang.data.api.response.auth.VerifRegisterResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.ListCityResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.ListProvinceResponse
 import com.alya.ecommerce_serang.data.api.response.customer.profile.EditProfileResponse
@@ -330,6 +332,10 @@ class UserRepository(private val apiService: ApiService) {
     
     suspend fun checkStore(): HasStoreResponse{
         return apiService.checkStoreUser()
+    }
+
+    suspend fun checkValue(request: VerifRegisReq): VerifRegisterResponse{
+        return apiService.verifValue(request)
     }
 
     companion object{

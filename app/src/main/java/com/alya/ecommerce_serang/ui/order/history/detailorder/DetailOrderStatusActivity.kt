@@ -33,6 +33,7 @@ import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.repository.OrderRepository
 import com.alya.ecommerce_serang.databinding.ActivityDetailOrderStatusBinding
 import com.alya.ecommerce_serang.ui.order.detail.PaymentActivity
+import com.alya.ecommerce_serang.ui.order.history.cancelorder.CancelOrderBottomSheet
 import com.alya.ecommerce_serang.ui.order.review.CreateReviewActivity
 import com.alya.ecommerce_serang.ui.product.ReviewProductActivity
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
@@ -50,6 +51,7 @@ class DetailOrderStatusActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityDetailOrderStatusBinding
     private lateinit var sessionManager: SessionManager
+
     private var orderId: Int = -1
     private var orderStatus: String = ""
     private val orders = mutableListOf<OrdersItem>()
@@ -181,9 +183,9 @@ class DetailOrderStatusActivity : AppCompatActivity() {
             setupProductsRecyclerView(orders.orderItems)
 
             // Set payment method
-            binding.tvPaymentMethod.text = "Bank Transfer - ${orders.payInfoName ?: "BCA"}"
+            binding.tvPaymentMethod.text = "Bank Transfer - ${orders.payInfoName ?: "Tidak tersedia"}"
 
-            Log.d(TAG, "populateOrderDetails: Payment method=${orders.payInfoName ?: "BCA"}")
+            Log.d(TAG, "populateOrderDetails: Payment method=${orders.payInfoName ?: "Tidak tersedia"}")
 
             // Set subtotal, shipping cost, and total
             val subtotal = orders.totalAmount?.toIntOrNull()?.minus(orders.shipmentPrice.toIntOrNull() ?: 0) ?: 0
@@ -237,10 +239,8 @@ class DetailOrderStatusActivity : AppCompatActivity() {
         Log.d(TAG, "adjustButtonsBasedOnStatus: Status header set to '$statusText'")
 
         when (status) {
-            "pending", "unpaid" -> {
-                Log.d(TAG, "adjustButtonsBasedOnStatus: Setting up UI for pending/unpaid order")
-
-                // Show status note
+            "pending"->{
+                binding.tvStatusHeader.text = "Menunggu Tagihan"
                 binding.tvStatusNote.visibility = View.VISIBLE
                 binding.tvStatusNote.text = "Pesanan ini harus dibayar sebelum ${formatDatePay(orders.updatedAt)}"
 
@@ -250,7 +250,27 @@ class DetailOrderStatusActivity : AppCompatActivity() {
                     text = "Batalkan Pesanan"
                     setOnClickListener {
                         Log.d(TAG, "Cancel Order button clicked")
-                        showCancelOrderDialog(orders.orderId.toString())
+                        showCancelOrderBottomSheet(orders.orderId)
+                        viewModel.getOrderDetails(orders.orderId)
+                    }
+                }
+            }
+            "unpaid" -> {
+                Log.d(TAG, "adjustButtonsBasedOnStatus: Setting up UI for pending/unpaid order")
+
+                // Show status note
+                binding.tvStatusHeader.text = "Belum Dibayar"
+                binding.tvStatusNote.visibility = View.VISIBLE
+                binding.tvStatusNote.text = "Pesanan ini harus dibayar sebelum ${formatDatePay(orders.updatedAt)}"
+
+                // Set buttons
+                binding.btnSecondary.apply {
+                    visibility = View.VISIBLE
+                    text = "Batalkan Pesanan"
+                    setOnClickListener {
+                        Log.d(TAG, "Cancel Order button clicked")
+                        showCancelOrderBottomSheet(orders.orderId)
+                        viewModel.getOrderDetails(orders.orderId)
                     }
                 }
 
@@ -270,6 +290,7 @@ class DetailOrderStatusActivity : AppCompatActivity() {
             "processed" -> {
                 Log.d(TAG, "adjustButtonsBasedOnStatus: Setting up UI for processed order")
 
+                binding.tvStatusHeader.text = "Sedang Diproses"
                 binding.tvStatusNote.visibility = View.VISIBLE
                 binding.tvStatusNote.text = "Penjual sedang memproses pesanan Anda"
 
@@ -279,13 +300,19 @@ class DetailOrderStatusActivity : AppCompatActivity() {
                     setOnClickListener {
                         Log.d(TAG, "Cancel Order button clicked for processed order")
                         showCancelOrderDialog(orders.orderId.toString())
+                        viewModel.getOrderDetails(orders.orderId)
                     }
+                }
+
+                binding.btnPrimary.apply {
+                    visibility = View.GONE
                 }
             }
 
             "shipped" -> {
                 Log.d(TAG, "adjustButtonsBasedOnStatus: Setting up UI for shipped order")
 
+                binding.tvStatusHeader.text = "Sudah Dikirim"
                 binding.tvStatusNote.visibility = View.VISIBLE
                 binding.tvStatusNote.text = "Pesanan Anda sedang dalam perjalanan. Akan sampai sekitar ${formatShipmentDate(orders.updatedAt, orders.etd ?: "0")}"
 
@@ -294,7 +321,8 @@ class DetailOrderStatusActivity : AppCompatActivity() {
                     text = "Ajukan Komplain"
                     setOnClickListener {
                         Log.d(TAG, "Complaint button clicked")
-                        showCancelOrderDialog(orders.orderId.toString()) // For now, reuse the cancel dialog
+                        showCancelOrderDialog(orders.orderId.toString())
+                        viewModel.getOrderDetails(orders.orderId)
                     }
                 }
 
@@ -314,11 +342,11 @@ class DetailOrderStatusActivity : AppCompatActivity() {
                 }
             }
 
-            "delivered", "completed" -> {
+            "completed" -> {
                 Log.d(TAG, "adjustButtonsBasedOnStatus: Setting up UI for delivered/completed order")
 
-                binding.tvStatusNote.visibility = View.VISIBLE
-                binding.tvStatusNote.text = "Pesanan telah selesai"
+                binding.tvStatusHeader.text = "Pesanan Selesai"
+                binding.tvStatusNote.visibility = View.GONE
 
                 binding.btnPrimary.apply {
                     visibility = View.VISIBLE
@@ -326,15 +354,27 @@ class DetailOrderStatusActivity : AppCompatActivity() {
                     setOnClickListener {
                         Log.d(TAG, "Review button clicked")
                         addReviewForOrder(orders)
+                        viewModel.getOrderDetails(orders.orderId)
                     }
+                }
+                binding.btnSecondary.apply {
+                    visibility = View.GONE
                 }
             }
 
             "canceled" -> {
                 Log.d(TAG, "adjustButtonsBasedOnStatus: Setting up UI for canceled order")
 
+                binding.tvStatusHeader.text = "Pesanan Selesai"
                 binding.tvStatusNote.visibility = View.VISIBLE
                 binding.tvStatusNote.text = "Pesanan dibatalkan: ${orders.cancelReason ?: "Alasan tidak diberikan"}"
+
+                binding.btnSecondary.apply {
+                    visibility = View.GONE
+                }
+                binding.btnPrimary.apply {
+                    visibility = View.GONE
+                }
             }
         }
     }
@@ -528,6 +568,22 @@ class DetailOrderStatusActivity : AppCompatActivity() {
 
         Log.d(TAG, "showCancelOrderDialog: Dialog setup complete, showing dialog")
         dialog.show()
+    }
+
+    private fun showCancelOrderBottomSheet(orderId: Int) {
+        // Create and show the bottom sheet directly since we're already in an Activity
+        val bottomSheet = CancelOrderBottomSheet(
+            orderId = orderId,
+            onOrderCancelled = {
+                // Handle the successful cancellation
+                // Refresh the data
+
+                // Show a success message
+                Toast.makeText(this, "Order cancelled successfully", Toast.LENGTH_SHORT).show()
+            }
+        )
+
+        bottomSheet.show(supportFragmentManager, CancelOrderBottomSheet.TAG)
     }
 
     private fun formatDate(dateString: String): String {

@@ -414,7 +414,8 @@ class DetailProductActivity : AppCompatActivity() {
             productImage = productDetail.image,
             productRating = productDetail.rating,
             storeName = storeDetail.data.storeName,
-            chatRoomId = 0
+            chatRoomId = 0,
+            storeImage = storeDetail.data.storeImage
             )
 
     }

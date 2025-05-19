@@ -154,6 +154,7 @@ class OrderHistoryAdapter(
                         text = itemView.context.getString(R.string.canceled_order_btn)
                         setOnClickListener {
                             showCancelOrderBottomSheet(order.orderId)
+                            viewModel.refreshOrders()
                         }
                     }
                     deadlineDate.apply {
@@ -175,6 +176,7 @@ class OrderHistoryAdapter(
                         text = itemView.context.getString(R.string.canceled_order_btn)
                         setOnClickListener {
                             showCancelOrderBottomSheet(order.orderId)
+                            viewModel.refreshOrders()
                         }
                     }
 
@@ -211,6 +213,7 @@ class OrderHistoryAdapter(
                         text = itemView.context.getString(R.string.canceled_order_btn)
                         setOnClickListener {
                             showCancelOrderDialog(order.orderId.toString())
+                            viewModel.refreshOrders()
                         }
                     }
                 }
@@ -229,6 +232,7 @@ class OrderHistoryAdapter(
                         text = itemView.context.getString(R.string.claim_complaint)
                         setOnClickListener {
                             showCancelOrderDialog(order.orderId.toString())
+                            viewModel.refreshOrders()
                         }
                     }
                     btnRight.apply {
@@ -237,22 +241,13 @@ class OrderHistoryAdapter(
                         setOnClickListener {
                             // Handle click event
                             viewModel.confirmOrderCompleted(order.orderId, "completed")
+                            viewModel.refreshOrders()
 
                         }
                     }
                     deadlineDate.apply {
                         visibility = View.VISIBLE
                         text = formatShipmentDate(order.updatedAt, order.etd ?: "0")
-                    }
-                }
-                "delivered" -> {
-                    // Untuk status delivered, tampilkan "Beri Ulasan"
-                    btnRight.apply {
-                        visibility = View.VISIBLE
-                        text = itemView.context.getString(R.string.add_review)
-                        setOnClickListener {
-                            // Handle click event
-                        }
                     }
                 }
                 "completed" -> {
@@ -269,6 +264,7 @@ class OrderHistoryAdapter(
                         text = itemView.context.getString(R.string.add_review)
                         setOnClickListener {
                             addReviewProduct(order)
+                            viewModel.refreshOrders()
                             // Handle click event
                         }
                     }
