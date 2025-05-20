@@ -30,7 +30,6 @@
         android:backgroundTint="@color/white"
         android:src="@drawable/outline_notifications_24"
         app:layout_constraintDimensionRatio="1:1"
-        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@id/search"
         app:layout_constraintEnd_toStartOf="@id/btn_cart"
         app:layout_constraintTop_toTopOf="@id/search"/>

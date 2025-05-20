@@ -13,6 +13,8 @@ import com.alya.ecommerce_serang.data.api.response.auth.FcmTokenResponse
 import com.alya.ecommerce_serang.data.api.response.auth.HasStoreResponse
 import com.alya.ecommerce_serang.data.api.response.auth.ListStoreTypeResponse
 import com.alya.ecommerce_serang.data.api.response.auth.LoginResponse
+import com.alya.ecommerce_serang.data.api.response.auth.NotifItem
+import com.alya.ecommerce_serang.data.api.response.auth.NotifstoreItem
 import com.alya.ecommerce_serang.data.api.response.auth.OtpResponse
 import com.alya.ecommerce_serang.data.api.response.auth.RegisterResponse
 import com.alya.ecommerce_serang.data.api.response.auth.RegisterStoreResponse
@@ -345,6 +347,36 @@ class UserRepository(private val apiService: ApiService) {
         return apiService.updateFcm(request)
     }
 
+    suspend fun getListNotif(): Result<List<NotifItem>> {
+        return try {
+            val response = apiService.getNotif()
+
+            if (response.isSuccessful){
+                val chat = response.body()?.notif ?: emptyList()
+                Result.Success(chat)
+            } else {
+                Result.Error(Exception("Failed to fetch list notif. Code: ${response.code()}"))
+            }
+        } catch (e: Exception){
+            Result.Error(e)
+        }
+    }
+
+
+    suspend fun getListNotifStore(): Result<List<NotifstoreItem>> {
+        return try {
+            val response = apiService.getNotifStore()
+
+            if (response.isSuccessful){
+                val chat = response.body()?.notifstore ?: emptyList()
+                Result.Success(chat)
+            } else {
+                Result.Error(Exception("Failed to fetch list notif. Code: ${response.code()}"))
+            }
+        } catch (e: Exception){
+            Result.Error(e)
+        }
+    }
     companion object{
         private const val TAG = "UserRepository"
     }

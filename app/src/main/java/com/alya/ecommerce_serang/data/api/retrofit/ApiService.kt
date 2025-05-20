@@ -26,6 +26,8 @@ import com.alya.ecommerce_serang.data.api.dto.VerifRegisReq
 import com.alya.ecommerce_serang.data.api.response.auth.CheckStoreResponse
 import com.alya.ecommerce_serang.data.api.response.auth.FcmTokenResponse
 import com.alya.ecommerce_serang.data.api.response.auth.HasStoreResponse
+import com.alya.ecommerce_serang.data.api.response.auth.ListNotifResponse
+import com.alya.ecommerce_serang.data.api.response.auth.ListStoreNotifResponse
 import com.alya.ecommerce_serang.data.api.response.auth.ListStoreTypeResponse
 import com.alya.ecommerce_serang.data.api.response.auth.LoginResponse
 import com.alya.ecommerce_serang.data.api.response.auth.OtpResponse
@@ -454,4 +456,12 @@ interface ApiService {
     @GET("chat")
     suspend fun getChatList(
     ): Response<ChatListResponse>
+
+    @GET("notification")
+    suspend fun getNotif(
+    ): Response<ListNotifResponse>
+
+    @GET("mystore/notification")
+    suspend fun getNotifStore(
+    ): Response<ListStoreNotifResponse>
 }
