@@ -1,4 +1,4 @@
-package com.alya.ecommerce_serang.ui.profile.mystore.sells.order
+package com.alya.ecommerce_serang.ui.profile.mystore.sells.shipment
 
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
@@ -7,11 +7,11 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.alya.ecommerce_serang.R
 
-class DetailOrderActivity : AppCompatActivity() {
+class ShipmentConfirmationActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContentView(R.layout.activity_detail_order)
+        setContentView(R.layout.activity_shipment_confirmation)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)

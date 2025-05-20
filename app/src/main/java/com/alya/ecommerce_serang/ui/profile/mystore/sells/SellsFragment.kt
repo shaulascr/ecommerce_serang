@@ -35,14 +35,13 @@ class SellsFragment : Fragment() {
 
         val tabs = listOf(
             "Semua Pesanan",
-            "Perlu Tagihan",
+            "Pesanan Masuk",
             "Konfirmasi Pembayaran",
             "Perlu Dikirim",
             "Dikirim",
             "Selesai",
             "Pembatalan",
-            "Klaim Pembayaran",
-            "Pengiriman Gagal"
+            "Klaim Pembayaran"
         )
 
         TabLayoutMediator(binding.tabLayoutSells, binding.viewPagerSells) { tab, position ->
