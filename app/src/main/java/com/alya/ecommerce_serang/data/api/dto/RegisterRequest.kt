@@ -1,7 +1,10 @@
 package com.alya.ecommerce_serang.data.api.dto
 
+import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
+import kotlinx.android.parcel.Parcelize
 
+@Parcelize
 data class RegisterRequest (
     val name: String?,
     val email: String?,
@@ -15,4 +18,4 @@ data class RegisterRequest (
     val image: String? = null,
 
     val otp: String? = null
-)
+): Parcelable

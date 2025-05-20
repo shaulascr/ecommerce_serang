@@ -14,6 +14,7 @@ import com.alya.ecommerce_serang.data.api.response.auth.HasStoreResponse
 import com.alya.ecommerce_serang.data.api.response.auth.ListStoreTypeResponse
 import com.alya.ecommerce_serang.data.api.response.auth.LoginResponse
 import com.alya.ecommerce_serang.data.api.response.auth.OtpResponse
+import com.alya.ecommerce_serang.data.api.response.auth.RegisterResponse
 import com.alya.ecommerce_serang.data.api.response.auth.RegisterStoreResponse
 import com.alya.ecommerce_serang.data.api.response.auth.VerifRegisterResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.ListCityResponse
@@ -59,12 +60,12 @@ class UserRepository(private val apiService: ApiService) {
         return if (response.isSuccessful) response.body() else null
     }
 
-    suspend fun registerUser(request: RegisterRequest): String {
+    suspend fun registerUser(request: RegisterRequest): RegisterResponse {
         val response = apiService.register(request) // API call
 
         if (response.isSuccessful) {
             val responseBody = response.body() ?: throw Exception("Empty response body")
-            return responseBody.message // Get the message from RegisterResponse
+            return responseBody // Get the message from RegisterResponse
         } else {
             throw Exception("Registration failed: ${response.errorBody()?.string()}")
         }
