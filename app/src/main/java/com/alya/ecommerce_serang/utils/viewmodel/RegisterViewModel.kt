@@ -105,9 +105,9 @@ class RegisterViewModel(private val repository: UserRepository, private val orde
 
             try {
                 // Call the repository function to request OTP
-                val authenticatedApiService = getAuthenticatedApiService()
-                val authenticatedOrderRepo = UserRepository(authenticatedApiService)
-                val response: OtpResponse = authenticatedOrderRepo.requestOtpRep(email)
+//                val authenticatedApiService = getAuthenticatedApiService()
+//                val authenticatedOrderRepo = UserRepository(authenticatedApiService)
+                val response: OtpResponse = repository.requestOtpRep(email)
 
                 // Log and store success message
                 Log.d("RegisterViewModel", "OTP Response: ${response.message}")

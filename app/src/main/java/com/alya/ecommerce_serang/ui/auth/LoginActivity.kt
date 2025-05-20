@@ -29,7 +29,7 @@ class LoginActivity : AppCompatActivity() {
         BaseViewModelFactory {
             val apiService = ApiConfig.getUnauthenticatedApiService()
             val userRepository = UserRepository(apiService)
-            LoginViewModel(userRepository)
+            LoginViewModel(userRepository, this)
         }
     }
 
@@ -46,7 +46,6 @@ class LoginActivity : AppCompatActivity() {
         FirebaseApp.initializeApp(this)
 
         // Request FCM token at app startup
-        retrieveFCMToken()
     }
 
     private fun setupListeners() {
@@ -70,6 +69,7 @@ class LoginActivity : AppCompatActivity() {
 
                     val sessionManager = SessionManager(this)
                     sessionManager.saveToken(accessToken)
+                    retrieveFCMToken()
 //                    sessionManager.saveUserId(response.userId)
 
                     Toast.makeText(this, "Login Successful", Toast.LENGTH_SHORT).show()
