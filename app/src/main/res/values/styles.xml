@@ -48,7 +48,7 @@
 
     <style name="BottomNavigationTextStyle" parent="TextAppearance.MaterialComponents.Caption">
         <item name="android:textSize">14sp</item>
-        <item name="fontFamily">@font/dmsans_semibold</item>
+        <item name="fontFamily">@font/dmsans_medium</item>
         <item name="android:paddingTop">8dp</item>
         <item name="android:layout_marginTop">4dp</item>
     </style>

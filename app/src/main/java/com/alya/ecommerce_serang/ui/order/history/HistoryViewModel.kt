@@ -5,8 +5,12 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.alya.ecommerce_serang.data.api.dto.CancelOrderReq
 import com.alya.ecommerce_serang.data.api.dto.CompletedOrderRequest
 import com.alya.ecommerce_serang.data.api.dto.OrdersItem
+import com.alya.ecommerce_serang.data.api.response.customer.order.CancelOrderResponse
+import com.alya.ecommerce_serang.data.api.response.customer.order.OrderListItemsItem
+import com.alya.ecommerce_serang.data.api.response.customer.order.Orders
 import com.alya.ecommerce_serang.data.api.response.order.CompletedOrderResponse
 import com.alya.ecommerce_serang.data.repository.OrderRepository
 import com.alya.ecommerce_serang.data.repository.Result
@@ -26,6 +30,18 @@ class HistoryViewModel(private val repository: OrderRepository) : ViewModel()  {
     private val _orderCompletionStatus = MutableLiveData<Result<CompletedOrderResponse>>()
     val orderCompletionStatus: LiveData<Result<CompletedOrderResponse>> = _orderCompletionStatus
 
+    private val _orderDetails = MutableLiveData<Orders>()
+    val orderDetails: LiveData<Orders> get() = _orderDetails
+
+    private val _cancelOrderStatus = MutableLiveData<Result<CancelOrderResponse>>()
+    val cancelOrderStatus: LiveData<Result<CancelOrderResponse>> = _cancelOrderStatus
+    private val _isCancellingOrder = MutableLiveData<Boolean>()
+    val isCancellingOrder: LiveData<Boolean> = _isCancellingOrder
+
+    // LiveData untuk OrderItems
+    private val _orderItems = MutableLiveData<List<OrderListItemsItem>>()
+    val orderItems: LiveData<List<OrderListItemsItem>> get() = _orderItems
+
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading
 
@@ -34,6 +50,9 @@ class HistoryViewModel(private val repository: OrderRepository) : ViewModel()  {
 
     private val _isSuccess = MutableLiveData<Boolean>()
     val isSuccess: LiveData<Boolean> = _isSuccess
+
+    private val _error = MutableLiveData<String>()
+    val error: LiveData<String> get() = _error
 
     fun getOrderList(status: String) {
         _orders.value = ViewState.Loading
@@ -98,5 +117,47 @@ class HistoryViewModel(private val repository: OrderRepository) : ViewModel()  {
                 }
             }
         }
+    }
+
+    fun getOrderDetails(orderId: Int) {
+        _isLoading.value = true
+        viewModelScope.launch {
+            try {
+                val response = repository.getOrderDetails(orderId)
+                if (response != null) {
+                    _orderDetails.value = response.orders
+                    _orderItems.value = response.orders.orderItems
+                } else {
+                    _error.value = "Gagal memuat detail pesanan"
+                }
+            } catch (e: Exception) {
+                _error.value = "Terjadi kesalahan: ${e.message}"
+                Log.e(TAG, "Error fetching order details", e)
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun cancelOrder(cancelReq: CancelOrderReq) {
+        viewModelScope.launch {
+            try {
+                _cancelOrderStatus.value = Result.Loading
+                val result = repository.cancelOrder(cancelReq)
+                _cancelOrderStatus.value = result
+            } catch (e: Exception) {
+                Log.e("HistoryViewModel", "Error cancelling order: ${e.message}")
+                _cancelOrderStatus.value = Result.Error(e)
+            }
+        }
+    }
+
+    fun refreshOrders(status: String = "all") {
+        Log.d(TAG, "Refreshing orders with status: $status")
+        // Clear current orders before fetching new ones
+        _orders.value = ViewState.Loading
+
+        // Re-fetch the orders with the current status
+        getOrderList(status)
     }
 }

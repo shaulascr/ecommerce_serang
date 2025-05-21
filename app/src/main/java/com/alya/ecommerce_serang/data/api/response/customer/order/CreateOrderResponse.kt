@@ -4,16 +4,16 @@ import com.google.gson.annotations.SerializedName
 
 data class CreateOrderResponse(
 
-    @field:SerializedName("shipping")
+	@field:SerializedName("shipping")
 	val shipping: Shipping,
 
-    @field:SerializedName("order_item")
+	@field:SerializedName("order_item")
 	val orderItem: List<OrderItemItem>,
 
-    @field:SerializedName("message")
+	@field:SerializedName("message")
 	val message: String,
 
-    @field:SerializedName("order")
+	@field:SerializedName("order")
 	val order: Order
 )
 
@@ -47,34 +47,10 @@ data class Shipping(
 	val status: String
 )
 
-data class OrderItemItem(
-
-	@field:SerializedName("quantity")
-	val quantity: Int,
-
-	@field:SerializedName("price")
-	val price: String,
-
-	@field:SerializedName("subtotal")
-	val subtotal: String,
-
-	@field:SerializedName("product_id")
-	val productId: Int,
-
-	@field:SerializedName("id")
-	val id: Int,
-
-	@field:SerializedName("order_id")
-	val orderId: Int
-)
-
 data class Order(
 
-	@field:SerializedName("payment_method_id")
-	val paymentMethodId: Int,
-
 	@field:SerializedName("auto_completed_at")
-	val autoCompletedAt: String? = null,
+	val autoCompletedAt: String,
 
 	@field:SerializedName("updated_at")
 	val updatedAt: String,
@@ -97,9 +73,33 @@ data class Order(
 	@field:SerializedName("voucher_id")
 	val voucherId: String? = null,
 
+	@field:SerializedName("payment_info_id")
+	val paymentInfoId: Int,
+
 	@field:SerializedName("id")
 	val id: Int,
 
 	@field:SerializedName("status")
 	val status: String
+)
+
+data class OrderItemItem(
+
+	@field:SerializedName("quantity")
+	val quantity: Int,
+
+	@field:SerializedName("price")
+	val price: String,
+
+	@field:SerializedName("subtotal")
+	val subtotal: String,
+
+	@field:SerializedName("product_id")
+	val productId: Int,
+
+	@field:SerializedName("id")
+	val id: Int,
+
+	@field:SerializedName("order_id")
+	val orderId: Int
 )

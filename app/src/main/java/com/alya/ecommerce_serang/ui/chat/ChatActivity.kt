@@ -125,6 +125,7 @@ class ChatActivity : AppCompatActivity() {
         val productRating = intent.getFloatExtra(Constants.EXTRA_PRODUCT_RATING, 0f)
         val storeName = intent.getStringExtra(Constants.EXTRA_STORE_NAME) ?: ""
         val chatRoomId = intent.getIntExtra(Constants.EXTRA_CHAT_ROOM_ID, 0)
+        val storeImg = intent.getStringExtra(Constants.EXTRA_STORE_IMAGE) ?: ""
 
         // Check if user is logged in
         val token = sessionManager.getToken()
@@ -137,7 +138,20 @@ class ChatActivity : AppCompatActivity() {
             return
         }
 
-        // Set chat parameters to ViewModel
+        binding.tvStoreName.text = storeName
+        val fullImageUrl = when (val img = storeImg) {
+            is String -> {
+                if (img.startsWith("/")) BASE_URL + img.substring(1) else img
+            }
+            else -> R.drawable.placeholder_image
+        }
+
+        Glide.with(this)
+            .load(fullImageUrl)
+            .placeholder(R.drawable.placeholder_image)
+            .into(binding.imgProfile)
+
+                // Set chat parameters to ViewModel
         viewModel.setChatParameters(
             storeId = storeId,
             productId = productId,
@@ -227,6 +241,7 @@ class ChatActivity : AppCompatActivity() {
 
             }
         })
+
         // Observe state changes using LiveData
         viewModel.state.observe(this, Observer { state ->
             // Update messages
@@ -244,6 +259,7 @@ class ChatActivity : AppCompatActivity() {
                 binding.ratingBar.rating = state.productRating
                 binding.tvRating.text = state.productRating.toString()
                 binding.tvSellerName.text = state.storeName
+                binding.tvStoreName.text=state.storeName
 
                 // Load product image
                 if (!state.productImageUrl.isNullOrEmpty()) {
@@ -269,6 +285,7 @@ class ChatActivity : AppCompatActivity() {
             } else {
                 binding.editTextMessage.hint = getString(R.string.write_message)
             }
+
 
             // Show typing indicator
             binding.tvTypingIndicator.visibility =
@@ -467,7 +484,8 @@ class ChatActivity : AppCompatActivity() {
             productImage: String? = null,
             productRating: String? = null,
             storeName: String? = null,
-            chatRoomId: Int = 0
+            chatRoomId: Int = 0,
+            storeImage: String? = null
         ) {
             val intent = Intent(context, ChatActivity::class.java).apply {
                 putExtra(Constants.EXTRA_STORE_ID, storeId)
@@ -475,6 +493,7 @@ class ChatActivity : AppCompatActivity() {
                 putExtra(Constants.EXTRA_PRODUCT_NAME, productName)
                 putExtra(Constants.EXTRA_PRODUCT_PRICE, productPrice)
                 putExtra(Constants.EXTRA_PRODUCT_IMAGE, productImage)
+                putExtra(Constants.EXTRA_STORE_IMAGE, storeImage)
 
                 // Convert productRating string to float if provided
                 if (productRating != null) {

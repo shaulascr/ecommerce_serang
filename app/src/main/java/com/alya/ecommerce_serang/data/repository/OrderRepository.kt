@@ -2,27 +2,33 @@ package com.alya.ecommerce_serang.data.repository
 
 import android.util.Log
 import com.alya.ecommerce_serang.data.api.dto.AddEvidenceMultipartRequest
+import com.alya.ecommerce_serang.data.api.dto.CancelOrderReq
 import com.alya.ecommerce_serang.data.api.dto.CompletedOrderRequest
 import com.alya.ecommerce_serang.data.api.dto.CourierCostRequest
 import com.alya.ecommerce_serang.data.api.dto.CreateAddressRequest
 import com.alya.ecommerce_serang.data.api.dto.OrderRequest
 import com.alya.ecommerce_serang.data.api.dto.OrderRequestBuy
+import com.alya.ecommerce_serang.data.api.dto.ReviewProductItem
+import com.alya.ecommerce_serang.data.api.dto.UpdateCart
 import com.alya.ecommerce_serang.data.api.dto.UserProfile
-import com.alya.ecommerce_serang.data.api.response.customer.cart.DataItem
-import com.alya.ecommerce_serang.data.api.response.customer.order.CreateOrderResponse
-import com.alya.ecommerce_serang.data.api.response.customer.order.OrderDetailResponse
-import com.alya.ecommerce_serang.data.api.response.customer.order.OrderListResponse
-import com.alya.ecommerce_serang.data.api.response.customer.product.ProductResponse
-import com.alya.ecommerce_serang.data.api.response.order.AddEvidenceResponse
-import com.alya.ecommerce_serang.data.api.response.order.ComplaintResponse
-import com.alya.ecommerce_serang.data.api.response.order.CompletedOrderResponse
+import com.alya.ecommerce_serang.data.api.response.customer.cart.DataItemCart
+import com.alya.ecommerce_serang.data.api.response.customer.order.CancelOrderResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.CourierCostResponse
+import com.alya.ecommerce_serang.data.api.response.customer.order.CreateOrderResponse
+import com.alya.ecommerce_serang.data.api.response.customer.order.CreateReviewResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.ListCityResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.ListProvinceResponse
+import com.alya.ecommerce_serang.data.api.response.customer.order.OrderDetailResponse
+import com.alya.ecommerce_serang.data.api.response.customer.order.OrderListResponse
+import com.alya.ecommerce_serang.data.api.response.customer.product.PaymentItemDetail
+import com.alya.ecommerce_serang.data.api.response.customer.product.ProductResponse
 import com.alya.ecommerce_serang.data.api.response.customer.product.StoreProduct
 import com.alya.ecommerce_serang.data.api.response.customer.product.StoreResponse
 import com.alya.ecommerce_serang.data.api.response.customer.profile.AddressResponse
 import com.alya.ecommerce_serang.data.api.response.customer.profile.CreateAddressResponse
+import com.alya.ecommerce_serang.data.api.response.order.AddEvidenceResponse
+import com.alya.ecommerce_serang.data.api.response.order.ComplaintResponse
+import com.alya.ecommerce_serang.data.api.response.order.CompletedOrderResponse
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -154,7 +160,7 @@ class OrderRepository(private val apiService: ApiService) {
         }
     }
 
-    suspend fun getCart(): Result<List<DataItem>> {
+    suspend fun getCart(): Result<List<DataItemCart>> {
         return try {
             val response = apiService.getCart()
 
@@ -177,6 +183,40 @@ class OrderRepository(private val apiService: ApiService) {
         }
     }
 
+    suspend fun updateCart(updateCart: UpdateCart): Result<String> {
+        return try {
+            val response = apiService.updateCart(updateCart)
+
+            if (response.isSuccessful) {
+                Result.Success(response.body()?.message ?: "Cart updated successfully")
+            } else {
+                val errorMsg = response.errorBody()?.string() ?: "Failed to update cart"
+                Log.e("Order Repository", "Error updating cart: $errorMsg")
+                Result.Error(Exception(errorMsg))
+            }
+        } catch (e: Exception) {
+            Log.e("Order Repository", "Exception updating cart", e)
+            Result.Error(e)
+        }
+    }
+
+    suspend fun deleteCartItem(cartItemId: Int): Result<String> {
+        return try {
+            val response = apiService.deleteCart(cartItemId)
+
+            if (response.isSuccessful) {
+                Result.Success(response.body()?.message ?: "Item removed from cart")
+            } else {
+                val errorMsg = response.errorBody()?.string() ?: "Failed to remove item from cart"
+                Log.e("Order Repository", "Error deleting cart item: $errorMsg")
+                Result.Error(Exception(errorMsg))
+            }
+        } catch (e: Exception) {
+            Log.e("Order Repository", "Exception deleting cart item", e)
+            Result.Error(e)
+        }
+    }
+
     suspend fun fetchStoreDetail(storeId: Int): Result<StoreProduct?> {
         return try {
             val response = apiService.getDetailStore(storeId)
@@ -194,6 +234,27 @@ class OrderRepository(private val apiService: ApiService) {
             }
         } catch (e: Exception) {
             Log.e("Order Repository", "Exception fetching store details", e)
+            Result.Error(e)
+        }
+    }
+
+    suspend fun fetchPaymentStore(storeId: Int): Result<List<PaymentItemDetail?>> {
+        return try {
+            val response = apiService.getDetailStore(storeId)
+            if (response.isSuccessful) {
+                val store = response.body()?.payment
+                if (store != null) {
+                    Result.Success(store)
+                } else {
+                    Result.Error(Exception("Payment details not found"))
+                }
+            } else {
+                val errorMsg = response.errorBody()?.string() ?: "Unknown error"
+                Log.e("Order Repository", "Error fetching store: $errorMsg")
+                Result.Error(Exception(errorMsg))
+            }
+        } catch (e: Exception) {
+            Log.e("Order Repository", "Exception fetching payment details", e)
             Result.Error(e)
         }
     }
@@ -258,59 +319,35 @@ class OrderRepository(private val apiService: ApiService) {
         }
     }
 
-//    suspend fun uploadPaymentProof(request : AddEvidenceRequest): Result<AddEvidenceResponse> {
-//        return try {
-//            Log.d("OrderRepository", "Add Evidence : $request")
-//            val response = apiService.addEvidence(request)
-//
-//            if (response.isSuccessful) {
-//                val addEvidenceResponse = response.body()
-//                if (addEvidenceResponse != null) {
-//                    Log.d("OrderRepository", "Add Evidence successfully: ${addEvidenceResponse.message}")
-//                    Result.Success(addEvidenceResponse)
-//                } else {
-//                    Log.e("OrderRepository", "Response body was null")
-//                    Result.Error(Exception("Empty response from server"))
-//                }
-//            } else {
-//                val errorBody = response.errorBody()?.string() ?: "Unknown error"
-//                Log.e("OrderRepository", "Error Add Evidence : $errorBody")
-//                Result.Error(Exception(errorBody))
-//            }
-//        } catch (e: Exception) {
-//            Log.e("OrderRepository", "Exception Add Evidence ", e)
-//            Result.Error(e)
-//        }
-//    }
-suspend fun uploadPaymentProof(request: AddEvidenceMultipartRequest): Result<AddEvidenceResponse> {
-    return try {
-        Log.d("OrderRepository", "Uploading payment proof...")
+        suspend fun uploadPaymentProof(request: AddEvidenceMultipartRequest): Result<AddEvidenceResponse> {
+        return try {
+            Log.d("OrderRepository", "Uploading payment proof...")
 
-        val response = apiService.addEvidenceMultipart(
-            orderId = request.orderId,
-            amount = request.amount,
-            evidence = request.evidence
-        )
+            val response = apiService.addEvidenceMultipart(
+                orderId = request.orderId,
+                amount = request.amount,
+                evidence = request.evidence
+            )
 
-        if (response.isSuccessful) {
-            val addEvidenceResponse = response.body()
-            if (addEvidenceResponse != null) {
-                Log.d("OrderRepository", "Payment proof uploaded successfully: ${addEvidenceResponse.message}")
-                Result.Success(addEvidenceResponse)
+            if (response.isSuccessful) {
+                val addEvidenceResponse = response.body()
+                if (addEvidenceResponse != null) {
+                    Log.d("OrderRepository", "Payment proof uploaded successfully: ${addEvidenceResponse.message}")
+                    Result.Success(addEvidenceResponse)
+                } else {
+                    Log.e("OrderRepository", "Response body was null")
+                    Result.Error(Exception("Empty response from server"))
+                }
             } else {
-                Log.e("OrderRepository", "Response body was null")
-                Result.Error(Exception("Empty response from server"))
+                val errorBody = response.errorBody()?.string() ?: "Unknown error"
+                Log.e("OrderRepository", "Error uploading payment proof: $errorBody")
+                Result.Error(Exception(errorBody))
             }
-        } else {
-            val errorBody = response.errorBody()?.string() ?: "Unknown error"
-            Log.e("OrderRepository", "Error uploading payment proof: $errorBody")
-            Result.Error(Exception(errorBody))
+        } catch (e: Exception) {
+            Log.e("OrderRepository", "Exception uploading payment proof", e)
+            Result.Error(e)
         }
-    } catch (e: Exception) {
-        Log.e("OrderRepository", "Exception uploading payment proof", e)
-        Result.Error(e)
     }
-}
 
     suspend fun getOrderList(status: String): Result<OrderListResponse> {
         return try {
@@ -339,7 +376,7 @@ suspend fun uploadPaymentProof(request: AddEvidenceMultipartRequest): Result<Add
 
     suspend fun confirmOrderCompleted(request: CompletedOrderRequest): Result<CompletedOrderResponse> {
         return try {
-            Log.d("OrderRepository", "Cinfroming order request completed: $request")
+            Log.d("OrderRepository", "Conforming order request completed: $request")
             val response = apiService.confirmOrder(request)
 
             if(response.isSuccessful) {
@@ -431,4 +468,47 @@ suspend fun uploadPaymentProof(request: AddEvidenceMultipartRequest): Result<Add
             emit(Result.Error(e))
         }
     }.flowOn(Dispatchers.IO)
+
+    suspend fun createReviewProduct(review: ReviewProductItem): Result<CreateReviewResponse>{
+        return try{
+            Log.d("Order Repository", "Sending review item product: $review")
+            val response = apiService.createReview(review)
+
+            if (response.isSuccessful){
+                response.body()?.let { reviewProductResponse ->
+                    Log.d("Order Repository", " Successful create review. Review item rating: ${reviewProductResponse.rating}, orderItemId: ${reviewProductResponse.orderItemId}")
+                    Result.Success(reviewProductResponse)
+                } ?: run {
+                    Result.Error(Exception("Failed to create review"))
+                }
+            } else {
+                val errorMsg = response.errorBody()?.string() ?: "Unknown Error"
+                Log.e("Order Repository", "Error create review. Code ${response.code()}, Error: $errorMsg")
+                Result.Error(Exception(errorMsg))
+            }
+        } catch (e:Exception) {
+            Result.Error(e)
+        }
+
+    }
+
+    suspend fun cancelOrder(cancelReq: CancelOrderReq): Result<CancelOrderResponse>{
+        return try{
+            val response= apiService.cancelOrder(cancelReq)
+
+            if (response.isSuccessful){
+                response.body()?.let { cancelOrderResponse ->
+                    Result.Success(cancelOrderResponse)
+                } ?: run {
+                    Result.Error(Exception("Failed to cancel order"))
+                }
+            } else {
+                val errorMsg = response.errorBody()?.string() ?: "Unknown Error"
+                Result.Error(Exception(errorMsg))
+            }
+        }catch (e: Exception){
+            Result.Error(e)
+        }
+    }
+
 }

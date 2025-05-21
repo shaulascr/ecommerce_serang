@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "284675201257",
+    "project_id": "ecommerce-serang",
+    "storage_bucket": "ecommerce-serang.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:284675201257:android:2755670e3dbb1b48683878",
+        "android_client_info": {
+          "package_name": "com.alya.ecommerce_serang"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB-nWHsVbdV4PPIH06JZSStIVXjv9Qc4iU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

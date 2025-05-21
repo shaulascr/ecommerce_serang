@@ -2,6 +2,7 @@ package com.alya.ecommerce_serang.ui.order.history
 
 import android.app.Activity
 import android.app.Dialog
+import android.content.ContextWrapper
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
@@ -17,14 +18,20 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.dto.OrdersItem
+import com.alya.ecommerce_serang.data.api.dto.ReviewUIItem
 import com.alya.ecommerce_serang.ui.order.detail.PaymentActivity
+import com.alya.ecommerce_serang.ui.order.history.cancelorder.CancelOrderBottomSheet
+import com.alya.ecommerce_serang.ui.order.review.CreateReviewActivity
+import com.alya.ecommerce_serang.ui.product.ReviewProductActivity
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputLayout
+import com.google.gson.Gson
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -146,7 +153,8 @@ class OrderHistoryAdapter(
                         visibility = View.VISIBLE
                         text = itemView.context.getString(R.string.canceled_order_btn)
                         setOnClickListener {
-                            showCancelOrderDialog(order.orderId.toString())
+                            showCancelOrderBottomSheet(order.orderId)
+                            viewModel.refreshOrders()
                         }
                     }
                     deadlineDate.apply {
@@ -167,7 +175,8 @@ class OrderHistoryAdapter(
                         visibility = View.VISIBLE
                         text = itemView.context.getString(R.string.canceled_order_btn)
                         setOnClickListener {
-                            showCancelOrderDialog(order.orderId.toString())
+                            showCancelOrderBottomSheet(order.orderId)
+                            viewModel.refreshOrders()
                         }
                     }
 
@@ -204,6 +213,7 @@ class OrderHistoryAdapter(
                         text = itemView.context.getString(R.string.canceled_order_btn)
                         setOnClickListener {
                             showCancelOrderDialog(order.orderId.toString())
+                            viewModel.refreshOrders()
                         }
                     }
                 }
@@ -222,7 +232,7 @@ class OrderHistoryAdapter(
                         text = itemView.context.getString(R.string.claim_complaint)
                         setOnClickListener {
                             showCancelOrderDialog(order.orderId.toString())
-                            // Handle click event
+                            viewModel.refreshOrders()
                         }
                     }
                     btnRight.apply {
@@ -231,22 +241,13 @@ class OrderHistoryAdapter(
                         setOnClickListener {
                             // Handle click event
                             viewModel.confirmOrderCompleted(order.orderId, "completed")
+                            viewModel.refreshOrders()
 
                         }
                     }
                     deadlineDate.apply {
                         visibility = View.VISIBLE
-                        text = formatShipmentDate(order.updatedAt, order.etd.toInt())
-                    }
-                }
-                "delivered" -> {
-                    // Untuk status delivered, tampilkan "Beri Ulasan"
-                    btnRight.apply {
-                        visibility = View.VISIBLE
-                        text = itemView.context.getString(R.string.add_review)
-                        setOnClickListener {
-                            // Handle click event
-                        }
+                        text = formatShipmentDate(order.updatedAt, order.etd ?: "0")
                     }
                 }
                 "completed" -> {
@@ -262,6 +263,8 @@ class OrderHistoryAdapter(
                         visibility = View.VISIBLE
                         text = itemView.context.getString(R.string.add_review)
                         setOnClickListener {
+                            addReviewProduct(order)
+                            viewModel.refreshOrders()
                             // Handle click event
                         }
                     }
@@ -322,9 +325,10 @@ class OrderHistoryAdapter(
             }
         }
 
-        private fun formatShipmentDate(dateString: String, estimate: Int): String {
+        private fun formatShipmentDate(dateString: String, estimate: String): String {
             return try {
-                // Parse the input date
+                val estimateTD = if (estimate.isNullOrEmpty()) 0 else estimate.toInt()
+
                 val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
                 inputFormat.timeZone = TimeZone.getTimeZone("UTC")
 
@@ -339,7 +343,7 @@ class OrderHistoryAdapter(
                     calendar.time = it
 
                     // Add estimated days
-                    calendar.add(Calendar.DAY_OF_MONTH, estimate)
+                    calendar.add(Calendar.DAY_OF_MONTH, estimateTD)
                     outputFormat.format(calendar.time)
                 } ?: dateString
             } catch (e: Exception) {
@@ -485,10 +489,112 @@ class OrderHistoryAdapter(
             }
             dialog.show()
         }
+
+        private fun showCancelOrderBottomSheet(orderId : Int) {
+            val context = itemView.context
+
+            // We need a FragmentManager to show the bottom sheet
+            // Try to get it from the context
+            val fragmentActivity = when (context) {
+                is FragmentActivity -> context
+                is ContextWrapper -> {
+                    val baseContext = context.baseContext
+                    if (baseContext is FragmentActivity) {
+                        baseContext
+                    } else {
+                        // Log error and show a Toast instead if we can't get a FragmentManager
+                        Log.e("OrderHistoryAdapter", "Cannot show bottom sheet: Context is not a FragmentActivity")
+                        Toast.makeText(context, "Cannot show cancel order dialog", Toast.LENGTH_SHORT).show()
+                        return
+                    }
+                }
+                else -> {
+                    // Log error and show a Toast instead if we can't get a FragmentManager
+                    Log.e("OrderHistoryAdapter", "Cannot show bottom sheet: Context is not a FragmentActivity")
+                    Toast.makeText(context, "Cannot show cancel order dialog", Toast.LENGTH_SHORT).show()
+                    return
+                }
+            }
+
+            // Create and show the bottom sheet using the obtained FragmentManager
+            val bottomSheet = CancelOrderBottomSheet(
+                orderId = orderId,
+                onOrderCancelled = {
+                    // Handle the successful cancellation
+                    // Refresh the data
+                    viewModel.refreshOrders() // Assuming there's a method to refresh orders
+
+                    // Show a success message
+                    Toast.makeText(context, "Order cancelled successfully", Toast.LENGTH_SHORT).show()
+                }
+            )
+
+            bottomSheet.show(fragmentActivity.supportFragmentManager, CancelOrderBottomSheet.TAG)
+        }
+
+        private fun addReviewProduct(order: OrdersItem) {
+            // Use ViewModel to fetch order details
+            viewModel.getOrderDetails(order.orderId)
+
+            // Create loading dialog
+//            val loadingDialog = Dialog(itemView.context).apply {
+//                requestWindowFeature(Window.FEATURE_NO_TITLE)
+//                setContentView(R.layout.dialog_loading)
+//                window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+//                setCancelable(false)
+//            }
+//            loadingDialog.show()
+
+            viewModel.error.observe(itemView.findViewTreeLifecycleOwner()!!) { errorMsg ->
+                if (!errorMsg.isNullOrEmpty()) {
+                    Toast.makeText(itemView.context, errorMsg, Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            // Observe the order details result
+            viewModel.orderItems.observe(itemView.findViewTreeLifecycleOwner()!!) { orderItems ->
+                if (orderItems != null && orderItems.isNotEmpty()) {
+                    // For single item review
+                    if (orderItems.size == 1) {
+                        val item = orderItems[0]
+                        val intent = Intent(itemView.context, CreateReviewActivity::class.java).apply {
+                            putExtra("order_item_id", item.orderItemId)
+                            putExtra("product_name", item.productName)
+                            putExtra("product_image", item.productImage)
+                        }
+                        (itemView.context as Activity).startActivityForResult(intent, REQUEST_CODE_REVIEW)
+                    }
+                    // For multiple items
+                    else {
+                        val reviewItems = orderItems.map { item ->
+                            ReviewUIItem(
+                                orderItemId = item.orderItemId,
+                                productName = item.productName,
+                                productImage = item.productImage
+                            )
+                        }
+
+                        val itemsJson = Gson().toJson(reviewItems)
+                        val intent = Intent(itemView.context, ReviewProductActivity::class.java).apply {
+                            putExtra("order_items", itemsJson)
+                        }
+                        (itemView.context as Activity).startActivityForResult(intent, REQUEST_CODE_REVIEW)
+                    }
+                } else {
+                    Toast.makeText(
+                        itemView.context,
+                        "No items to review",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
+
     }
 
     companion object {
         private const val REQUEST_IMAGE_PICK = 100
+        const val REQUEST_CODE_REVIEW = 101
         private var imagePickCallback: ((Uri) -> Unit)? = null
 
         // This method should be called from the activity's onActivityResult

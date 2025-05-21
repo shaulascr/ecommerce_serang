@@ -12,5 +12,6 @@ data class CheckoutData(
     val sellerId: Int = 0,
     val quantity: Int = 1,
     val isBuyNow: Boolean = false,
-    val cartItems: List<CartItemsItem> = emptyList()
+    val cartItems: List<CartItemsItem> = emptyList(),
+    val cartItemWholesaleMap: Map<Int, Boolean> = emptyMap()
 )

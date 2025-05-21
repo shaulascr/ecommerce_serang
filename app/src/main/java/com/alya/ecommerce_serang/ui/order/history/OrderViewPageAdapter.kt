@@ -14,9 +14,7 @@ class OrderViewPagerAdapter(
         "pending",    // Menunggu Tagihan
         "unpaid",     // Belum Dibayar
         "processed",  // Diproses
-        "paid",       // Dibayar
         "shipped",    // Dikirim
-        "delivered",  // Diterima
         "completed",  // Selesai
         "canceled"    // Dibatalkan
     )

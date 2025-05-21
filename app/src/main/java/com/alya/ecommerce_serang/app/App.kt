@@ -5,14 +5,13 @@ import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
 class App : Application(){
-//    override fun onCreate() {
-//        super.onCreate()
+//    private val TAG = "AppSerang"
 //
-//        val sessionManager = SessionManager(this)
-//        if (sessionManager.getUserId() != null) {
-//            val serviceIntent = Intent(this, SimpleWebSocketService::class.java)
-//            startService(serviceIntent)
-//        }
+////    var tokenTes: String? = null
+//
+//    override fun onCreate() {
+//
 //    }
+
 
 }

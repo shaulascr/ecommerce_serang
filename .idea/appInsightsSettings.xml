@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.alya.ecommerce_serang" />
+                  <option name="mobileSdkAppId" value="1:284675201257:android:2755670e3dbb1b48683878" />
+                  <option name="projectId" value="ecommerce-serang" />
+                  <option name="projectNumber" value="284675201257" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

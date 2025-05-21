@@ -20,6 +20,7 @@ object Constants {
     const val EXTRA_PRODUCT_PRICE = "product_price"
     const val EXTRA_PRODUCT_IMAGE = "product_image"
     const val EXTRA_PRODUCT_RATING = "product_rating"
+    const val EXTRA_STORE_IMAGE = "store_image"
 
     // Request codes
     const val REQUEST_IMAGE_PICK = 1001

@@ -7,15 +7,19 @@ import android.util.Log
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.alya.ecommerce_serang.data.api.dto.CheckoutData
 import com.alya.ecommerce_serang.data.api.dto.OrderRequest
 import com.alya.ecommerce_serang.data.api.dto.OrderRequestBuy
-import com.alya.ecommerce_serang.data.api.response.customer.product.PaymentInfoItem
+import com.alya.ecommerce_serang.data.api.response.customer.product.PaymentItemDetail
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.repository.OrderRepository
 import com.alya.ecommerce_serang.databinding.ActivityCheckoutBinding
@@ -30,6 +34,7 @@ class CheckoutActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCheckoutBinding
     private lateinit var sessionManager: SessionManager
     private var paymentAdapter: PaymentMethodAdapter? = null
+    private var paymentMethodsLoaded = false
 
     private val viewModel: CheckoutViewModel by viewModels {
         BaseViewModelFactory {
@@ -46,6 +51,21 @@ class CheckoutActivity : AppCompatActivity() {
 
         sessionManager = SessionManager(this)
 
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
+        enableEdgeToEdge()
+
+        // Apply insets to your root layout
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, windowInsets ->
+            val systemBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(
+                systemBars.left,
+                systemBars.top,
+                systemBars.right,
+                systemBars.bottom
+            )
+            windowInsets
+        }
 
         // Setup UI components
         setupToolbar()
@@ -57,6 +77,7 @@ class CheckoutActivity : AppCompatActivity() {
     private fun processIntentData() {
         // Determine if this is Buy Now or Cart checkout
         val isBuyNow = intent.hasExtra(EXTRA_PRODUCT_ID) && !intent.hasExtra(EXTRA_CART_ITEM_IDS)
+        val isWholesaleNow = intent.getBooleanExtra(EXTRA_ISWHOLESALE, false)
 
         if (isBuyNow) {
             // Process Buy Now flow
@@ -67,23 +88,33 @@ class CheckoutActivity : AppCompatActivity() {
                 productName = intent.getStringExtra(EXTRA_PRODUCT_NAME),
                 productImage = intent.getStringExtra(EXTRA_PRODUCT_IMAGE),
                 quantity = intent.getIntExtra(EXTRA_QUANTITY, 1),
-                price = intent.getDoubleExtra(EXTRA_PRICE, 0.0)
+                price = intent.getDoubleExtra(EXTRA_PRICE, 0.0),
+                isWholesale = isWholesaleNow
             )
         } else {
             // Process Cart checkout flow
             val cartItemIds = intent.getIntArrayExtra(EXTRA_CART_ITEM_IDS)?.toList() ?: emptyList()
+            val isWholesaleArray = intent.getBooleanArrayExtra(EXTRA_CART_ITEM_WHOLESALE)
+
             if (cartItemIds.isNotEmpty()) {
-                viewModel.initializeFromCart(cartItemIds)
+                // Create a map of cart item IDs to wholesale status if available
+                val wholesaleMap = if (isWholesaleArray != null && isWholesaleArray.size == cartItemIds.size) {
+                    cartItemIds.mapIndexed { index, id -> id to isWholesaleArray[index] }.toMap()
+                } else {
+                    emptyMap()
+                }
+
+                viewModel.initializeFromCart(cartItemIds, wholesaleMap)
             } else {
                 Toast.makeText(this, "Error: No cart items specified", Toast.LENGTH_SHORT).show()
                 finish()
             }
         }
 
-        viewModel.getPaymentMethods { paymentMethods ->
-            // Logging is just for debugging
-            Log.d("CheckoutActivity", "Loaded ${paymentMethods.size} payment methods")
-        }
+//        viewModel.getPaymentMethods { paymentMethods ->
+//            // Logging is just for debugging
+//            Log.d("CheckoutActivity", "Loaded ${paymentMethods.size} payment methods")
+//        }
     }
 
     private fun setupToolbar() {
@@ -97,6 +128,10 @@ class CheckoutActivity : AppCompatActivity() {
         viewModel.checkoutData.observe(this) { data ->
             setupProductRecyclerView(data)
             updateOrderSummary()
+
+            if (data != null) {
+                viewModel.getPaymentMethods()
+            }
         }
 
         // Observe address details
@@ -106,22 +141,26 @@ class CheckoutActivity : AppCompatActivity() {
         }
 
         viewModel.availablePaymentMethods.observe(this) { paymentMethods ->
-            if (paymentMethods.isNotEmpty()) {
+            if (paymentMethods.isNotEmpty() && !paymentMethodsLoaded) {
+                Log.d("CheckoutActivity", "Setting up payment methods: ${paymentMethods.size} methods available")
                 setupPaymentMethodsRecyclerView(paymentMethods)
+                paymentMethodsLoaded = true
             }
         }
 
-// Observe selected payment
         viewModel.selectedPayment.observe(this) { selectedPayment ->
             if (selectedPayment != null) {
-                // Update the adapter to show the selected payment
-                paymentAdapter?.setSelectedPaymentName(selectedPayment.name)
+                Log.d("CheckoutActivity", "Observer notified of selected payment: ${selectedPayment.bankName}")
 
-                // Optional: Update other UI elements to show the selected payment
-                // For example: binding.tvSelectedPaymentMethod.text = selectedPayment.name
+                // Update the adapter ONLY if it exists
+                paymentAdapter?.let { adapter ->
+                    // This line was causing issues - using setSelectedPayment instead of setSelectedPaymentName
+                    adapter.setSelectedPaymentId(selectedPayment.id)
+
+                    Log.d("CheckoutActivity", "Updated adapter with selected payment: ${selectedPayment.id}")
+                }
             }
         }
-
 
         // Observe loading state
         viewModel.isLoading.observe(this) { isLoading ->
@@ -146,7 +185,7 @@ class CheckoutActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupPaymentMethodsRecyclerView(paymentMethods: List<PaymentInfoItem>) {
+    private fun setupPaymentMethodsRecyclerView(paymentMethods: List<PaymentItemDetail>) {
         if (paymentMethods.isEmpty()) {
             Log.e("CheckoutActivity", "Payment methods list is empty")
             Toast.makeText(this, "No payment methods available", Toast.LENGTH_SHORT).show()
@@ -156,18 +195,22 @@ class CheckoutActivity : AppCompatActivity() {
         // Debug logging
         Log.d("CheckoutActivity", "Setting up payment methods: ${paymentMethods.size} methods available")
 
-        paymentAdapter = PaymentMethodAdapter(paymentMethods) { payment ->
-            // We're using a hardcoded ID for now
-            viewModel.setPaymentMethod(1)
-        }
+        if (paymentAdapter == null) {
+            paymentAdapter = PaymentMethodAdapter(paymentMethods) { payment ->
+                Log.d("CheckoutActivity", "Payment selected in adapter: ${payment.bankName}")
 
-        binding.rvPaymentInfo.apply {
-            layoutManager = LinearLayoutManager(this@CheckoutActivity)
-            adapter = paymentAdapter
+                // Set this payment as selected in the ViewModel
+                viewModel.setPaymentMethod(payment.id)
+            }
+
+            binding.rvPaymentInfo.apply {
+                layoutManager = LinearLayoutManager(this@CheckoutActivity)
+                adapter = paymentAdapter
+            }
         }
     }
 
-    private fun updatePaymentMethodsAdapter(paymentMethods: List<PaymentInfoItem>, selectedId: Int?) {
+    private fun updatePaymentMethodsAdapter(paymentMethods: List<PaymentItemDetail>, selectedId: Int?) {
         Log.d("CheckoutActivity", "Updating payment adapter with ${paymentMethods.size} methods")
 
         // Simple test adapter
@@ -183,7 +226,7 @@ class CheckoutActivity : AppCompatActivity() {
 
             override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
                 val payment = paymentMethods[position]
-                (holder.itemView as TextView).text = "Payment: ${payment.name}"
+                (holder.itemView as TextView).text = "Payment: ${payment.bankName}"
             }
         }
 
@@ -347,7 +390,13 @@ class CheckoutActivity : AppCompatActivity() {
         }
 
         // Check if payment method is selected
-        if (viewModel.selectedPayment.value == null) {
+        val paymentMethodId = if (checkoutData.isBuyNow) {
+            (checkoutData.orderRequest as OrderRequestBuy).paymentMethodId
+        } else {
+            (checkoutData.orderRequest as OrderRequest).paymentMethodId
+        }
+
+        if (paymentMethodId <= 0) {
             Toast.makeText(this, "Silakan pilih metode pembayaran", Toast.LENGTH_SHORT).show()
             return false
         }
@@ -365,9 +414,12 @@ class CheckoutActivity : AppCompatActivity() {
         const val EXTRA_PRODUCT_IMAGE = "PRODUCT_IMAGE"
         const val EXTRA_QUANTITY = "QUANTITY"
         const val EXTRA_PRICE = "PRICE"
+        const val EXTRA_ISWHOLESALE = "ISWHOLESALE"
+        const val EXTRA_CART_ITEM_WHOLESALE = "EXTRA_CART_ITEM_WHOLESALE"
 
         // Helper methods for starting activity
 
+        // TO DO: delete iswholesale klo ngga dibuthin
         // For Buy Now
         fun startForBuyNow(
             context: Context,
@@ -377,7 +429,8 @@ class CheckoutActivity : AppCompatActivity() {
             productName: String?,
             productImage: String?,
             quantity: Int,
-            price: Double
+            price: Double,
+            isWholesale: Boolean
         ) {
             val intent = Intent(context, CheckoutActivity::class.java).apply {
                 putExtra(EXTRA_STORE_ID, storeId)
@@ -387,6 +440,7 @@ class CheckoutActivity : AppCompatActivity() {
                 putExtra(EXTRA_PRODUCT_IMAGE, productImage)
                 putExtra(EXTRA_QUANTITY, quantity)
                 putExtra(EXTRA_PRICE, price)
+                putExtra(EXTRA_ISWHOLESALE, isWholesale)
             }
             context.startActivity(intent)
         }
@@ -394,10 +448,14 @@ class CheckoutActivity : AppCompatActivity() {
         // For Cart checkout
         fun startForCart(
             context: Context,
-            cartItemIds: List<Int>
+            cartItemIds: List<Int>,
+            isWholesaleArray: BooleanArray? = null
         ) {
             val intent = Intent(context, CheckoutActivity::class.java).apply {
                 putExtra(EXTRA_CART_ITEM_IDS, cartItemIds.toIntArray())
+                if (isWholesaleArray != null) {
+                    putExtra(EXTRA_CART_ITEM_WHOLESALE, isWholesaleArray)
+                }
             }
             context.startActivity(intent)
         }

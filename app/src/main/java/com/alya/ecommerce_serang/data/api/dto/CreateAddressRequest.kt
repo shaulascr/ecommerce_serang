@@ -4,10 +4,10 @@ import com.google.gson.annotations.SerializedName
 
 data class CreateAddressRequest (
     @SerializedName("latitude")
-    val lat: Double,
+    val lat: Double? = null,
 
     @SerializedName("longitude")
-    val long: Double,
+    val long: Double? = null,
 
     @SerializedName("street")
     val street: String,

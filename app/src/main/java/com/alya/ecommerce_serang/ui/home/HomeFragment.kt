@@ -21,6 +21,7 @@ import com.alya.ecommerce_serang.data.api.dto.ProductsItem
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.repository.ProductRepository
 import com.alya.ecommerce_serang.databinding.FragmentHomeBinding
+import com.alya.ecommerce_serang.ui.cart.CartActivity
 import com.alya.ecommerce_serang.ui.notif.NotificationActivity
 import com.alya.ecommerce_serang.ui.product.DetailProductActivity
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
@@ -129,6 +130,8 @@ class HomeFragment : Fragment() {
         // Setup cart and notification buttons
         binding.searchContainer.btnCart.setOnClickListener {
             // Navigate to cart
+            val intent = Intent(requireContext(), CartActivity::class.java)
+            startActivity(intent)
         }
 
         binding.searchContainer.btnNotification.setOnClickListener {

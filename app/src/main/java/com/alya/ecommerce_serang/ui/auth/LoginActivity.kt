@@ -1,11 +1,14 @@
 package com.alya.ecommerce_serang.ui.auth
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import com.alya.ecommerce_serang.data.api.dto.FcmReq
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.repository.Result
 import com.alya.ecommerce_serang.data.repository.UserRepository
@@ -14,15 +17,19 @@ import com.alya.ecommerce_serang.ui.MainActivity
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
 import com.alya.ecommerce_serang.utils.viewmodel.LoginViewModel
+import com.google.firebase.FirebaseApp
+import com.google.firebase.messaging.FirebaseMessaging
 
 class LoginActivity : AppCompatActivity() {
+
+    private val TAG = "LoginActivity"
 
     private lateinit var binding: ActivityLoginBinding
     private val loginViewModel: LoginViewModel by viewModels{
         BaseViewModelFactory {
             val apiService = ApiConfig.getUnauthenticatedApiService()
             val userRepository = UserRepository(apiService)
-            LoginViewModel(userRepository)
+            LoginViewModel(userRepository, this)
         }
     }
 
@@ -35,6 +42,10 @@ class LoginActivity : AppCompatActivity() {
 
         setupListeners()
         observeLoginState()
+
+        FirebaseApp.initializeApp(this)
+
+        // Request FCM token at app startup
     }
 
     private fun setupListeners() {
@@ -58,6 +69,7 @@ class LoginActivity : AppCompatActivity() {
 
                     val sessionManager = SessionManager(this)
                     sessionManager.saveToken(accessToken)
+                    retrieveFCMToken()
 //                    sessionManager.saveUserId(response.userId)
 
                     Toast.makeText(this, "Login Successful", Toast.LENGTH_SHORT).show()
@@ -73,5 +85,36 @@ class LoginActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun retrieveFCMToken() {
+        FirebaseMessaging.getInstance().token
+            .addOnCompleteListener { task ->
+                if (!task.isSuccessful) {
+                    Log.e(TAG, "Failed to get FCM token", task.exception)
+                    return@addOnCompleteListener
+                }
+
+                val token = task.result
+//                tokenTes = token
+                Log.d(TAG, "FCM token retrieved: $token")
+
+                // Save token locally
+                val sharedPreferences = getSharedPreferences("FCM_PREFS", Context.MODE_PRIVATE)
+                sharedPreferences.edit().putString("FCM_TOKEN", token).apply()
+
+                // Send to your server
+                sendTokenToServer(token)
+            }
+    }
+
+    private fun sendTokenToServer(token: String) {
+        Log.d(TAG, "Would send token to server: $token")
+        val tokenFcm=FcmReq(
+            fcmToken = token
+        )
+        loginViewModel.sendFcm(tokenFcm)
+        Log.d(TAG, "Sent token fcm: $token")
+
     }
 }

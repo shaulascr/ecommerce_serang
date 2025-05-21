@@ -6,7 +6,7 @@ data class OrderRequest (
     @SerializedName("address_id")
     val addressId : Int,
 
-    @SerializedName("payment_method_id")
+    @SerializedName("payment_info_id")
     val paymentMethodId : Int,
 
     @SerializedName("ship_price")
@@ -21,9 +21,12 @@ data class OrderRequest (
     @SerializedName("is_negotiable")
     val isNego: Boolean,
 
-    @SerializedName("cart_items_id")
+    @SerializedName("cart_item_ids")
     val cartItemId: List<Int>,
 
     @SerializedName("ship_etd")
-    val shipEtd: String
-    )
+    val shipEtd: String,
+
+    @SerializedName("is_reseller")
+    val isReseller: Boolean
+)

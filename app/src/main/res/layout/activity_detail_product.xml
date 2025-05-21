@@ -37,6 +37,49 @@
                 android:contentDescription="@string/product_image"
                 tools:src="@drawable/placeholder_image" />
 
+            <androidx.cardview.widget.CardView
+                android:id="@+id/container_wholesale"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/blue_50"
+                android:visibility="gone"
+                app:cardElevation="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="16dp"
+                    android:paddingVertical="4dp"
+                    android:orientation="vertical">
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="8dp"
+                            android:fontFamily="@font/dmsans_semibold"
+                            android:text="Harga Grosir"/>
+                        <TextView
+                            android:id="@+id/tvPriceWholesale"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/blue_500"
+                            android:text="Rp50.000"
+                            android:fontFamily="@font/dmsans_semibold"/>
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/desc_min_order"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:fontFamily="@font/dmsans_mediumitalic"
+                        android:textColor="@color/black_300"
+                        android:text="Minimal pembelian 10 buah"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
             <!-- Product Price and Name -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
@@ -58,6 +101,50 @@
                         android:textStyle="bold"
                         tools:text="Rp65.000" />
 
+<!--                    <androidx.cardview.widget.CardView-->
+<!--                        android:layout_width="match_parent"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:backgroundTint="@color/blue_50"-->
+<!--                        app:cardElevation="0dp">-->
+
+<!--                        <LinearLayout-->
+<!--                            android:layout_width="match_parent"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:paddingStart="16dp"-->
+<!--                            android:paddingVertical="4dp"-->
+<!--                            android:orientation="vertical">-->
+<!--                            <LinearLayout-->
+<!--                                android:layout_width="wrap_content"-->
+<!--                                android:layout_height="wrap_content"-->
+<!--                                android:orientation="horizontal">-->
+<!--                                <TextView-->
+<!--                                    android:layout_width="wrap_content"-->
+<!--                                    android:layout_height="wrap_content"-->
+<!--                                    android:layout_marginEnd="8dp"-->
+<!--                                    android:fontFamily="@font/dmsans_semibold"-->
+<!--                                    android:text="Harga Grosir"/>-->
+<!--                                <TextView-->
+<!--                                    android:id="@+id/tvPriceWholesale"-->
+<!--                                    android:layout_width="wrap_content"-->
+<!--                                    android:layout_height="wrap_content"-->
+<!--                                    android:textColor="@color/blue_500"-->
+<!--                                    android:text="Rp50.000"-->
+<!--                                    android:fontFamily="@font/dmsans_semibold"/>-->
+<!--                            </LinearLayout>-->
+
+<!--                            <TextView-->
+<!--                                android:id="@+id/desc_min_order"-->
+<!--                                android:layout_width="match_parent"-->
+<!--                                android:layout_height="match_parent"-->
+<!--                                android:fontFamily="@font/dmsans_mediumitalic"-->
+<!--                                android:textColor="@color/black_300"-->
+<!--                                android:text="Minimal pembelian 10 buah"/>-->
+<!--                        </LinearLayout>-->
+
+
+<!--                    </androidx.cardview.widget.CardView>-->
+
+
                     <TextView
                         android:id="@+id/tvProductName"
                         android:layout_width="wrap_content"
@@ -66,6 +153,7 @@
                         android:textColor="@color/black"
                         android:textSize="16sp"
                         tools:text="Keripik Ikan Tenggiri" />
+
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -91,7 +179,7 @@
                             android:layout_width="16dp"
                             android:layout_height="16dp"
                             android:contentDescription="@string/rating"
-                            android:src="@drawable/baseline_star_24"/>
+                            android:src="@drawable/baseline_star_24" />
 
                         <TextView
                             android:id="@+id/tvRating"
@@ -103,9 +191,13 @@
                     </LinearLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
+
             <com.google.android.material.divider.MaterialDivider
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
+
+
+
 
             <!-- Buyer Reviews Section -->
             <androidx.cardview.widget.CardView

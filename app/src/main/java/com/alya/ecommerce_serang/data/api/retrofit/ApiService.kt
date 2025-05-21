@@ -3,34 +3,49 @@ package com.alya.ecommerce_serang.data.api.retrofit
 
 import com.alya.ecommerce_serang.data.api.dto.AddEvidenceRequest
 import com.alya.ecommerce_serang.data.api.dto.AddPaymentInfoResponse
+import com.alya.ecommerce_serang.data.api.dto.CancelOrderReq
 import com.alya.ecommerce_serang.data.api.dto.CartItem
 import com.alya.ecommerce_serang.data.api.dto.CityResponse
 import com.alya.ecommerce_serang.data.api.dto.CompletedOrderRequest
 import com.alya.ecommerce_serang.data.api.dto.CourierCostRequest
 import com.alya.ecommerce_serang.data.api.dto.CreateAddressRequest
+import com.alya.ecommerce_serang.data.api.dto.FcmReq
 import com.alya.ecommerce_serang.data.api.dto.LoginRequest
 import com.alya.ecommerce_serang.data.api.dto.OrderRequest
 import com.alya.ecommerce_serang.data.api.dto.OrderRequestBuy
 import com.alya.ecommerce_serang.data.api.dto.OtpRequest
 import com.alya.ecommerce_serang.data.api.dto.ProvinceResponse
 import com.alya.ecommerce_serang.data.api.dto.RegisterRequest
+import com.alya.ecommerce_serang.data.api.dto.ReviewProductItem
 import com.alya.ecommerce_serang.data.api.dto.SearchRequest
 import com.alya.ecommerce_serang.data.api.dto.ShippingServiceRequest
 import com.alya.ecommerce_serang.data.api.dto.StoreAddressResponse
 import com.alya.ecommerce_serang.data.api.dto.UpdateCart
 import com.alya.ecommerce_serang.data.api.dto.UpdateChatRequest
+import com.alya.ecommerce_serang.data.api.dto.VerifRegisReq
+import com.alya.ecommerce_serang.data.api.response.auth.CheckStoreResponse
+import com.alya.ecommerce_serang.data.api.response.auth.FcmTokenResponse
+import com.alya.ecommerce_serang.data.api.response.auth.HasStoreResponse
+import com.alya.ecommerce_serang.data.api.response.auth.ListNotifResponse
+import com.alya.ecommerce_serang.data.api.response.auth.ListStoreNotifResponse
+import com.alya.ecommerce_serang.data.api.response.auth.ListStoreTypeResponse
 import com.alya.ecommerce_serang.data.api.response.auth.LoginResponse
 import com.alya.ecommerce_serang.data.api.response.auth.OtpResponse
 import com.alya.ecommerce_serang.data.api.response.auth.RegisterResponse
+import com.alya.ecommerce_serang.data.api.response.auth.RegisterStoreResponse
+import com.alya.ecommerce_serang.data.api.response.auth.VerifRegisterResponse
 import com.alya.ecommerce_serang.data.api.response.chat.ChatHistoryResponse
 import com.alya.ecommerce_serang.data.api.response.chat.ChatListResponse
 import com.alya.ecommerce_serang.data.api.response.chat.SendChatResponse
 import com.alya.ecommerce_serang.data.api.response.chat.UpdateChatResponse
 import com.alya.ecommerce_serang.data.api.response.customer.cart.AddCartResponse
+import com.alya.ecommerce_serang.data.api.response.customer.cart.DeleteCartResponse
 import com.alya.ecommerce_serang.data.api.response.customer.cart.ListCartResponse
 import com.alya.ecommerce_serang.data.api.response.customer.cart.UpdateCartResponse
+import com.alya.ecommerce_serang.data.api.response.customer.order.CancelOrderResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.CourierCostResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.CreateOrderResponse
+import com.alya.ecommerce_serang.data.api.response.customer.order.CreateReviewResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.ListCityResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.ListProvinceResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.OrderDetailResponse
@@ -43,6 +58,7 @@ import com.alya.ecommerce_serang.data.api.response.customer.product.ReviewProduc
 import com.alya.ecommerce_serang.data.api.response.customer.product.StoreResponse
 import com.alya.ecommerce_serang.data.api.response.customer.profile.AddressResponse
 import com.alya.ecommerce_serang.data.api.response.customer.profile.CreateAddressResponse
+import com.alya.ecommerce_serang.data.api.response.customer.profile.EditProfileResponse
 import com.alya.ecommerce_serang.data.api.response.customer.profile.ProfileResponse
 import com.alya.ecommerce_serang.data.api.response.order.AddEvidenceResponse
 import com.alya.ecommerce_serang.data.api.response.order.ComplaintResponse
@@ -68,6 +84,7 @@ import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Part
+import retrofit2.http.PartMap
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -77,10 +94,53 @@ interface ApiService {
         @Body registerRequest: RegisterRequest
     ): Response<RegisterResponse>
 
+    @POST("verif")
+    suspend fun verifValue (
+        @Body verifRegisReq: VerifRegisReq
+    ):VerifRegisterResponse
+
+    @GET("checkstore")
+    suspend fun checkStore (): Response<CheckStoreResponse>
+
+    @Multipart
+    @POST("registerstore")
+    suspend fun registerStore(
+        @Part("description") description: RequestBody,
+        @Part("store_type_id") storeTypeId: RequestBody,
+        @Part("latitude") latitude: RequestBody,
+        @Part("longitude") longitude: RequestBody,
+        @Part("street") street: RequestBody,
+        @Part("subdistrict") subdistrict: RequestBody,
+        @Part("city_id") cityId: RequestBody,
+        @Part("province_id") provinceId: RequestBody,
+        @Part("postal_code") postalCode: RequestBody,
+        @Part("detail") detail: RequestBody,
+        @Part("bank_name") bankName: RequestBody,
+        @Part("bank_num") bankNum: RequestBody,
+        @Part("store_name") storeName: RequestBody,
+        @Part storeimg: MultipartBody.Part?,
+        @Part ktp: MultipartBody.Part?,
+        @Part npwp: MultipartBody.Part?,
+        @Part nib: MultipartBody.Part?,
+        @Part persetujuan: MultipartBody.Part?,
+        @PartMap couriers: Map<String, @JvmSuppressWildcards RequestBody>,
+        @Part qris: MultipartBody.Part?,
+        @Part("account_name") accountName: RequestBody,
+    ): Response<RegisterStoreResponse>
+
     @POST("otp")
     suspend fun getOTP(
         @Body otpRequest: OtpRequest
     ):OtpResponse
+
+    @PUT("updatefcm")
+    suspend fun updateFcm(
+        @Body fcmReq: FcmReq
+    ): FcmTokenResponse
+
+    @GET("checkstore")
+    suspend fun checkStoreUser(
+    ): HasStoreResponse
 
     @POST("login")
     suspend fun login(
@@ -90,6 +150,10 @@ interface ApiService {
     @GET("category")
     suspend fun allCategory(
     ): Response<CategoryResponse>
+
+    @GET("storetype")
+    suspend fun listTypeStore(
+    ): Response<ListStoreTypeResponse>
 
     @GET("product")
     suspend fun getAllProduct(): Response<AllProductResponse>
@@ -117,6 +181,11 @@ interface ApiService {
         @Body request: OrderRequest
     ): Response<CreateOrderResponse>
 
+    @POST("order/cancel")
+    suspend fun cancelOrder(
+        @Body cancelReq: CancelOrderReq
+    ): Response<CancelOrderResponse>
+
     @GET("order/detail/{id}")
     suspend fun getDetailOrder(
         @Path("id") orderId: Int
@@ -134,6 +203,17 @@ interface ApiService {
         @Part("amount") amount: RequestBody,
         @Part evidence: MultipartBody.Part
     ): Response<AddEvidenceResponse>
+
+    @Multipart
+    @PUT("profile/edit")
+    suspend fun editProfileCustomer(
+        @Part("username") username: RequestBody,
+        @Part("name") name: RequestBody,
+        @Part("phone") phone: RequestBody,
+        @Part("birth_date") birthDate: RequestBody,
+        @Part userimg: MultipartBody.Part,
+        @Part("email") email: RequestBody
+    ): Response<EditProfileResponse>
 
     @GET("order/{status}")
     suspend fun getOrderList(
@@ -215,6 +295,11 @@ interface ApiService {
         @Body updateCart: UpdateCart
     ): Response<UpdateCartResponse>
 
+    @DELETE("cart/delete/{id}")
+    suspend fun deleteCart(
+        @Path("id") cartItemId : Int
+    ):Response<DeleteCartResponse>
+
     @POST("couriercost")
     suspend fun countCourierCost(
         @Body courierCost : CourierCostRequest
@@ -252,6 +337,11 @@ interface ApiService {
         @Part("description") description: RequestBody,
         @Part complaintimg: MultipartBody.Part
     ): Response<ComplaintResponse>
+
+    @POST("review")
+    suspend fun createReview(
+        @Body contentReview : ReviewProductItem
+    ): Response<CreateReviewResponse>
 
     @GET("store/topup")
     suspend fun getTopUpHistory(): Response<TopUpResponse>
@@ -366,4 +456,12 @@ interface ApiService {
     @GET("chat")
     suspend fun getChatList(
     ): Response<ChatListResponse>
+
+    @GET("notification")
+    suspend fun getNotif(
+    ): Response<ListNotifResponse>
+
+    @GET("mystore/notification")
+    suspend fun getNotifStore(
+    ): Response<ListStoreNotifResponse>
 }

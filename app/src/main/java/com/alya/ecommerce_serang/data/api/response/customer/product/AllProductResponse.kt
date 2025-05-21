@@ -12,4 +12,3 @@ data class AllProductResponse(
 	val products: List<ProductsItem>
 )
 
-

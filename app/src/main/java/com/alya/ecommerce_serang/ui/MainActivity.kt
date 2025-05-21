@@ -1,8 +1,10 @@
 package com.alya.ecommerce_serang.ui
 
+import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -20,14 +22,19 @@ import com.alya.ecommerce_serang.data.api.retrofit.ApiService
 import com.alya.ecommerce_serang.databinding.ActivityMainBinding
 import com.alya.ecommerce_serang.ui.notif.WebSocketManager
 import com.alya.ecommerce_serang.utils.SessionManager
+import com.google.firebase.FirebaseApp
+import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
+    private val TAG = "MainActivity"
+
     private lateinit var binding: ActivityMainBinding
     private lateinit var apiService: ApiService
     private lateinit var sessionManager: SessionManager
+
 //    private val viewModel: NotifViewModel by viewModels()
     private val navController by lazy {
         (supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment).navController
@@ -64,6 +71,11 @@ class MainActivity : AppCompatActivity() {
             )
             windowInsets
         }
+        // Initialize Firebase
+        FirebaseApp.initializeApp(this)
+
+        // Request FCM token at app startup
+        retrieveFCMToken()
 
         requestNotificationPermissionIfNeeded()
 
@@ -150,4 +162,31 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
+    private fun retrieveFCMToken() {
+        FirebaseMessaging.getInstance().token
+            .addOnCompleteListener { task ->
+                if (!task.isSuccessful) {
+                    Log.e(TAG, "Failed to get FCM token", task.exception)
+                    return@addOnCompleteListener
+                }
+
+                val token = task.result
+//                tokenTes = token
+                Log.d(TAG, "FCM token retrieved: $token")
+
+                // Save token locally
+                val sharedPreferences = getSharedPreferences("FCM_PREFS", Context.MODE_PRIVATE)
+                sharedPreferences.edit().putString("FCM_TOKEN", token).apply()
+
+                // Send to your server
+                sendTokenToServer(token)
+            }
+    }
+
+    private fun sendTokenToServer(token: String) {
+        Log.d(TAG, "Would send token to server: $token")
+    }
+
+
 }

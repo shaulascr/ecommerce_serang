@@ -47,11 +47,9 @@ class OrderHistoryFragment : Fragment() {
                 1 -> getString(R.string.pending_orders)
                 2 -> getString(R.string.unpaid_orders)
                 3 -> getString(R.string.processed_orders)
-                4 -> getString(R.string.paid_orders)
-                5 -> getString(R.string.shipped_orders)
-                6 -> getString(R.string.delivered_orders)
-                7 -> getString(R.string.completed_orders)
-                8 -> getString(R.string.canceled_orders)
+                4 -> getString(R.string.shipped_orders)
+                5 -> getString(R.string.completed_orders)
+                6 -> getString(R.string.canceled_orders)
                 else -> "Tab $position"
             }
         }.attach()
