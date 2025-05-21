@@ -91,7 +91,6 @@ class CartActivity : AppCompatActivity() {
             adapter = storeAdapter
         }
     }
-
     private fun setupListeners() {
         binding.cbSelectAll.setOnCheckedChangeListener { _, _ ->
             viewModel.toggleSelectAll()
@@ -99,16 +98,20 @@ class CartActivity : AppCompatActivity() {
 
         binding.btnCheckout.setOnClickListener {
             if (viewModel.totalSelectedCount.value ?: 0 > 0) {
-                val selectedItems = viewModel.prepareCheckout()
-                if (selectedItems.isNotEmpty()) {
-                    // Check if all items are from the same store
-                    val storeId = viewModel.activeStoreId.value
-                    if (storeId != null) {
-                        // Start checkout with the prepared items
-                        startCheckoutWithWholesaleInfo(selectedItems)
-                    } else {
-                        Toast.makeText(this, "Please select items from a single store only", Toast.LENGTH_SHORT).show()
+                if (viewModel.hasConsistentWholesaleStatus.value == true) {
+                    val selectedItems = viewModel.prepareCheckout()
+                    if (selectedItems.isNotEmpty()) {
+                        // Check if all items are from the same store
+                        val storeId = viewModel.activeStoreId.value
+                        if (storeId != null) {
+                            // Start checkout with the prepared items
+                            startCheckoutWithWholesaleInfo(selectedItems)
+                        } else {
+                            Toast.makeText(this, "Please select items from a single store only", Toast.LENGTH_SHORT).show()
+                        }
                     }
+                } else {
+                    Toast.makeText(this, "Tidak dapat checkout produk grosir dan retail sekaligus", Toast.LENGTH_LONG).show()
                 }
             } else {
                 Toast.makeText(this, "Pilih produk terlebih dahulu", Toast.LENGTH_SHORT).show()
@@ -174,6 +177,30 @@ class CartActivity : AppCompatActivity() {
             selectCbAll.isChecked = allSelected
             selectCbAll.setOnCheckedChangeListener { _, _ ->
                 viewModel.toggleSelectAll()
+            }
+        }
+
+        viewModel.hasConsistentWholesaleStatus.observe(this) { isConsistent ->
+            if (!isConsistent && (viewModel.totalSelectedCount.value ?: 0) > 1) {
+                binding.btnCheckout.isEnabled = false
+                // Show an error message or indicator
+                binding.tvWholesaleWarning.visibility = View.VISIBLE
+                binding.tvWholesaleWarning.text = "Tidak dapat checkout produk grosir dan retail sekaligus"
+            } else {
+                binding.btnCheckout.isEnabled = true
+                binding.tvWholesaleWarning.visibility = View.GONE
+            }
+        }
+
+        viewModel.cartItemWholesaleStatus.observe(this) { wholesaleStatusMap ->
+            viewModel.cartItemWholesalePrice.value?.let { wholesalePriceMap ->
+                storeAdapter.updateWholesaleStatus(wholesaleStatusMap, wholesalePriceMap)
+            }
+        }
+
+        viewModel.cartItemWholesalePrice.observe(this) { wholesalePriceMap ->
+            viewModel.cartItemWholesaleStatus.value?.let { wholesaleStatusMap ->
+                storeAdapter.updateWholesaleStatus(wholesaleStatusMap, wholesalePriceMap)
             }
         }
     }

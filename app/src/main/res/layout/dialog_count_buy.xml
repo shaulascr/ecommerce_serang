@@ -79,7 +79,7 @@
                     android:layout_width="30dp"
                     android:layout_height="30dp"
                     android:background="@drawable/bg_button_filled"
-                    android:src="@drawable/baseline_add_24"
+                    android:src="@drawable/btn_minus_24dp"
                     app:tint="@color/white"/>
 
                 <TextView

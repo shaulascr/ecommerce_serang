@@ -28,6 +28,8 @@ class StoreAdapter(
     private var selectedItems = HashSet<Int>()
     private var selectedStores = HashSet<Int>()
     private var activeStoreId: Int? = null
+    private var wholesaleStatusMap: Map<Int, Boolean> = mapOf()
+    private var wholesalePriceMap: Map<Int, Double> = mapOf()
 
     companion object {
         private const val VIEW_TYPE_STORE = 0
@@ -70,6 +72,27 @@ class StoreAdapter(
         return count
     }
 
+    private fun isItemSelectable(cartItemId: Int): Boolean {
+        // If no items are selected, any item can be selected
+        if (selectedItems.isEmpty()) return true
+
+        // Get wholesale status of this item
+        val thisItemWholesale = wholesaleStatusMap[cartItemId] ?: false
+
+        // Get wholesale status of first selected item
+        val firstSelectedId = selectedItems.first()
+        val firstSelectedWholesale = wholesaleStatusMap[firstSelectedId] ?: false
+
+        // Item can be selected if its wholesale status matches the first selected item
+        return thisItemWholesale == firstSelectedWholesale
+    }
+
+    fun updateWholesaleStatus(wholesaleStatusMap: Map<Int, Boolean>, wholesalePriceMap: Map<Int, Double>) {
+        this.wholesaleStatusMap = wholesaleStatusMap
+        this.wholesalePriceMap = wholesalePriceMap
+        notifyDataSetChanged()
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (viewType) {
             VIEW_TYPE_STORE -> {
@@ -100,11 +123,16 @@ class StoreAdapter(
                 val cartItem = store.cartItems[itemIndex]
                 val isSelected = selectedItems.contains(cartItem.cartItemId)
                 val isEnabled = activeStoreId == null || activeStoreId == store.storeId
+                val isItemWholesale = wholesaleStatusMap[cartItem.cartItemId] ?: false
+                val wholesalePrice = wholesalePriceMap[cartItem.cartItemId]
+                val isSelectable = isItemSelectable(cartItem.cartItemId)
 
                 holder.bind(
                     cartItem,
                     isSelected,
-                    isEnabled,
+                    isEnabled && isSelectable,
+                    isItemWholesale,
+                    wholesalePrice,
                     { isChecked -> onItemCheckChanged(cartItem.cartItemId, store.storeId, isChecked) },
                     { quantity -> onItemQuantityChanged(cartItem.cartItemId, quantity) },
                     { onItemDeleted(cartItem.cartItemId) }
@@ -158,19 +186,66 @@ class StoreAdapter(
         private val btnMinus: ImageButton = itemView.findViewById(R.id.btnMinus)
         private val tvQuantity: TextView = itemView.findViewById(R.id.tvQuantity)
         private val btnPlus: ImageButton = itemView.findViewById(R.id.btnPlus)
+        private val tvWholesaleIndicator : TextView = itemView.findViewById((R.id.tvWholesaleIndicator))
         private val quantityController: ConstraintLayout = itemView.findViewById(R.id.quantityController)
 
         fun bind(
             cartItem: CartItemsItem,
-            isChecked: Boolean,
+            isSelected: Boolean,
             isEnabled: Boolean,
+            isWholesale: Boolean,
+            wholesalePrice: Double?,
             onCheckedChange: (Boolean) -> Unit,
             onQuantityChanged: (Int) -> Unit,
             onDelete: () -> Unit
         ) {
+            // Set product name
             tvProductName.text = cartItem.productName
-            tvPrice.text = formatCurrency(cartItem.price)
+
+            // Set price based on wholesale status
+            if (isWholesale && wholesalePrice != null) {
+                tvPrice.text = formatCurrency(wholesalePrice.toInt())
+                // Show wholesale indicator if available
+                tvWholesaleIndicator?.visibility = View.VISIBLE
+                tvWholesaleIndicator?.text = "Harga Grosir"
+            } else {
+                tvPrice.text = formatCurrency(cartItem.price)
+                tvWholesaleIndicator?.visibility = View.GONE
+            }
+
+            // Set quantity
             tvQuantity.text = cartItem.quantity.toString()
+
+            // Visual indication for wholesale items
+//            if (isWholesale) {
+//                // You can add a background or border to indicate wholesale items
+//                // For example:
+////                itemView.setBackgroundResource(R.drawable.bg_wholesale_item)
+//                // If you don't have this drawable, you can use a simple color tint instead:
+//                 itemView.setBackgroundColor(ContextCompat.getColor(itemView.context, R.color.wholesale_item_bg))
+//            } else {
+//                // Reset to default background
+////                itemView.setBackgroundResource(R.drawable.bg_normal_item)
+//                // Or if you don't have this drawable:
+//                 itemView.setBackgroundColor(ContextCompat.getColor(itemView.context, R.color.normal_item_bg))
+//            }
+
+            // Set checkbox state without triggering listener
+            cbItem.setOnCheckedChangeListener(null)
+            cbItem.isChecked = isSelected
+            cbItem.isEnabled = isEnabled
+
+            // If not enabled, visually indicate this item can't be selected
+            if (!isEnabled) {
+                itemView.alpha = 0.5f
+            } else {
+                itemView.alpha = 1.0f
+            }
+
+            // Set checkbox listener
+            cbItem.setOnCheckedChangeListener { _, isChecked ->
+                onCheckedChange(isChecked)
+            }
 
             // Load product image
             Glide.with(itemView.context)
@@ -178,15 +253,6 @@ class StoreAdapter(
                 .placeholder(R.drawable.placeholder_image)
                 .error(R.drawable.placeholder_image)
                 .into(ivProduct)
-
-            // Set checkbox state without triggering listener
-            cbItem.setOnCheckedChangeListener(null)
-            cbItem.isChecked = isChecked
-            cbItem.isEnabled = isEnabled
-
-            cbItem.setOnCheckedChangeListener { _, isChecked ->
-                onCheckedChange(isChecked)
-            }
 
             // Quantity control
             btnMinus.setOnClickListener {

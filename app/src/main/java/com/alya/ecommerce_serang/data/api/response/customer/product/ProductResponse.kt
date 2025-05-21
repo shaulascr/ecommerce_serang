@@ -78,13 +78,16 @@ data class Product(
 	val preorderDuration: String? = null
 )
 
-data class CartItemWholesaleInfo(
-	val cartItemId: Int,
-	val isWholesale: Boolean,
-	val wholesalePrice: Double? = null
-)
+
 
 data class CartItemCheckoutInfo(
 	val cartItem: CartItemsItem,
 	val isWholesale: Boolean
+)
+
+
+data class CartItemWholesaleInfo(
+	val cartItemId: Int,
+	val isWholesale: Boolean,
+	val wholesalePrice: Double? = null
 )

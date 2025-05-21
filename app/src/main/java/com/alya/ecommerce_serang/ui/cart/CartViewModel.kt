@@ -49,6 +49,9 @@ class CartViewModel(private val repository: OrderRepository) : ViewModel() {
     private val _cartItemWholesalePrice = MutableLiveData<Map<Int, Double>>(mapOf())
     val cartItemWholesalePrice: LiveData<Map<Int, Double>> = _cartItemWholesalePrice
 
+    private val _hasConsistentWholesaleStatus = MutableLiveData<Boolean>(true)
+    val hasConsistentWholesaleStatus: LiveData<Boolean> = _hasConsistentWholesaleStatus
+
     fun getCart() {
         _isLoading.value = true
         _errorMessage.value = null
@@ -378,5 +381,27 @@ class CartViewModel(private val repository: OrderRepository) : ViewModel() {
             // Recalculate total price to account for wholesale prices
             calculateTotalPrice()
         }
+    }
+
+    private fun checkWholesaleConsistency() {
+        val selectedItemIds = _selectedItems.value ?: HashSet()
+        val wholesaleStatus = _cartItemWholesaleStatus.value ?: mapOf()
+
+        if (selectedItemIds.isEmpty()) {
+            _hasConsistentWholesaleStatus.value = true
+            return
+        }
+
+        // Get the wholesale status of the first selected item
+        val firstSelectedId = selectedItemIds.first()
+        val firstStatus = wholesaleStatus[firstSelectedId] ?: false
+
+        // Check if all other selected items have the same wholesale status
+        val allSameStatus = selectedItemIds.all { itemId ->
+            val itemStatus = wholesaleStatus[itemId] ?: false
+            itemStatus == firstStatus
+        }
+
+        _hasConsistentWholesaleStatus.value = allSameStatus
     }
 }

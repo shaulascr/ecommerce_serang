@@ -54,6 +54,17 @@
         app:layout_constraintStart_toStartOf="@+id/tvProductName"
         app:layout_constraintTop_toBottomOf="@+id/tvProductName" />
 
+    <TextView
+        android:id="@+id/tvWholesaleIndicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Harga Grosir"
+        android:textColor="@color/blue_500"
+        android:textSize="12sp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/tvPrice"
+        app:layout_constraintStart_toStartOf="@id/tvPrice" />
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/quantityController"
         android:layout_width="wrap_content"
