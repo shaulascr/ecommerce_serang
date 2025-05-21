@@ -40,6 +40,8 @@ class CheckoutViewModel(private val repository: OrderRepository) : ViewModel() {
     private val _orderCreated = MutableLiveData<Boolean>()
     val orderCreated: LiveData<Boolean> = _orderCreated
 
+
+
     // Initialize "Buy Now" checkout
     fun initializeBuyNow(
         storeId: Int,
@@ -48,7 +50,8 @@ class CheckoutViewModel(private val repository: OrderRepository) : ViewModel() {
         productName: String?,
         productImage: String?,
         quantity: Int,
-        price: Double
+        price: Double,
+        isWholesale: Boolean
     ) {
         viewModelScope.launch {
             _isLoading.value = true
@@ -64,7 +67,8 @@ class CheckoutViewModel(private val repository: OrderRepository) : ViewModel() {
                     isNego = false, // Default value
                     productId = productId,
                     quantity = quantity,
-                    shipEtd = ""
+                    shipEtd = "",
+                    isReseller = isWholesale
                 )
 
                 // Create checkout data
@@ -89,7 +93,7 @@ class CheckoutViewModel(private val repository: OrderRepository) : ViewModel() {
     }
 
     // Initialize checkout from cart
-    fun initializeFromCart(cartItemIds: List<Int>) {
+    fun initializeFromCart(cartItemIds: List<Int>, isWholesaleMap: Map<Int, Boolean> = emptyMap()) {
         viewModelScope.launch {
             _isLoading.value = true
 
@@ -112,20 +116,18 @@ class CheckoutViewModel(private val repository: OrderRepository) : ViewModel() {
                     }
 
                     if (matchingItems.isNotEmpty() && storeData != null) {
-                        if (matchingItems.size != cartItemIds.size) {
-                            Log.w(TAG, "Not all requested cart items were found. Found ${matchingItems.size} out of ${cartItemIds.size}")
-                            // Consider showing a warning or adjusting the list
-                        }
                         // Create initial OrderRequest object
                         val orderRequest = OrderRequest(
-                            addressId = 0, // Will be set when user selects address
-                            paymentMethodId = 0, // Will be set when user selects payment
-                            shipPrice = 0, // Will be set when user selects shipping
+                            addressId = 0,
+                            paymentMethodId = 0,
+                            shipPrice = 0,
                             shipName = "",
                             shipService = "",
                             isNego = false,
                             cartItemId = cartItemIds,
-                            shipEtd = ""
+                            shipEtd = "",
+                            // Add a list tracking which items are wholesale
+                            isReseller = isWholesaleMap.any { it.value } // Set true if any item is wholesale
                         )
 
                         // Create checkout data
@@ -135,9 +137,9 @@ class CheckoutViewModel(private val repository: OrderRepository) : ViewModel() {
                             sellerName = storeData.storeName,
                             sellerId = storeData.storeId,
                             isBuyNow = false,
-                            cartItems = matchingItems
+                            cartItems = matchingItems,
+                            cartItemWholesaleMap = isWholesaleMap // Store the wholesale map
                         )
-                        Log.d(TAG, "Setting sellerId to: ${storeData.storeId}")
 
                         calculateSubtotal()
                         calculateTotal()
@@ -148,7 +150,6 @@ class CheckoutViewModel(private val repository: OrderRepository) : ViewModel() {
                     _errorMessage.value = "Failed to fetch cart items: ${cartResult.exception.message}"
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Error initializing cart checkout", e)
                 _errorMessage.value = "Error: ${e.message}"
             } finally {
                 _isLoading.value = false
@@ -403,6 +404,8 @@ class CheckoutViewModel(private val repository: OrderRepository) : ViewModel() {
             (data.orderRequest as OrderRequest).shipPrice.toDouble()
         }
     }
+
+
 
     companion object {
         private const val TAG = "CheckoutViewModel"

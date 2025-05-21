@@ -11,6 +11,12 @@ data class ProductsItem(
     @field:SerializedName("image")
     val image: String,
 
+    @field:SerializedName("is_wholesale")
+    val isWholesale: Boolean,
+
+    @field:SerializedName("sppirt")
+    val sppirt: String? = null,
+
     @field:SerializedName("rating")
     val rating: String,
 
@@ -23,6 +29,9 @@ data class ProductsItem(
     @field:SerializedName("is_pre_order")
     val isPreOrder: Boolean,
 
+    @field:SerializedName("condition")
+    val condition: String? = null,
+
     @field:SerializedName("category_id")
     val categoryId: Int,
 
@@ -31,6 +40,9 @@ data class ProductsItem(
 
     @field:SerializedName("name")
     val name: String,
+
+    @field:SerializedName("halal")
+    val halal: String?= null,
 
     @field:SerializedName("id")
     val id: Int,

@@ -27,7 +27,10 @@ data class OrderRequestBuy (
     @SerializedName("quantity")
     val quantity : Int,
 
-
     @SerializedName("ship_etd")
-    val shipEtd: String
+    val shipEtd: String,
+
+    @SerializedName("is_reseller")
+    val isReseller: Boolean
+
 )

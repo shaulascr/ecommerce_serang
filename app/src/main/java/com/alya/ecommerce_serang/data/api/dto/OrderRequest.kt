@@ -25,5 +25,8 @@ data class OrderRequest (
     val cartItemId: List<Int>,
 
     @SerializedName("ship_etd")
-    val shipEtd: String
-    )
+    val shipEtd: String,
+
+    @SerializedName("is_reseller")
+    val isReseller: Boolean
+)

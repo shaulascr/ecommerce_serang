@@ -9,6 +9,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.response.customer.order.OrderListItemsItem
 import com.bumptech.glide.Glide
+import java.text.NumberFormat
+import java.util.Locale
 
 class DetailOrderItemsAdapter : RecyclerView.Adapter<DetailOrderItemsAdapter.DetailOrderItemViewHolder>() {
 
@@ -46,9 +48,16 @@ class DetailOrderItemsAdapter : RecyclerView.Adapter<DetailOrderItemsAdapter.Det
                 .error(R.drawable.placeholder_image)
                 .into(ivProduct)
 
+            val newPrice = formatCurrency(item.price.toDouble())
+
             tvProductName.text = item.productName
             tvQuantity.text = "${item.quantity} buah"
-            tvPrice.text = "Rp${item.price}"
+            tvPrice.text = "Rp${newPrice}"
         }
+    }
+
+    private fun formatCurrency(amount: Double): String {
+        val formatter = NumberFormat.getCurrencyInstance(Locale("in", "ID"))
+        return formatter.format(amount).replace(",00", "")
     }
 }

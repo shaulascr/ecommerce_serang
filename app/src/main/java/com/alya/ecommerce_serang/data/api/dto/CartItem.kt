@@ -9,3 +9,4 @@ data class CartItem (
     @SerializedName("quantity")
     val quantity: Int
 )
+

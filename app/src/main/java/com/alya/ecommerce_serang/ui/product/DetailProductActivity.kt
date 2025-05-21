@@ -12,6 +12,7 @@ import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SwitchCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -46,6 +47,9 @@ class DetailProductActivity : AppCompatActivity() {
     private var productAdapter: HorizontalProductAdapter? = null
     private var reviewsAdapter: ReviewsAdapter? = null
     private var currentQuantity = 1
+    private var isWholesaleAvailable: Boolean = false
+    private var isWholesaleSelected: Boolean = false
+    private var minOrder: Int = 0
 
     private val viewModel: ProductUserViewModel by viewModels {
         BaseViewModelFactory {
@@ -194,17 +198,7 @@ class DetailProductActivity : AppCompatActivity() {
             }
         }
 
-        binding.btnBuyNow.setOnClickListener {
-            viewModel.productDetail.value?.productId?.let { id ->
-                showBuyNowPopup(id)
-            }
-        }
 
-        binding.btnAddToCart.setOnClickListener {
-            viewModel.productDetail.value?.productId?.let { id ->
-                showAddToCartPopup(id)
-            }
-        }
 
         val searchContainerView = binding.searchContainer
         searchContainerView.btnCart.setOnClickListener{
@@ -221,17 +215,39 @@ class DetailProductActivity : AppCompatActivity() {
 
     private fun updateUI(product: Product){
         binding.tvProductName.text = product.productName
-        binding.tvPrice.text = formatCurrency(product.price.toDouble())
-        binding.tvSold.text = product.totalSold.toString()
+        binding.tvPrice.text = "Rp${formatCurrency(product.price.toDouble())}"
+        binding.tvSold.text = "Terjual ${product.totalSold} buah"
         binding.tvRating.text = product.rating
-        binding.tvWeight.text = product.weight.toString()
-        binding.tvStock.text = product.stock.toString()
+        binding.tvWeight.text = "${product.weight} gram"
+        binding.tvStock.text = "${product.stock} buah"
         binding.tvCategory.text = product.productCategory
         binding.tvDescription.text = product.description
 
+        minOrder = product.wholesaleMinItem ?: 1
+        isWholesaleAvailable = product.isWholesale ?: false
+        isWholesaleSelected = false // Default to regular pricing
+        if (isWholesaleAvailable) {
+            binding.containerWholesale.visibility = View.VISIBLE
+            binding.tvPriceWholesale.text = "Rp${formatCurrency(product.wholesalePrice!!.toDouble())}"
+            binding.descMinOrder.text = "Minimal pembelian ${minOrder}"
+        } else {
+            binding.containerWholesale.visibility = View.GONE
+        }
 
         binding.btnChat.setOnClickListener{
             navigateToChat()
+        }
+
+        binding.btnBuyNow.setOnClickListener {
+            viewModel.productDetail.value?.productId?.let { id ->
+                showBuyNowPopup(id)
+            }
+        }
+
+        binding.btnAddToCart.setOnClickListener {
+            viewModel.productDetail.value?.productId?.let { id ->
+                showAddToCartPopup(id)
+            }
         }
 
         val fullImageUrl = when (val img = product.image) {
@@ -315,26 +331,53 @@ class DetailProductActivity : AppCompatActivity() {
         val view = layoutInflater.inflate(R.layout.dialog_count_buy, null)
         bottomSheetDialog.setContentView(view)
 
-        val btnDecrease = view.findViewById<Button>(R.id.btnDecrease)
-        val btnIncrease = view.findViewById<Button>(R.id.btnIncrease)
+        val btnDecrease = view.findViewById<ImageButton>(R.id.btnDecrease)
+        val btnIncrease = view.findViewById<ImageButton>(R.id.btnIncrease)
+
         val tvQuantity = view.findViewById<TextView>(R.id.tvQuantity)
         val btnBuyNow = view.findViewById<Button>(R.id.btnBuyNow)
         val btnClose = view.findViewById<ImageButton>(R.id.btnCloseDialog)
 
-        // Set button text based on action
+        val switchWholesale = view.findViewById<SwitchCompat>(R.id.switch_price)
+
         if (!isBuyNow) {
             btnBuyNow.setText(R.string.add_to_cart)
         }
 
-        currentQuantity = 1
+        switchWholesale.isEnabled = isWholesaleAvailable
+        switchWholesale.isChecked = isWholesaleSelected
+
+        // Set initial quantity based on current selection
+        currentQuantity = if (isWholesaleSelected) minOrder else 1
         tvQuantity.text = currentQuantity.toString()
+
+        switchWholesale.setOnCheckedChangeListener { _, isChecked ->
+            isWholesaleSelected = isChecked
+
+            // Reset quantity when switching between retail and wholesale
+            if (isChecked) {
+                currentQuantity = minOrder
+            } else {
+                currentQuantity = 1
+            }
+            tvQuantity.text = currentQuantity.toString()
+        }
 
         val maxStock = viewModel.productDetail.value?.stock ?: 1
 
         btnDecrease.setOnClickListener {
-            if (currentQuantity > 1) {
-                currentQuantity--
-                tvQuantity.text = currentQuantity.toString()
+            if (isWholesaleSelected) {
+                if (currentQuantity > minOrder) {
+                    currentQuantity--
+                    tvQuantity.text = currentQuantity.toString()
+                } else {
+                    Toast.makeText(this, "Sudah mencapai jumlah minimum", Toast.LENGTH_SHORT).show()
+                }
+            } else {
+                if (currentQuantity > 1) {
+                    currentQuantity--
+                    tvQuantity.text = currentQuantity.toString()
+                }
             }
         }
 
@@ -343,7 +386,7 @@ class DetailProductActivity : AppCompatActivity() {
                 currentQuantity++
                 tvQuantity.text = currentQuantity.toString()
             } else {
-                Toast.makeText(this, "Maximum stock reached", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Sudah mencapai jumlah maksimum", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -351,10 +394,8 @@ class DetailProductActivity : AppCompatActivity() {
             bottomSheetDialog.dismiss()
 
             if (isBuyNow) {
-                // If it's Buy Now, navigate directly to checkout without adding to cart
                 navigateToCheckout()
             } else {
-                // If it's Add to Cart, add the item to the cart
                 val cartItem = CartItem(
                     productId = productId,
                     quantity = currentQuantity
@@ -384,17 +425,34 @@ class DetailProductActivity : AppCompatActivity() {
             return
         }
 
-        // Start checkout activity with buy now flow
-        CheckoutActivity.startForBuyNow(
-            context = this,
-            storeId = productDetail.storeId,
-            storeName = storeDetail.data.storeName,
-            productId = productDetail.productId,
-            productName = productDetail.productName,
-            productImage = productDetail.image,
-            quantity = currentQuantity,
-            price = productDetail.price.toDouble()
-        )
+        if (isWholesaleSelected) {
+            // Start checkout activity with buy now flow
+            //checkout klo grosiran
+            CheckoutActivity.startForBuyNow(
+                context = this,
+                storeId = productDetail.storeId,
+                storeName = storeDetail.data.storeName,
+                productId = productDetail.productId,
+                productName = productDetail.productName,
+                productImage = productDetail.image,
+                quantity = currentQuantity,
+                price = productDetail.wholesalePrice!!.toDouble(),
+                isWholesale = true
+            )
+        } else {
+            //checkout klo direct buy normal price
+            CheckoutActivity.startForBuyNow(
+                context = this,
+                storeId = productDetail.storeId,
+                storeName = storeDetail.data.storeName,
+                productId = productDetail.productId,
+                productName = productDetail.productName,
+                productImage = productDetail.image,
+                quantity = currentQuantity,
+                price = productDetail.price.toDouble(),
+                isWholesale = false
+            )
+        }
     }
 
     private fun navigateToChat(){

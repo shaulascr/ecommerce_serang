@@ -77,6 +77,7 @@ class CheckoutActivity : AppCompatActivity() {
     private fun processIntentData() {
         // Determine if this is Buy Now or Cart checkout
         val isBuyNow = intent.hasExtra(EXTRA_PRODUCT_ID) && !intent.hasExtra(EXTRA_CART_ITEM_IDS)
+        val isWholesaleNow = intent.getBooleanExtra(EXTRA_ISWHOLESALE, false)
 
         if (isBuyNow) {
             // Process Buy Now flow
@@ -87,13 +88,23 @@ class CheckoutActivity : AppCompatActivity() {
                 productName = intent.getStringExtra(EXTRA_PRODUCT_NAME),
                 productImage = intent.getStringExtra(EXTRA_PRODUCT_IMAGE),
                 quantity = intent.getIntExtra(EXTRA_QUANTITY, 1),
-                price = intent.getDoubleExtra(EXTRA_PRICE, 0.0)
+                price = intent.getDoubleExtra(EXTRA_PRICE, 0.0),
+                isWholesale = isWholesaleNow
             )
         } else {
             // Process Cart checkout flow
             val cartItemIds = intent.getIntArrayExtra(EXTRA_CART_ITEM_IDS)?.toList() ?: emptyList()
+            val isWholesaleArray = intent.getBooleanArrayExtra(EXTRA_CART_ITEM_WHOLESALE)
+
             if (cartItemIds.isNotEmpty()) {
-                viewModel.initializeFromCart(cartItemIds)
+                // Create a map of cart item IDs to wholesale status if available
+                val wholesaleMap = if (isWholesaleArray != null && isWholesaleArray.size == cartItemIds.size) {
+                    cartItemIds.mapIndexed { index, id -> id to isWholesaleArray[index] }.toMap()
+                } else {
+                    emptyMap()
+                }
+
+                viewModel.initializeFromCart(cartItemIds, wholesaleMap)
             } else {
                 Toast.makeText(this, "Error: No cart items specified", Toast.LENGTH_SHORT).show()
                 finish()
@@ -403,9 +414,12 @@ class CheckoutActivity : AppCompatActivity() {
         const val EXTRA_PRODUCT_IMAGE = "PRODUCT_IMAGE"
         const val EXTRA_QUANTITY = "QUANTITY"
         const val EXTRA_PRICE = "PRICE"
+        const val EXTRA_ISWHOLESALE = "ISWHOLESALE"
+        const val EXTRA_CART_ITEM_WHOLESALE = "EXTRA_CART_ITEM_WHOLESALE"
 
         // Helper methods for starting activity
 
+        // TO DO: delete iswholesale klo ngga dibuthin
         // For Buy Now
         fun startForBuyNow(
             context: Context,
@@ -415,7 +429,8 @@ class CheckoutActivity : AppCompatActivity() {
             productName: String?,
             productImage: String?,
             quantity: Int,
-            price: Double
+            price: Double,
+            isWholesale: Boolean
         ) {
             val intent = Intent(context, CheckoutActivity::class.java).apply {
                 putExtra(EXTRA_STORE_ID, storeId)
@@ -425,6 +440,7 @@ class CheckoutActivity : AppCompatActivity() {
                 putExtra(EXTRA_PRODUCT_IMAGE, productImage)
                 putExtra(EXTRA_QUANTITY, quantity)
                 putExtra(EXTRA_PRICE, price)
+                putExtra(EXTRA_ISWHOLESALE, isWholesale)
             }
             context.startActivity(intent)
         }
@@ -432,10 +448,14 @@ class CheckoutActivity : AppCompatActivity() {
         // For Cart checkout
         fun startForCart(
             context: Context,
-            cartItemIds: List<Int>
+            cartItemIds: List<Int>,
+            isWholesaleArray: BooleanArray? = null
         ) {
             val intent = Intent(context, CheckoutActivity::class.java).apply {
                 putExtra(EXTRA_CART_ITEM_IDS, cartItemIds.toIntArray())
+                if (isWholesaleArray != null) {
+                    putExtra(EXTRA_CART_ITEM_WHOLESALE, isWholesaleArray)
+                }
             }
             context.startActivity(intent)
         }

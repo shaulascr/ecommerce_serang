@@ -1,12 +1,13 @@
 package com.alya.ecommerce_serang.ui.cart
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.alya.ecommerce_serang.data.api.dto.UpdateCart
-import com.alya.ecommerce_serang.data.api.response.customer.cart.CartItemsItem
 import com.alya.ecommerce_serang.data.api.response.customer.cart.DataItemCart
+import com.alya.ecommerce_serang.data.api.response.customer.product.CartItemCheckoutInfo
 import com.alya.ecommerce_serang.data.repository.OrderRepository
 import com.alya.ecommerce_serang.data.repository.Result
 import kotlinx.coroutines.launch
@@ -42,17 +43,26 @@ class CartViewModel(private val repository: OrderRepository) : ViewModel() {
     private val _allSelected = MutableLiveData<Boolean>(false)
     val allSelected: LiveData<Boolean> = _allSelected
 
+    private val _cartItemWholesaleStatus = MutableLiveData<Map<Int, Boolean>>(mapOf())
+    val cartItemWholesaleStatus: LiveData<Map<Int, Boolean>> = _cartItemWholesaleStatus
+
+    private val _cartItemWholesalePrice = MutableLiveData<Map<Int, Double>>(mapOf())
+    val cartItemWholesalePrice: LiveData<Map<Int, Double>> = _cartItemWholesalePrice
+
     fun getCart() {
         _isLoading.value = true
         _errorMessage.value = null
 
         viewModelScope.launch {
             when (val result = repository.getCart()) {
-                is com.alya.ecommerce_serang.data.repository.Result.Success -> {
+                is Result.Success -> {
                     _cartItems.value = result.data
                     _isLoading.value = false
+
+                    // After loading cart items, check wholesale status
+                    checkWholesaleStatus()
                 }
-                is com.alya.ecommerce_serang.data.repository.Result.Error -> {
+                is Result.Error -> {
                     _errorMessage.value = result.exception.message
                     _isLoading.value = false
                 }
@@ -245,12 +255,22 @@ class CartViewModel(private val repository: OrderRepository) : ViewModel() {
 
     private fun calculateTotalPrice() {
         val selectedItems = _selectedItems.value ?: HashSet()
+        val wholesaleStatus = _cartItemWholesaleStatus.value ?: mapOf()
+        val wholesalePrices = _cartItemWholesalePrice.value ?: mapOf()
         var total = 0
 
         _cartItems.value?.forEach { dataItem ->
             dataItem.cartItems.forEach { cartItem ->
                 if (selectedItems.contains(cartItem.cartItemId)) {
-                    total += cartItem.price * cartItem.quantity
+                    // Check if this item qualifies for wholesale pricing
+                    if (wholesaleStatus[cartItem.cartItemId] == true &&
+                        wholesalePrices.containsKey(cartItem.cartItemId)) {
+                        // Use wholesale price
+                        total += (wholesalePrices[cartItem.cartItemId]!!.toInt() * cartItem.quantity)
+                    } else {
+                        // Use regular price
+                        total += cartItem.price * cartItem.quantity
+                    }
                 }
             }
         }
@@ -281,20 +301,82 @@ class CartViewModel(private val repository: OrderRepository) : ViewModel() {
         _allSelected.value = isAllSelected
     }
 
-    fun prepareCheckout(): List<CartItemsItem> {
+    fun prepareCheckout(): List<CartItemCheckoutInfo> {
         val selectedItemsIds = _selectedItems.value ?: HashSet()
-        val result = mutableListOf<CartItemsItem>()
+        val wholesaleStatus = _cartItemWholesaleStatus.value ?: mapOf()
+        val result = mutableListOf<CartItemCheckoutInfo>()
 
-        if (activeStoreId != null){
+        if (_activeStoreId.value != null) {
             _cartItems.value?.forEach { dataItem ->
                 dataItem.cartItems.forEach { cartItem ->
                     if (selectedItemsIds.contains(cartItem.cartItemId)) {
-                        result.add(cartItem)
+                        // Check wholesale status for this cart item
+                        val isWholesale = wholesaleStatus[cartItem.cartItemId] ?: false
+
+                        result.add(
+                            CartItemCheckoutInfo(
+                            cartItem = cartItem,
+                            isWholesale = isWholesale
+                        )
+                        )
                     }
                 }
             }
         }
 
         return result
+    }
+
+    private fun checkWholesaleStatus() {
+        viewModelScope.launch {
+            val cartItems = _cartItems.value ?: return@launch
+            val wholesaleStatusMap = mutableMapOf<Int, Boolean>()
+            val wholesalePriceMap = mutableMapOf<Int, Double>()
+
+            // Process each cart item
+            for (store in cartItems) {
+                for (item in store.cartItems) {
+                    try {
+                        // Fetch product details to get wholesale information
+                        val productResponse = repository.fetchProductDetail(item.productId)
+
+                        if (productResponse != null) {
+                            val product = productResponse.product
+
+                            // Check if wholesale is available and if quantity meets minimum
+                            val isWholesale = product.isWholesale == true &&
+                                    product.wholesaleMinItem != null &&
+                                    item.quantity >= product.wholesaleMinItem
+
+                            wholesaleStatusMap[item.cartItemId] = isWholesale
+
+                            // If wholesale applies, store the wholesale price
+                            if (isWholesale && product.wholesalePrice != null) {
+                                wholesalePriceMap[item.cartItemId] = product.wholesalePrice.toDouble()
+                            }
+
+                            Log.d("CartViewModel", "Cart item ${item.cartItemId}: isWholesale=$isWholesale, min=${product.wholesaleMinItem}, qty=${item.quantity}")
+                        } else {
+                            // If product details couldn't be fetched, default to non-wholesale
+                            Log.e("CartViewModel", "Failed to fetch product details for ID: ${item.productId}")
+                            wholesaleStatusMap[item.cartItemId] = false
+                        }
+                    } catch (e: Exception) {
+                        // If we can't determine wholesale status, default to false
+                        Log.e("CartViewModel", "Exception checking wholesale status: ${e.message}")
+                        wholesaleStatusMap[item.cartItemId] = false
+                    }
+                }
+            }
+
+            Log.d("CartViewModel", "Wholesale status map: $wholesaleStatusMap")
+            Log.d("CartViewModel", "Wholesale price map: $wholesalePriceMap")
+
+            _cartItemWholesaleStatus.value = wholesaleStatusMap
+            _cartItemWholesalePrice.value = wholesalePriceMap
+
+            // Recalculate total price to account for wholesale prices
+            calculateTotalPrice()
+        }
     }
 }

@@ -12,6 +12,7 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.alya.ecommerce_serang.R
+import com.alya.ecommerce_serang.data.api.response.customer.product.CartItemCheckoutInfo
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
 import com.alya.ecommerce_serang.data.repository.OrderRepository
@@ -103,9 +104,8 @@ class CartActivity : AppCompatActivity() {
                     // Check if all items are from the same store
                     val storeId = viewModel.activeStoreId.value
                     if (storeId != null) {
-                        // Get cart item ids to pass to checkout
-                        val cartItemIds = selectedItems.map { it.cartItemId }
-                        CheckoutActivity.startForCart(this, cartItemIds)
+                        // Start checkout with the prepared items
+                        startCheckoutWithWholesaleInfo(selectedItems)
                     } else {
                         Toast.makeText(this, "Please select items from a single store only", Toast.LENGTH_SHORT).show()
                     }
@@ -120,6 +120,15 @@ class CartActivity : AppCompatActivity() {
             //implement home or search activity
             finish()
         }
+    }
+
+    private fun startCheckoutWithWholesaleInfo(checkoutItems: List<CartItemCheckoutInfo>) {
+        // Extract cart item IDs and wholesale status
+        val cartItemIds = checkoutItems.map { it.cartItem.cartItemId }
+        val wholesaleArray = checkoutItems.map { it.isWholesale }.toBooleanArray()
+
+        // Start checkout activity with the cart items and wholesale info
+        CheckoutActivity.startForCart(this, cartItemIds, wholesaleArray)
     }
 
     private fun observeViewModel() {
