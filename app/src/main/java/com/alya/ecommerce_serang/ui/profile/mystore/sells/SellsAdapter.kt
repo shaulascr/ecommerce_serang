@@ -108,7 +108,7 @@ class SellsAdapter(
             Log.d("SellsAdapter", "Adjusting display for status: $status")
 
             when (status) {
-                "unpaid" -> {
+                "pending" -> {
                     layoutOrders.visibility = View.VISIBLE
                     layoutPayments.visibility = View.GONE
                     layoutShipments.visibility = View.GONE

@@ -9,7 +9,7 @@ class SellsViewPagerAdapter(fragmentActivity: FragmentActivity)
 
     private val sellsStatuses = listOf(
         "all",          // Semua Pesanan
-        "unpaid",       // Pesanan Masuk
+        "pending",       // Pesanan Masuk
         "processed",    // Konfirmasi Pembayaran
         "paid",         // Perlu Dikirim
         "shipped",      // Dikirim

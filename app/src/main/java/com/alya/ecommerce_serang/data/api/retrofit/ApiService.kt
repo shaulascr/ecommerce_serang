@@ -314,7 +314,7 @@ interface ApiService {
     suspend fun getListProv(
     ): Response<ListProvinceResponse>
 
-    @GET("order/{status}")
+    @GET("mystore/orders/{status}")
     suspend fun getSellList(
         @Path("status") status: String
     ): Response<com.alya.ecommerce_serang.data.api.response.store.orders.OrderListResponse>
