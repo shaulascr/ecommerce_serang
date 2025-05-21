@@ -2,8 +2,12 @@ package com.alya.ecommerce_serang.ui.order.address
 
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
@@ -32,6 +36,22 @@ class AddressActivity : AppCompatActivity() {
 
         sessionManager = SessionManager(this)
 
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
+        enableEdgeToEdge()
+
+        // Apply insets to your root layout
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, windowInsets ->
+            val systemBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(
+                systemBars.left,
+                systemBars.top,
+                systemBars.right,
+                systemBars.bottom
+            )
+            windowInsets
+        }
+
 
         setupToolbar()
         setupRecyclerView()
@@ -40,18 +60,16 @@ class AddressActivity : AppCompatActivity() {
         viewModel.fetchAddresses()
     }
 
-    private fun addAddressClicked(){
-        binding.addAddressClick.setOnClickListener{
-            val intent = Intent(this, AddAddressActivity::class.java)
-            startActivity(intent)
-        }
-    }
 
     private fun setupToolbar() {
         // Remove duplicate toolbar setup
-        addAddressClicked()
         binding.toolbar.setNavigationOnClickListener {
             onBackPressedWithResult()
+        }
+
+        binding.addAddressClick.setOnClickListener{
+            val intent = Intent(this, AddAddressActivity::class.java)
+            startActivity(intent)
         }
     }
 

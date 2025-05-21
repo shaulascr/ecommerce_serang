@@ -63,22 +63,17 @@ class RegisterStoreActivity : AppCompatActivity() {
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.d(TAG, "onCreate: Starting RegisterStoreActivity")
         binding = ActivityRegisterStoreBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         sessionManager = SessionManager(this)
-        Log.d(TAG, "onCreate: SessionManager initialized")
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        Log.d(TAG, "onCreate: Window decoration set")
 
         enableEdgeToEdge()
-        Log.d(TAG, "onCreate: Edge-to-edge enabled")
 
         // Apply insets to your root layout
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, windowInsets ->
-            Log.d(TAG, "onCreate: Applying window insets")
             val systemBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
             view.setPadding(
                 systemBars.left,

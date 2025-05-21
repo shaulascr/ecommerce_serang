@@ -17,8 +17,8 @@ class SellsViewModel(private val repository: SellsRepository) : ViewModel() {
         private const val TAG = "SellsViewModel"
     }
 
-    private val _sells = MutableLiveData<ViewState<List<OrdersItem?>?>>()
-    val sells: LiveData<ViewState<List<OrdersItem?>?>> = _sells
+    private val _sells = MutableLiveData<ViewState<List<OrdersItem>>>()
+    val sells: LiveData<ViewState<List<OrdersItem>>> = _sells
 
     fun getSellList(status: String) {
         _sells.value = ViewState.Loading

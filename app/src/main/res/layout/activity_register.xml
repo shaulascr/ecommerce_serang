@@ -9,6 +9,17 @@
     android:theme="@style/Theme.Ecommerce_serang"
     tools:context=".ui.auth.RegisterActivity">
 
+    <TextView
+        android:id="@+id/tv_title_register"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="16dp"
+        android:text="Daftar Akun"
+        android:textAlignment="center"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
     <com.google.android.material.progressindicator.LinearProgressIndicator
         android:id="@+id/registration_progress"
         android:layout_width="match_parent"

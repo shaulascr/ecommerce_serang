@@ -221,15 +221,6 @@
         android:padding="16dp"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnNegotiatePrice"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:background="@drawable/bg_button_outline"
-            android:text="Negosiasi Harga"
-            android:textAllCaps="false"
-            android:textColor="@color/blue_500" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnUploadPaymentProof"

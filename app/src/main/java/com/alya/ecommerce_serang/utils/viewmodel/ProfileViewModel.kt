@@ -28,7 +28,7 @@ class ProfileViewModel(private val userRepository: UserRepository) : ViewModel()
     val checkStore: LiveData<Boolean> = _checkStore
 
     private val _logout = MutableLiveData<Boolean>()
-    val logout : LiveData<Boolean> = _checkStore
+    val logout : LiveData<Boolean> = _logout
 
     fun loadUserProfile(){
         viewModelScope.launch {

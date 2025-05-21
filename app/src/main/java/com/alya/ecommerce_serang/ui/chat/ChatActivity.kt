@@ -59,11 +59,6 @@ class ChatActivity : AppCompatActivity() {
     // For image attachment
     private var tempImageUri: Uri? = null
 
-//    // Chat parameters from intent
-//    private var chatRoomId: Int = 0
-//    private var storeId: Int = 0
-//    private var productId: Int = 0
-
     // Typing indicator handler
     private val typingHandler = android.os.Handler(android.os.Looper.getMainLooper())
     private val stopTypingRunnable = Runnable {

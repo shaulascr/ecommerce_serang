@@ -22,7 +22,7 @@
 
             <include
                 android:id="@+id/searchContainer"
-                layout="@layout/view_search"
+                layout="@layout/view_search_back"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
@@ -195,9 +195,6 @@
             <com.google.android.material.divider.MaterialDivider
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
-
-
-
 
             <!-- Buyer Reviews Section -->
             <androidx.cardview.widget.CardView
@@ -377,6 +374,7 @@
 
             <!-- Seller Info Section -->
             <androidx.cardview.widget.CardView
+                android:id="@+id/container_store_detail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:cardElevation="0dp">

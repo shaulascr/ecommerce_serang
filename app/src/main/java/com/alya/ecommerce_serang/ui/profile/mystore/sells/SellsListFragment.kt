@@ -1,11 +1,11 @@
 package com.alya.ecommerce_serang.ui.profile.mystore.sells
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.alya.ecommerce_serang.data.api.response.store.orders.OrdersItem
@@ -104,7 +104,7 @@ class SellsListFragment : Fragment() {
                     } else {
                         binding.tvEmptyState.visibility = View.GONE
                         binding.rvSells.visibility = View.VISIBLE
-                        //sellsAdapter.submitList(result.data)
+                        sellsAdapter.submitList(result.data)
                     }
                 }
                 is ViewState.Error -> {

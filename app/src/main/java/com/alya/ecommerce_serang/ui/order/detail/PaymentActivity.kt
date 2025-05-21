@@ -4,9 +4,13 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.repository.OrderRepository
 import com.alya.ecommerce_serang.databinding.ActivityPaymentBinding
@@ -39,6 +43,22 @@ class PaymentActivity : AppCompatActivity() {
 
         sessionManager = SessionManager(this)
 
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
+        enableEdgeToEdge()
+
+        // Apply insets to your root layout
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, windowInsets ->
+            val systemBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(
+                systemBars.left,
+                systemBars.top,
+                systemBars.right,
+                systemBars.bottom
+            )
+            windowInsets
+        }
+
         // Mengambil data dari intent
         val orderId = intent.getIntExtra("ORDER_ID", 0)
         val paymentInfoId = intent.getIntExtra("ORDER_PAYMENT_ID", 0)
@@ -50,6 +70,7 @@ class PaymentActivity : AppCompatActivity() {
 
         // Setup toolbar
         binding.toolbar.setNavigationOnClickListener {
+            onBackPressedDispatcher
             finish()
         }
 
@@ -75,15 +96,6 @@ class PaymentActivity : AppCompatActivity() {
 
             startActivity(intent)
         }
-
-        // Setup button negosiasi harga
-        binding.btnNegotiatePrice.setOnClickListener {
-            // Intent ke activity negosiasi harga
-//            val intent = Intent(this, NegotiatePriceActivity::class.java)
-//            intent.putExtra("ORDER_ID", orderId)
-//            startActivity(intent)
-        }
-
         // Observe data
         observeData()
 

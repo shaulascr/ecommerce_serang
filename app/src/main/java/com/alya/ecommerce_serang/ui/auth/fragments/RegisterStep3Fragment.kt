@@ -70,10 +70,10 @@ class RegisterStep3Fragment : Fragment() {
 
         // Set step progress and description
         (activity as? RegisterActivity)?.let {
-            it.findViewById<LinearProgressIndicator>(R.id.registration_progress)?.progress = 33
-            it.findViewById<TextView>(R.id.tv_step_title)?.text = "Step 1: Account & Personal Info"
+            it.findViewById<LinearProgressIndicator>(R.id.registration_progress)?.progress = 100
+            it.findViewById<TextView>(R.id.tv_step_title)?.text = "Step 3: Tambahkan Alamat"
             it.findViewById<TextView>(R.id.tv_step_description)?.text =
-                "Fill in your account and personal details to create your profile."
+                "Masukkan alamat untuk menerima pesanan."
             Log.d(TAG, "Step indicators updated to Step 1")
         }
 

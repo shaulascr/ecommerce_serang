@@ -6,6 +6,19 @@
     android:layout_height="wrap_content"
     android:padding="8dp">
 
+    <TextView
+        android:id="@+id/tvStoreName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="SnackEnak"
+        android:fontFamily="@font/dmsans_semibold"
+        android:textColor="@color/black"
+        android:paddingBottom="8dp"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
     <ImageView
         android:id="@+id/ivProduct"
         android:layout_width="64dp"
@@ -13,7 +26,7 @@
         android:scaleType="centerCrop"
         android:elevation="4dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvStoreName"
         tools:src="@drawable/placeholder_image" />
 
     <TextView

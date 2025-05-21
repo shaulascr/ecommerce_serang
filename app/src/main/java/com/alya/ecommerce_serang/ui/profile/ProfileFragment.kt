@@ -63,16 +63,19 @@ class ProfileFragment : Fragment() {
         viewModel.loadUserProfile()
         viewModel.checkStoreUser()
 
+
+
         binding.cardBukaToko.setOnClickListener{
             val hasStore = viewModel.checkStore.value
-//            val hasStore = false
 
             Log.d("Profile Fragment", "Check store $hasStore")
 
             if (hasStore == true){
+                binding.tvBukaToko.text = "Buka Toko Saya"
                 val intentBuka = Intent(requireContext(), MyStoreActivity::class.java)
                 startActivity(intentBuka)
             } else {
+                binding.tvBukaToko.text = "Daftar Toko Saya"
                 val intentBuka = Intent(requireContext(), RegisterStoreActivity::class.java)
                 startActivity(intentBuka)
             }

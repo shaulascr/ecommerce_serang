@@ -33,6 +33,7 @@ import com.alya.ecommerce_serang.ui.cart.CartActivity
 import com.alya.ecommerce_serang.ui.chat.ChatActivity
 import com.alya.ecommerce_serang.ui.home.HorizontalProductAdapter
 import com.alya.ecommerce_serang.ui.order.CheckoutActivity
+import com.alya.ecommerce_serang.ui.product.storeDetail.StoreDetailActivity
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
 import com.bumptech.glide.Glide
@@ -185,20 +186,19 @@ class DetailProductActivity : AppCompatActivity() {
             binding.recyclerViewOtherProducts.visibility = View.VISIBLE
             binding.tvViewAllProducts.visibility = View.VISIBLE
             productAdapter?.updateProducts(products)
-        }    }
+        }
+    }
 
     private fun setupUI() {
-//        binding.btnBack.setOnClickListener {
-//            finish()
-//        }
+        binding.searchContainer.btnBack.setOnClickListener {
+            finish()
+        }
 
         binding.tvViewAllReviews.setOnClickListener {
             viewModel.productDetail.value?.productId?.let { productId ->
                 handleAllReviewsClick(productId)
             }
         }
-
-
 
         val searchContainerView = binding.searchContainer
         searchContainerView.btnCart.setOnClickListener{
@@ -242,6 +242,10 @@ class DetailProductActivity : AppCompatActivity() {
             viewModel.productDetail.value?.productId?.let { id ->
                 showBuyNowPopup(id)
             }
+        }
+
+        binding.containerStoreDetail.setOnClickListener{
+            handleStoreClick(product)
         }
 
         binding.btnAddToCart.setOnClickListener {
@@ -314,6 +318,12 @@ class DetailProductActivity : AppCompatActivity() {
     private fun handleProductClick(product: ProductsItem) {
         val intent = Intent(this, DetailProductActivity::class.java)
         intent.putExtra("PRODUCT_ID", product.id) // Pass product ID
+        startActivity(intent)
+    }
+
+    private fun handleStoreClick(product: Product) {
+        val intent = Intent(this, StoreDetailActivity::class.java)
+        intent.putExtra("STORE_ID", product.storeId) // Pass product ID
         startActivity(intent)
     }
 

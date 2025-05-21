@@ -70,9 +70,9 @@ class RegisterStep2Fragment : Fragment() {
         // Set step progress and description
         (activity as? RegisterActivity)?.let {
             it.findViewById<LinearProgressIndicator>(R.id.registration_progress)?.progress = 66
-            it.findViewById<TextView>(R.id.tv_step_title)?.text = "Step 2: Verify Your Email"
+            it.findViewById<TextView>(R.id.tv_step_title)?.text = "Step 2: Masukkan Kode OTP"
             it.findViewById<TextView>(R.id.tv_step_description)?.text =
-                "Enter the verification code sent to your email to continue."
+                "Cek email untuk melihat kode OTP. Pastikan email yang digunakan aktif."
             Log.d(TAG, "Step indicators updated to Step 2")
         }
 

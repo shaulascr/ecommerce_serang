@@ -106,10 +106,19 @@ class DetailOrderStatusActivity : AppCompatActivity() {
             return
         }
 
+        setupToolbar()
         setupObservers()
         loadOrderDetails()
 
         Log.d(TAG, "onCreate: Activity initialization completed")
+    }
+
+    private fun setupToolbar(){
+        binding.header.headerLeftIcon.setOnClickListener{
+            finish()
+        }
+
+        binding.header.headerTitle.text = "Detail Pesanan"
     }
 
     private fun setupObservers() {

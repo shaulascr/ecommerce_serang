@@ -6,15 +6,14 @@ import com.alya.ecommerce_serang.data.api.dto.CategoryItem
 import com.alya.ecommerce_serang.data.api.dto.Preorder
 import com.alya.ecommerce_serang.data.api.dto.ProductsItem
 import com.alya.ecommerce_serang.data.api.dto.SearchRequest
-import com.alya.ecommerce_serang.data.api.response.store.product.CreateProductResponse
 import com.alya.ecommerce_serang.data.api.response.customer.cart.AddCartResponse
 import com.alya.ecommerce_serang.data.api.response.customer.product.ProductResponse
 import com.alya.ecommerce_serang.data.api.response.customer.product.ReviewsItem
 import com.alya.ecommerce_serang.data.api.response.customer.product.StoreProduct
-import com.alya.ecommerce_serang.data.api.response.store.product.UpdateProductResponse
 import com.alya.ecommerce_serang.data.api.response.product.Search
+import com.alya.ecommerce_serang.data.api.response.store.product.CreateProductResponse
+import com.alya.ecommerce_serang.data.api.response.store.product.UpdateProductResponse
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
-import com.alya.ecommerce_serang.utils.SessionManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -119,7 +118,7 @@ class ProductRepository(private val apiService: ApiService) {
         }
     }
 
-    suspend fun fetchStoreDetail(storeId: Int): Result<StoreProduct?> {
+    suspend fun fetchStoreDetail(storeId: Int): Result<StoreProduct> {
         return try {
             val response = apiService.getDetailStore(storeId)
             if (response.isSuccessful) {

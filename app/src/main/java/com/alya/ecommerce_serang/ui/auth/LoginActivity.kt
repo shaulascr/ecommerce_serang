@@ -8,6 +8,9 @@ import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import com.alya.ecommerce_serang.data.api.dto.FcmReq
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.repository.Result
@@ -35,10 +38,29 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
 
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
+        enableEdgeToEdge()
+
+        // Apply insets to your root layout
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, windowInsets ->
+            val systemBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(
+                systemBars.left,
+                systemBars.top,
+                systemBars.right,
+                systemBars.bottom
+            )
+            windowInsets
+        }
+
+//        onBackPressedDispatcher.addCallback(this) {
+//            // Handle the back button event
+//        }
 
         setupListeners()
         observeLoginState()
@@ -58,6 +80,11 @@ class LoginActivity : AppCompatActivity() {
             } else {
                 loginViewModel.login(email, password)
             }
+        }
+
+        binding.tvRegistrasi.setOnClickListener{
+            startActivity(Intent(this, RegisterActivity::class.java))
+            finish()
         }
     }
 

@@ -60,10 +60,18 @@ class CartActivity : AppCompatActivity() {
             windowInsets
         }
 
+        setupToolbar()
         setupRecyclerView()
         setupListeners()
         observeViewModel()
         viewModel.getCart()
+    }
+
+    private fun setupToolbar(){
+        binding.header.headerLeftIcon.setOnClickListener{
+            finish()
+        }
+        binding.header.headerTitle.text = "Keranjang"
     }
 
     private fun setupRecyclerView() {
