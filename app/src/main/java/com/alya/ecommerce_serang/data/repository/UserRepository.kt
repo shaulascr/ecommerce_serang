@@ -24,6 +24,9 @@ import com.alya.ecommerce_serang.data.api.response.customer.order.ListProvinceRe
 import com.alya.ecommerce_serang.data.api.response.customer.profile.EditProfileResponse
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
 import com.alya.ecommerce_serang.utils.FileUtils
+import com.alya.ecommerce_serang.utils.ImageUtils
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -32,6 +35,9 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
 
 class UserRepository(private val apiService: ApiService) {
+
+    private val ALLOWED_FILE_TYPES = Regex("^(jpeg|jpg|png|pdf)$", RegexOption.IGNORE_CASE)
+
     //post data without message/response
     suspend fun requestOtpRep(email: String): OtpResponse {
         return apiService.getOTP(OtpRequest(email))
@@ -84,7 +90,7 @@ class UserRepository(private val apiService: ApiService) {
         cityId: Int,
         provinceId: Int,
         postalCode: Int,
-        detail: String?,
+        detail: String,
         bankName: String,
         bankNum: Int,
         storeName: String,
@@ -98,6 +104,17 @@ class UserRepository(private val apiService: ApiService) {
         accountName: String
     ): Result<RegisterStoreResponse> {
         return try {
+            Log.d("RegisterStoreRepo", "Registration params: " +
+                    "storeName=$storeName, " +
+                    "storeTypeId=$storeTypeId, " +
+                    "location=($latitude,$longitude), " +
+                    "address=$street, $subdistrict, cityId=$cityId, provinceId=$provinceId, " +
+                    "postalCode=$postalCode, " +
+                    "bankDetails=$bankName, $bankNum, $accountName, " +
+                    "couriers=${couriers.joinToString()}, " +
+                    "files: storeImg=${storeImg != null}, ktp=${ktp != null}, npwp=${npwp != null}, " +
+                    "nib=${nib != null}, persetujuan=${persetujuan != null}, qris=${qris != null}")
+
             val descriptionPart = description.toRequestBody("text/plain".toMediaTypeOrNull())
             val storeTypeIdPart = storeTypeId.toString().toRequestBody("text/plain".toMediaTypeOrNull())
             val latitudePart = latitude.toRequestBody("text/plain".toMediaTypeOrNull())
@@ -107,7 +124,7 @@ class UserRepository(private val apiService: ApiService) {
             val cityIdPart = cityId.toString().toRequestBody("text/plain".toMediaTypeOrNull())
             val provinceIdPart = provinceId.toString().toRequestBody("text/plain".toMediaTypeOrNull())
             val postalCodePart = postalCode.toString().toRequestBody("text/plain".toMediaTypeOrNull())
-            val detailPart = detail?.toRequestBody("text/plain".toMediaTypeOrNull())
+            val detailPart = detail.toRequestBody("text/plain".toMediaTypeOrNull())
             val bankNamePart = bankName.toRequestBody("text/plain".toMediaTypeOrNull())
             val bankNumPart = bankNum.toString().toRequestBody("text/plain".toMediaTypeOrNull())
             val storeNamePart = storeName.toRequestBody("text/plain".toMediaTypeOrNull())
@@ -116,88 +133,55 @@ class UserRepository(private val apiService: ApiService) {
 
             // Create a Map for courier values
             val courierMap = HashMap<String, RequestBody>()
-            couriers.forEach { courier ->
-                courierMap["couriers[]"] = courier.toRequestBody("text/plain".toMediaTypeOrNull())
+            couriers.forEachIndexed { index, courier ->
+                // Add index to make keys unique
+                courierMap["couriers[$index]"] = courier.toRequestBody("text/plain".toMediaTypeOrNull())
             }
 
-            // Convert URIs to MultipartBody.Part
-            val storeImgPart = storeImg?.let {
-                val inputStream = context.contentResolver.openInputStream(it)
-                val file = File(context.cacheDir, "store_img_${System.currentTimeMillis()}")
-                inputStream?.use { input ->
-                    file.outputStream().use { output ->
-                        input.copyTo(output)
-                    }
-                }
-                val mimeType = context.contentResolver.getType(it) ?: "application/octet-stream"
-                val requestFile = file.asRequestBody(mimeType.toMediaTypeOrNull())
-                MultipartBody.Part.createFormData("storeimg", file.name, requestFile)
+            val storeImgPart = try {
+                processImageFile(context, storeImg, "storeimg", "store_img")
+            } catch (e: IllegalArgumentException) {
+                return Result.Error(Exception("Foto toko: ${e.message}"))
             }
 
-            val ktpPart = ktp?.let {
-                val inputStream = context.contentResolver.openInputStream(it)
-                val file = File(context.cacheDir, "ktp_${System.currentTimeMillis()}")
-                inputStream?.use { input ->
-                    file.outputStream().use { output ->
-                        input.copyTo(output)
-                    }
-                }
-                val mimeType = context.contentResolver.getType(it) ?: "application/octet-stream"
-                val requestFile = file.asRequestBody(mimeType.toMediaTypeOrNull())
-                MultipartBody.Part.createFormData("ktp", file.name, requestFile)
+            val ktpPart = try {
+                processImageFile(context, ktp, "ktp", "ktp")
+            } catch (e: IllegalArgumentException) {
+                return Result.Error(Exception("KTP: ${e.message}"))
             }
 
-            val npwpPart = npwp?.let {
-                val inputStream = context.contentResolver.openInputStream(it)
-                val file = File(context.cacheDir, "npwp_${System.currentTimeMillis()}")
-                inputStream?.use { input ->
-                    file.outputStream().use { output ->
-                        input.copyTo(output)
-                    }
+            val npwpPart = try {
+                npwp?.let {
+                    processDocumentFile(context, it, "npwp", "npwp")
                 }
-                val mimeType = context.contentResolver.getType(it) ?: "application/octet-stream"
-                val requestFile = file.asRequestBody(mimeType.toMediaTypeOrNull())
-                MultipartBody.Part.createFormData("npwp", file.name, requestFile)
+            } catch (e: IllegalArgumentException) {
+                return Result.Error(Exception("NPWP: ${e.message}"))
             }
 
-            val nibPart = nib?.let {
-                val inputStream = context.contentResolver.openInputStream(it)
-                val file = File(context.cacheDir, "nib_${System.currentTimeMillis()}")
-                inputStream?.use { input ->
-                    file.outputStream().use { output ->
-                        input.copyTo(output)
-                    }
-                }
-                val mimeType = context.contentResolver.getType(it) ?: "application/octet-stream"
-                val requestFile = file.asRequestBody(mimeType.toMediaTypeOrNull())
-                MultipartBody.Part.createFormData("nib", file.name, requestFile)
+            val nibPart = try {
+                processDocumentFile(context, nib, "nib", "nib")
+            } catch (e: IllegalArgumentException) {
+                return Result.Error(Exception("NIB: ${e.message}"))
             }
 
-            val persetujuanPart = persetujuan?.let {
-                val inputStream = context.contentResolver.openInputStream(it)
-                val file = File(context.cacheDir, "persetujuan_${System.currentTimeMillis()}")
-                inputStream?.use { input ->
-                    file.outputStream().use { output ->
-                        input.copyTo(output)
-                    }
+            val persetujuanPart = try {
+                persetujuan?.let {
+                    processDocumentFile(context, it, "persetujuan", "persetujuan")
                 }
-                val mimeType = context.contentResolver.getType(it) ?: "application/octet-stream"
-                val requestFile = file.asRequestBody(mimeType.toMediaTypeOrNull())
-                MultipartBody.Part.createFormData("persetujuan", file.name, requestFile)
+            } catch (e: IllegalArgumentException) {
+                return Result.Error(Exception("Persetujuan: ${e.message}"))
             }
 
-            val qrisPart = qris?.let {
-                val inputStream = context.contentResolver.openInputStream(it)
-                val file = File(context.cacheDir, "qris_${System.currentTimeMillis()}")
-                inputStream?.use { input ->
-                    file.outputStream().use { output ->
-                        input.copyTo(output)
-                    }
+            val qrisPart = try {
+                qris?.let {
+                    processDocumentFile(context, it, "qris", "qris")
                 }
-                val mimeType = context.contentResolver.getType(it) ?: "application/octet-stream"
-                val requestFile = file.asRequestBody(mimeType.toMediaTypeOrNull())
-                MultipartBody.Part.createFormData("qris", file.name, requestFile)
+            } catch (e: IllegalArgumentException) {
+                return Result.Error(Exception("QRIS: ${e.message}"))
             }
+
+            Log.d("RegisterStoreRepo", "All parts prepared, making API call")
+
 
             // Make the API call
             val response = apiService.registerStore(
@@ -210,7 +194,7 @@ class UserRepository(private val apiService: ApiService) {
                 cityIdPart,
                 provinceIdPart,
                 postalCodePart,
-                detailPart ?: "".toRequestBody("text/plain".toMediaTypeOrNull()),
+                detailPart,
                 bankNamePart,
                 bankNumPart,
                 storeNamePart,
@@ -226,13 +210,125 @@ class UserRepository(private val apiService: ApiService) {
 
             // Check if response is successful
             if (response.isSuccessful) {
+                Log.d("RegisterStoreRepo", "Registration successful")
                 Result.Success(response.body() ?: throw Exception("Response body is null"))
             } else {
-                Result.Error(Exception("Registration failed with code: ${response.code()}"))
+                val errorBody = response.errorBody()?.string() ?: "No error details"
+                Log.e("RegisterStore", "Registration failed: ${response.code()}, Error: $errorBody")
+                Result.Error(Exception("Registration failed with code: ${response.code()}\nDetails: $errorBody"))
             }
 
         } catch (e: Exception) {
+            Log.e("RegisterStoreRepo", "Registration exception", e)
             Result.Error(e)
+        }
+    }
+
+    private suspend fun processImageFile(
+        context: Context,
+        uri: Uri?,
+        formName: String,
+        filePrefix: String
+    ): MultipartBody.Part? {
+        if (uri == null) {
+            Log.d(TAG, "$formName is null, skipping")
+            return null
+        }
+
+        return withContext(Dispatchers.IO) {
+            try {
+                Log.d(TAG, "Processing $formName image")
+
+                // Check file type
+                val mimeType = context.contentResolver.getType(uri) ?: "application/octet-stream"
+                Log.d(TAG, "$formName MIME type: $mimeType")
+
+                // Validate file type
+                if (!ImageUtils.isAllowedFileType(context, uri, ALLOWED_FILE_TYPES)) {
+                    Log.e(TAG, "$formName has invalid file type: $mimeType")
+                    throw IllegalArgumentException("$formName hanya menerima file JPEG, JPG, atau PNG")
+                }
+
+                // Only compress image files, not PDFs
+                if (mimeType.startsWith("image/")) {
+                    Log.d(TAG, "Compressing $formName image")
+
+                    // Compress image
+                    val compressedFile = ImageUtils.compressImage(
+                        context = context,
+                        uri = uri,
+                        filename = filePrefix,
+                        maxWidth = 1024,
+                        maxHeight = 1024,
+                        quality = 80
+                    )
+
+                    val requestFile = compressedFile.asRequestBody(mimeType.toMediaTypeOrNull())
+                    Log.d(TAG, "$formName compressed size: ${compressedFile.length() / 1024} KB")
+
+                    MultipartBody.Part.createFormData(formName, compressedFile.name, requestFile)
+                } else {
+                    throw IllegalArgumentException("$formName harus berupa file gambar (JPEG, JPG, atau PNG)")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error processing $formName image", e)
+                throw e
+            }
+        }
+    }
+
+    // Process document files (handle PDFs separately)
+    private suspend fun processDocumentFile(
+        context: Context,
+        uri: Uri?,
+        formName: String,
+        filePrefix: String
+    ): MultipartBody.Part? {
+        if (uri == null) {
+            Log.d(TAG, "$formName is null, skipping")
+            return null
+        }
+
+        return withContext(Dispatchers.IO) {
+            try {
+                Log.d(TAG, "Processing $formName document")
+
+                val mimeType = context.contentResolver.getType(uri) ?: "application/octet-stream"
+                Log.d(TAG, "$formName MIME type: $mimeType")
+
+                // Validate file type
+                if (!ImageUtils.isAllowedFileType(context, uri, ALLOWED_FILE_TYPES)) {
+                    Log.e(TAG, "$formName has invalid file type: $mimeType")
+                    throw IllegalArgumentException("$formName hanya menerima file JPEG, JPG, PNG, atau PDF")
+                }
+
+                // For image documents, compress them
+                if (mimeType.startsWith("image/")) {
+                    return@withContext processImageFile(context, uri, formName, filePrefix)
+                }
+
+                // For PDFs, copy as is
+                if (mimeType.contains("pdf")) {
+                    val inputStream = context.contentResolver.openInputStream(uri)
+                    val file = File(context.cacheDir, "${filePrefix}_${System.currentTimeMillis()}.pdf")
+
+                    inputStream?.use { input ->
+                        file.outputStream().use { output ->
+                            input.copyTo(output)
+                        }
+                    }
+
+                    Log.d(TAG, "$formName PDF size: ${file.length() / 1024} KB")
+
+                    val requestFile = file.asRequestBody(mimeType.toMediaTypeOrNull())
+                    MultipartBody.Part.createFormData(formName, file.name, requestFile)
+                } else {
+                    throw IllegalArgumentException("$formName harus berupa file PDF atau gambar (JPEG, JPG, PNG)")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error processing $formName document", e)
+                throw e
+            }
         }
     }
 

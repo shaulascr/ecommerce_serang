@@ -22,9 +22,9 @@ class ApiConfig {
             val client = OkHttpClient.Builder()
                 .addInterceptor(loggingInterceptor)
                 .addInterceptor(authInterceptor)
-                .connectTimeout(60, TimeUnit.SECONDS)  // Increase to 60 seconds
-                .readTimeout(60, TimeUnit.SECONDS)     // Increase to 60 seconds
-                .writeTimeout(60, TimeUnit.SECONDS)
+                .connectTimeout(180, TimeUnit.SECONDS)  // 3 minutes
+                .readTimeout(300, TimeUnit.SECONDS)     // 5 minutes
+                .writeTimeout(300, TimeUnit.SECONDS)    // 5 minutes
                 .build()
 
             val retrofit = Retrofit.Builder()

@@ -13,6 +13,7 @@ import com.alya.ecommerce_serang.data.api.response.customer.order.CitiesItem
 import com.alya.ecommerce_serang.data.api.response.customer.order.ProvincesItem
 import com.alya.ecommerce_serang.data.repository.Result
 import com.alya.ecommerce_serang.data.repository.UserRepository
+import com.alya.ecommerce_serang.utils.ImageUtils
 import kotlinx.coroutines.launch
 
 class RegisterStoreViewModel(
@@ -71,6 +72,44 @@ class RegisterStoreViewModel(
     val selectedCouriers = mutableListOf<String>()
 
     fun registerStore(context: Context) {
+        val allowedFileTypes = Regex("^(jpeg|jpg|png|pdf)$", RegexOption.IGNORE_CASE)
+
+        // Check each file if present
+        if (storeImageUri != null && !ImageUtils.isAllowedFileType(context, storeImageUri, allowedFileTypes)) {
+            _errorMessage.value = "Foto toko harus berupa file JPEG, JPG, atau PNG"
+            _registerState.value = Result.Error(Exception(_errorMessage.value ?: "Invalid file type"))
+            return
+        }
+
+        if (ktpUri != null && !ImageUtils.isAllowedFileType(context, ktpUri, allowedFileTypes)) {
+            _errorMessage.value = "KTP harus berupa file JPEG, JPG, atau PNG"
+            _registerState.value = Result.Error(Exception(_errorMessage.value ?: "Invalid file type"))
+            return
+        }
+
+        if (npwpUri != null && !ImageUtils.isAllowedFileType(context, npwpUri, allowedFileTypes)) {
+            _errorMessage.value = "NPWP harus berupa file JPEG, JPG, PNG, atau PDF"
+            _registerState.value = Result.Error(Exception(_errorMessage.value ?: "Invalid file type"))
+            return
+        }
+
+        if (nibUri != null && !ImageUtils.isAllowedFileType(context, nibUri, allowedFileTypes)) {
+            _errorMessage.value = "NIB harus berupa file JPEG, JPG, PNG, atau PDF"
+            _registerState.value = Result.Error(Exception(_errorMessage.value ?: "Invalid file type"))
+            return
+        }
+
+        if (persetujuanUri != null && !ImageUtils.isAllowedFileType(context, persetujuanUri, allowedFileTypes)) {
+            _errorMessage.value = "Persetujuan harus berupa file JPEG, JPG, PNG, atau PDF"
+            _registerState.value = Result.Error(Exception(_errorMessage.value ?: "Invalid file type"))
+            return
+        }
+
+        if (qrisUri != null && !ImageUtils.isAllowedFileType(context, qrisUri, allowedFileTypes)) {
+            _errorMessage.value = "QRIS harus berupa file JPEG, JPG, PNG, atau PDF"
+            _registerState.value = Result.Error(Exception(_errorMessage.value ?: "Invalid file type"))
+            return
+        }
         viewModelScope.launch {
             try {
                 _registerState.value = Result.Loading
@@ -86,7 +125,7 @@ class RegisterStoreViewModel(
                     cityId = cityId.value ?: 0,
                     provinceId = provinceId.value ?: 0,
                     postalCode = postalCode.value ?: 0,
-                    detail = addressDetail.value,
+                    detail = addressDetail.value ?: "",
                     bankName = bankName.value ?: "",
                     bankNum = bankNumber.value ?: 0,
                     storeName = storeName.value ?: "",
