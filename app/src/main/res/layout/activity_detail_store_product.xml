@@ -639,6 +639,145 @@
 
             </LinearLayout>
 
+            <!-- Produk Grosir -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginBottom="24dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Produk Grosir"
+                        style="@style/body_medium"
+                        android:layout_marginEnd="4dp"/>
+
+                    <Switch
+                        android:id="@+id/switch_is_wholesale"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- Minimum Pesan Grosir -->
+            <LinearLayout
+                android:id="@+id/layout_min_pesan_grosir"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="4dp"
+                        android:text="Minimum Pesanan Grosir"
+                        style="@style/body_medium" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:layout_weight="1"
+                        android:text="*"
+                        style="@style/body_medium"
+                        android:textColor="@color/red_required" />
+
+                </LinearLayout>
+
+                <EditText
+                    android:id="@+id/edt_min_pesan_grosir"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/bg_text_field"
+                    android:hint="Isi minimum produk untuk mendapatkan harga grosir di sini"
+                    android:padding="8dp"
+                    style="@style/body_small" />
+
+            </LinearLayout>
+
+            <!-- Harga grosir produk -->
+            <LinearLayout
+                android:id="@+id/layout_harga_grosir"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginBottom="24dp"
+                android:visibility="gone">
+
+                <!-- Label Harga Grosir -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Harga Grosir"
+                        style="@style/body_medium"
+                        android:layout_marginEnd="4dp"/>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="*"
+                        style="@style/body_medium"
+                        android:textColor="@color/red_required"
+                        android:layout_gravity="end"/>
+
+                </LinearLayout>
+
+                <!-- Input Harga dengan Prefix "Rp" -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:background="@drawable/bg_text_field"
+                    android:layout_marginTop="10dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Rp"
+                        style="@style/label_medium_prominent"
+                        android:textColor="@color/black_300"
+                        android:padding="8dp" />
+
+                    <EditText
+                        android:id="@+id/edt_harga_grosir"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@null"
+                        android:hint="Isi harga grosir per item produk di sini"
+                        android:inputType="number"
+                        android:padding="8dp"
+                        style="@style/body_small" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
             <!-- SPPIRT -->
             <LinearLayout
                 android:layout_width="match_parent"

@@ -109,7 +109,6 @@ class DetailStoreProductActivity : AppCompatActivity() {
         // Setup Pre-Order visibility
         binding.switchIsPreOrder.setOnCheckedChangeListener { _, isChecked ->
             binding.layoutDurasi.visibility = if (isChecked) View.VISIBLE else View.GONE
-            validateForm()
         }
 
         validateForm()
@@ -176,7 +175,10 @@ class DetailStoreProductActivity : AppCompatActivity() {
         binding.edtStokProduk.setText(product?.stock.toString())
         binding.edtMinOrder.setText(product?.minOrder.toString())
         binding.edtBeratProduk.setText(product?.weight.toString())
-        binding.switchIsPreOrder.isChecked = product?.isPreOrder ?: false
+        binding.switchIsPreOrder.isChecked = product?.isPreOrder == false
+//        binding.switchIsWholesale.isChecked = product?.isWholesale == false
+//        binding.edtMinPesanGrosir.setText(product?.minOrderWholesale.toString())
+//        binding.edtHargaGrosir.setText(product?.priceWholesale.toString())
         binding.switchIsActive.isChecked = product?.status == "active"
         binding.spinnerKondisiProduk.setSelection(if (product?.condition == "Baru") 0 else 1)
 
@@ -267,6 +269,9 @@ class DetailStoreProductActivity : AppCompatActivity() {
         val weight = binding.edtBeratProduk.text.toString().toInt()
         val isPreOrder = binding.switchIsPreOrder.isChecked
         val duration = if (isPreOrder) binding.edtDurasi.text.toString().toInt() else 0
+        val isWholesale = binding.switchIsWholesale.isChecked
+        val minOrderWholesale = binding.edtMinPesanGrosir.text.toString().toInt()
+        val priceWholesale = binding.edtHargaGrosir.text.toString().toInt()
         val status = if (binding.switchIsActive.isChecked) "active" else "inactive"
         val condition = binding.spinnerKondisiProduk.selectedItem.toString()
         val categoryId = categoryList.getOrNull(binding.spinnerKategoriProduk.selectedItemPosition)?.id ?: 0

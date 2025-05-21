@@ -1,6 +1,7 @@
 [versions]
 agp = "8.9.2"
 glide = "4.16.0"
+gson = "2.11.0"
 hiltAndroid = "2.56.2"  # Updated from 2.44 for better compatibility
 hiltLifecycleViewmodel = "1.0.0-alpha03"
 hiltCompiler = "2.56.2"  # Added for consistency
@@ -30,6 +31,7 @@ recyclerview = "1.4.0"
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-hilt-lifecycle-viewmodel = { module = "androidx.hilt:hilt-lifecycle-viewmodel", version.ref = "hiltLifecycleViewmodel" }
 androidx-recyclerview = { module = "androidx.recyclerview:recyclerview", version.ref = "recyclerview" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }

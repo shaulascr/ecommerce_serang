@@ -9,14 +9,13 @@ class SellsViewPagerAdapter(fragmentActivity: FragmentActivity)
 
     private val sellsStatuses = listOf(
         "all",          // Semua Pesanan
-        "pending",      // Perlu Tagihan
+        "unpaid",       // Pesanan Masuk
         "processed",    // Konfirmasi Pembayaran
         "paid",         // Perlu Dikirim
         "shipped",      // Dikirim
-        "delivered",    // Dikirim
         "completed",    // Selesai
         "canceled",     // Dibatalkan
-        TODO("Klaim Pembayaran dan Pengajuan Komplain belum ada statusnya")
+        "payment_onhold"
     )
 
     override fun getItemCount(): Int = sellsStatuses.size

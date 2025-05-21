@@ -3,6 +3,7 @@ package com.alya.ecommerce_serang.ui.profile.mystore.sells
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.activity.viewModels
+import androidx.fragment.app.commit
 import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.repository.SellsRepository
@@ -33,9 +34,9 @@ class SellsActivity : AppCompatActivity() {
         setupHeader()
 
         if (savedInstanceState == null) {
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container_sells, SellsFragment())
-                .commit()
+            supportFragmentManager.commit {
+                replace(R.id.fragment_container_sells, SellsFragment())
+            }
         }
     }
 

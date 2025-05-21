@@ -42,6 +42,9 @@
             android:name=".ui.order.review.CreateReviewActivity"
             android:exported="false" />
         <activity
+            android:name=".ui.profile.mystore.sells.shipment.ShipmentConfirmationActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.profile.mystore.profile.EditStoreProfileActivity"
             android:exported="false" />
         <activity
@@ -64,7 +67,6 @@
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
-
         <activity
             android:name=".ui.profile.mystore.profile.shipping_service.ShippingServiceActivity"
             android:exported="false" />
