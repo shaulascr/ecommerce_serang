@@ -100,6 +100,10 @@ class SellsAdapter(
 
             tvSellsQty.text = "${sells.orderItems?.size} produk"
             tvSellsPrice.text = "Rp${sells.totalAmount}"
+//
+//            itemView.setOnClickListener {
+//                onOrderClickListener(sells)
+//            }
 
             adjustDisplay(fragmentStatus, sells)
         }
@@ -108,7 +112,7 @@ class SellsAdapter(
             Log.d("SellsAdapter", "Adjusting display for status: $status")
 
             when (status) {
-                "pending" -> {
+                "pending", "unpaid" -> {
                     layoutOrders.visibility = View.VISIBLE
                     layoutPayments.visibility = View.GONE
                     layoutShipments.visibility = View.GONE
@@ -125,6 +129,20 @@ class SellsAdapter(
                     tvSellsPrice = itemView.findViewById(R.id.tv_order_price)
 
                     tvSellsDue.text = formatDueDate(sells.updatedAt.toString(), 1)
+
+                    val product = sells.orderItems?.get(0)
+                    product?.let {
+                        tvSellsProductName.text = it.productName
+                        tvSellsProductQty.text = "x${it.quantity}"
+                        tvSellsProductPrice.text = "Rp${it.price}"
+                        Glide.with(itemView.context)
+                            .load(it.productImage)
+                            .placeholder(R.drawable.placeholder_image)
+                            .into(ivSellsProduct)
+                    }
+
+                    tvSellsQty.text = "${sells.orderItems?.size} produk"
+                    tvSellsPrice.text = "Rp${sells.totalAmount}"
                 }
                 "paid" -> {
                     layoutOrders.visibility = View.GONE
@@ -133,11 +151,18 @@ class SellsAdapter(
 
                     tvSellsDue.text = formatDueDate(sells.updatedAt.toString(), 2)
                     btnConfirmPayment.setOnClickListener {
+
                         val context = itemView.context
                         val intent = Intent(context, DetailPaymentActivity::class.java)
                         intent.putExtra("sells_data", Gson().toJson(sells))
                         context.startActivity(intent)
+                        viewModel.refreshOrders()
                     }
+
+                    tvSellsTitle.text = "Pesanan Telah Dibayar"
+                    tvSellsDueDesc.text = "Konfirmasi pembayaran sebelum:"
+                    tvSellsDue.text = formatDueDate(sells.updatedAt.toString(), 2)
+
                 }
                 "processed" -> {
                     layoutOrders.visibility = View.GONE
@@ -160,6 +185,12 @@ class SellsAdapter(
                         intent.putExtra("sells_data", Gson().toJson(sells))
                         context.startActivity(intent)
                     }
+
+                    tvSellsTitle.text = "Pesanan Perlu Dikirim"
+                    tvSellsNumber.text = "No. Pesanan: ${sells.orderId}"
+                    tvSellsLocation.text = sells.subdistrict
+                    tvSellsCustomer.text = sells.username
+                    tvSellsDue.text = formatDueDate(sells.updatedAt.toString(), 2)
                 }
                 "shipped" -> {
                     layoutOrders.visibility = View.GONE
