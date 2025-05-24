@@ -42,10 +42,14 @@ class ProductOptionsBottomSheetFragment(private val product: ProductsItem) : Bot
                 .setTitle("Hapus Produk?")
                 .setMessage("Produk yang dihapus tidak dapat dikembalikan.")
                 .setPositiveButton("Ya, Hapus") { _, _ ->
-                    val viewModel = ViewModelProvider(this).get(ProductViewModel::class.java)
+                    val viewModel = ViewModelProvider(requireActivity())[ProductViewModel::class.java]
                     viewModel.deleteProduct(product.id)
                     Toast.makeText(context, "Produk berhasil dihapus", Toast.LENGTH_SHORT).show()
                     dismiss()
+                    activity?.run {
+                        finish()
+                        startActivity(Intent(this, ProductActivity::class.java))
+                    }
                 }
                 .setNegativeButton("Batalkan", null)
                 .show()

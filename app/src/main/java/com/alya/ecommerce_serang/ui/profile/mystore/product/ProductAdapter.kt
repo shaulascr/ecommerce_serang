@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.RecyclerView
+import com.alya.ecommerce_serang.BuildConfig.BASE_URL
 import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.dto.Product
 import com.alya.ecommerce_serang.data.api.dto.ProductsItem
@@ -43,8 +44,13 @@ class ProductAdapter(
                 tvProductStatus.background = ContextCompat.getDrawable(itemView.context, R.drawable.bg_product_inactive)
             }
 
+            val imageUrl = if (product.image.startsWith("/")) {
+                BASE_URL + product.image.removePrefix("/") // Append base URL if the path starts with "/"
+            } else {
+                product.image // Use as is if it's already a full URL
+            }
             Glide.with(itemView.context)
-                .load(product.image)
+                .load(imageUrl)
                 .placeholder(R.drawable.placeholder_image)
                 .into(ivProduct)
 

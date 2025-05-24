@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.alya.ecommerce_serang.data.api.dto.CategoryItem
 import com.alya.ecommerce_serang.data.api.dto.Preorder
 import com.alya.ecommerce_serang.data.api.dto.ProductsItem
+import com.alya.ecommerce_serang.data.api.dto.Wholesale
 import com.alya.ecommerce_serang.data.api.response.store.product.CreateProductResponse
 import com.alya.ecommerce_serang.data.api.response.customer.product.Product
 import com.alya.ecommerce_serang.data.api.response.customer.product.ReviewsItem
@@ -88,6 +89,8 @@ class ProductViewModel(private val repository: ProductRepository) : ViewModel() 
         weight: Int,
         isPreOrder: Boolean,
         preorder: Preorder,
+        isWholesale: Boolean,
+        wholesale: Wholesale,
         categoryId: Int,
         status: String,
         condition: String,
@@ -98,7 +101,7 @@ class ProductViewModel(private val repository: ProductRepository) : ViewModel() 
         _productCreationResult.value = Result.Loading
         viewModelScope.launch {
             val result = repository.addProduct(
-                name, description, price, stock, minOrder, weight, isPreOrder, preorder, categoryId, status, condition, imagePart, sppirtPart, halalPart
+                name, description, price, stock, minOrder, weight, isPreOrder, preorder, isWholesale, wholesale, categoryId, status, condition, imagePart, sppirtPart, halalPart
             )
             _productCreationResult.value = result
         }
