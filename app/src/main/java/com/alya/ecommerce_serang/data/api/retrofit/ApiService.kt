@@ -382,6 +382,7 @@ interface ApiService {
         @Part("latitude") latitude: RequestBody,
         @Part("longitude") longitude: RequestBody,
         @Part("user_phone") userPhone: RequestBody,
+        @Part("store_type_id") storeTypeId: RequestBody,
         @Part storeimg: MultipartBody.Part?
     ): Response<StoreDataResponse>
 

@@ -66,7 +66,7 @@ class MyStoreActivity : AppCompatActivity() {
         binding.tvStoreName.text = store.storeName
         binding.tvStoreType.text = store.storeType
 
-        if (store.storeImage != null && store.storeImage.toString().isNotEmpty() && store.storeImage.toString() != "null") {
+        if (store.storeImage.toString().isNotEmpty() && store.storeImage.toString() != "null") {
             val imageUrl = "$BASE_URL${store.storeImage}"
             Log.d("MyStoreActivity", "Loading store image from: $imageUrl")
 
@@ -78,6 +78,8 @@ class MyStoreActivity : AppCompatActivity() {
         } else {
             Log.d("MyStoreActivity", "No store image available")
         }
+
+//        binding.tvBalance.text = String.format("Rp%,.0f", store.balance.toString())
     }
 
     private fun setUpClickListeners() {

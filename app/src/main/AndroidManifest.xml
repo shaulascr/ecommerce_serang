@@ -48,16 +48,10 @@
             android:name=".ui.profile.mystore.sells.shipment.ShipmentConfirmationActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.profile.mystore.profile.EditStoreProfileActivity"
-            android:exported="false" />
-        <activity
             android:name=".ui.profile.mystore.sells.shipment.DetailShipmentActivity"
             android:exported="false" />
         <activity
             android:name=".ui.profile.mystore.sells.payment.DetailPaymentActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.profile.mystore.sells.order.DetailOrderActivity"
             android:exported="false" />
         <activity
             android:name=".ui.chat.ChatActivity"

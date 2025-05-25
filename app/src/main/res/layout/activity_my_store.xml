@@ -198,7 +198,7 @@
 
                         <TextView
                             style="@style/headline_small"
-                            android:id="@+id/tv_num_perlu_tagihan"
+                            android:id="@+id/tv_num_pesanan_masuk"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="0"
@@ -206,10 +206,10 @@
 
                         <TextView
                             style="@style/label_small"
-                            android:id="@+id/tv_perlu_tagihan"
+                            android:id="@+id/tv_pesanan_masuk"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Perlu Tagihan"/>
+                            android:text="Pesanan Masuk"/>
 
                     </LinearLayout>
 
