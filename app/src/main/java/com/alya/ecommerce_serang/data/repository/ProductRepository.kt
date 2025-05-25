@@ -12,10 +12,8 @@ import com.alya.ecommerce_serang.data.api.response.customer.cart.AddCartResponse
 import com.alya.ecommerce_serang.data.api.response.customer.product.ProductResponse
 import com.alya.ecommerce_serang.data.api.response.customer.product.ReviewsItem
 import com.alya.ecommerce_serang.data.api.response.customer.product.StoreProduct
-import com.alya.ecommerce_serang.data.api.response.store.product.UpdateProductResponse
 import com.alya.ecommerce_serang.data.api.response.product.Search
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
-import com.alya.ecommerce_serang.utils.SessionManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -267,16 +265,13 @@ class ProductRepository(private val apiService: ApiService) {
             }
         }
 
-    suspend fun updateProduct(productId: Int?, updatedProduct: Map<String, Any?>) : UpdateProductResponse {
-        // Build the request with the updated fields
-        val response = apiService.updateProduct(productId, updatedProduct)
-        if (response.isSuccessful) {
-            return response.body()!!
-        } else {
-            throw Exception("Gagal memperbarui produk: ${response.code()}")
-        }
-    }
-
+    suspend fun updateProduct(
+        productId: Int?,
+        data: Map<String, RequestBody>,
+        image: MultipartBody.Part?,
+        halal: MultipartBody.Part?,
+        sppirt: MultipartBody.Part?
+    ) = apiService.updateProduct(data, image, halal, sppirt)
 
     suspend fun deleteProduct(productId: Int): Result<Unit> {
         return withContext(Dispatchers.IO) {

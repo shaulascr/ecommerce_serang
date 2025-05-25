@@ -274,10 +274,13 @@ interface ApiService {
         @Part halal: MultipartBody.Part?
     ): Response<CreateProductResponse>
 
-    @PUT("store/editproduct/{id}")
+    @Multipart
+    @PUT("store/editproduct")
     suspend fun updateProduct(
-        @Path("id") productId: Int?,
-        @Body updatedProduct: Map<String, Any?>
+        @PartMap data: Map<String, @JvmSuppressWildcards RequestBody>,
+        @Part productImage: MultipartBody.Part?,
+        @Part halal: MultipartBody.Part?,
+        @Part sppirt: MultipartBody.Part?
     ): Response<UpdateProductResponse>
 
     @DELETE("store/deleteproduct/{id}")

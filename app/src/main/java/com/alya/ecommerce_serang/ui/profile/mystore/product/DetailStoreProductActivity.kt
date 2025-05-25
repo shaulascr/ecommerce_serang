@@ -110,17 +110,6 @@ class DetailStoreProductActivity : AppCompatActivity() {
         adapterCondition.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.spinnerKondisiProduk.adapter = adapterCondition
 
-        // Setup Pre-Order visibility
-        binding.switchIsPreOrder.setOnCheckedChangeListener { _, isChecked ->
-            togglePreOrderVisibility(isChecked)
-            validateForm()
-        }
-
-        binding.switchIsWholesale.setOnCheckedChangeListener { _, isChecked ->
-            toggleWholesaleVisibility(isChecked)
-            validateForm()
-        }
-
         with(binding) {
             edtNamaProduk.doAfterTextChanged { validateForm() }
             edtDeskripsiProduk.doAfterTextChanged { validateForm() }
@@ -131,8 +120,14 @@ class DetailStoreProductActivity : AppCompatActivity() {
             edtDurasi.doAfterTextChanged { validateForm() }
             edtMinPesanGrosir.doAfterTextChanged { validateForm() }
             edtHargaGrosir.doAfterTextChanged { validateForm() }
-            switchIsPreOrder.setOnCheckedChangeListener { _, _ -> validateForm() }
-            switchIsWholesale.setOnCheckedChangeListener { _, _ -> validateForm() }
+            switchIsPreOrder.setOnCheckedChangeListener { _, isChecked ->
+                togglePreOrderVisibility(isChecked)
+                validateForm()
+            }
+            switchIsWholesale.setOnCheckedChangeListener { _, isChecked ->
+                toggleWholesaleVisibility(isChecked)
+                validateForm()
+            }
         }
 
         validateForm()
@@ -424,27 +419,61 @@ class DetailStoreProductActivity : AppCompatActivity() {
     }
 
     private fun updateProduct(productId: Int?) {
-        val updatedProduct = mapOf(
-            "name" to binding.edtNamaProduk.text.toString(),
-            "description" to binding.edtDeskripsiProduk.text.toString(),
-            "price" to binding.edtHargaProduk.text.toString(),
-            "stock" to binding.edtStokProduk.text.toString().toInt(),
-            "min_order" to binding.edtMinOrder.text.toString().toInt(),
-            "weight" to binding.edtBeratProduk.text.toString().toInt(),
-            "is_pre_order" to binding.switchIsPreOrder.isChecked,
-            "duration" to (binding.edtDurasi.text.toString().toIntOrNull() ?: 0),
-            "is_wholesale" to binding.switchIsWholesale.isChecked,
-            "wholesale_min_item" to (binding.edtMinPesanGrosir.text.toString().toIntOrNull() ?: 0),
-            "wholesale_price" to (binding.edtHargaGrosir.text.toString().toIntOrNull() ?: 0),
-            "category_id" to categoryList[binding.spinnerKategoriProduk.selectedItemPosition].id,
-            "status" to if (binding.switchIsActive.isChecked) "active" else "inactive",
-            "condition" to binding.spinnerKondisiProduk.selectedItem.toString(),
-            "productimg" to imageUri?.path,
-            "sppirt" to sppirtUri?.path,
-            "halal" to halalUri?.path
+        if (productId == null) return
+
+        val imageFile = imageUri?.let { uriToNamedFile(it, this, "productimg") }
+        val sppirtFile = sppirtUri?.let { uriToNamedFile(it, this, "sppirt") }
+        val halalFile = halalUri?.let { uriToNamedFile(it, this, "halal") }
+
+        val imagePart = createPartFromFile("productimg", imageFile)
+        val sppirtPart = createPartFromFile("sppirt", sppirtFile)
+        val halalPart = createPartFromFile("halal", halalFile)
+
+        val data = mutableMapOf<String, RequestBody>(
+            "product_id" to toRequestBody(productId.toString()),
+            "name" to toRequestBody(binding.edtNamaProduk.text.toString()),
+            "description" to toRequestBody(binding.edtDeskripsiProduk.text.toString()),
+            "price" to toRequestBody(binding.edtHargaProduk.text.toString()),
+            "stock" to toRequestBody(binding.edtStokProduk.text.toString()),
+            "min_order" to toRequestBody(binding.edtMinOrder.text.toString()),
+            "weight" to toRequestBody(binding.edtBeratProduk.text.toString()),
+            "is_pre_order" to toRequestBody(binding.switchIsPreOrder.isChecked.toString()),
+            "preorder_duration" to toRequestBody(
+                if (binding.switchIsPreOrder.isChecked)
+                    binding.edtDurasi.text.toString()
+                else
+                    "0"
+            ),
+            "is_wholesale" to toRequestBody(binding.switchIsWholesale.isChecked.toString()),
+            "wholesale_min_item" to toRequestBody(
+                if (binding.switchIsWholesale.isChecked)
+                    binding.edtMinPesanGrosir.text.toString()
+                else
+                    "0"
+            ),
+            "wholesale_price" to toRequestBody(
+                if (binding.switchIsWholesale.isChecked)
+                    binding.edtHargaGrosir.text.toString()
+                else
+                    "0"
+            ),
+            "category_id" to toRequestBody(
+                categoryList[binding.spinnerKategoriProduk.selectedItemPosition].id.toString()
+            ),
+            "status" to toRequestBody(
+                if (binding.switchIsActive.isChecked) "active" else "inactive"
+            ),
+            "condition" to toRequestBody(binding.spinnerKondisiProduk.selectedItem.toString())
         )
 
-        viewModel.updateProduct(productId, updatedProduct)
+        viewModel.updateProduct(
+            productId,
+            data,
+            imagePart,
+            halalPart,
+            sppirtPart
+        )
+
         viewModel.productUpdateResult.observe(this) { result ->
             when (result) {
                 is Result.Loading -> binding.btnSaveProduct.isEnabled = false
@@ -461,4 +490,7 @@ class DetailStoreProductActivity : AppCompatActivity() {
             }
         }
     }
+
+    private fun toRequestBody(value: String): RequestBody =
+        RequestBody.create("text/plain".toMediaTypeOrNull(), value)
 }

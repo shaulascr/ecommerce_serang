@@ -17,6 +17,7 @@ import com.alya.ecommerce_serang.data.repository.ProductRepository
 import com.alya.ecommerce_serang.data.repository.Result
 import kotlinx.coroutines.launch
 import okhttp3.MultipartBody
+import okhttp3.RequestBody
 
 class ProductViewModel(private val repository: ProductRepository) : ViewModel() {
 
@@ -107,14 +108,20 @@ class ProductViewModel(private val repository: ProductRepository) : ViewModel() 
         }
     }
 
-    fun updateProduct(productId: Int?, updatedProduct: Map<String, Any?>) {
-        _productUpdateResult.value = Result.Loading
+    fun updateProduct(
+        productId: Int?,
+        data: Map<String, RequestBody>,
+        image: MultipartBody.Part?,
+        halal: MultipartBody.Part?,
+        sppirt: MultipartBody.Part?
+    ) {
         viewModelScope.launch {
+            _productUpdateResult.postValue(Result.Loading)
             try {
-                val response = repository.updateProduct(productId, updatedProduct)
-                _productUpdateResult.value = Result.Success(response)
+                val response = repository.updateProduct(productId, data, image, halal, sppirt)
+                _productUpdateResult.postValue(Result.Success(response.body()!!))
             } catch (e: Exception) {
-                _productUpdateResult.value = Result.Error(e)
+                _productUpdateResult.postValue(Result.Error(e))
             }
         }
     }
