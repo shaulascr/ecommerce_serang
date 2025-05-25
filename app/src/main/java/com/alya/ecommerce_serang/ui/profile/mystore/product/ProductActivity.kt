@@ -43,6 +43,11 @@ class ProductActivity : AppCompatActivity() {
 
     }
 
+    override fun onResume() {
+        super.onResume()
+        viewModel.loadMyStoreProducts()
+    }
+
     private fun observeViewModel() {
         viewModel.productList.observe(this) { result ->
             when (result) {

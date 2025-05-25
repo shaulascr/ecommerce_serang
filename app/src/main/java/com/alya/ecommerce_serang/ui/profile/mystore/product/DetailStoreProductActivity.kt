@@ -3,8 +3,10 @@ package com.alya.ecommerce_serang.ui.profile.mystore.product
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
+import android.provider.OpenableColumns
 import android.util.Log
 import android.view.View
 import android.widget.ArrayAdapter
@@ -16,7 +18,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.alya.ecommerce_serang.data.api.dto.CategoryItem
 import com.alya.ecommerce_serang.data.api.dto.Preorder
-import com.alya.ecommerce_serang.data.api.dto.Product
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.repository.ProductRepository
 import com.alya.ecommerce_serang.data.repository.Result
@@ -32,6 +33,9 @@ import java.io.File
 import java.io.FileOutputStream
 import kotlin.getValue
 import androidx.core.net.toUri
+import androidx.core.widget.doAfterTextChanged
+import com.alya.ecommerce_serang.BuildConfig.BASE_URL
+import com.alya.ecommerce_serang.data.api.dto.Wholesale
 
 class DetailStoreProductActivity : AppCompatActivity() {
 
@@ -42,6 +46,7 @@ class DetailStoreProductActivity : AppCompatActivity() {
     private var sppirtUri: Uri? = null
     private var halalUri: Uri? = null
     private var productId: Int? = null
+    private var hasImage: Boolean = false
 
     private val viewModel: ProductViewModel by viewModels {
         BaseViewModelFactory {
@@ -58,6 +63,7 @@ class DetailStoreProductActivity : AppCompatActivity() {
             imageUri?.let {
                 binding.ivPreviewFoto.setImageURI(it)
                 binding.switcherFotoProduk.showNext()
+                hasImage = true
             }
             validateForm()
         }
@@ -89,26 +95,39 @@ class DetailStoreProductActivity : AppCompatActivity() {
 
         binding.header.headerTitle.text = if (isEditing) "Ubah Produk" else "Tambah Produk"
 
-//        if (isEditing && productId != null) {
-//            viewModel.productDetail.observe(this) { product ->
-//                product?.let {
-//                    populateForm(it)
-//                }
-//            }
-//            viewModel.loadProductDetail(productId!!)
-//        }
+        if (isEditing && productId != null && productId != -1) {
+            viewModel.loadProductDetail(productId!!)
+            viewModel.productDetail.observe(this) { product ->
+                product?.let { populateForm(it) }
+            }
+        }
 
         setupCategorySpinner()
-        setupImagePickers()
+        setupFilePickers()
 
         var conditionList = listOf("Baru", "Pernah Dipakai")
         val adapterCondition = ArrayAdapter(this, android.R.layout.simple_spinner_item, conditionList)
         adapterCondition.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.spinnerKondisiProduk.adapter = adapterCondition
 
-        // Setup Pre-Order visibility
-        binding.switchIsPreOrder.setOnCheckedChangeListener { _, isChecked ->
-            binding.layoutDurasi.visibility = if (isChecked) View.VISIBLE else View.GONE
+        with(binding) {
+            edtNamaProduk.doAfterTextChanged { validateForm() }
+            edtDeskripsiProduk.doAfterTextChanged { validateForm() }
+            edtHargaProduk.doAfterTextChanged { validateForm() }
+            edtStokProduk.doAfterTextChanged { validateForm() }
+            edtMinOrder.doAfterTextChanged { validateForm() }
+            edtBeratProduk.doAfterTextChanged { validateForm() }
+            edtDurasi.doAfterTextChanged { validateForm() }
+            edtMinPesanGrosir.doAfterTextChanged { validateForm() }
+            edtHargaGrosir.doAfterTextChanged { validateForm() }
+            switchIsPreOrder.setOnCheckedChangeListener { _, isChecked ->
+                togglePreOrderVisibility(isChecked)
+                validateForm()
+            }
+            switchIsWholesale.setOnCheckedChangeListener { _, isChecked ->
+                toggleWholesaleVisibility(isChecked)
+                validateForm()
+            }
         }
 
         validateForm()
@@ -138,7 +157,7 @@ class DetailStoreProductActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupImagePickers() {
+    private fun setupFilePickers() {
         binding.tvTambahFoto.setOnClickListener {
             val intent = Intent(Intent.ACTION_PICK).apply { type = "image/*" }
             imagePickerLauncher.launch(intent)
@@ -151,6 +170,7 @@ class DetailStoreProductActivity : AppCompatActivity() {
 
         binding.btnRemoveFoto.setOnClickListener {
             imageUri = null
+            hasImage = false
             binding.switcherFotoProduk.showPrevious()
             validateForm()
         }
@@ -168,38 +188,72 @@ class DetailStoreProductActivity : AppCompatActivity() {
         }
     }
 
-    private fun populateForm(product: Product?) {
-        binding.edtNamaProduk.setText(product?.name)
-        binding.edtDeskripsiProduk.setText(product?.description)
-        binding.edtHargaProduk.setText(product?.price.toString())
-        binding.edtStokProduk.setText(product?.stock.toString())
-        binding.edtMinOrder.setText(product?.minOrder.toString())
-        binding.edtBeratProduk.setText(product?.weight.toString())
-        binding.switchIsPreOrder.isChecked = product?.isPreOrder == false
-//        binding.switchIsWholesale.isChecked = product?.isWholesale == false
-//        binding.edtMinPesanGrosir.setText(product?.minOrderWholesale.toString())
-//        binding.edtHargaGrosir.setText(product?.priceWholesale.toString())
-        binding.switchIsActive.isChecked = product?.status == "active"
-        binding.spinnerKondisiProduk.setSelection(if (product?.condition == "Baru") 0 else 1)
+    private fun populateForm(product: com.alya.ecommerce_serang.data.api.response.customer.product.Product) {
+        binding.edtNamaProduk.setText(product.productName)
+        binding.edtDeskripsiProduk.setText(product.description)
+        binding.edtHargaProduk.setText(product.price.toString())
+        binding.edtStokProduk.setText(product.stock.toString())
+        binding.edtMinOrder.setText(product.minOrder.toString())
+        binding.edtBeratProduk.setText(product.weight.toString())
+        binding.spinnerKondisiProduk.setSelection(if (product.condition == "Baru") 0 else 1)
 
-        product?.categoryId?.let {
-            binding.spinnerKategoriProduk.setSelection(categoryList.indexOfFirst { it.id == product.categoryId })
+        // Category selection
+        product.categoryId.let { categoryId ->
+            val index = categoryList.indexOfFirst { it.id == categoryId }
+            if (index != -1) binding.spinnerKategoriProduk.setSelection(index)
         }
 
-        Glide.with(this).load(product?.image).into(binding.ivPreviewFoto)
-        binding.switcherFotoProduk.showNext()
+        // Pre-order
+        val isPreOrder = product.isPreOrder == true
+        binding.switchIsPreOrder.jumpDrawablesToCurrentState()
+        binding.switchIsPreOrder.isChecked = isPreOrder
+        togglePreOrderVisibility(isPreOrder)
+        if (isPreOrder) {
+            binding.edtDurasi.setText(product.preorderDuration?.toString() ?: "")
+        }
 
-        product?.sppirt?.let {
+        // Wholesale
+        val isWholesale = product.isWholesale == true
+        binding.switchIsWholesale.jumpDrawablesToCurrentState()
+        binding.switchIsWholesale.isChecked = isWholesale
+        toggleWholesaleVisibility(isWholesale)
+        if (isWholesale) {
+            binding.edtMinPesanGrosir.setText(product.wholesaleMinItem?.toString() ?: "")
+            binding.edtHargaGrosir.setText(product.wholesalePrice?.toString() ?: "")
+        }
+
+        // Product image
+        val imageUrl = if (product.image.startsWith("/")) {
+            BASE_URL + product.image.removePrefix("/")
+        } else product.image
+        Glide.with(this).load(imageUrl).into(binding.ivPreviewFoto)
+        binding.switcherFotoProduk.showNext()
+        hasImage = true
+
+        // SPPIRT
+        product.sppirt?.let {
             binding.tvSppirtName.text = getFileName(it.toUri())
             binding.switcherSppirt.showNext()
         }
 
-        product?.halal?.let {
+        // Halal
+        product.halal?.let {
             binding.tvHalalName.text = getFileName(it.toUri())
             binding.switcherHalal.showNext()
         }
 
         validateForm()
+    }
+
+    private fun togglePreOrderVisibility(isChecked: Boolean) {
+        Log.d("DEBUG", "togglePreOrderVisibility: $isChecked")
+        binding.layoutDurasi.visibility = if (isChecked) View.VISIBLE else View.GONE
+    }
+
+    private fun toggleWholesaleVisibility(isChecked: Boolean) {
+        Log.d("DEBUG", "toggleWholesaleVisibility: $isChecked")
+        binding.layoutMinPesanGrosir.visibility = if (isChecked) View.VISIBLE else View.GONE
+        binding.layoutHargaGrosir.visibility = if (isChecked) View.VISIBLE else View.GONE
     }
 
     private fun isValidFile(uri: Uri): Boolean {
@@ -208,7 +262,25 @@ class DetailStoreProductActivity : AppCompatActivity() {
     }
 
     private fun getFileName(uri: Uri): String {
-        return uri.lastPathSegment?.split("/")?.last() ?: "unknown_file"
+        var name = "unknown_file"
+        val cursor = contentResolver.query(uri, null, null, null, null)
+        cursor?.use {
+            if (it.moveToFirst()) {
+                val nameIndex = it.getColumnIndexOpenableColumnsDisplayName()
+                if (nameIndex != -1) {
+                    name = it.getString(nameIndex)
+                }
+            }
+        }
+        return name
+    }
+
+    private fun Cursor.getColumnIndexOpenableColumnsDisplayName(): Int {
+        return try {
+            getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME)
+        } catch (e: Exception) {
+            -1
+        }
     }
 
     private fun uriToNamedFile(uri: Uri, context: Context, prefix: String): File {
@@ -242,36 +314,63 @@ class DetailStoreProductActivity : AppCompatActivity() {
     }
 
     private fun validateForm() {
-        val valid = binding.edtNamaProduk.text.isNotBlank() &&
-                binding.edtDeskripsiProduk.text.isNotBlank() &&
-                binding.edtHargaProduk.text.isNotBlank() &&
-                binding.edtStokProduk.text.isNotBlank() &&
-                binding.edtMinOrder.text.isNotBlank() &&
-                binding.edtBeratProduk.text.isNotBlank() &&
-                (!binding.switchIsPreOrder.isChecked || binding.edtDurasi.text.isNotBlank()) &&
-                imageUri != null
+        val name = binding.edtNamaProduk.text.toString().trim()
+        val description = binding.edtDeskripsiProduk.text.toString().trim()
+        val price = binding.edtHargaProduk.text.toString().trim()
+        val stock = binding.edtStokProduk.text.toString().trim()
+        val minOrder = binding.edtMinOrder.text.toString().trim()
+        val weight = binding.edtBeratProduk.text.toString().trim()
+        val duration = binding.edtDurasi.text.toString().trim()
+        val wholesaleMinItem = binding.edtMinPesanGrosir.text.toString().trim()
+        val wholesalePrice = binding.edtHargaGrosir.text.toString().trim()
+        val category = binding.spinnerKategoriProduk.selectedItemPosition != -1
+        val isPreOrderChecked = binding.switchIsPreOrder.isChecked
+        val isWholesaleChecked = binding.switchIsWholesale.isChecked
+
+        val valid = name.isNotEmpty() &&
+                description.isNotEmpty() &&
+                price.isNotEmpty() &&
+                stock.isNotEmpty() &&
+                minOrder.isNotEmpty() &&
+                weight.isNotEmpty() &&
+                (!isPreOrderChecked || duration.isNotEmpty()) &&
+                (!isWholesaleChecked || (wholesaleMinItem.isNotEmpty() && wholesalePrice.isNotEmpty())) &&
+                category &&
+                hasImage
 
         binding.btnSaveProduct.isEnabled = valid
         binding.btnSaveProduct.setTextColor(
-            if (valid) ContextCompat.getColor(this, R.color.white) else ContextCompat.getColor(this, R.color.black_300)
+            if (valid) ContextCompat.getColor(this, R.color.white)
+            else ContextCompat.getColor(this, R.color.black_300)
         )
         binding.btnSaveProduct.setBackgroundResource(
-            if (valid) R.drawable.bg_button_active else R.drawable.bg_button_disabled
+            if (valid) R.drawable.bg_button_active
+            else R.drawable.bg_button_disabled
         )
     }
 
     private fun addProduct() {
-        val name = binding.edtNamaProduk.text.toString()
-        val description = binding.edtDeskripsiProduk.text.toString()
-        val price = binding.edtHargaProduk.text.toString().toInt()
-        val stock = binding.edtStokProduk.text.toString().toInt()
-        val minOrder = binding.edtMinOrder.text.toString().toInt()
-        val weight = binding.edtBeratProduk.text.toString().toInt()
+        val name = binding.edtNamaProduk.text.toString().trim()
+        val description = binding.edtDeskripsiProduk.text.toString().trim()
+        val price = binding.edtHargaProduk.text.toString().toIntOrNull() ?: return showInputError("Harga produk")
+        val stock = binding.edtStokProduk.text.toString().toIntOrNull() ?: return showInputError("Stok produk")
+        val minOrder = binding.edtMinOrder.text.toString().toIntOrNull() ?: return showInputError("Minimal order")
+        val weight = binding.edtBeratProduk.text.toString().toIntOrNull() ?: return showInputError("Berat produk")
+
         val isPreOrder = binding.switchIsPreOrder.isChecked
-        val duration = if (isPreOrder) binding.edtDurasi.text.toString().toInt() else 0
+        val duration = if (isPreOrder) {
+            binding.edtDurasi.text.toString().toIntOrNull() ?: return showInputError("Durasi pre-order")
+        } else 0
+
         val isWholesale = binding.switchIsWholesale.isChecked
-        val minOrderWholesale = binding.edtMinPesanGrosir.text.toString().toInt()
-        val priceWholesale = binding.edtHargaGrosir.text.toString().toInt()
+        val minOrderWholesale = if (isWholesale) {
+            binding.edtMinPesanGrosir.text.toString().toIntOrNull() ?: return showInputError("Min. grosir")
+        } else 0
+
+        val priceWholesale = if (isWholesale) {
+            binding.edtHargaGrosir.text.toString().toIntOrNull() ?: return showInputError("Harga grosir")
+        } else 0
+
         val status = if (binding.switchIsActive.isChecked) "active" else "inactive"
         val condition = binding.spinnerKondisiProduk.selectedItem.toString()
         val categoryId = categoryList.getOrNull(binding.spinnerKategoriProduk.selectedItemPosition)?.id ?: 0
@@ -288,9 +387,14 @@ class DetailStoreProductActivity : AppCompatActivity() {
         val halalPart = halalFile?.let { createPartFromFile("halal", it) }
 
         val preorder = Preorder(productId = productId, duration = duration)
+        val wholesale = Wholesale(productId = productId, minItem = minOrderWholesale, wholesalePrice = priceWholesale.toString())
 
         viewModel.addProduct(
-            name, description, price, stock, minOrder, weight, isPreOrder, preorder, categoryId, status, condition, imagePart, sppirtPart, halalPart
+            name, description, price, stock, minOrder, weight,
+            isPreOrder, preorder,
+            isWholesale, wholesale,
+            categoryId, status, condition,
+            imagePart, sppirtPart, halalPart
         )
 
         viewModel.productCreationResult.observe(this) { result ->
@@ -309,24 +413,84 @@ class DetailStoreProductActivity : AppCompatActivity() {
         }
     }
 
+    private fun showInputError(fieldName: String): Nothing {
+        Toast.makeText(this, "$fieldName tidak boleh kosong dan harus berupa angka.", Toast.LENGTH_SHORT).show()
+        return throw IllegalArgumentException("$fieldName invalid")
+    }
+
     private fun updateProduct(productId: Int?) {
-        val updatedProduct = mapOf(
-            "name" to binding.edtNamaProduk.text.toString(),
-            "description" to binding.edtDeskripsiProduk.text.toString(),
-            "price" to binding.edtHargaProduk.text.toString(),
-            "stock" to binding.edtStokProduk.text.toString().toInt(),
-            "min_order" to binding.edtMinOrder.text.toString().toInt(),
-            "weight" to binding.edtBeratProduk.text.toString().toInt(),
-            "is_pre_order" to binding.switchIsPreOrder.isChecked,
-            "duration" to binding.edtDurasi.text.toString().toInt(),
-            "category_id" to categoryList[binding.spinnerKategoriProduk.selectedItemPosition].id,
-            "status" to if (binding.switchIsActive.isChecked) "active" else "inactive",
-            "condition" to binding.spinnerKondisiProduk.selectedItem.toString(),
-            "productimg" to imageUri?.path,
-            "sppirt" to sppirtUri?.path,
-            "halal" to halalUri?.path
+        if (productId == null) return
+
+        val imageFile = imageUri?.let { uriToNamedFile(it, this, "productimg") }
+        val sppirtFile = sppirtUri?.let { uriToNamedFile(it, this, "sppirt") }
+        val halalFile = halalUri?.let { uriToNamedFile(it, this, "halal") }
+
+        val imagePart = createPartFromFile("productimg", imageFile)
+        val sppirtPart = createPartFromFile("sppirt", sppirtFile)
+        val halalPart = createPartFromFile("halal", halalFile)
+
+        val data = mutableMapOf<String, RequestBody>(
+            "product_id" to toRequestBody(productId.toString()),
+            "name" to toRequestBody(binding.edtNamaProduk.text.toString()),
+            "description" to toRequestBody(binding.edtDeskripsiProduk.text.toString()),
+            "price" to toRequestBody(binding.edtHargaProduk.text.toString()),
+            "stock" to toRequestBody(binding.edtStokProduk.text.toString()),
+            "min_order" to toRequestBody(binding.edtMinOrder.text.toString()),
+            "weight" to toRequestBody(binding.edtBeratProduk.text.toString()),
+            "is_pre_order" to toRequestBody(binding.switchIsPreOrder.isChecked.toString()),
+            "preorder_duration" to toRequestBody(
+                if (binding.switchIsPreOrder.isChecked)
+                    binding.edtDurasi.text.toString()
+                else
+                    "0"
+            ),
+            "is_wholesale" to toRequestBody(binding.switchIsWholesale.isChecked.toString()),
+            "wholesale_min_item" to toRequestBody(
+                if (binding.switchIsWholesale.isChecked)
+                    binding.edtMinPesanGrosir.text.toString()
+                else
+                    "0"
+            ),
+            "wholesale_price" to toRequestBody(
+                if (binding.switchIsWholesale.isChecked)
+                    binding.edtHargaGrosir.text.toString()
+                else
+                    "0"
+            ),
+            "category_id" to toRequestBody(
+                categoryList[binding.spinnerKategoriProduk.selectedItemPosition].id.toString()
+            ),
+            "status" to toRequestBody(
+                if (binding.switchIsActive.isChecked) "active" else "inactive"
+            ),
+            "condition" to toRequestBody(binding.spinnerKondisiProduk.selectedItem.toString())
         )
 
-        viewModel.updateProduct(productId, updatedProduct)
+        viewModel.updateProduct(
+            productId,
+            data,
+            imagePart,
+            halalPart,
+            sppirtPart
+        )
+
+        viewModel.productUpdateResult.observe(this) { result ->
+            when (result) {
+                is Result.Loading -> binding.btnSaveProduct.isEnabled = false
+                is Result.Success -> {
+                    val product = result.data.product
+                    Toast.makeText(this, "Produk berhasil diubah: ${product?.name}", Toast.LENGTH_SHORT).show()
+                    setResult(Activity.RESULT_OK)
+                    finish()
+                }
+                is Result.Error -> {
+                    Log.e("ProductDetailActivity", "Error: ${result.exception.message}")
+                    binding.btnSaveProduct.isEnabled = true
+                }
+            }
+        }
     }
+
+    private fun toRequestBody(value: String): RequestBody =
+        RequestBody.create("text/plain".toMediaTypeOrNull(), value)
 }

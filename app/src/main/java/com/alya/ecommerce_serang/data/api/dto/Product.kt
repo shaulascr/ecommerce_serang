@@ -10,6 +10,9 @@ data class Product(
     @field:SerializedName("image")
     val image: String? = null,
 
+    @field:SerializedName("is_wholesale")
+    val isWholesale: Boolean? = null,
+
     @field:SerializedName("sppirt")
     val sppirt: String? = null,
 

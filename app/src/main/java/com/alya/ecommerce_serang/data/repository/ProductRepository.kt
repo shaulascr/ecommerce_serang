@@ -6,13 +6,13 @@ import com.alya.ecommerce_serang.data.api.dto.CategoryItem
 import com.alya.ecommerce_serang.data.api.dto.Preorder
 import com.alya.ecommerce_serang.data.api.dto.ProductsItem
 import com.alya.ecommerce_serang.data.api.dto.SearchRequest
+import com.alya.ecommerce_serang.data.api.dto.Wholesale
+import com.alya.ecommerce_serang.data.api.response.store.product.CreateProductResponse
 import com.alya.ecommerce_serang.data.api.response.customer.cart.AddCartResponse
 import com.alya.ecommerce_serang.data.api.response.customer.product.ProductResponse
 import com.alya.ecommerce_serang.data.api.response.customer.product.ReviewsItem
 import com.alya.ecommerce_serang.data.api.response.customer.product.StoreProduct
 import com.alya.ecommerce_serang.data.api.response.product.Search
-import com.alya.ecommerce_serang.data.api.response.store.product.CreateProductResponse
-import com.alya.ecommerce_serang.data.api.response.store.product.UpdateProductResponse
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -161,6 +161,8 @@ class ProductRepository(private val apiService: ApiService) {
         weight: Int,
         isPreOrder: Boolean,
         preorder: Preorder,
+        isWholesale: Boolean,
+        wholesale: Wholesale,
         categoryId: Int,
         status: String,
         condition: String,
@@ -178,6 +180,9 @@ class ProductRepository(private val apiService: ApiService) {
                 weight = RequestBody.create("text/plain".toMediaTypeOrNull(), weight.toString()),
                 isPreOrder = RequestBody.create("text/plain".toMediaTypeOrNull(), isPreOrder.toString()),
                 duration = RequestBody.create("text/plain".toMediaTypeOrNull(), preorder.duration.toString()),
+                isWholesale = RequestBody.create("text/plain".toMediaTypeOrNull(), isWholesale.toString()),
+                minItemWholesale = RequestBody.create("text/plain".toMediaTypeOrNull(), wholesale.minItem.toString()),
+                wholesalePrice = RequestBody.create("text/plain".toMediaTypeOrNull(), wholesale.wholesalePrice.toString()),
                 categoryId = RequestBody.create("text/plain".toMediaTypeOrNull(), categoryId.toString()),
                 status = RequestBody.create("text/plain".toMediaTypeOrNull(), status),
                 condition = RequestBody.create("text/plain".toMediaTypeOrNull(), condition),
@@ -260,16 +265,13 @@ class ProductRepository(private val apiService: ApiService) {
             }
         }
 
-    suspend fun updateProduct(productId: Int?, updatedProduct: Map<String, Any?>) : UpdateProductResponse {
-        // Build the request with the updated fields
-        val response = apiService.updateProduct(productId, updatedProduct)
-        if (response.isSuccessful) {
-            return response.body()!!
-        } else {
-            throw Exception("Gagal memperbarui produk: ${response.code()}")
-        }
-    }
-
+    suspend fun updateProduct(
+        productId: Int?,
+        data: Map<String, RequestBody>,
+        image: MultipartBody.Part?,
+        halal: MultipartBody.Part?,
+        sppirt: MultipartBody.Part?
+    ) = apiService.updateProduct(data, image, halal, sppirt)
 
     suspend fun deleteProduct(productId: Int): Result<Unit> {
         return withContext(Dispatchers.IO) {

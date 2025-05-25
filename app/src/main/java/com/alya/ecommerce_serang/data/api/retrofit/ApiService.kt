@@ -263,6 +263,9 @@ interface ApiService {
         @Part("weight") weight: RequestBody,
         @Part("is_pre_order") isPreOrder: RequestBody,
         @Part("duration") duration: RequestBody,
+        @Part("is_wholesale") isWholesale: RequestBody,
+        @Part("wholesale_min_item") minItemWholesale: RequestBody,
+        @Part("wholesale_price") wholesalePrice: RequestBody,
         @Part("category_id") categoryId: RequestBody,
         @Part("status") status: RequestBody,
         @Part("condition") condition: RequestBody,
@@ -271,10 +274,13 @@ interface ApiService {
         @Part halal: MultipartBody.Part?
     ): Response<CreateProductResponse>
 
-    @PUT("store/editproduct/{id}")
+    @Multipart
+    @PUT("store/editproduct")
     suspend fun updateProduct(
-        @Path("id") productId: Int?,
-        @Body updatedProduct: Map<String, Any?>
+        @PartMap data: Map<String, @JvmSuppressWildcards RequestBody>,
+        @Part productImage: MultipartBody.Part?,
+        @Part halal: MultipartBody.Part?,
+        @Part sppirt: MultipartBody.Part?
     ): Response<UpdateProductResponse>
 
     @DELETE("store/deleteproduct/{id}")

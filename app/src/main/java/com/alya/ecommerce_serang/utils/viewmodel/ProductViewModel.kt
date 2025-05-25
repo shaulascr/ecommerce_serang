@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.alya.ecommerce_serang.data.api.dto.CategoryItem
 import com.alya.ecommerce_serang.data.api.dto.Preorder
 import com.alya.ecommerce_serang.data.api.dto.ProductsItem
+import com.alya.ecommerce_serang.data.api.dto.Wholesale
 import com.alya.ecommerce_serang.data.api.response.store.product.CreateProductResponse
 import com.alya.ecommerce_serang.data.api.response.customer.product.Product
 import com.alya.ecommerce_serang.data.api.response.customer.product.ReviewsItem
@@ -16,6 +17,7 @@ import com.alya.ecommerce_serang.data.repository.ProductRepository
 import com.alya.ecommerce_serang.data.repository.Result
 import kotlinx.coroutines.launch
 import okhttp3.MultipartBody
+import okhttp3.RequestBody
 
 class ProductViewModel(private val repository: ProductRepository) : ViewModel() {
 
@@ -88,6 +90,8 @@ class ProductViewModel(private val repository: ProductRepository) : ViewModel() 
         weight: Int,
         isPreOrder: Boolean,
         preorder: Preorder,
+        isWholesale: Boolean,
+        wholesale: Wholesale,
         categoryId: Int,
         status: String,
         condition: String,
@@ -98,20 +102,26 @@ class ProductViewModel(private val repository: ProductRepository) : ViewModel() 
         _productCreationResult.value = Result.Loading
         viewModelScope.launch {
             val result = repository.addProduct(
-                name, description, price, stock, minOrder, weight, isPreOrder, preorder, categoryId, status, condition, imagePart, sppirtPart, halalPart
+                name, description, price, stock, minOrder, weight, isPreOrder, preorder, isWholesale, wholesale, categoryId, status, condition, imagePart, sppirtPart, halalPart
             )
             _productCreationResult.value = result
         }
     }
 
-    fun updateProduct(productId: Int?, updatedProduct: Map<String, Any?>) {
-        _productUpdateResult.value = Result.Loading
+    fun updateProduct(
+        productId: Int?,
+        data: Map<String, RequestBody>,
+        image: MultipartBody.Part?,
+        halal: MultipartBody.Part?,
+        sppirt: MultipartBody.Part?
+    ) {
         viewModelScope.launch {
+            _productUpdateResult.postValue(Result.Loading)
             try {
-                val response = repository.updateProduct(productId, updatedProduct)
-                _productUpdateResult.value = Result.Success(response)
+                val response = repository.updateProduct(productId, data, image, halal, sppirt)
+                _productUpdateResult.postValue(Result.Success(response.body()!!))
             } catch (e: Exception) {
-                _productUpdateResult.value = Result.Error(e)
+                _productUpdateResult.postValue(Result.Error(e))
             }
         }
     }
