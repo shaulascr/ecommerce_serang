@@ -11,6 +11,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.alya.ecommerce_serang.BuildConfig
+import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.dto.City
 import com.alya.ecommerce_serang.data.api.dto.Province
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
@@ -28,6 +29,7 @@ class DetailStoreAddressActivity : AppCompatActivity() {
     private lateinit var sessionManager: SessionManager
 
     private var selectedProvinceId: String? = null
+    private var selectedCityId: String? = null
     private var provinces: List<Province> = emptyList()
     private var cities: List<City> = emptyList()
 
@@ -66,6 +68,7 @@ class DetailStoreAddressActivity : AppCompatActivity() {
         setupSpinners()
         setupObservers()
         setupSaveButton()
+        setupFieldListeners()
 
         // Add retry button
         binding.btnRetry.setOnClickListener {
@@ -95,17 +98,25 @@ class DetailStoreAddressActivity : AppCompatActivity() {
                 if (position > 0 && provinces.isNotEmpty()) {
                     selectedProvinceId = provinces[position - 1].provinceId
                     Log.d(TAG, "Selected province ID: $selectedProvinceId")
-                    selectedProvinceId?.let {
-                        Log.d(TAG, "Fetching cities for province ID: $it")
-                        showCityLoading(true)
-                        viewModel.fetchCities(it)
-                    }
+                    selectedCityId = null
+                    showCityLoading(true)
+                    viewModel.fetchCities(selectedProvinceId!!)
+                } else {
+                    selectedProvinceId = null
                 }
+                checkAllFieldsFilled()
             }
 
-            override fun onNothingSelected(p0: AdapterView<*>?) {
-                // Do nothing
+            override fun onNothingSelected(p0: AdapterView<*>?) {}
+        }
+
+        binding.spinnerCity.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                selectedCityId = if (position > 0) cities[position - 1].cityId else null
+                checkAllFieldsFilled()
             }
+
+            override fun onNothingSelected(p0: AdapterView<*>?) {}
         }
     }
 
@@ -114,11 +125,6 @@ class DetailStoreAddressActivity : AppCompatActivity() {
         viewModel.provinces.observe(this) { provinceList ->
             Log.d(TAG, "Received provinces: ${provinceList.size}")
             showProvinceLoading(false)
-
-            if (provinceList.isEmpty()) {
-                showError("No provinces available")
-                return@observe
-            }
 
             provinces = provinceList
             val provinceNames = mutableListOf("Pilih Provinsi")
@@ -133,6 +139,13 @@ class DetailStoreAddressActivity : AppCompatActivity() {
             )
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             binding.spinnerProvince.adapter = adapter
+
+            viewModel.storeAddress.value?.let { address ->
+                val index = provinces.indexOfFirst { it.provinceId == address.provinceId }
+                if (index != -1) {
+                    binding.spinnerProvince.setSelection(index + 1)
+                }
+            }
         }
 
         // Observe cities data
@@ -156,14 +169,9 @@ class DetailStoreAddressActivity : AppCompatActivity() {
 
             // If we have a stored city_id, select it
             viewModel.storeAddress.value?.let { address ->
-                if (address.cityId.isNotEmpty()) {
-                    val cityIndex = cities.indexOfFirst { city ->
-                        city.cityId == address.cityId
-                    }
-                    Log.d(TAG, "City index for ID ${address.cityId}: $cityIndex")
-                    if (cityIndex != -1) {
-                        binding.spinnerCity.setSelection(cityIndex + 1) // +1 because of "Pilih Kota/Kabupaten"
-                    }
+                val index = cities.indexOfFirst { it.cityId == address.cityId }
+                if (index != -1) {
+                    binding.spinnerCity.setSelection(index + 1)
                 }
             }
         }
@@ -173,57 +181,109 @@ class DetailStoreAddressActivity : AppCompatActivity() {
             Log.d(TAG, "Received store address: $address")
             address?.let {
                 // Set the fields
-                binding.edtStreet.setText(address.street)
-                binding.edtSubdistrict.setText(address.subdistrict)
-                binding.edtDetailAddress.setText(address.detail ?: "")
-                binding.edtPostalCode.setText(address.postalCode)
+                binding.edtStreet.setText(it.street)
+                binding.edtSubdistrict.setText(it.subdistrict)
+                binding.edtDetailAddress.setText(it.detail ?: "")
+                binding.edtPostalCode.setText(it.postalCode)
+                binding.edtLatitude.setText(it.latitude.toString())
+                binding.edtLongitude.setText(it.longitude.toString())
+                selectedProvinceId = it.provinceId
+                selectedCityId = it.cityId
 
-                // Handle latitude and longitude
-                val lat = if (address.latitude == null || address.latitude.toString() == "NaN") 0.0 else address.latitude
-                val lng = if (address.longitude == null || address.longitude.toString() == "NaN") 0.0 else address.longitude
-
-                binding.edtLatitude.setText(lat.toString())
-                binding.edtLongitude.setText(lng.toString())
-
-                // Set selected province ID to trigger city loading
-                if (address.provinceId.isNotEmpty()) {
-                    selectedProvinceId = address.provinceId
-
-                    // Find province index and select it after provinces are loaded
-                    if (provinces.isNotEmpty()) {
-                        val provinceIndex = provinces.indexOfFirst { province ->
-                            province.provinceId == address.provinceId
-                        }
-                        Log.d(TAG, "Province index for ID ${address.provinceId}: $provinceIndex")
-                        if (provinceIndex != -1) {
-                            binding.spinnerProvince.setSelection(provinceIndex + 1) // +1 because of "Pilih Provinsi"
-
-                            // Now fetch cities for this province
-                            showCityLoading(true)
-                            viewModel.fetchCities(address.provinceId)
-                        }
+                // Find province index and select it after provinces are loaded
+                if (provinces.isNotEmpty()) {
+                    val index = provinces.indexOfFirst { p -> p.provinceId == it.provinceId }
+                    Log.d(TAG, "Province index for ID ${address.provinceId}: $index")
+                    if (index != -1) {
+                        binding.spinnerProvince.setSelection(index + 1) // +1 because of "Pilih Provinsi"
+//                        showCityLoading(true)
+                        viewModel.fetchCities(it.provinceId)
                     }
                 }
             }
         }
 
         // Observe loading state
-        viewModel.isLoading.observe(this) { isLoading ->
-            binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+        viewModel.isLoading.observe(this) {
+            binding.progressBar.visibility = if (it) View.VISIBLE else View.GONE
         }
 
         // Observe error messages
-        viewModel.errorMessage.observe(this) { errorMsg ->
-            Log.e(TAG, "Error: $errorMsg")
-            showError(errorMsg)
+        viewModel.errorMessage.observe(this) {
+            showError(it)
         }
 
         // Observe save success
-        viewModel.saveSuccess.observe(this) { success ->
-            if (success) {
+        viewModel.saveSuccess.observe(this) {
+            if (it) {
                 Toast.makeText(this, "Alamat berhasil disimpan", Toast.LENGTH_SHORT).show()
                 setResult(Activity.RESULT_OK)
                 finish()
+            }
+        }
+    }
+
+    private fun setupSaveButton() {
+        binding.btnSaveAddress.setOnClickListener {
+            val street = binding.edtStreet.text.toString()
+            val subdistrict = binding.edtSubdistrict.text.toString()
+            val detail = binding.edtDetailAddress.text.toString()
+            val postalCode = binding.edtPostalCode.text.toString()
+            val latitude = binding.edtLatitude.text.toString().toDoubleOrNull() ?: 0.0
+            val longitude = binding.edtLongitude.text.toString().toDoubleOrNull() ?: 0.0
+
+            val city = cities.find { it.cityId == selectedCityId }
+            val province = provinces.find { it.provinceId == selectedProvinceId }
+
+            // Validate required fields
+            if (selectedProvinceId.isNullOrEmpty() || city == null || street.isEmpty() || subdistrict.isEmpty() || postalCode.isEmpty()) {
+                Toast.makeText(this, "Mohon lengkapi data yang wajib diisi", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            // Save address
+            viewModel.saveStoreAddress(
+                provinceId = selectedProvinceId!!,
+                provinceName = province?.provinceName ?: "",
+                cityId = city.cityId,
+                cityName = city.cityName,
+                street = street,
+                subdistrict = subdistrict,
+                detail = detail,
+                postalCode = postalCode,
+                latitude = latitude,
+                longitude = longitude
+            )
+        }
+    }
+
+    private fun setupFieldListeners() {
+        val watcher = object : android.text.TextWatcher {
+            override fun afterTextChanged(s: android.text.Editable?) = checkAllFieldsFilled()
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        }
+        binding.edtStreet.addTextChangedListener(watcher)
+        binding.edtSubdistrict.addTextChangedListener(watcher)
+        binding.edtPostalCode.addTextChangedListener(watcher)
+    }
+
+    private fun checkAllFieldsFilled() {
+        val allValid = !selectedProvinceId.isNullOrEmpty()
+                && !selectedCityId.isNullOrEmpty()
+                && binding.edtStreet.text.isNotBlank()
+                && binding.edtSubdistrict.text.isNotBlank()
+                && binding.edtPostalCode.text.isNotBlank()
+
+        binding.btnSaveAddress.let {
+            if (allValid) {
+                it.isEnabled = true
+                it.setBackgroundResource(R.drawable.bg_button_active)
+                it.setTextColor(getColor(R.color.white))
+            } else {
+                it.isEnabled = false
+                it.setBackgroundResource(R.drawable.bg_button_disabled)
+                it.setTextColor(getColor(R.color.black_300))
             }
         }
     }
@@ -244,7 +304,6 @@ class DetailStoreAddressActivity : AppCompatActivity() {
         binding.tvError.text = "Error: $message\nURL: ${BuildConfig.BASE_URL}/provinces"
         binding.btnRetry.visibility = View.VISIBLE
 
-        // Also show in a dialog for immediate attention
         AlertDialog.Builder(this)
             .setTitle("Error")
             .setMessage("$message\n\nAPI URL: ${BuildConfig.BASE_URL}/provinces")
@@ -258,7 +317,6 @@ class DetailStoreAddressActivity : AppCompatActivity() {
             }
             .show()
 
-        // Also show a snackbar
         Snackbar.make(binding.root, "Error: $message", Snackbar.LENGTH_LONG)
             .setAction("Retry") {
                 binding.tvError.visibility = View.GONE
@@ -266,50 +324,5 @@ class DetailStoreAddressActivity : AppCompatActivity() {
                 viewModel.fetchProvinces()
             }
             .show()
-    }
-
-    private fun setupSaveButton() {
-        binding.btnSaveAddress.setOnClickListener {
-            val street = binding.edtStreet.text.toString()
-            val subdistrict = binding.edtSubdistrict.text.toString()
-            val detail = binding.edtDetailAddress.text.toString()
-            val postalCode = binding.edtPostalCode.text.toString()
-            val latitudeStr = binding.edtLatitude.text.toString()
-            val longitudeStr = binding.edtLongitude.text.toString()
-
-            // Validate required fields
-            if (selectedProvinceId == null || binding.spinnerCity.selectedItemPosition <= 0 ||
-                street.isEmpty() || subdistrict.isEmpty() || postalCode.isEmpty()) {
-                Toast.makeText(this, "Mohon lengkapi data yang wajib diisi", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            // Get selected city
-            val cityPosition = binding.spinnerCity.selectedItemPosition
-            if (cityPosition <= 0 || cities.isEmpty() || cityPosition > cities.size) {
-                Toast.makeText(this, "Mohon pilih kota/kabupaten", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            val selectedCity = cities[cityPosition - 1]
-
-            // Parse coordinates
-            val latitude = latitudeStr.toDoubleOrNull() ?: 0.0
-            val longitude = longitudeStr.toDoubleOrNull() ?: 0.0
-
-            // Save address
-            viewModel.saveStoreAddress(
-                provinceId = selectedProvinceId!!,
-                provinceName = provinces.find { it.provinceId == selectedProvinceId }?.provinceName ?: "",
-                cityId = selectedCity.cityId,
-                cityName = selectedCity.cityName,
-                street = street,
-                subdistrict = subdistrict,
-                detail = detail,
-                postalCode = postalCode,
-                latitude = latitude,
-                longitude = longitude
-            )
-        }
     }
 }
