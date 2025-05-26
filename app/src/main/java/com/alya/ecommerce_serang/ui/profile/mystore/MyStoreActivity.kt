@@ -66,18 +66,18 @@ class MyStoreActivity : AppCompatActivity() {
         binding.tvStoreName.text = store.storeName
         binding.tvStoreType.text = store.storeType
 
-        if (store.storeImage.toString().isNotEmpty() && store.storeImage.toString() != "null") {
-            val imageUrl = "$BASE_URL${store.storeImage}"
-            Log.d("MyStoreActivity", "Loading store image from: $imageUrl")
-
-            Glide.with(this)
-                .load(imageUrl)
-                .placeholder(R.drawable.placeholder_image)
-                .error(R.drawable.placeholder_image)
-                .into(binding.ivProfile)
-        } else {
-            Log.d("MyStoreActivity", "No store image available")
+        val imageUrl = when {
+            store.storeImage.toString().isBlank() -> null
+            store.storeImage.toString().startsWith("http") == true -> store.storeImage
+            store.storeImage.toString().startsWith("/") == true -> BASE_URL + store.storeImage.toString().removePrefix("/")
+            else -> BASE_URL + store.storeImage
         }
+
+        Glide.with(this)
+            .load(imageUrl)
+            .placeholder(R.drawable.placeholder_image)
+            .error(R.drawable.placeholder_image)
+            .into(binding.ivProfile)
 
 //        binding.tvBalance.text = String.format("Rp%,.0f", store.balance.toString())
     }
