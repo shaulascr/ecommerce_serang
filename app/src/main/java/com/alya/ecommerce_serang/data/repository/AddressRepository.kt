@@ -143,14 +143,14 @@ class AddressRepository(private val apiService: ApiService) {
 
         try {
             val addressMap = HashMap<String, Any?>()
-            addressMap["provinceId"] = provinceId
-            addressMap["provinceName"] = provinceName
-            addressMap["cityId"] = cityId
-            addressMap["cityName"] = cityName
+            addressMap["province_id"] = provinceId
+            addressMap["province_name"] = provinceName
+            addressMap["city_id"] = cityId
+            addressMap["city_name"] = cityName
             addressMap["street"] = street
             addressMap["subdistrict"] = subdistrict
             addressMap["detail"] = detail
-            addressMap["postalCode"] = postalCode
+            addressMap["postal_code"] = postalCode
             addressMap["latitude"] = latitude
             addressMap["longitude"] = longitude
 

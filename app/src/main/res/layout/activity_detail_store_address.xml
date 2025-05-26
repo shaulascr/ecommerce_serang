@@ -351,8 +351,8 @@
             <Button
                 android:id="@+id/btn_save_address"
                 android:text="Simpan Perubahan"
-                style="@style/button.large.disabled.long"
-                android:enabled="false"
+                style="@style/button.large.active.long"
+                android:enabled="true"
                 android:layout_marginBottom="16dp"/>
 
             <ProgressBar
