@@ -68,16 +68,29 @@ class MyStoreViewModel(private val repository: MyStoreRepository): ViewModel() {
     ) {
         viewModelScope.launch {
             try {
+                val store = myStoreProfile.value
+
+                if (store == null) {
+                    _errorMessage.postValue("Data toko tidak tersedia")
+                    return@launch
+                }
+
                 val response = repository.updateStoreProfile(
-                    storeName,
-                    "active".toRequestBody(),
-                    description,
-                    isOnLeave,
-                    0.toString().toRequestBody(),
-                    0.toString().toRequestBody(),
-                    "".toRequestBody(), "".toRequestBody(), "".toRequestBody(), "".toRequestBody(),
-                    "".toRequestBody(), "".toRequestBody(), "".toRequestBody(),
-                    storeType, storeImage
+                    storeName = storeName,
+                    storeStatus = "active".toRequestBody(),
+                    storeDescription = description,
+                    isOnLeave = isOnLeave,
+                    cityId = store.cityId.toString().toRequestBody(),
+                    provinceId = store.provinceId.toString().toRequestBody(),
+                    street = store.street.toRequestBody(),
+                    subdistrict = store.subdistrict.toRequestBody(),
+                    detail = store.detail.toRequestBody(),
+                    postalCode = store.postalCode.toRequestBody(),
+                    latitude = store.latitude.toRequestBody(),
+                    longitude = store.longitude.toRequestBody(),
+                    userPhone = store.phone.toRequestBody(),
+                    storeType = storeType,
+                    storeimg = storeImage
                 )
                 if (response.isSuccessful) _updateStoreProfileResult.postValue(response.body())
                 else _errorMessage.postValue("Gagal memperbarui profil")

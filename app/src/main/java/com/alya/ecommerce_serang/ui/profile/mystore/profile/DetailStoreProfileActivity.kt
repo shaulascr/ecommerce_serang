@@ -112,8 +112,6 @@ class DetailStoreProfileActivity : AppCompatActivity() {
             } else {
                 enterEditMode()
             }
-//            val intent = Intent(this, EditStoreProfileActivity::class.java)
-//            startActivityForResult(intent, EDIT_PROFILE_REQUEST_CODE)
         }
 
         binding.layoutAddress.setOnClickListener {
