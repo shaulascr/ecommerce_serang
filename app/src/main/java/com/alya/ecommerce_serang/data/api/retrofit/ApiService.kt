@@ -443,6 +443,13 @@ interface ApiService {
         @Part chatimg: MultipartBody.Part?
     ): Response<SendChatResponse>
 
+    @Multipart
+    @POST("sendchat")
+    suspend fun sendChatMessage(
+        @PartMap parts: Map<String, @JvmSuppressWildcards RequestBody>,
+        @Part chatimg: MultipartBody.Part? = null
+    ): Response<SendChatResponse>
+
     @PUT("chatstatus")
     suspend fun updateChatStatus(
         @Body request: UpdateChatRequest

@@ -44,7 +44,14 @@ class PersonalNotificationAdapter(
 
         fun bind(notification: NotifItem) {
             binding.apply {
-                tvNotificationType.text = notification.type
+                val typeNotif = notification.type.toString()
+                if(typeNotif == "User"){
+                    tvNotificationType.text = "Pembelian"
+                } else if (typeNotif == "Store"){
+                    tvNotificationType.text = "Penjualan"
+                } else {
+                    tvNotificationType.text = notification.type
+                }
                 tvTitle.text = notification.title
                 tvDescription.text = notification.message
 
@@ -63,7 +70,7 @@ class PersonalNotificationAdapter(
             try {
                 // Parse the date with the expected format from API
                 val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
-                val outputFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+                val outputFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
 
                 val date = inputFormat.parse(createdAt)
                 date?.let {

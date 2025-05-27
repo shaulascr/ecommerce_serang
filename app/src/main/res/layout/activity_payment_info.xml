@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/white"
+    android:theme="@style/Theme.Ecommerce_serang"
     tools:context=".ui.profile.mystore.profile.payment_info.PaymentInfoActivity">
 
     <include

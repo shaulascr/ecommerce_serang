@@ -78,8 +78,16 @@ class ChatAdapter : ListAdapter<ChatUiMessage, RecyclerView.ViewHolder>(ChatMess
             // Handle attachment if exists
             if (message.attachment?.isNotEmpty() == true) {
                 binding.imgAttachment.visibility = View.VISIBLE
+
+                val fullImageUrl = when (val img = message.attachment) {
+                    is String -> {
+                        if (img.startsWith("/")) BASE_URL + img.substring(1) else img
+                    }
+                    else -> R.drawable.placeholder_image
+                }
+
                 Glide.with(binding.root.context)
-                    .load(BASE_URL + message.attachment)
+                    .load(fullImageUrl)
                     .centerCrop()
                     .placeholder(R.drawable.placeholder_image)
                     .error(R.drawable.placeholder_image)
@@ -101,10 +109,17 @@ class ChatAdapter : ListAdapter<ChatUiMessage, RecyclerView.ViewHolder>(ChatMess
             binding.tvTimestamp.text = message.time
 
             // Handle attachment if exists
+            val fullImageUrl = when (val img = message.attachment) {
+                is String -> {
+                    if (img.startsWith("/")) BASE_URL + img.substring(1) else img
+                }
+                else -> R.drawable.placeholder_image
+            }
+
             if (message.attachment?.isNotEmpty() == true) {
                 binding.imgAttachment.visibility = View.VISIBLE
                 Glide.with(binding.root.context)
-                    .load(BASE_URL + message.attachment)
+                    .load(fullImageUrl)
                     .centerCrop()
                     .placeholder(R.drawable.placeholder_image)
                     .error(R.drawable.placeholder_image)
