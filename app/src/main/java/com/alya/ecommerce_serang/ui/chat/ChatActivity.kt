@@ -3,6 +3,7 @@ package com.alya.ecommerce_serang.ui.chat
 import android.Manifest
 import android.app.Activity
 import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -12,6 +13,7 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
@@ -22,6 +24,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsAnimationCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -40,6 +43,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
+import kotlin.math.max
 
 @AndroidEntryPoint
 class ChatActivity : AppCompatActivity() {
@@ -100,16 +104,7 @@ class ChatActivity : AppCompatActivity() {
         enableEdgeToEdge()
 
         // Apply insets to your root layout
-        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, windowInsets ->
-            val systemBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-            view.setPadding(
-                systemBars.left,
-                systemBars.top,
-                systemBars.right,
-                systemBars.bottom
-            )
-            windowInsets
-        }
+
 
         // Get parameters from intent
         val storeId = intent.getIntExtra(Constants.EXTRA_STORE_ID, 0)
@@ -146,6 +141,84 @@ class ChatActivity : AppCompatActivity() {
             .placeholder(R.drawable.placeholder_image)
             .into(binding.imgProfile)
 
+        ViewCompat.setOnApplyWindowInsetsListener(binding.layoutChatInput) { view, insets ->
+            val imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime())
+            val navBarInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+
+            val bottomPadding = max(imeInsets.bottom, navBarInsets.bottom)
+            view.setPadding(view.paddingLeft, view.paddingTop, view.paddingRight, bottomPadding)
+            insets
+        }
+
+// Handle top inset on toolbar (status bar height)
+        ViewCompat.setOnApplyWindowInsetsListener(binding.chatToolbar) { view, insets ->
+            val statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
+            view.setPadding(view.paddingLeft, statusBarHeight, view.paddingRight, view.paddingBottom)
+            insets
+        }
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.recyclerChat) { view, insets ->
+            val navBarInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+            val bottomPadding = binding.layoutChatInput.height + navBarInsets.bottom
+
+            view.setPadding(
+                view.paddingLeft,
+                view.paddingTop,
+                view.paddingRight,
+                bottomPadding
+            )
+            insets
+        }
+
+// For RecyclerView, add bottom padding = chat input height + nav bar height (to avoid last message hidden)
+
+        ViewCompat.setWindowInsetsAnimationCallback(binding.root,
+            object : WindowInsetsAnimationCompat.Callback(DISPATCH_MODE_STOP) {
+
+                private var startPaddingBottom = 0
+                private var endPaddingBottom = 0
+
+                override fun onPrepare(animation: WindowInsetsAnimationCompat) {
+                    startPaddingBottom = binding.layoutChatInput.paddingBottom
+                }
+
+                override fun onStart(
+                    animation: WindowInsetsAnimationCompat,
+                    bounds: WindowInsetsAnimationCompat.BoundsCompat
+                ): WindowInsetsAnimationCompat.BoundsCompat {
+                    endPaddingBottom = binding.layoutChatInput.paddingBottom
+                    return bounds
+                }
+
+                override fun onProgress(
+                    insets: WindowInsetsCompat,
+                    runningAnimations: MutableList<WindowInsetsAnimationCompat>
+                ): WindowInsetsCompat {
+                    val imeAnimation = runningAnimations.find {
+                        it.typeMask and WindowInsetsCompat.Type.ime() != 0
+                    } ?: return insets
+
+                    val animatedBottomPadding = startPaddingBottom +
+                            (endPaddingBottom - startPaddingBottom) * imeAnimation.interpolatedFraction
+
+                    binding.layoutChatInput.setPadding(
+                        binding.layoutChatInput.paddingLeft,
+                        binding.layoutChatInput.paddingTop,
+                        binding.layoutChatInput.paddingRight,
+                        animatedBottomPadding.toInt()
+                    )
+
+                    binding.recyclerChat.setPadding(
+                        binding.recyclerChat.paddingLeft,
+                        binding.recyclerChat.paddingTop,
+                        binding.recyclerChat.paddingRight,
+                        animatedBottomPadding.toInt() + binding.layoutChatInput.height
+                    )
+
+                    return insets
+                }
+            })
+
                 // Set chat parameters to ViewModel
         viewModel.setChatParameters(
             storeId = storeId,
@@ -178,6 +251,12 @@ class ChatActivity : AppCompatActivity() {
                 stackFromEnd = true
             }
         }
+//        binding.recyclerChat.setPadding(
+//            binding.recyclerChat.paddingLeft,
+//            binding.recyclerChat.paddingTop,
+//            binding.recyclerChat.paddingRight,
+//            binding.layoutChatInput.height + binding.root.rootWindowInsets?.getInsets(WindowInsetsCompat.Type.navigationBars())?.bottom ?: 0
+//        )
     }
 
 
@@ -222,6 +301,11 @@ class ChatActivity : AppCompatActivity() {
 
             override fun afterTextChanged(s: Editable?) {}
         })
+
+        binding.editTextMessage.requestFocus()
+        val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.showSoftInput(binding.editTextMessage, InputMethodManager.SHOW_IMPLICIT)
+
     }
 
     private fun observeViewModel() {
@@ -256,10 +340,17 @@ class ChatActivity : AppCompatActivity() {
                 binding.tvSellerName.text = state.storeName
                 binding.tvStoreName.text=state.storeName
 
+                val fullImageUrl = when (val img = state.productImageUrl) {
+                    is String -> {
+                        if (img.startsWith("/")) BASE_URL + img.substring(1) else img
+                    }
+                    else -> R.drawable.placeholder_image
+                }
+
                 // Load product image
                 if (!state.productImageUrl.isNullOrEmpty()) {
                     Glide.with(this@ChatActivity)
-                        .load(BASE_URL + state.productImageUrl)
+                        .load(fullImageUrl)
                         .centerCrop()
                         .placeholder(R.drawable.placeholder_image)
                         .error(R.drawable.placeholder_image)
@@ -293,8 +384,6 @@ class ChatActivity : AppCompatActivity() {
             }
         })
     }
-
-
 
     private fun showOptionsMenu() {
         val options = arrayOf(
@@ -380,67 +469,36 @@ class ChatActivity : AppCompatActivity() {
         try {
             Log.d(TAG, "Processing selected image: $uri")
 
-            // First try the direct approach to get the file path
-            var filePath: String? = null
+            // Always use the copy-to-cache approach for reliability
+            contentResolver.openInputStream(uri)?.use { inputStream ->
+                val fileName = "chat_img_${System.currentTimeMillis()}.jpg"
+                val outputFile = File(cacheDir, fileName)
 
-            // For newer Android versions, we need to handle content URIs properly
-            if (uri.scheme == "content") {
-                val cursor = contentResolver.query(uri, null, null, null, null)
-                cursor?.use {
-                    if (it.moveToFirst()) {
-                        val columnIndex = it.getColumnIndex(MediaStore.Images.Media.DATA)
-                        if (columnIndex != -1) {
-                            filePath = it.getString(columnIndex)
-                            Log.d(TAG, "Found file path from cursor: $filePath")
-                        }
-                    }
+                outputFile.outputStream().use { outputStream ->
+                    inputStream.copyTo(outputStream)
                 }
 
-                // If we couldn't get the path directly, create a copy in our cache directory
-                if (filePath == null) {
-                    contentResolver.openInputStream(uri)?.use { inputStream ->
-                        val fileName = "img_${System.currentTimeMillis()}.jpg"
-                        val outputFile = File(cacheDir, fileName)
-
-                        outputFile.outputStream().use { outputStream ->
-                            inputStream.copyTo(outputStream)
-                        }
-
-                        filePath = outputFile.absolutePath
-                        Log.d(TAG, "Created temp file from input stream: $filePath")
-                    }
-                }
-            } else if (uri.scheme == "file") {
-                // Direct file URI
-                filePath = uri.path
-                Log.d(TAG, "Got file path directly from URI: $filePath")
-            }
-
-            // Process the file path
-            if (filePath != null) {
-                val file = File(filePath)
-                if (file.exists()) {
-                    // Check file size (limit to 5MB)
-                    if (file.length() > 5 * 1024 * 1024) {
-                        Toast.makeText(this, "Image too large (max 5MB), please select a smaller image", Toast.LENGTH_SHORT).show()
+                if (outputFile.exists() && outputFile.length() > 0) {
+                    if (outputFile.length() > 5 * 1024 * 1024) {
+                        Log.e(TAG, "File too large: ${outputFile.length()} bytes")
+                        Toast.makeText(this, "Image too large (max 5MB)", Toast.LENGTH_SHORT).show()
                         return
                     }
 
-                    // Set the file to the ViewModel
-                    viewModel.setSelectedImageFile(file)
-                    Toast.makeText(this, R.string.image_selected, Toast.LENGTH_SHORT).show()
-                    Log.d(TAG, "Successfully set image file: ${file.absolutePath}, size: ${file.length()} bytes")
+                    Log.d(TAG, "Image processed successfully: ${outputFile.absolutePath}, size: ${outputFile.length()}")
+                    viewModel.setSelectedImageFile(outputFile)
+                    Toast.makeText(this, "Image selected", Toast.LENGTH_SHORT).show()
                 } else {
-                    Log.e(TAG, "File does not exist: $filePath")
-                    Toast.makeText(this, "Could not access the selected image", Toast.LENGTH_SHORT).show()
+                    Log.e(TAG, "Failed to create image file")
+                    Toast.makeText(this, "Failed to process image", Toast.LENGTH_SHORT).show()
                 }
-            } else {
-                Log.e(TAG, "Could not get file path from URI: $uri")
-                Toast.makeText(this, "Could not process the selected image", Toast.LENGTH_SHORT).show()
+            } ?: run {
+                Log.e(TAG, "Could not open input stream for URI: $uri")
+                Toast.makeText(this, "Could not access image", Toast.LENGTH_SHORT).show()
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error handling selected image", e)
-            Toast.makeText(this, "Error processing image: ${e.message}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
 

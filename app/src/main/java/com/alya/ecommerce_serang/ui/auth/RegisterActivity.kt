@@ -59,6 +59,8 @@ class RegisterActivity : AppCompatActivity() {
             windowInsets
         }
 
+
+
         Log.d("RegisterActivity", "Token in storage: '${sessionManager.getToken()}'")
         Log.d("RegisterActivity", "User ID in storage: '${sessionManager.getUserId()}'")
 
