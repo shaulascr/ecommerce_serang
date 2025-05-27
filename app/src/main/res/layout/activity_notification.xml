@@ -6,6 +6,7 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:theme="@style/Theme.Ecommerce_serang"
     tools:context=".ui.notif.NotificationActivity">
 
     <androidx.appcompat.widget.Toolbar
@@ -31,7 +32,7 @@
             android:text="Notifikasi"
             android:textColor="@android:color/black"
             android:textSize="18sp"
-            android:textStyle="bold" />
+            android:fontFamily="@font/dmsans_semibold" />
     </androidx.appcompat.widget.Toolbar>
 
     <com.google.android.material.tabs.TabLayout
@@ -46,6 +47,7 @@
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            style="@style/body_medium"
             android:text="Notifikasi Saya" />
 
         <com.google.android.material.tabs.TabItem
@@ -54,17 +56,17 @@
             android:text="Notifikasi Toko" />
     </com.google.android.material.tabs.TabLayout>
 
-    <TextView
-        android:id="@+id/tvMarkAllRead"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:padding="8dp"
-        android:text="Tandai Sudah Dibaca Semua"
-        android:textColor="@color/blue_500"
-        android:textSize="12sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tabLayout" />
+<!--    <TextView-->
+<!--        android:id="@+id/tvMarkAllRead"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_marginEnd="16dp"-->
+<!--        android:padding="8dp"-->
+<!--        android:text="Tandai Sudah Dibaca Semua"-->
+<!--        android:textColor="@color/blue_500"-->
+<!--        android:textSize="12sp"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintTop_toBottomOf="@id/tabLayout" />-->
 
     <TextView
         android:id="@+id/tvNewest"
@@ -75,9 +77,9 @@
         android:text="Terbaru"
         android:textColor="@android:color/black"
         android:textSize="14sp"
-        android:textStyle="bold"
+        android:fontFamily="@font/dmsans_semibold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvMarkAllRead" />
+        app:layout_constraintTop_toBottomOf="@id/tabLayout" />
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipeRefreshLayout"

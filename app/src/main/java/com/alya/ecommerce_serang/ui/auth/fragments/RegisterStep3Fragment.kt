@@ -8,6 +8,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsAnimationCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.alya.ecommerce_serang.R
@@ -91,6 +94,8 @@ class RegisterStep3Fragment : Fragment() {
         // Set up province and city dropdowns
         setupAutoComplete()
 
+        setupEdgeToEdge()
+
         // Set up button listeners
         binding.btnPrevious.setOnClickListener {
             // Go back to the previous step
@@ -114,6 +119,55 @@ class RegisterStep3Fragment : Fragment() {
         registerViewModel.getProvinces()
         setupProvinceObserver()
         setupCityObserver()
+    }
+
+    private fun setupEdgeToEdge() {
+        // Apply insets to your fragment's root view
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, windowInsets ->
+            val systemBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(
+                systemBars.left,
+                systemBars.top,
+                systemBars.right,
+                systemBars.bottom
+            )
+            windowInsets
+        }
+
+        // Set up IME animation callback
+        ViewCompat.setWindowInsetsAnimationCallback(
+            binding.root,
+            object : WindowInsetsAnimationCompat.Callback(DISPATCH_MODE_STOP) {
+                var startBottom = 0f
+                var endBottom = 0f
+
+                override fun onPrepare(animation: WindowInsetsAnimationCompat) {
+                    startBottom = binding.root.bottom.toFloat()
+                }
+
+                override fun onStart(
+                    animation: WindowInsetsAnimationCompat,
+                    bounds: WindowInsetsAnimationCompat.BoundsCompat
+                ): WindowInsetsAnimationCompat.BoundsCompat {
+                    endBottom = binding.root.bottom.toFloat()
+                    return bounds
+                }
+
+                override fun onProgress(
+                    insets: WindowInsetsCompat,
+                    runningAnimations: MutableList<WindowInsetsAnimationCompat>
+                ): WindowInsetsCompat {
+                    val imeAnimation = runningAnimations.find {
+                        it.typeMask and WindowInsetsCompat.Type.ime() != 0
+                    } ?: return insets
+
+                    binding.root.translationY =
+                        (startBottom - endBottom) * (1 - imeAnimation.interpolatedFraction)
+
+                    return insets
+                }
+            }
+        )
     }
 
     private fun setupAutoComplete() {
@@ -351,6 +405,8 @@ class RegisterStep3Fragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root, null)
+        ViewCompat.setWindowInsetsAnimationCallback(binding.root, null)
         _binding = null
     }
 //

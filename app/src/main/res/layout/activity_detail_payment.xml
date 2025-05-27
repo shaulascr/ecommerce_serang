@@ -8,6 +8,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/white"
+    android:theme="@style/Theme.Ecommerce_serang"
     tools:context=".ui.profile.mystore.sells.payment.DetailPaymentActivity">
 
     <include

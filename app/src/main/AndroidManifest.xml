@@ -34,6 +34,7 @@
             android:exported="false" />
         <activity
             android:name=".ui.auth.RegisterStoreActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
         <activity
             android:name=".ui.profile.editprofile.EditProfileCustActivity"
@@ -55,7 +56,8 @@
             android:exported="false" />
         <activity
             android:name=".ui.chat.ChatActivity"
-            android:exported="false" /> <!-- <provider -->
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize|stateHidden" /> <!-- <provider -->
         <!-- android:name="androidx.startup.InitializationProvider" -->
         <!-- android:authorities="${applicationId}.androidx-startup" -->
         <!-- tools:node="remove" /> -->
@@ -88,6 +90,7 @@
             android:exported="false" />
         <activity
             android:name=".ui.order.address.AddAddressActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
         <activity
             android:name=".ui.order.address.AddressActivity"
@@ -136,6 +139,7 @@
             android:exported="false" />
         <activity
             android:name=".ui.auth.RegisterActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

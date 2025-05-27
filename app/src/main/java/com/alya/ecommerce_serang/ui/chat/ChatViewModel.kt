@@ -46,7 +46,7 @@ class ChatViewModel @Inject constructor(
 
     // Store and product parameters
     private var storeId: Int = 0
-    private var productId: Int? = 0
+    private var productId: Int = 0
     private var currentUserId: Int? = null
     private var defaultUserId: Int = 0
 
@@ -100,8 +100,9 @@ class ChatViewModel @Inject constructor(
         productRating: Float? = 0f,
         storeName: String
     ) {
+        this.productId = if (productId != null && productId > 0) productId else 0
+
         this.storeId = storeId
-        this.productId = productId!!
         this.productName = productName.toString()
         this.productPrice = productPrice.toString()
         this.productImage = productImage.toString()
@@ -247,6 +248,11 @@ class ChatViewModel @Inject constructor(
      * Sends a chat message
      */
     fun sendMessage(message: String) {
+        Log.d(TAG, "=== SEND MESSAGE ===")
+        Log.d(TAG, "Message: '$message'")
+        Log.d(TAG, "Has attachment: ${selectedImageFile != null}")
+        Log.d(TAG, "Selected image file: ${selectedImageFile?.absolutePath}")
+        Log.d(TAG, "File exists: ${selectedImageFile?.exists()}")
         if (message.isBlank() && selectedImageFile == null) {
             Log.e(TAG, "Cannot send message: Both message and image are empty")
             return
@@ -282,12 +288,14 @@ class ChatViewModel @Inject constructor(
                 // Send the message using the repository
                 // Note: We keep the chatRoomId parameter for compatibility with the repository method signature,
                 // but it's not actually used in the API call
+                val safeProductId = if (productId == 0) null else productId
+
+
                 val result = chatRepository.sendChatMessage(
                     storeId = storeId,
                     message = message,
-                    productId = productId,
-                    imageFile = selectedImageFile,
-                    chatRoomId = existingChatRoomId
+                    productId = safeProductId,
+                    imageFile = selectedImageFile
                 )
 
                 when (result) {
