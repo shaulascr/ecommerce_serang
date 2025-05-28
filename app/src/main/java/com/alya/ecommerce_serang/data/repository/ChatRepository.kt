@@ -90,6 +90,60 @@ class ChatRepository @Inject constructor(
         }
     }
 
+    suspend fun sendChatMessageStore(
+        storeId: Int,
+        message: String,
+        productId: Int?,           // Nullable and optional
+        imageFile: File? = null    // Nullable and optional
+    ): Result<SendChatResponse> {
+        return try {
+            val parts = mutableMapOf<String, RequestBody>()
+
+            // Required fields
+            parts["store_id"] = storeId.toString().toRequestBody("text/plain".toMediaType())
+            parts["message"] = message.toRequestBody("text/plain".toMediaType())
+
+            // Optional: Only include if productId is valid
+            if (productId != null && productId > 0) {
+                parts["product_id"] = productId.toString().toRequestBody("text/plain".toMediaType())
+            }
+
+            // Optional: Only include if imageFile is valid
+            val imagePart = imageFile?.takeIf { it.exists() }?.let { file ->
+//                val requestFile = file.asRequestBody("image/*".toMediaType())
+                val mimeType = when {
+                    file.name.endsWith(".png", ignoreCase = true) -> "image/png"
+                    file.name.endsWith(".jpg", ignoreCase = true) || file.name.endsWith(".jpeg", ignoreCase = true) -> "image/jpeg"
+                    else -> "image/jpeg"  // fallback
+                }
+                val requestFile = file.asRequestBody(mimeType.toMediaType())
+                MultipartBody.Part.createFormData("chatimg", file.name, requestFile)
+            }
+
+            // Log the parts map keys and values (string representations)
+            Log.d("ChatRepository", "Sending chat message with parts:")
+            parts.forEach { (key, body) ->
+                Log.d("ChatRepository", "Key: $key, Value (approx): ${bodyToString(body)}")
+            }
+            Log.d("ChatRepository", "Sending chat message with imagePart: ${imagePart != null}")
+
+            // Send request
+            val response = apiService.sendChatMessageStore(parts, imagePart)
+
+            if (response.isSuccessful) {
+                response.body()?.let { Result.Success(it) } ?: Result.Error(Exception("Empty response body"))
+            } else {
+                val errorMsg = response.errorBody()?.string().orEmpty()
+                Log.e("ChatRepository", "API Error: ${response.code()} - $errorMsg")
+                Result.Error(Exception("API Error: ${response.code()} - $errorMsg"))
+            }
+
+        } catch (e: Exception) {
+            Log.e("ChatRepository", "Exception sending chat message", e)
+            Result.Error(e)
+        }
+    }
+
     // Helper function to get string content from RequestBody (best effort)
     private fun bodyToString(requestBody: RequestBody): String {
         return try {
@@ -214,6 +268,28 @@ class ChatRepository @Inject constructor(
                 Result.Error(Exception("Failed to fetch categories. Code: ${response.code()}"))
             }
         } catch (e: Exception){
+            Result.Error(e)
+        }
+    }
+
+    suspend fun getListChatStore(): Result<List<ChatItemList>> {
+        return try {
+            Log.d("ChatRepository", "Calling getChatListStore() from ApiService")
+
+            val response = apiService.getChatListStore()
+
+            Log.d("ChatRepository", "Response received: isSuccessful=${response.isSuccessful}, code=${response.code()}")
+
+            if (response.isSuccessful) {
+                val chat = response.body()?.chat ?: emptyList()
+                Log.d("ChatRepository", "Chat list size: ${chat.size}")
+                Result.Success(chat)
+            } else {
+                Log.e("ChatRepository", "Failed response: ${response.errorBody()?.string()}")
+                Result.Error(Exception("Failed to fetch chat list. Code: ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            Log.e("ChatRepository", "Exception during getChatListStore", e)
             Result.Error(e)
         }
     }

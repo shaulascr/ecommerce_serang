@@ -41,6 +41,9 @@ class ChatViewModel @Inject constructor(
     private val _chatList = MutableLiveData<Result<List<ChatItemList>>>()
     val chatList: LiveData<Result<List<ChatItemList>>> = _chatList
 
+    private val _chatListStore = MutableLiveData<Result<List<ChatItemList>>>()
+    val chatListStore: LiveData<Result<List<ChatItemList>>> = _chatListStore
+
     private val _storeDetail = MutableLiveData<Result<StoreProduct?>>()
     val storeDetail : LiveData<Result<StoreProduct?>> get() = _storeDetail
 
@@ -367,6 +370,126 @@ class ChatViewModel @Inject constructor(
         }
     }
 
+    fun sendMessageStore(message: String) {
+        Log.d(TAG, "=== SEND MESSAGE ===")
+        Log.d(TAG, "Message: '$message'")
+        Log.d(TAG, "Has attachment: ${selectedImageFile != null}")
+        Log.d(TAG, "Selected image file: ${selectedImageFile?.absolutePath}")
+        Log.d(TAG, "File exists: ${selectedImageFile?.exists()}")
+        if (message.isBlank() && selectedImageFile == null) {
+            Log.e(TAG, "Cannot send message: Both message and image are empty")
+            return
+        }
+
+        // Check if we have the necessary parameters
+        if (storeId <= 0) {
+            Log.e(TAG, "Cannot send message: Store ID is invalid")
+            updateState { it.copy(error = "Cannot send message. Invalid store ID.") }
+            return
+        }
+
+        // Get the existing chatRoomId (not used in API but may be needed for Socket.IO)
+        val existingChatRoomId = _chatRoomId.value ?: 0
+
+        // Log debug information
+        Log.d(TAG, "Sending message with params: storeId=$storeId, productId=$productId")
+        Log.d(TAG, "Current user ID: $currentUserId")
+        Log.d(TAG, "Has attachment: ${selectedImageFile != null}")
+
+        // Check image file size if present
+        selectedImageFile?.let { file ->
+            if (file.exists() && file.length() > 5 * 1024 * 1024) { // 5MB limit
+                updateState { it.copy(error = "Image file is too large. Please select a smaller image.") }
+                return
+            }
+        }
+
+        viewModelScope.launch {
+            updateState { it.copy(isSending = true) }
+
+            try {
+                // Send the message using the repository
+                // Note: We keep the chatRoomId parameter for compatibility with the repository method signature,
+                // but it's not actually used in the API call
+                val safeProductId = if (productId == 0) null else productId
+
+
+                val result = chatRepository.sendChatMessageStore(
+                    storeId = storeId,
+                    message = message,
+                    productId = safeProductId,
+                    imageFile = selectedImageFile
+                )
+
+                when (result) {
+                    is Result.Success -> {
+                        // Add new message to the list
+                        val chatLine = result.data.chatLine
+                        val newMessage = convertChatLineToUiMessage(chatLine)
+
+                        val currentMessages = _state.value?.messages ?: listOf()
+                        val updatedMessages = currentMessages.toMutableList().apply {
+                            add(newMessage)
+                        }
+
+                        updateState {
+                            it.copy(
+                                messages = updatedMessages,
+                                isSending = false,
+                                hasAttachment = false,
+                                error = null
+                            )
+                        }
+
+                        Log.d(TAG, "Message sent successfully: ${chatLine.id}")
+
+                        // Update the chat room ID if it's the first message
+                        val newChatRoomId = chatLine.chatRoomId
+                        if (existingChatRoomId == 0 && newChatRoomId > 0) {
+                            Log.d(TAG, "Chat room created: $newChatRoomId")
+                            _chatRoomId.value = newChatRoomId
+
+                            // Now that we have a chat room ID, we can join the Socket.IO room
+                            joinSocketRoom(newChatRoomId)
+                        }
+
+                        // Emit the message via Socket.IO for real-time updates
+                        socketService.sendMessage(chatLine)
+
+                        // Clear the image attachment
+                        selectedImageFile = null
+                    }
+                    is Result.Error -> {
+                        val errorMsg = if (result.exception.message.isNullOrEmpty() || result.exception.message == "{}") {
+                            "Failed to send message. Please try again."
+                        } else {
+                            result.exception.message
+                        }
+
+                        updateState {
+                            it.copy(
+                                isSending = false,
+                                error = errorMsg
+                            )
+                        }
+                        Log.e(TAG, "Error sending message: ${result.exception.message}")
+                    }
+                    is Result.Loading -> {
+                        updateState { it.copy(isSending = true) }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Exception in sendMessage", e)
+                updateState {
+                    it.copy(
+                        isSending = false,
+                        error = "An unexpected error occurred: ${e.message}"
+                    )
+                }
+            }
+        }
+    }
+
     /**
      * Updates a message status (delivered, read)
      */
@@ -486,6 +609,17 @@ class ChatViewModel @Inject constructor(
         viewModelScope.launch {
             _chatList.value = com.alya.ecommerce_serang.data.repository.Result.Loading
             _chatList.value = chatRepository.getListChat()
+        }
+    }
+
+    fun getChatListStore() {
+        Log.d("ChatViewModel", "getChatListStore() called")
+        _chatListStore.value = Result.Loading
+
+        viewModelScope.launch {
+            val result = chatRepository.getListChatStore()
+            Log.d("ChatViewModel", "getChatListStore() result: $result")
+            _chatListStore.value = result
         }
     }
 }
