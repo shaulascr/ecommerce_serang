@@ -30,12 +30,15 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".ui.profile.mystore.chat.ChatListStoreActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.product.storeDetail.StoreDetailActivity"
             android:exported="false" />
         <activity
             android:name=".ui.auth.RegisterStoreActivity"
-            android:windowSoftInputMode="adjustResize"
-            android:exported="false" />
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".ui.profile.editprofile.EditProfileCustActivity"
             android:exported="false" />
@@ -66,6 +69,10 @@
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
+        <activity
+            android:name=".ui.profile.mystore.chat.ChatStoreActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize|stateHidden" />
 
         <activity
             android:name=".ui.profile.mystore.profile.shipping_service.ShippingServiceActivity"
@@ -90,8 +97,8 @@
             android:exported="false" />
         <activity
             android:name=".ui.order.address.AddAddressActivity"
-            android:windowSoftInputMode="adjustResize"
-            android:exported="false" />
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".ui.order.address.AddressActivity"
             android:exported="false" />
@@ -139,8 +146,8 @@
             android:exported="false" />
         <activity
             android:name=".ui.auth.RegisterActivity"
-            android:windowSoftInputMode="adjustResize"
-            android:exported="true">
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
