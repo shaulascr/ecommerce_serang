@@ -67,7 +67,7 @@
         <activity
             android:name=".ui.chat.ChatActivity"
             android:exported="false"
-            android:windowSoftInputMode="adjustResize|stateHidden" /> <!-- <provider -->
+            android:windowSoftInputMode="adjustResize" /> <!-- <provider -->
         <!-- android:name="androidx.startup.InitializationProvider" -->
         <!-- android:authorities="${applicationId}.androidx-startup" -->
         <!-- tools:node="remove" /> -->
@@ -79,7 +79,7 @@
         <activity
             android:name=".ui.profile.mystore.chat.ChatStoreActivity"
             android:exported="false"
-            android:windowSoftInputMode="adjustResize|stateHidden" />
+            android:windowSoftInputMode="adjustResize" />
 
         <activity
             android:name=".ui.profile.mystore.profile.shipping_service.ShippingServiceActivity"

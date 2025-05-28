@@ -24,12 +24,12 @@ import javax.inject.Inject
 class ChatViewModel @Inject constructor(
     private val chatRepository: ChatRepository,
     private val socketService: SocketIOService,
-
-
     private val sessionManager: SessionManager
 ) : ViewModel() {
 
     private val TAG = "ChatViewModel"
+    // Product attachment flag
+    private var shouldAttachProduct = false
 
     // UI state using LiveData
     private val _state = MutableLiveData(ChatUiState())
@@ -45,9 +45,9 @@ class ChatViewModel @Inject constructor(
     val chatListStore: LiveData<Result<List<ChatItemList>>> = _chatListStore
 
     private val _storeDetail = MutableLiveData<Result<StoreProduct?>>()
-    val storeDetail : LiveData<Result<StoreProduct?>> get() = _storeDetail
+    val storeDetail: LiveData<Result<StoreProduct?>> get() = _storeDetail
 
-    // Store and product parameters
+    // Chat parameters
     private var storeId: Int = 0
     private var productId: Int = 0
     private var currentUserId: Int? = null
@@ -64,36 +64,39 @@ class ChatViewModel @Inject constructor(
     private var selectedImageFile: File? = null
 
     init {
-        // Try to get current user ID from the repository
+        Log.d(TAG, "ChatViewModel initialized")
+        initializeUser()
+    }
+
+    private fun initializeUser() {
         viewModelScope.launch {
+            Log.d(TAG, "Initializing user session...")
+
             when (val result = chatRepository.fetchUserProfile()) {
                 is Result.Success -> {
                     currentUserId = result.data?.userId
-                    Log.e(TAG, "User ID: $currentUserId")
+                    Log.d(TAG, "User session initialized - User ID: $currentUserId")
 
-                    // Move the validation and subsequent logic inside the coroutine
                     if (currentUserId == null || currentUserId == 0) {
-                        Log.e(TAG, "Error: User ID is not set or invalid")
+                        Log.e(TAG, "Invalid user ID detected")
                         updateState { it.copy(error = "User authentication error. Please login again.") }
                     } else {
-                        // Set up socket listeners
+                        Log.d(TAG, "Setting up socket listeners...")
                         setupSocketListeners()
                     }
                 }
                 is Result.Error -> {
-                    Log.e(TAG, "Error fetching user profile: ${result.exception.message}")
+                    Log.e(TAG, "Failed to fetch user profile: ${result.exception.message}")
                     updateState { it.copy(error = "User authentication error. Please login again.") }
                 }
                 is Result.Loading -> {
-                    // Handle loading state if needed
+                    Log.d(TAG, "Loading user profile...")
                 }
             }
         }
     }
 
-    /**
-     * Set chat parameters received from activity
-     */
+    // set chat parameter for buyer
     fun setChatParameters(
         storeId: Int,
         productId: Int? = 0,
@@ -103,8 +106,9 @@ class ChatViewModel @Inject constructor(
         productRating: Float? = 0f,
         storeName: String
     ) {
-        this.productId = if (productId != null && productId > 0) productId else 0
+        Log.d(TAG, "Setting chat parameters - StoreID: $storeId, ProductID: $productId")
 
+        this.productId = if (productId != null && productId > 0) productId else 0
         this.storeId = storeId
         this.productName = productName.toString()
         this.productPrice = productPrice.toString()
@@ -112,7 +116,6 @@ class ChatViewModel @Inject constructor(
         this.productRating = productRating!!
         this.storeName = storeName
 
-        // Update state with product info
         updateState {
             it.copy(
                 productName = productName.toString(),
@@ -123,17 +126,15 @@ class ChatViewModel @Inject constructor(
             )
         }
 
-        // Connect to socket and load chat history
         val existingChatRoomId = _chatRoomId.value ?: 0
         if (existingChatRoomId > 0) {
-            // If we already have a chat room ID, we can load the chat history
+            Log.d(TAG, "Loading existing chat room: $existingChatRoomId")
             loadChatHistory(existingChatRoomId)
-
-            // And join the Socket.IO room
             joinSocketRoom(existingChatRoomId)
         }
     }
 
+    // set chat parameter for store
     fun setChatParametersStore(
         storeId: Int,
         userId: Int,
@@ -144,16 +145,17 @@ class ChatViewModel @Inject constructor(
         productRating: Float? = 0f,
         storeName: String
     ) {
-        this.productId = if (productId != null && productId > 0) productId else 0
+        Log.d(TAG, "Setting store chat parameters - StoreID: $storeId, UserID: $userId, ProductID: $productId")
 
+        this.productId = if (productId != null && productId > 0) productId else 0
         this.storeId = storeId
-        this.defaultUserId = userId  // Store the user_id for store-side chat
+        this.defaultUserId = userId
         this.productName = productName.toString()
         this.productPrice = productPrice.toString()
         this.productImage = productImage.toString()
         this.productRating = productRating!!
         this.storeName = storeName
-        // Update state with product info
+
         updateState {
             it.copy(
                 productName = productName.toString(),
@@ -164,14 +166,71 @@ class ChatViewModel @Inject constructor(
             )
         }
 
-        // Connect to socket and load chat history
         val existingChatRoomId = _chatRoomId.value ?: 0
         if (existingChatRoomId > 0) {
-            // If we already have a chat room ID, we can load the chat history
+            Log.d(TAG, "Loading existing store chat room: $existingChatRoomId")
             loadChatHistory(existingChatRoomId)
-
-            // And join the Socket.IO room
             joinSocketRoom(existingChatRoomId)
+        }
+    }
+
+    //enable product attach from detailproductactivity
+    fun enableProductAttachment() {
+        Log.d(TAG, "Product attachment enabled - ProductID: $productId, ProductName: $productName")
+        shouldAttachProduct = true
+        updateState { it.copy(hasProductAttachment = true) }
+    }
+
+    // disable product attach
+    fun disableProductAttachment() {
+        Log.d(TAG, "Product attachment disabled")
+        shouldAttachProduct = false
+        updateState { it.copy(hasProductAttachment = false) }
+    }
+
+    private fun setupSocketListeners() {
+        Log.d(TAG, "Setting up socket listeners...")
+
+        viewModelScope.launch {
+            socketService.connectionState.collect { connectionState ->
+                Log.d(TAG, "Socket connection state changed: $connectionState")
+                updateState { it.copy(connectionState = connectionState) }
+
+                if (connectionState is ConnectionState.Connected) {
+                    Log.d(TAG, "Socket connected, joining room...")
+                    socketService.joinRoom()
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            socketService.newMessages.collect { chatLine ->
+                chatLine?.let {
+                    Log.d(TAG, "New message received via socket - ID: ${it.id}, SenderID: ${it.senderId}")
+                    val currentMessages = _state.value?.messages ?: listOf()
+                    val updatedMessages = currentMessages.toMutableList().apply {
+                        add(convertChatLineToUiMessage(it))
+                    }
+                    updateState { it.copy(messages = updatedMessages) }
+
+                    if (it.senderId != currentUserId) {
+                        Log.d(TAG, "Marking message as read: ${it.id}")
+                        updateMessageStatus(it.id, Constants.STATUS_READ)
+                    }
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            socketService.typingStatus.collect { typingStatus ->
+                typingStatus?.let {
+                    val currentRoomId = _chatRoomId.value ?: 0
+                    if (typingStatus.roomId == currentRoomId && typingStatus.userId != currentUserId) {
+                        Log.d(TAG, "Typing status updated: ${typingStatus.isTyping}")
+                        updateState { it.copy(isOtherUserTyping = typingStatus.isTyping) }
+                    }
+                }
+            }
         }
     }
 
@@ -181,78 +240,37 @@ class ChatViewModel @Inject constructor(
             return
         }
 
+        Log.d(TAG, "Joining socket room: $roomId")
         socketService.joinRoom()
     }
 
-    /**
-     * Sets up listeners for Socket.IO events
-     */
-    private fun setupSocketListeners() {
-        viewModelScope.launch {
-            // Listen for connection state changes
-            socketService.connectionState.collect { connectionState ->
-                updateState { it.copy(connectionState = connectionState) }
-
-                // Join room when connected
-                if (connectionState is ConnectionState.Connected) {
-                    socketService.joinRoom()
-                }
-            }
-        }
-
-        viewModelScope.launch {
-            // Listen for new messages
-            socketService.newMessages.collect { chatLine ->
-                chatLine?.let {
-                    val currentMessages = _state.value?.messages ?: listOf()
-                    val updatedMessages = currentMessages.toMutableList().apply {
-                        add(convertChatLineToUiMessage(it))
-                    }
-                    updateState { it.copy(messages = updatedMessages) }
-
-                    // Update message status if received from others
-                    if (it.senderId != currentUserId) {
-                        updateMessageStatus(it.id, Constants.STATUS_READ)
-                    }
-                }
-            }
-        }
-
-        viewModelScope.launch {
-            // Listen for typing status updates
-            socketService.typingStatus.collect { typingStatus ->
-                typingStatus?.let {
-                    if (typingStatus.roomId == (_chatRoomId.value ?: 0) && typingStatus.userId != currentUserId) {
-                        updateState { it.copy(isOtherUserTyping = typingStatus.isTyping) }
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Helper function to update LiveData state
-     */
-    private fun updateState(update: (ChatUiState) -> ChatUiState) {
-        _state.value?.let {
-            _state.value = update(it)
-        }
-    }
-
-    /**
-     * Loads chat history
-     */
-    fun loadChatHistory(chatRoomId: Int) {
-        if (chatRoomId <= 0) {
-            Log.e(TAG, "Cannot load chat history: Chat room ID is 0")
+    fun sendTypingStatus(isTyping: Boolean) {
+        val roomId = _chatRoomId.value ?: 0
+        if (roomId <= 0) {
+            Log.w(TAG, "Cannot send typing status: No active room")
             return
         }
+
+        Log.d(TAG, "Sending typing status: $isTyping for room: $roomId")
+        socketService.sendTypingStatus(roomId, isTyping)
+    }
+
+    // load chat history
+    fun loadChatHistory(chatRoomId: Int) {
+        if (chatRoomId <= 0) {
+            Log.e(TAG, "Cannot load chat history: Invalid chat room ID")
+            return
+        }
+
+        Log.d(TAG, "Loading chat history for room: $chatRoomId")
 
         viewModelScope.launch {
             updateState { it.copy(isLoading = true) }
 
             when (val result = chatRepository.getChatHistory(chatRoomId)) {
                 is Result.Success -> {
+                    Log.d(TAG, "Chat history loaded successfully - ${result.data.chat.size} messages")
+
                     val messages = result.data.chat.map { chatLine ->
                         convertChatLineToUiMessageHistory(chatLine)
                     }
@@ -265,21 +283,24 @@ class ChatViewModel @Inject constructor(
                         )
                     }
 
-                    Log.d(TAG, "Loaded ${messages.size} messages for chat room $chatRoomId")
-
                     // Update status of unread messages
-                    result.data.chat
-                        .filter { it.senderId != currentUserId && it.status != Constants.STATUS_READ }
-                        .forEach { updateMessageStatus(it.id, Constants.STATUS_READ) }
+                    val unreadMessages = result.data.chat.filter {
+                        it.senderId != currentUserId && it.status != Constants.STATUS_READ
+                    }
+
+                    if (unreadMessages.isNotEmpty()) {
+                        Log.d(TAG, "Marking ${unreadMessages.size} messages as read")
+                        unreadMessages.forEach { updateMessageStatus(it.id, Constants.STATUS_READ) }
+                    }
                 }
                 is Result.Error -> {
+                    Log.e(TAG, "Error loading chat history: ${result.exception.message}")
                     updateState {
                         it.copy(
                             isLoading = false,
                             error = result.exception.message
                         )
                     }
-                    Log.e(TAG, "Error loading chat history: ${result.exception.message}")
                 }
                 is Result.Loading -> {
                     updateState { it.copy(isLoading = true) }
@@ -288,52 +309,329 @@ class ChatViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Sends a chat message
-     */
+    fun getChatList() {
+        Log.d(TAG, "Getting chat list...")
+        viewModelScope.launch {
+            _chatList.value = Result.Loading
+            _chatList.value = chatRepository.getListChat()
+        }
+    }
+
+    fun getChatListStore() {
+        Log.d(TAG, "Getting store chat list...")
+        _chatListStore.value = Result.Loading
+
+        viewModelScope.launch {
+            val result = chatRepository.getListChatStore()
+            Log.d(TAG, "Store chat list result: $result")
+            _chatListStore.value = result
+        }
+    }
+
+    // handle regular message and product message
     fun sendMessage(message: String) {
         Log.d(TAG, "=== SEND MESSAGE ===")
         Log.d(TAG, "Message: '$message'")
-        Log.d(TAG, "Has attachment: ${selectedImageFile != null}")
-        Log.d(TAG, "Selected image file: ${selectedImageFile?.absolutePath}")
-        Log.d(TAG, "File exists: ${selectedImageFile?.exists()}")
+        Log.d(TAG, "Should attach product: $shouldAttachProduct")
+        Log.d(TAG, "Has image attachment: ${selectedImageFile != null}")
+        Log.d(TAG, "Product ID: $productId")
+
         if (message.isBlank() && selectedImageFile == null) {
-            Log.e(TAG, "Cannot send message: Both message and image are empty")
+            Log.w(TAG, "Cannot send message: Both message and image are empty")
             return
         }
 
-        // Check if we have the necessary parameters
         if (storeId <= 0) {
-            Log.e(TAG, "Cannot send message: Store ID is invalid")
+            Log.e(TAG, "Cannot send message: Invalid store ID")
             updateState { it.copy(error = "Cannot send message. Invalid store ID.") }
             return
         }
 
-        // Get the existing chatRoomId (not used in API but may be needed for Socket.IO)
-        val existingChatRoomId = _chatRoomId.value ?: 0
+        // Check for product attachment
+        if (shouldAttachProduct && productId > 0) {
+            Log.d(TAG, "Sending message with product attachment")
+            sendMessageWithProduct(message)
+            shouldAttachProduct = false
+            updateState { it.copy(hasProductAttachment = false) }
+            return
+        }
 
-        // Log debug information
-        Log.d(TAG, "Sending message with params: storeId=$storeId, productId=$productId")
-        Log.d(TAG, "Current user ID: $currentUserId")
+        Log.d(TAG, "Sending regular message")
+        sendRegularMessage(message)
+    }
+
+    //send message for store
+    fun sendMessageStore(message: String) {
+        Log.d(TAG, "=== SEND MESSAGE STORE ===")
+        Log.d(TAG, "Message: '$message'")
         Log.d(TAG, "Has attachment: ${selectedImageFile != null}")
+        Log.d(TAG, "Default User ID: $defaultUserId")
 
-        // Check image file size if present
+        if (message.isBlank() && selectedImageFile == null) {
+            Log.w(TAG, "Cannot send store message: Both message and image are empty")
+            return
+        }
+
+        if (storeId <= 0) {
+            Log.e(TAG, "Cannot send store message: Invalid store ID")
+            updateState { it.copy(error = "Cannot send message. Invalid store ID.") }
+            return
+        }
+
+        if (defaultUserId <= 0) {
+            Log.e(TAG, "Cannot send store message: Invalid user ID")
+            updateState { it.copy(error = "Cannot send message. Invalid user ID.") }
+            return
+        }
+
         selectedImageFile?.let { file ->
-            if (file.exists() && file.length() > 5 * 1024 * 1024) { // 5MB limit
+            if (file.exists() && file.length() > 5 * 1024 * 1024) {
+                Log.e(TAG, "Image file too large: ${file.length()} bytes")
                 updateState { it.copy(error = "Image file is too large. Please select a smaller image.") }
                 return
             }
         }
 
+        val existingChatRoomId = _chatRoomId.value ?: 0
+        Log.d(TAG, "Sending store message - StoreID: $storeId, UserID: $defaultUserId, RoomID: $existingChatRoomId")
+
         viewModelScope.launch {
             updateState { it.copy(isSending = true) }
 
             try {
-                // Send the message using the repository
-                // Note: We keep the chatRoomId parameter for compatibility with the repository method signature,
-                // but it's not actually used in the API call
                 val safeProductId = if (productId == 0) null else productId
 
+                val result = chatRepository.sendChatMessageStore(
+                    userId = defaultUserId,
+                    message = message,
+                    productId = safeProductId,
+                    imageFile = selectedImageFile
+                )
+
+                when (result) {
+                    is Result.Success -> {
+                        val chatLine = result.data.chatLine
+                        Log.d(TAG, "Store message sent successfully - ID: ${chatLine.id}")
+
+                        val newMessage = convertChatLineToUiMessage(chatLine)
+                        val currentMessages = _state.value?.messages ?: listOf()
+                        val updatedMessages = currentMessages.toMutableList().apply {
+                            add(newMessage)
+                        }
+
+                        updateState {
+                            it.copy(
+                                messages = updatedMessages,
+                                isSending = false,
+                                hasAttachment = false,
+                                error = null
+                            )
+                        }
+
+                        handleChatRoomCreation(existingChatRoomId, chatLine.chatRoomId)
+                        socketService.sendMessage(chatLine)
+                        selectedImageFile = null
+                    }
+                    is Result.Error -> {
+                        val errorMsg = result.exception.message?.takeIf { it.isNotBlank() && it != "{}" }
+                            ?: "Failed to send message. Please try again."
+
+                        Log.e(TAG, "Error sending store message: $errorMsg")
+                        updateState {
+                            it.copy(
+                                isSending = false,
+                                error = errorMsg
+                            )
+                        }
+                    }
+                    is Result.Loading -> {
+                        updateState { it.copy(isSending = true) }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Exception in sendMessageStore", e)
+                updateState {
+                    it.copy(
+                        isSending = false,
+                        error = "An unexpected error occurred: ${e.message}"
+                    )
+                }
+            }
+        }
+    }
+
+    // send message with product info
+    private fun sendMessageWithProduct(userMessage: String) {
+        Log.d(TAG, "Sending message with product attachment")
+        Log.d(TAG, "User message: '$userMessage'")
+        Log.d(TAG, "Product: $productName")
+
+        // Send product bubble FIRST
+        sendProductBubble()
+
+        // Then send user's text message after a small delay
+        viewModelScope.launch {
+            kotlinx.coroutines.delay(100)
+            sendTextMessage(userMessage)
+        }
+    }
+
+    // send only text message w/o product info
+    private fun sendTextMessage(message: String) {
+        if (message.isBlank()) {
+            Log.w(TAG, "Cannot send text message: Message is blank")
+            return
+        }
+
+        Log.d(TAG, "Sending text message: '$message'")
+
+        viewModelScope.launch {
+            updateState { it.copy(isSending = true) }
+
+            try {
+                val result = chatRepository.sendChatMessage(
+                    storeId = storeId,
+                    message = message,
+                    productId = null,
+                    imageFile = selectedImageFile
+                )
+
+                when (result) {
+                    is Result.Success -> {
+                        val chatLine = result.data.chatLine
+                        Log.d(TAG, "Text message sent successfully - ID: ${chatLine.id}")
+
+                        val newMessage = convertChatLineToUiMessage(chatLine)
+                        val currentMessages = _state.value?.messages ?: listOf()
+                        val updatedMessages = currentMessages.toMutableList().apply {
+                            add(newMessage)
+                        }
+
+                        updateState {
+                            it.copy(
+                                messages = updatedMessages,
+                                isSending = false,
+                                hasAttachment = false,
+                                error = null
+                            )
+                        }
+
+                        val existingChatRoomId = _chatRoomId.value ?: 0
+                        handleChatRoomCreation(existingChatRoomId, chatLine.chatRoomId)
+                        socketService.sendMessage(chatLine)
+                        selectedImageFile = null
+                    }
+                    is Result.Error -> {
+                        Log.e(TAG, "Error sending text message: ${result.exception.message}")
+                        updateState {
+                            it.copy(
+                                isSending = false,
+                                error = result.exception.message ?: "Failed to send message"
+                            )
+                        }
+                    }
+                    is Result.Loading -> {
+                        updateState { it.copy(isSending = true) }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Exception in sendTextMessage", e)
+                updateState {
+                    it.copy(
+                        isSending = false,
+                        error = "An unexpected error occurred: ${e.message}"
+                    )
+                }
+            }
+        }
+    }
+
+    // send product bubble message
+    private fun sendProductBubble() {
+        Log.d(TAG, "Sending product bubble - ProductID: $productId, ProductName: $productName")
+
+        viewModelScope.launch {
+            try {
+                val result = chatRepository.sendChatMessage(
+                    storeId = storeId,
+                    message = "",
+                    productId = productId,
+                    imageFile = null
+                )
+
+                when (result) {
+                    is Result.Success -> {
+                        val chatLine = result.data.chatLine
+                        Log.d(TAG, "Product bubble sent successfully - ID: ${chatLine.id}")
+
+                        val newMessage = convertChatLineToUiMessage(chatLine).copy(
+                            messageType = MessageType.PRODUCT,
+                            productInfo = ProductInfo(
+                                productId = productId,
+                                productName = productName,
+                                productPrice = productPrice,
+                                productImage = productImage,
+                                productRating = productRating,
+                                storeName = storeName
+                            )
+                        )
+
+                        val currentMessages = _state.value?.messages ?: listOf()
+                        val updatedMessages = currentMessages.toMutableList().apply {
+                            add(newMessage)
+                        }
+
+                        updateState {
+                            it.copy(
+                                messages = updatedMessages,
+                                error = null
+                            )
+                        }
+
+                        socketService.sendMessage(chatLine)
+                    }
+                    is Result.Error -> {
+                        Log.e(TAG, "Error sending product bubble: ${result.exception.message}")
+                        updateState {
+                            it.copy(
+                                error = "Failed to send product info: ${result.exception.message}"
+                            )
+                        }
+                    }
+                    is Result.Loading -> {
+                        // Handle loading if needed
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Exception in sendProductBubble", e)
+                updateState {
+                    it.copy(
+                        error = "An unexpected error occurred: ${e.message}"
+                    )
+                }
+            }
+        }
+    }
+
+    // send regular message for normal chat
+    private fun sendRegularMessage(message: String) {
+        Log.d(TAG, "Sending regular message: '$message'")
+
+        selectedImageFile?.let { file ->
+            if (file.exists() && file.length() > 5 * 1024 * 1024) {
+                Log.e(TAG, "Image file too large: ${file.length()} bytes")
+                updateState { it.copy(error = "Image file is too large. Please select a smaller image.") }
+                return
+            }
+        }
+
+        val existingChatRoomId = _chatRoomId.value ?: 0
+
+        viewModelScope.launch {
+            updateState { it.copy(isSending = true) }
+
+            try {
+                val safeProductId = if (productId == 0) null else productId
 
                 val result = chatRepository.sendChatMessage(
                     storeId = storeId,
@@ -344,10 +642,10 @@ class ChatViewModel @Inject constructor(
 
                 when (result) {
                     is Result.Success -> {
-                        // Add new message to the list
                         val chatLine = result.data.chatLine
-                        val newMessage = convertChatLineToUiMessage(chatLine)
+                        Log.d(TAG, "Regular message sent successfully - ID: ${chatLine.id}")
 
+                        val newMessage = convertChatLineToUiMessage(chatLine)
                         val currentMessages = _state.value?.messages ?: listOf()
                         val updatedMessages = currentMessages.toMutableList().apply {
                             add(newMessage)
@@ -362,45 +660,28 @@ class ChatViewModel @Inject constructor(
                             )
                         }
 
-                        Log.d(TAG, "Message sent successfully: ${chatLine.id}")
-
-                        // Update the chat room ID if it's the first message
-                        val newChatRoomId = chatLine.chatRoomId
-                        if (existingChatRoomId == 0 && newChatRoomId > 0) {
-                            Log.d(TAG, "Chat room created: $newChatRoomId")
-                            _chatRoomId.value = newChatRoomId
-
-                            // Now that we have a chat room ID, we can join the Socket.IO room
-                            joinSocketRoom(newChatRoomId)
-                        }
-
-                        // Emit the message via Socket.IO for real-time updates
+                        handleChatRoomCreation(existingChatRoomId, chatLine.chatRoomId)
                         socketService.sendMessage(chatLine)
-
-                        // Clear the image attachment
                         selectedImageFile = null
                     }
                     is Result.Error -> {
-                        val errorMsg = if (result.exception.message.isNullOrEmpty() || result.exception.message == "{}") {
-                            "Failed to send message. Please try again."
-                        } else {
-                            result.exception.message
-                        }
+                        val errorMsg = result.exception.message?.takeIf { it.isNotBlank() && it != "{}" }
+                            ?: "Failed to send message. Please try again."
 
+                        Log.e(TAG, "Error sending regular message: $errorMsg")
                         updateState {
                             it.copy(
                                 isSending = false,
                                 error = errorMsg
                             )
                         }
-                        Log.e(TAG, "Error sending message: ${result.exception.message}")
                     }
                     is Result.Loading -> {
                         updateState { it.copy(isSending = true) }
                     }
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Exception in sendMessage", e)
+                Log.e(TAG, "Exception in sendRegularMessage", e)
                 updateState {
                     it.copy(
                         isSending = false,
@@ -411,138 +692,15 @@ class ChatViewModel @Inject constructor(
         }
     }
 
-    fun sendMessageStore(message: String) {
-        Log.d(TAG, "=== SEND MESSAGE ===")
-        Log.d(TAG, "Message: '$message'")
-        Log.d(TAG, "Has attachment: ${selectedImageFile != null}")
-        Log.d(TAG, "Selected image file: ${selectedImageFile?.absolutePath}")
-        Log.d(TAG, "File exists: ${selectedImageFile?.exists()}")
-        if (message.isBlank() && selectedImageFile == null) {
-            Log.e(TAG, "Cannot send message: Both message and image are empty")
-            return
-        }
-
-        // Check if we have the necessary parameters
-        if (storeId <= 0) {
-            Log.e(TAG, "Cannot send message: Store ID is invalid")
-            updateState { it.copy(error = "Cannot send message. Invalid store ID.") }
-            return
-        }
-
-        // Get the existing chatRoomId (not used in API but may be needed for Socket.IO)
-        val existingChatRoomId = _chatRoomId.value ?: 0
-
-        // Log debug information
-        Log.d(TAG, "Sending message with params: storeId=$storeId, productId=$productId")
-        Log.d(TAG, "Current user ID: $currentUserId")
-        Log.d(TAG, "Has attachment: ${selectedImageFile != null}")
-
-        // Check image file size if present
-        selectedImageFile?.let { file ->
-            if (file.exists() && file.length() > 5 * 1024 * 1024) { // 5MB limit
-                updateState { it.copy(error = "Image file is too large. Please select a smaller image.") }
-                return
-            }
-        }
-
-        if (defaultUserId <= 0) {  // Check userId instead of storeId
-            Log.e(TAG, "Cannot send message: User ID is invalid")
-            updateState { it.copy(error = "Cannot send message. Invalid user ID.") }
-            return
-        }
-
-        viewModelScope.launch {
-            updateState { it.copy(isSending = true) }
-
-            try {
-                val safeProductId = if (productId == 0) null else productId
-
-                val result = chatRepository.sendChatMessageStore(
-                    userId = defaultUserId,  // Pass userId instead of storeId
-                    message = message,
-                    productId = safeProductId,
-                    imageFile = selectedImageFile
-                )
-
-                when (result) {
-                    is Result.Success -> {
-                        // Add new message to the list
-                        val chatLine = result.data.chatLine
-                        val newMessage = convertChatLineToUiMessage(chatLine)
-
-                        val currentMessages = _state.value?.messages ?: listOf()
-                        val updatedMessages = currentMessages.toMutableList().apply {
-                            add(newMessage)
-                        }
-
-                        updateState {
-                            it.copy(
-                                messages = updatedMessages,
-                                isSending = false,
-                                hasAttachment = false,
-                                error = null
-                            )
-                        }
-
-                        Log.d(TAG, "Message sent successfully: ${chatLine.id}")
-
-                        // Update the chat room ID if it's the first message
-                        val newChatRoomId = chatLine.chatRoomId
-                        if (existingChatRoomId == 0 && newChatRoomId > 0) {
-                            Log.d(TAG, "Chat room created: $newChatRoomId")
-                            _chatRoomId.value = newChatRoomId
-
-                            // Now that we have a chat room ID, we can join the Socket.IO room
-                            joinSocketRoom(newChatRoomId)
-                        }
-
-                        // Emit the message via Socket.IO for real-time updates
-                        socketService.sendMessage(chatLine)
-
-                        // Clear the image attachment
-                        selectedImageFile = null
-                    }
-                    is Result.Error -> {
-                        val errorMsg = if (result.exception.message.isNullOrEmpty() || result.exception.message == "{}") {
-                            "Failed to send message. Please try again."
-                        } else {
-                            result.exception.message
-                        }
-
-                        updateState {
-                            it.copy(
-                                isSending = false,
-                                error = errorMsg
-                            )
-                        }
-                        Log.e(TAG, "Error sending message: ${result.exception.message}")
-                    }
-                    is Result.Loading -> {
-                        updateState { it.copy(isSending = true) }
-                    }
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Exception in sendMessage", e)
-                updateState {
-                    it.copy(
-                        isSending = false,
-                        error = "An unexpected error occurred: ${e.message}"
-                    )
-                }
-            }
-        }
-    }
-
-    /**
-     * Updates a message status (delivered, read)
-     */
+   //update message status
     fun updateMessageStatus(messageId: Int, status: String) {
+        Log.d(TAG, "Updating message status - ID: $messageId, Status: $status")
+
         viewModelScope.launch {
             try {
                 val result = chatRepository.updateMessageStatus(messageId, status)
 
                 if (result is Result.Success) {
-                    // Update local message status
                     val currentMessages = _state.value?.messages ?: listOf()
                     val updatedMessages = currentMessages.map { message ->
                         if (message.id == messageId) {
@@ -552,8 +710,7 @@ class ChatViewModel @Inject constructor(
                         }
                     }
                     updateState { it.copy(messages = updatedMessages) }
-
-                    Log.d(TAG, "Message status updated: $messageId -> $status")
+                    Log.d(TAG, "Message status updated successfully")
                 } else if (result is Result.Error) {
                     Log.e(TAG, "Error updating message status: ${result.exception.message}")
                 }
@@ -563,118 +720,245 @@ class ChatViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Sets the selected image file for attachment
-     */
+   //set image attachment
     fun setSelectedImageFile(file: File?) {
         selectedImageFile = file
         updateState { it.copy(hasAttachment = file != null) }
-
-        Log.d(TAG, "Image attachment ${if (file != null) "selected" else "cleared"}")
+        Log.d(TAG, "Image attachment ${if (file != null) "selected: ${file.name}" else "cleared"}")
     }
 
-    /**
-     * Sends typing status to the other user
-     */
-    fun sendTypingStatus(isTyping: Boolean) {
-        val roomId = _chatRoomId.value ?: 0
-        if (roomId <= 0) return
-
-        socketService.sendTypingStatus(roomId, isTyping)
-    }
-
-    /**
-     * Clears any error message in the state
-     */
-    fun clearError() {
-        updateState { it.copy(error = null) }
-    }
-
-    /**
-     * Converts a ChatLine from API to a UI message model
-     */
+    // convert form chatLine api to UI chat messages
     private fun convertChatLineToUiMessage(chatLine: ChatLine): ChatUiMessage {
-        // Format the timestamp for display
-        val formattedTime = try {
-            val inputFormat = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
-            inputFormat.timeZone = TimeZone.getTimeZone("UTC")
-            val outputFormat = java.text.SimpleDateFormat("HH:mm", Locale.getDefault())
-
-            val date = inputFormat.parse(chatLine.createdAt)
-            date?.let { outputFormat.format(it) } ?: ""
-        } catch (e: Exception) {
-            Log.e(TAG, "Error formatting date: ${chatLine.createdAt}", e)
-            ""
-        }
+        val formattedTime = formatTimestamp(chatLine.createdAt)
 
         return ChatUiMessage(
             id = chatLine.id,
             message = chatLine.message,
-            attachment = chatLine.attachment ?: "", // Handle null attachment
+            attachment = chatLine.attachment ?: "",
             status = chatLine.status,
             time = formattedTime,
             isSentByMe = chatLine.senderId == currentUserId
         )
     }
 
+   // convert chat history item to ui
     private fun convertChatLineToUiMessageHistory(chatItem: ChatItem): ChatUiMessage {
-        // Format the timestamp for display
-        val formattedTime = try {
+        val formattedTime = formatTimestamp(chatItem.createdAt)
+
+        val messageType = when {
+            chatItem.productId > 0 -> MessageType.PRODUCT
+            !chatItem.attachment.isNullOrEmpty() -> MessageType.IMAGE
+            else -> MessageType.TEXT
+        }
+
+        val productInfo = if (messageType == MessageType.PRODUCT) {
+            if (chatItem.senderId == currentUserId && chatItem.productId == productId) {
+                ProductInfo(
+                    productId = productId,
+                    productName = productName,
+                    productPrice = productPrice,
+                    productImage = productImage,
+                    productRating = productRating,
+                    storeName = storeName
+                )
+            } else {
+                ProductInfo(
+                    productId = chatItem.productId,
+                    productName = "Loading...",
+                    productPrice = "Loading...",
+                    productImage = "",
+                    productRating = 0f,
+                    storeName = "Loading..."
+                )
+            }
+        } else null
+
+        val message = ChatUiMessage(
+            id = chatItem.id,
+            message = chatItem.message,
+            attachment = chatItem.attachment,
+            status = chatItem.status,
+            time = formattedTime,
+            isSentByMe = chatItem.senderId == currentUserId,
+            messageType = messageType,
+            productInfo = productInfo
+        )
+
+        // Fetch product info for non-current-user products
+        if (messageType == MessageType.PRODUCT &&
+            (chatItem.senderId != currentUserId || chatItem.productId != productId)) {
+            fetchProductInfoForHistoryMessage(message, chatItem.productId)
+        }
+
+        return message
+    }
+
+    // fetch produc =t info in chat history
+    private fun fetchProductInfoForHistoryMessage(message: ChatUiMessage, productId: Int) {
+        Log.d(TAG, "Fetching product info for message ${message.id}, productId: $productId")
+
+        viewModelScope.launch {
+            try {
+                val productResult = chatRepository.fetchProductDetail(productId)
+
+                if (productResult != null) {
+                    val product = productResult.product
+                    Log.d(TAG, "Product fetched successfully: ${product.productName}")
+
+                    val productInfo = ProductInfo(
+                        productId = product.productId,
+                        productName = product.productName,
+                        productPrice = formatPrice(product.price),
+                        productImage = product.image,
+                        productRating = parseRating(product.rating),
+                        storeName = getStoreName(product.storeId)
+                    )
+
+                    updateMessageWithProductInfo(message.id, productInfo)
+                } else {
+                    Log.e(TAG, "Failed to fetch product info for productId: $productId")
+                    val errorProductInfo = ProductInfo(
+                        productId = productId,
+                        productName = "Product not available",
+                        productPrice = "N/A",
+                        productImage = "",
+                        productRating = 0f,
+                        storeName = "Unknown Store"
+                    )
+                    updateMessageWithProductInfo(message.id, errorProductInfo)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Exception fetching product info for message: ${message.id}", e)
+                val errorProductInfo = ProductInfo(
+                    productId = productId,
+                    productName = "Error loading product",
+                    productPrice = "N/A",
+                    productImage = "",
+                    productRating = 0f,
+                    storeName = "Unknown Store"
+                )
+                updateMessageWithProductInfo(message.id, errorProductInfo)
+            }
+        }
+    }
+
+    //update specific message with product info
+    private fun updateMessageWithProductInfo(messageId: Int, productInfo: ProductInfo) {
+        Log.d(TAG, "Updating message $messageId with product info: ${productInfo.productName}")
+
+        val currentMessages = _state.value?.messages ?: listOf()
+        val updatedMessages = currentMessages.map { message ->
+            if (message.id == messageId) {
+                message.copy(productInfo = productInfo)
+            } else {
+                message
+            }
+        }
+        updateState { it.copy(messages = updatedMessages) }
+    }
+
+    //handle chat room when initiate chat
+    private fun handleChatRoomCreation(existingChatRoomId: Int, newChatRoomId: Int) {
+        if (existingChatRoomId == 0 && newChatRoomId > 0) {
+            Log.d(TAG, "Chat room created: $newChatRoomId")
+            _chatRoomId.value = newChatRoomId
+            joinSocketRoom(newChatRoomId)
+        }
+    }
+
+    //format timestamp
+    private fun formatTimestamp(timestamp: String): String {
+        return try {
             val inputFormat = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
             inputFormat.timeZone = TimeZone.getTimeZone("UTC")
             val outputFormat = java.text.SimpleDateFormat("HH:mm", Locale.getDefault())
 
-            val date = inputFormat.parse(chatItem.createdAt)
+            val date = inputFormat.parse(timestamp)
             date?.let { outputFormat.format(it) } ?: ""
         } catch (e: Exception) {
-            Log.e(TAG, "Error formatting date: ${chatItem.createdAt}", e)
+            Log.e(TAG, "Error formatting date: $timestamp", e)
             ""
         }
+    }
 
-        return ChatUiMessage(
-            attachment = chatItem.attachment, // Handle null attachment
-            id = chatItem.id,
-            message = chatItem.message,
-            status = chatItem.status,
-            time = formattedTime,
-            isSentByMe = chatItem.senderId == currentUserId,
-        )
+   //format price
+    private fun formatPrice(price: String): String {
+        return if (price.startsWith("Rp")) price else "Rp$price"
+    }
+
+    // parse string to float
+    private fun parseRating(rating: String): Float {
+        return try {
+            rating.toFloat()
+        } catch (e: Exception) {
+            Log.w(TAG, "Error parsing rating: $rating", e)
+            0f
+        }
+    }
+
+    //get store name by Id
+    private fun getStoreName(storeId: Int): String {
+        return if (storeId == this.storeId) {
+            storeName
+        } else {
+            "Store #$storeId"
+        }
+    }
+
+    // helper function to update live data
+    private fun updateState(update: (ChatUiState) -> ChatUiState) {
+        _state.value?.let {
+            _state.value = update(it)
+        }
+    }
+
+    //clear any error messages
+    fun clearError() {
+        Log.d(TAG, "Clearing error state")
+        updateState { it.copy(error = null) }
     }
 
     override fun onCleared() {
         super.onCleared()
-        // Disconnect Socket.IO when ViewModel is cleared
+        Log.d(TAG, "ChatViewModel cleared - Disconnecting socket")
         socketService.disconnect()
-        Log.d(TAG, "ViewModel cleared, Socket.IO disconnected")
-    }
-
-    fun getChatList() {
-        viewModelScope.launch {
-            _chatList.value = com.alya.ecommerce_serang.data.repository.Result.Loading
-            _chatList.value = chatRepository.getListChat()
-        }
-    }
-
-    fun getChatListStore() {
-        Log.d("ChatViewModel", "getChatListStore() called")
-        _chatListStore.value = Result.Loading
-
-        viewModelScope.launch {
-            val result = chatRepository.getListChatStore()
-            Log.d("ChatViewModel", "getChatListStore() result: $result")
-            _chatListStore.value = result
-        }
     }
 }
 
-/**
- * Data class representing the UI state for the chat screen
- */
+enum class MessageType {
+    TEXT,           // Regular text message
+    IMAGE,          // Image message
+    PRODUCT         // Product share message
+}
+
+data class ProductInfo(
+    val productId: Int,
+    val productName: String,
+    val productPrice: String,
+    val productImage: String,
+    val productRating: Float,
+    val storeName: String
+)
+
+// representing chat messages to UI
+data class ChatUiMessage(
+    val id: Int,
+    val message: String,
+    val attachment: String?,
+    val status: String,
+    val time: String,
+    val isSentByMe: Boolean,
+    val messageType: MessageType = MessageType.TEXT,
+    val productInfo: ProductInfo? = null
+)
+
+// representing UI state to screen
 data class ChatUiState(
     val messages: List<ChatUiMessage> = emptyList(),
     val isLoading: Boolean = false,
     val isSending: Boolean = false,
     val hasAttachment: Boolean = false,
+    val hasProductAttachment: Boolean = false,
     val isOtherUserTyping: Boolean = false,
     val error: String? = null,
     val connectionState: ConnectionState = ConnectionState.Disconnected(),
@@ -685,16 +969,4 @@ data class ChatUiState(
     val productImageUrl: String = "",
     val productRating: Float = 0f,
     val storeName: String = ""
-)
-
-/**
- * Data class representing a chat message in the UI
- */
-data class ChatUiMessage(
-    val id: Int,
-    val message: String,
-    val attachment: String?,
-    val status: String,
-    val time: String,
-    val isSentByMe: Boolean
 )
