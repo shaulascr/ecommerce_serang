@@ -134,6 +134,47 @@ class ChatViewModel @Inject constructor(
         }
     }
 
+    fun setChatParametersStore(
+        storeId: Int,
+        userId: Int,
+        productId: Int? = 0,
+        productName: String? = null,
+        productPrice: String? = null,
+        productImage: String? = null,
+        productRating: Float? = 0f,
+        storeName: String
+    ) {
+        this.productId = if (productId != null && productId > 0) productId else 0
+
+        this.storeId = storeId
+        this.defaultUserId = userId  // Store the user_id for store-side chat
+        this.productName = productName.toString()
+        this.productPrice = productPrice.toString()
+        this.productImage = productImage.toString()
+        this.productRating = productRating!!
+        this.storeName = storeName
+        // Update state with product info
+        updateState {
+            it.copy(
+                productName = productName.toString(),
+                productPrice = productPrice.toString(),
+                productImageUrl = productImage.toString(),
+                productRating = productRating,
+                storeName = storeName
+            )
+        }
+
+        // Connect to socket and load chat history
+        val existingChatRoomId = _chatRoomId.value ?: 0
+        if (existingChatRoomId > 0) {
+            // If we already have a chat room ID, we can load the chat history
+            loadChatHistory(existingChatRoomId)
+
+            // And join the Socket.IO room
+            joinSocketRoom(existingChatRoomId)
+        }
+    }
+
     fun joinSocketRoom(roomId: Int) {
         if (roomId <= 0) {
             Log.e(TAG, "Cannot join room: Invalid room ID")
@@ -404,18 +445,20 @@ class ChatViewModel @Inject constructor(
             }
         }
 
+        if (defaultUserId <= 0) {  // Check userId instead of storeId
+            Log.e(TAG, "Cannot send message: User ID is invalid")
+            updateState { it.copy(error = "Cannot send message. Invalid user ID.") }
+            return
+        }
+
         viewModelScope.launch {
             updateState { it.copy(isSending = true) }
 
             try {
-                // Send the message using the repository
-                // Note: We keep the chatRoomId parameter for compatibility with the repository method signature,
-                // but it's not actually used in the API call
                 val safeProductId = if (productId == 0) null else productId
 
-
                 val result = chatRepository.sendChatMessageStore(
-                    storeId = storeId,
+                    userId = defaultUserId,  // Pass userId instead of storeId
                     message = message,
                     productId = safeProductId,
                     imageFile = selectedImageFile

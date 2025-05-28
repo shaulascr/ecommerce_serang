@@ -110,6 +110,7 @@ class ChatStoreActivity : AppCompatActivity() {
 
         // Get parameters from intent
         val storeId = intent.getIntExtra(Constants.EXTRA_STORE_ID, 0)
+        val userId = intent.getIntExtra(Constants.EXTRA_USER_ID, 0)
         val productId = intent.getIntExtra(Constants.EXTRA_PRODUCT_ID, 0)
         val productName = intent.getStringExtra(Constants.EXTRA_PRODUCT_NAME) ?: ""
         val productPrice = intent.getStringExtra(Constants.EXTRA_PRODUCT_PRICE) ?: ""
@@ -222,8 +223,9 @@ class ChatStoreActivity : AppCompatActivity() {
             })
 
                 // Set chat parameters to ViewModel
-        viewModel.setChatParameters(
+        viewModel.setChatParametersStore(
             storeId = storeId,
+            userId = userId,  // The user you want to chat with
             productId = productId,
             productName = productName,
             productPrice = productPrice,
@@ -540,7 +542,8 @@ class ChatStoreActivity : AppCompatActivity() {
             productRating: String? = null,
             storeName: String? = null,
             chatRoomId: Int = 0,
-            storeImage: String? = null
+            storeImage: String? = null,
+            userId: Int
         ): Intent {
             return Intent(context, ChatStoreActivity::class.java).apply {
                 putExtra(Constants.EXTRA_STORE_ID, storeId)
@@ -549,6 +552,7 @@ class ChatStoreActivity : AppCompatActivity() {
                 putExtra(Constants.EXTRA_PRODUCT_PRICE, productPrice)
                 putExtra(Constants.EXTRA_PRODUCT_IMAGE, productImage)
                 putExtra(Constants.EXTRA_STORE_IMAGE, storeImage)
+                putExtra(Constants.EXTRA_USER_ID, userId)
 
                 // Convert productRating string to float if provided
                 if (productRating != null) {

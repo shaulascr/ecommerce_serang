@@ -91,7 +91,7 @@ class ChatRepository @Inject constructor(
     }
 
     suspend fun sendChatMessageStore(
-        storeId: Int,
+        userId: Int,
         message: String,
         productId: Int?,           // Nullable and optional
         imageFile: File? = null    // Nullable and optional
@@ -100,7 +100,7 @@ class ChatRepository @Inject constructor(
             val parts = mutableMapOf<String, RequestBody>()
 
             // Required fields
-            parts["store_id"] = storeId.toString().toRequestBody("text/plain".toMediaType())
+            parts["user_id"] = userId.toString().toRequestBody("text/plain".toMediaType())
             parts["message"] = message.toRequestBody("text/plain".toMediaType())
 
             // Optional: Only include if productId is valid
