@@ -27,7 +27,6 @@ class OrderListFragment : Fragment() {
     private val binding get() = _binding!!
     private lateinit var sessionManager: SessionManager
 
-
     private val viewModel: HistoryViewModel by viewModels {
         BaseViewModelFactory {
             val apiService = ApiConfig.getApiService(sessionManager)
@@ -80,10 +79,9 @@ class OrderListFragment : Fragment() {
     private fun setupRecyclerView() {
         orderAdapter = OrderHistoryAdapter(
             onOrderClickListener = { order ->
-                // Handle order click
                 navigateToOrderDetail(order)
             },
-            viewModel = viewModel // Pass the ViewModel to the adapter
+            viewModel = viewModel
         )
 
         orderAdapter.setFragmentStatus(status)
@@ -95,6 +93,7 @@ class OrderListFragment : Fragment() {
     }
 
     private fun observeOrderList() {
+        // Now we only need to observe one LiveData for all cases
         viewModel.orders.observe(viewLifecycleOwner) { result ->
             when (result) {
                 is ViewState.Success -> {
@@ -115,13 +114,14 @@ class OrderListFragment : Fragment() {
                     Toast.makeText(requireContext(), result.message, Toast.LENGTH_SHORT).show()
                 }
                 is ViewState.Loading -> {
-                    null
+                    binding.progressBar.visibility = View.VISIBLE
                 }
             }
         }
     }
 
     private fun loadOrders() {
+        // Simple - just call getOrderList for any status including "all"
         viewModel.getOrderList(status)
     }
 
@@ -130,15 +130,15 @@ class OrderListFragment : Fragment() {
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             // Refresh order list when returning with OK result
-            viewModel.getOrderList(status)
+            loadOrders()
         }
     }
 
     private fun navigateToOrderDetail(order: OrdersItem) {
         val intent = Intent(requireContext(), DetailOrderStatusActivity::class.java).apply {
             putExtra("ORDER_ID", order.orderId)
-            putExtra("ORDER_STATUS", status) // Pass the current status
-        }
+            val actualStatus = if (status == "all") order.displayStatus ?: "" else status
+            putExtra("ORDER_STATUS", actualStatus)        }
         detailOrderLauncher.launch(intent)
     }
 
@@ -147,11 +147,11 @@ class OrderListFragment : Fragment() {
         _binding = null
     }
 
-    private fun observeOrderCompletionStatus(){
-        viewModel.orderCompletionStatus.observe(viewLifecycleOwner){ result ->
-            when(result){
+    private fun observeOrderCompletionStatus() {
+        viewModel.orderCompletionStatus.observe(viewLifecycleOwner) { result ->
+            when (result) {
                 is Result.Loading -> {
-
+                    // Handle loading state if needed
                 }
                 is Result.Success -> {
                     Toast.makeText(requireContext(), "Order completed successfully!", Toast.LENGTH_SHORT).show()
@@ -163,5 +163,4 @@ class OrderListFragment : Fragment() {
             }
         }
     }
-
 }
