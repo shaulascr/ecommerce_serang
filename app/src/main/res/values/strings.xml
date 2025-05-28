@@ -85,7 +85,7 @@
     <string name="dl_delivered">Semua Pesanan </string>
     <string name="dl_completed">Semua Pesanan </string>
     <string name="dl_shipped">Tanggal Pesanan Sampai</string>
-    <string name="dl_canceled">Semua Pesanan </string>
+    <string name="dl_canceled">Tanggal Pesanan Dibatalkan </string>
 
     <string name="sent_evidence">Kirim Bukti Pembayaran </string>
     <string name="canceled_order_btn">Batalkan Pesanan </string>
