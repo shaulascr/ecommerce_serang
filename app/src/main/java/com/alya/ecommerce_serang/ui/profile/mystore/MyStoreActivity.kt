@@ -14,8 +14,8 @@ import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
 import com.alya.ecommerce_serang.data.repository.MyStoreRepository
 import com.alya.ecommerce_serang.databinding.ActivityMyStoreBinding
-import com.alya.ecommerce_serang.ui.chat.ChatListFragment
 import com.alya.ecommerce_serang.ui.profile.mystore.balance.BalanceActivity
+import com.alya.ecommerce_serang.ui.profile.mystore.chat.ChatListStoreActivity
 import com.alya.ecommerce_serang.ui.profile.mystore.product.ProductActivity
 import com.alya.ecommerce_serang.ui.profile.mystore.profile.DetailStoreProfileActivity
 import com.alya.ecommerce_serang.ui.profile.mystore.review.ReviewFragment
@@ -124,10 +124,8 @@ class MyStoreActivity : AppCompatActivity() {
         }
 
         binding.layoutInbox.setOnClickListener {
-            supportFragmentManager.beginTransaction()
-                .replace(android.R.id.content, ChatListFragment())
-                .addToBackStack(null)
-                .commit()
+            val intent = Intent(this, ChatListStoreActivity::class.java)
+            startActivity(intent)
         }
     }
 

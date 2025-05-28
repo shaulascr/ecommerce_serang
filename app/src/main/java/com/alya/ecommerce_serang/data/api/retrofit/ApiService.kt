@@ -444,6 +444,17 @@ interface ApiService {
     ): Response<SendChatResponse>
 
     @Multipart
+    @POST("store/sendchat")
+    suspend fun sendChatMessageStore(
+        @PartMap parts: Map<String, @JvmSuppressWildcards RequestBody>,
+        @Part chatimg: MultipartBody.Part? = null
+    ): Response<SendChatResponse>
+
+    @GET("store/chat")
+    suspend fun getChatListStore(
+    ): Response<ChatListResponse>
+
+    @Multipart
     @POST("sendchat")
     suspend fun sendChatMessage(
         @PartMap parts: Map<String, @JvmSuppressWildcards RequestBody>,
