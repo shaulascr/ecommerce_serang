@@ -80,7 +80,7 @@ class ChatListStoreActivity : AppCompatActivity() {
             when (result) {
                 is Result.Success -> {
                     Log.d(TAG, "Chat list fetch success. Data size: ${result.data.size}")
-                    val adapter = ChatListAdapter(result.data) { chatItem ->
+                    val adapter = ChatStoreListAdapter(result.data) { chatItem ->
                         Log.d(TAG, "Chat item clicked: storeId=${chatItem.storeId}, chatRoomId=${chatItem.chatRoomId}")
                         val intent = ChatStoreActivity.createIntent(
                             context = this,
@@ -93,7 +93,10 @@ class ChatListStoreActivity : AppCompatActivity() {
                             storeName = chatItem.storeName,
                             chatRoomId = chatItem.chatRoomId,
                             storeImage = chatItem.storeImage,
-                            userId = chatItem.userId
+                            userId = chatItem.userId,
+                            userName = chatItem.userName,
+                            userImg = chatItem.userImage
+
                         )
                         startActivity(intent)
                     }

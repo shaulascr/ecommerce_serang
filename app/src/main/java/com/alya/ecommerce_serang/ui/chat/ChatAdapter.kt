@@ -8,56 +8,71 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.alya.ecommerce_serang.BuildConfig.BASE_URL
 import com.alya.ecommerce_serang.R
+import com.alya.ecommerce_serang.databinding.ItemMessageProductReceivedBinding
+import com.alya.ecommerce_serang.databinding.ItemMessageProductSentBinding
 import com.alya.ecommerce_serang.databinding.ItemMessageReceivedBinding
 import com.alya.ecommerce_serang.databinding.ItemMessageSentBinding
 import com.alya.ecommerce_serang.utils.Constants
 import com.bumptech.glide.Glide
 
-class ChatAdapter : ListAdapter<ChatUiMessage, RecyclerView.ViewHolder>(ChatMessageDiffCallback()) {
+class ChatAdapter(
+    private val onProductClick: ((ProductInfo) -> Unit)? = null
+) : ListAdapter<ChatUiMessage, RecyclerView.ViewHolder>(ChatMessageDiffCallback()) {
 
     companion object {
         private const val VIEW_TYPE_MESSAGE_SENT = 1
         private const val VIEW_TYPE_MESSAGE_RECEIVED = 2
+        private const val VIEW_TYPE_PRODUCT_SENT = 3
+        private const val VIEW_TYPE_PRODUCT_RECEIVED = 4
+    }
+
+    override fun getItemViewType(position: Int): Int {
+        val message = getItem(position)
+        return when {
+            message.messageType == MessageType.PRODUCT && message.isSentByMe -> VIEW_TYPE_PRODUCT_SENT
+            message.messageType == MessageType.PRODUCT && !message.isSentByMe -> VIEW_TYPE_PRODUCT_RECEIVED
+            message.isSentByMe -> VIEW_TYPE_MESSAGE_SENT
+            else -> VIEW_TYPE_MESSAGE_RECEIVED
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        return if (viewType == VIEW_TYPE_MESSAGE_SENT) {
-            val binding = ItemMessageSentBinding.inflate(
-                LayoutInflater.from(parent.context),
-                parent,
-                false
-            )
-            SentMessageViewHolder(binding)
-        } else {
-            val binding = ItemMessageReceivedBinding.inflate(
-                LayoutInflater.from(parent.context),
-                parent,
-                false
-            )
-            ReceivedMessageViewHolder(binding)
+        val inflater = LayoutInflater.from(parent.context)
+
+        return when (viewType) {
+            VIEW_TYPE_MESSAGE_SENT -> {
+                val binding = ItemMessageSentBinding.inflate(inflater, parent, false)
+                SentMessageViewHolder(binding)
+            }
+            VIEW_TYPE_MESSAGE_RECEIVED -> {
+                val binding = ItemMessageReceivedBinding.inflate(inflater, parent, false)
+                ReceivedMessageViewHolder(binding)
+            }
+            VIEW_TYPE_PRODUCT_SENT -> {
+                val binding = ItemMessageProductSentBinding.inflate(inflater, parent, false)
+                SentProductViewHolder(binding)
+            }
+            VIEW_TYPE_PRODUCT_RECEIVED -> {
+                val binding = ItemMessageProductReceivedBinding.inflate(inflater, parent, false)
+                ReceivedProductViewHolder(binding)
+            }
+            else -> throw IllegalArgumentException("Unknown view type: $viewType")
         }
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val message = getItem(position)
 
-        when (holder.itemViewType) {
-            VIEW_TYPE_MESSAGE_SENT -> (holder as SentMessageViewHolder).bind(message)
-            VIEW_TYPE_MESSAGE_RECEIVED -> (holder as ReceivedMessageViewHolder).bind(message)
-        }
-    }
-
-    override fun getItemViewType(position: Int): Int {
-        val message = getItem(position)
-        return if (message.isSentByMe) {
-            VIEW_TYPE_MESSAGE_SENT
-        } else {
-            VIEW_TYPE_MESSAGE_RECEIVED
+        when (holder) {
+            is SentMessageViewHolder -> holder.bind(message)
+            is ReceivedMessageViewHolder -> holder.bind(message)
+            is SentProductViewHolder -> holder.bind(message)
+            is ReceivedProductViewHolder -> holder.bind(message)
         }
     }
 
     /**
-     * ViewHolder for messages sent by the current user
+     * ViewHolder for regular messages sent by the current user
      */
     inner class SentMessageViewHolder(private val binding: ItemMessageSentBinding) :
         RecyclerView.ViewHolder(binding.root) {
@@ -99,7 +114,7 @@ class ChatAdapter : ListAdapter<ChatUiMessage, RecyclerView.ViewHolder>(ChatMess
     }
 
     /**
-     * ViewHolder for messages received from other users
+     * ViewHolder for regular messages received from other users
      */
     inner class ReceivedMessageViewHolder(private val binding: ItemMessageReceivedBinding) :
         RecyclerView.ViewHolder(binding.root) {
@@ -133,6 +148,89 @@ class ChatAdapter : ListAdapter<ChatUiMessage, RecyclerView.ViewHolder>(ChatMess
                 .load(R.drawable.placeholder_image) // Replace with actual avatar URL if available
                 .circleCrop()
                 .into(binding.imgAvatar)
+        }
+    }
+
+    /**
+     * ViewHolder for product messages sent by the current user
+     */
+    inner class SentProductViewHolder(private val binding: ItemMessageProductSentBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+
+        fun bind(message: ChatUiMessage) {
+            // For product bubble, we don't show the text message here
+            binding.tvTimestamp.text = message.time
+
+            // Show message status
+            val statusIcon = when (message.status) {
+                Constants.STATUS_SENT -> R.drawable.check_single_24
+                Constants.STATUS_DELIVERED -> R.drawable.check_double_24
+                Constants.STATUS_READ -> R.drawable.check_double_read_24
+                else -> R.drawable.check_single_24
+            }
+            binding.imgStatus.setImageResource(statusIcon)
+
+            // Bind product info
+            message.productInfo?.let { product ->
+                binding.tvProductName.text = product.productName
+                binding.tvProductPrice.text = product.productPrice
+
+                // Load product image
+                val fullImageUrl = if (product.productImage.startsWith("/")) {
+                    BASE_URL + product.productImage.substring(1)
+                } else {
+                    product.productImage
+                }
+
+                Glide.with(binding.root.context)
+                    .load(fullImageUrl)
+                    .centerCrop()
+                    .placeholder(R.drawable.placeholder_image)
+                    .error(R.drawable.placeholder_image)
+                    .into(binding.imgProduct)
+
+                // Handle product click
+                binding.layoutProduct.setOnClickListener {
+                    onProductClick?.invoke(product)
+                }
+            }
+        }
+    }
+
+    /**
+     * ViewHolder for product messages received from other users
+     */
+    inner class ReceivedProductViewHolder(private val binding: ItemMessageProductReceivedBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+
+        fun bind(message: ChatUiMessage) {
+            // For product bubble, we don't show the text message here
+            binding.tvTimestamp.text = message.time
+
+            // Bind product info
+            message.productInfo?.let { product ->
+                binding.tvProductName.text = product.productName
+                binding.tvProductPrice.text = product.productPrice
+
+                // Load product image
+                val fullImageUrl = if (product.productImage.startsWith("/")) {
+                    BASE_URL + product.productImage.substring(1)
+                } else {
+                    product.productImage
+                }
+
+                Glide.with(binding.root.context)
+                    .load(fullImageUrl)
+                    .centerCrop()
+                    .placeholder(R.drawable.placeholder_image)
+                    .error(R.drawable.placeholder_image)
+                    .into(binding.imgProduct)
+
+                // Handle product click
+                binding.layoutProduct.setOnClickListener {
+                    onProductClick?.invoke(product)
+                }
+            }
         }
     }
 }

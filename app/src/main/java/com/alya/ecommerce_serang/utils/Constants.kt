@@ -22,6 +22,11 @@ object Constants {
     const val EXTRA_PRODUCT_RATING = "product_rating"
     const val EXTRA_STORE_IMAGE = "store_image"
     const val EXTRA_USER_ID = "user_id"
+    const val EXTRA_USER_NAME = "user_name"
+    const val EXTRA_USER_IMAGE = "user_image"
+    const val EXTRA_ATTACH_PRODUCT = "extra_attach_product"
+
+
 
     // Request codes
     const val REQUEST_IMAGE_PICK = 1001

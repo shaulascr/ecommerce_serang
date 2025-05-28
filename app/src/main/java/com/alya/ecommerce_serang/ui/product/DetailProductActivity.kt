@@ -483,8 +483,10 @@ class DetailProductActivity : AppCompatActivity() {
             productRating = productDetail.rating,
             storeName = storeDetail.data.storeName,
             chatRoomId = 0,
-            storeImage = storeDetail.data.storeImage
-            )
+            storeImage = storeDetail.data.storeImage,
+            attachProduct = true // This will auto-attach the product!
+
+        )
 
     }
 
