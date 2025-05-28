@@ -27,7 +27,7 @@ data class OrdersItem(
     val street: String,
 
     @field:SerializedName("cancel_date")
-    val cancelDate: String? = null,
+    val cancelDate: String,
 
     @field:SerializedName("longitude")
     val longitude: String,
@@ -42,7 +42,7 @@ data class OrdersItem(
     val autoCompletedAt: String? = null,
 
     @field:SerializedName("is_store_location")
-    val isStoreLocation: Boolean? = null,
+    val isStoreLocation: Boolean? = false,
 
     @field:SerializedName("voucher_name")
     val voucherName: String? = null,
@@ -81,7 +81,7 @@ data class OrdersItem(
     val paymentInfoId: Int? = null,
 
     @field:SerializedName("detail")
-    val detail: String,
+    val detail: String? = null,
 
     @field:SerializedName("postal_code")
     val postalCode: String,
@@ -90,5 +90,7 @@ data class OrdersItem(
     val orderId: Int,
 
     @field:SerializedName("city_id")
-    val cityId: Int
+    val cityId: Int,
+
+    var displayStatus: String? = null
 )

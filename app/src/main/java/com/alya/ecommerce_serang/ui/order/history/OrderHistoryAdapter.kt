@@ -119,8 +119,8 @@ class OrderHistoryAdapter(
                 onOrderClickListener(order)
             }
 
-            //adjust each fragment
-            adjustButtonsAndText(fragmentStatus, order)
+            val actualStatus = if (fragmentStatus == "all") order.displayStatus ?: "" else fragmentStatus
+            adjustButtonsAndText(actualStatus, order)
 
         }
 
@@ -253,7 +253,7 @@ class OrderHistoryAdapter(
                 "completed" -> {
                     statusOrder.apply {
                         visibility = View.VISIBLE
-                        text = itemView.context.getString(R.string.shipped_orders)
+                        text = itemView.context.getString(R.string.completed_orders)
                     }
                     deadlineLabel.apply {
                         visibility = View.VISIBLE
@@ -268,11 +268,25 @@ class OrderHistoryAdapter(
                             // Handle click event
                         }
                     }
+                    deadlineDate.apply {
+                        visibility = View.VISIBLE
+                        text = formatDate(order.updatedAt)
+                    }
                 }
                 "canceled" -> {
                     statusOrder.apply {
                         visibility = View.VISIBLE
                         text = itemView.context.getString(R.string.canceled_orders)
+                    }
+
+                    deadlineLabel.apply {
+                        visibility = View.VISIBLE
+                        text = itemView.context.getString(R.string.dl_canceled)
+                    }
+
+                    deadlineDate.apply {
+                        visibility = View.VISIBLE
+                        text = formatDate(order.cancelDate)
                     }
                 }
             }
