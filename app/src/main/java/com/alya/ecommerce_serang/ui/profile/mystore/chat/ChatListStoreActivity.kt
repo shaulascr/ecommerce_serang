@@ -92,7 +92,8 @@ class ChatListStoreActivity : AppCompatActivity() {
                             productRating = null,
                             storeName = chatItem.storeName,
                             chatRoomId = chatItem.chatRoomId,
-                            storeImage = chatItem.storeImage
+                            storeImage = chatItem.storeImage,
+                            userId = chatItem.userId
                         )
                         startActivity(intent)
                     }
