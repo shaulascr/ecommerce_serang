@@ -13,20 +13,20 @@ import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 
-class ChatListAdapter(
+class ChatStoreListAdapter(
     private val chatList: List<ChatItemList>,
     private val onClick: (ChatItemList) -> Unit
-) : RecyclerView.Adapter<ChatListAdapter.ChatViewHolder>() {
+) : RecyclerView.Adapter<ChatStoreListAdapter.ChatViewHolder>() {
 
     inner class ChatViewHolder(private val binding: ItemChatBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(chat: ChatItemList) {
-            binding.txtStoreName.text = chat.storeName
+            binding.txtStoreName.text = chat.userName
             binding.txtMessage.text = chat.message
             binding.txtTime.text = formatTime(chat.latestMessageTime)
 
             // Process image URL properly
-            val imageUrl = chat.storeImage?.let {
+            val imageUrl = chat.userImage?.let {
                 if (it.startsWith("/")) BASE_URL + it else it
             }
 

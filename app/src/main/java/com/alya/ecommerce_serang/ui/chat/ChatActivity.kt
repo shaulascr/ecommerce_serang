@@ -34,6 +34,7 @@ import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
 import com.alya.ecommerce_serang.databinding.ActivityChatBinding
 import com.alya.ecommerce_serang.ui.auth.LoginActivity
+import com.alya.ecommerce_serang.ui.product.DetailProductActivity
 import com.alya.ecommerce_serang.utils.Constants
 import com.alya.ecommerce_serang.utils.SessionManager
 import com.bumptech.glide.Glide
@@ -43,7 +44,6 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
-import kotlin.math.max
 
 @AndroidEntryPoint
 class ChatActivity : AppCompatActivity() {
@@ -103,9 +103,6 @@ class ChatActivity : AppCompatActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         enableEdgeToEdge()
 
-        // Apply insets to your root layout
-
-
         // Get parameters from intent
         val storeId = intent.getIntExtra(Constants.EXTRA_STORE_ID, 0)
         val productId = intent.getIntExtra(Constants.EXTRA_PRODUCT_ID, 0)
@@ -116,6 +113,8 @@ class ChatActivity : AppCompatActivity() {
         val storeName = intent.getStringExtra(Constants.EXTRA_STORE_NAME) ?: ""
         val chatRoomId = intent.getIntExtra(Constants.EXTRA_CHAT_ROOM_ID, 0)
         val storeImg = intent.getStringExtra(Constants.EXTRA_STORE_IMAGE) ?: ""
+
+        val shouldAttachProduct = intent.getBooleanExtra(Constants.EXTRA_ATTACH_PRODUCT, false)
 
         // Check if user is logged in
         val token = sessionManager.getToken()
@@ -141,84 +140,6 @@ class ChatActivity : AppCompatActivity() {
             .placeholder(R.drawable.placeholder_image)
             .into(binding.imgProfile)
 
-        ViewCompat.setOnApplyWindowInsetsListener(binding.layoutChatInput) { view, insets ->
-            val imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime())
-            val navBarInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
-
-            val bottomPadding = max(imeInsets.bottom, navBarInsets.bottom)
-            view.setPadding(view.paddingLeft, view.paddingTop, view.paddingRight, bottomPadding)
-            insets
-        }
-
-// Handle top inset on toolbar (status bar height)
-        ViewCompat.setOnApplyWindowInsetsListener(binding.chatToolbar) { view, insets ->
-            val statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
-            view.setPadding(view.paddingLeft, statusBarHeight, view.paddingRight, view.paddingBottom)
-            insets
-        }
-
-        ViewCompat.setOnApplyWindowInsetsListener(binding.recyclerChat) { view, insets ->
-            val navBarInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
-            val bottomPadding = binding.layoutChatInput.height + navBarInsets.bottom
-
-            view.setPadding(
-                view.paddingLeft,
-                view.paddingTop,
-                view.paddingRight,
-                bottomPadding
-            )
-            insets
-        }
-
-// For RecyclerView, add bottom padding = chat input height + nav bar height (to avoid last message hidden)
-
-        ViewCompat.setWindowInsetsAnimationCallback(binding.root,
-            object : WindowInsetsAnimationCompat.Callback(DISPATCH_MODE_STOP) {
-
-                private var startPaddingBottom = 0
-                private var endPaddingBottom = 0
-
-                override fun onPrepare(animation: WindowInsetsAnimationCompat) {
-                    startPaddingBottom = binding.layoutChatInput.paddingBottom
-                }
-
-                override fun onStart(
-                    animation: WindowInsetsAnimationCompat,
-                    bounds: WindowInsetsAnimationCompat.BoundsCompat
-                ): WindowInsetsAnimationCompat.BoundsCompat {
-                    endPaddingBottom = binding.layoutChatInput.paddingBottom
-                    return bounds
-                }
-
-                override fun onProgress(
-                    insets: WindowInsetsCompat,
-                    runningAnimations: MutableList<WindowInsetsAnimationCompat>
-                ): WindowInsetsCompat {
-                    val imeAnimation = runningAnimations.find {
-                        it.typeMask and WindowInsetsCompat.Type.ime() != 0
-                    } ?: return insets
-
-                    val animatedBottomPadding = startPaddingBottom +
-                            (endPaddingBottom - startPaddingBottom) * imeAnimation.interpolatedFraction
-
-                    binding.layoutChatInput.setPadding(
-                        binding.layoutChatInput.paddingLeft,
-                        binding.layoutChatInput.paddingTop,
-                        binding.layoutChatInput.paddingRight,
-                        animatedBottomPadding.toInt()
-                    )
-
-                    binding.recyclerChat.setPadding(
-                        binding.recyclerChat.paddingLeft,
-                        binding.recyclerChat.paddingTop,
-                        binding.recyclerChat.paddingRight,
-                        animatedBottomPadding.toInt() + binding.layoutChatInput.height
-                    )
-
-                    return insets
-                }
-            })
-
                 // Set chat parameters to ViewModel
         viewModel.setChatParameters(
             storeId = storeId,
@@ -230,8 +151,14 @@ class ChatActivity : AppCompatActivity() {
             storeName = storeName
         )
 
+        if (shouldAttachProduct && productId > 0) {
+            viewModel.enableProductAttachment()
+            showProductAttachmentToast()
+        }
+
         // Setup UI components
         setupRecyclerView()
+        setupWindowInsets()
         setupListeners()
         setupTypingIndicator()
         observeViewModel()
@@ -243,20 +170,95 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
+    private fun showProductAttachmentToast() {
+        Toast.makeText(
+            this,
+            "Product will be attached to your message",
+            Toast.LENGTH_LONG
+        ).show()
+    }
+
     private fun setupRecyclerView() {
-        chatAdapter = ChatAdapter()
+        chatAdapter = ChatAdapter { productInfo ->
+            // This lambda will be called when user taps on a product bubble
+            handleProductClick(productInfo)
+        }
         binding.recyclerChat.apply {
             adapter = chatAdapter
-            layoutManager = LinearLayoutManager(this@ChatActivity).apply {
-                stackFromEnd = true
-            }
+            layoutManager = LinearLayoutManager(this@ChatActivity)
+            // Use clipToPadding to allow content to scroll under padding
+            clipToPadding = false
+            // Set minimal padding - we'll handle spacing differently
+            setPadding(paddingLeft, paddingTop, paddingRight, 16)
         }
-//        binding.recyclerChat.setPadding(
-//            binding.recyclerChat.paddingLeft,
-//            binding.recyclerChat.paddingTop,
-//            binding.recyclerChat.paddingRight,
-//            binding.layoutChatInput.height + binding.root.rootWindowInsets?.getInsets(WindowInsetsCompat.Type.navigationBars())?.bottom ?: 0
-//        )
+    }
+
+    private fun setupWindowInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.chatToolbar) { view, insets ->
+            val statusBarInsets = insets.getInsets(WindowInsetsCompat.Type.statusBars())
+            view.updatePadding(top = statusBarInsets.top)
+            insets
+        }
+
+        // Handle IME (keyboard) and navigation bar insets for the input layout only
+        ViewCompat.setOnApplyWindowInsetsListener(binding.layoutChatInput) { view, insets ->
+            val imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime())
+            val navBarInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+
+            Log.d(TAG, "Insets - IME: ${imeInsets.bottom}, NavBar: ${navBarInsets.bottom}")
+
+            val bottomInset = if (imeInsets.bottom > 0) {
+                imeInsets.bottom
+            } else {
+                navBarInsets.bottom
+            }
+
+            // Only apply padding to the input layout
+            view.updatePadding(bottom = bottomInset)
+
+            // When keyboard appears, scroll to bottom to keep last message visible
+            if (imeInsets.bottom > 0) {
+                // Keyboard is visible - scroll to bottom with delay to ensure layout is complete
+                binding.recyclerChat.postDelayed({
+                    scrollToBottomSmooth()
+                }, 100)
+            }
+
+            insets
+        }
+
+        // Smooth animation for keyboard transitions
+        ViewCompat.setWindowInsetsAnimationCallback(
+            binding.layoutChatInput,
+            object : WindowInsetsAnimationCompat.Callback(DISPATCH_MODE_STOP) {
+
+                override fun onProgress(
+                    insets: WindowInsetsCompat,
+                    runningAnimations: MutableList<WindowInsetsAnimationCompat>
+                ): WindowInsetsCompat {
+                    val imeAnimation = runningAnimations.find {
+                        it.typeMask and WindowInsetsCompat.Type.ime() != 0
+                    }
+
+                    if (imeAnimation != null) {
+                        val imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime())
+                        val navBarInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+                        val targetBottomInset = if (imeInsets.bottom > 0) imeInsets.bottom else navBarInsets.bottom
+
+                        // Only animate input layout padding
+                        binding.layoutChatInput.updatePadding(bottom = targetBottomInset)
+                    }
+
+                    return insets
+                }
+
+                override fun onEnd(animation: WindowInsetsAnimationCompat) {
+                    super.onEnd(animation)
+                    // Smooth scroll to bottom after animation
+                    scrollToBottomSmooth()
+                }
+            }
+        )
     }
 
 
@@ -276,14 +278,52 @@ class ChatActivity : AppCompatActivity() {
             val message = binding.editTextMessage.text.toString().trim()
             val currentState = viewModel.state.value
             if (message.isNotEmpty() || (currentState != null && currentState.hasAttachment)) {
+                // This will automatically handle product attachment if enabled
                 viewModel.sendMessage(message)
                 binding.editTextMessage.text.clear()
+
+                // Instantly scroll to show new message
+                binding.recyclerChat.postDelayed({
+                    scrollToBottomInstant()
+                }, 50)
             }
         }
 
         // Attachment button
         binding.btnAttachment.setOnClickListener {
             checkPermissionsAndShowImagePicker()
+        }
+
+        // Product card click to enable/disable product attachment
+        binding.productContainer.setOnClickListener {
+            toggleProductAttachment()
+        }
+    }
+
+    private fun toggleProductAttachment() {
+        val currentState = viewModel.state.value
+        if (currentState?.hasProductAttachment == true) {
+            // Disable product attachment
+            viewModel.disableProductAttachment()
+            updateProductAttachmentUI(false)
+            Toast.makeText(this, "Product attachment disabled", Toast.LENGTH_SHORT).show()
+        } else {
+            // Enable product attachment
+            viewModel.enableProductAttachment()
+            updateProductAttachmentUI(true)
+            Toast.makeText(this, "Product will be attached to your next message", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun updateProductAttachmentUI(isEnabled: Boolean) {
+        if (isEnabled) {
+            // Show visual indicator that product will be attached
+            binding.productContainer.setBackgroundResource(R.drawable.bg_product_selected)
+            binding.editTextMessage.hint = "Type your message (product will be attached)"
+        } else {
+            // Reset to normal state
+            binding.productContainer.setBackgroundResource(R.drawable.bg_product_normal)
+            binding.editTextMessage.hint = getString(R.string.write_message)
         }
     }
 
@@ -302,33 +342,64 @@ class ChatActivity : AppCompatActivity() {
             override fun afterTextChanged(s: Editable?) {}
         })
 
+        // Focus and show keyboard
         binding.editTextMessage.requestFocus()
-        val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.showSoftInput(binding.editTextMessage, InputMethodManager.SHOW_IMPLICIT)
+        binding.editTextMessage.post {
+            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.showSoftInput(binding.editTextMessage, InputMethodManager.SHOW_IMPLICIT)
+        }
+    }
 
+    private fun scrollToBottomSmooth() {
+        val messageCount = chatAdapter.itemCount
+        if (messageCount > 0) {
+            binding.recyclerChat.post {
+                // Use smooth scroll to bottom
+                binding.recyclerChat.smoothScrollToPosition(messageCount - 1)
+            }
+        }
+    }
+
+    private fun scrollToBottomInstant() {
+        val messageCount = chatAdapter.itemCount
+        if (messageCount > 0) {
+            binding.recyclerChat.post {
+                // Instant scroll for new messages
+                binding.recyclerChat.scrollToPosition(messageCount - 1)
+            }
+        }
+    }
+
+    // Extension function to make padding updates cleaner
+    private fun View.updatePadding(
+        left: Int = paddingLeft,
+        top: Int = paddingTop,
+        right: Int = paddingRight,
+        bottom: Int = paddingBottom
+    ) {
+        setPadding(left, top, right, bottom)
     }
 
     private fun observeViewModel() {
         viewModel.chatRoomId.observe(this, Observer { chatRoomId ->
             if (chatRoomId > 0) {
-                // Chat room has been created, now we can join the Socket.IO room
                 viewModel.joinSocketRoom(chatRoomId)
-
-                // Now we can also load chat history
                 viewModel.loadChatHistory(chatRoomId)
                 Log.d(TAG, "Chat Activity started - Chat Room: $chatRoomId")
-
             }
         })
 
-        // Observe state changes using LiveData
         viewModel.state.observe(this, Observer { state ->
-            // Update messages
-            chatAdapter.submitList(state.messages)
+            Log.d(TAG, "State updated - Messages: ${state.messages.size}")
 
-            // Scroll to bottom if new message
-            if (state.messages.isNotEmpty()) {
-                binding.recyclerChat.scrollToPosition(state.messages.size - 1)
+            // Update messages
+            val previousCount = chatAdapter.itemCount
+            chatAdapter.submitList(state.messages) {
+                Log.d(TAG, "Messages submitted to adapter")
+                // Only auto-scroll for new messages or initial load
+                if (previousCount == 0 || state.messages.size > previousCount) {
+                    scrollToBottomInstant()
+                }
             }
 
             // Update product info
@@ -338,7 +409,7 @@ class ChatActivity : AppCompatActivity() {
                 binding.ratingBar.rating = state.productRating
                 binding.tvRating.text = state.productRating.toString()
                 binding.tvSellerName.text = state.storeName
-                binding.tvStoreName.text=state.storeName
+                binding.tvStoreName.text = state.storeName
 
                 val fullImageUrl = when (val img = state.productImageUrl) {
                     is String -> {
@@ -347,7 +418,6 @@ class ChatActivity : AppCompatActivity() {
                     else -> R.drawable.placeholder_image
                 }
 
-                // Load product image
                 if (!state.productImageUrl.isNullOrEmpty()) {
                     Glide.with(this@ChatActivity)
                         .load(fullImageUrl)
@@ -357,13 +427,15 @@ class ChatActivity : AppCompatActivity() {
                         .into(binding.imgProduct)
                 }
 
-                // Make sure the product section is visible
                 binding.productContainer.visibility = View.VISIBLE
             } else {
-                // Hide the product section if info is missing
                 binding.productContainer.visibility = View.GONE
             }
 
+            updateInputHint(state)
+
+            // Update product card visual feedback
+            updateProductCardUI(state.hasProductAttachment)
 
             // Update attachment hint
             if (state.hasAttachment) {
@@ -371,7 +443,6 @@ class ChatActivity : AppCompatActivity() {
             } else {
                 binding.editTextMessage.hint = getString(R.string.write_message)
             }
-
 
             // Show typing indicator
             binding.tvTypingIndicator.visibility =
@@ -383,6 +454,45 @@ class ChatActivity : AppCompatActivity() {
                 viewModel.clearError()
             }
         })
+    }
+
+    private fun updateInputHint(state: ChatUiState) {
+        binding.editTextMessage.hint = when {
+            state.hasAttachment -> getString(R.string.image_attached)
+            state.hasProductAttachment -> "Type your message (product will be attached)"
+            else -> getString(R.string.write_message)
+        }
+    }
+
+    private fun updateProductCardUI(hasProductAttachment: Boolean) {
+        if (hasProductAttachment) {
+            // Show visual indicator that product will be attached
+            binding.productContainer.setBackgroundResource(R.drawable.bg_product_selected)
+        } else {
+            // Reset to normal state
+            binding.productContainer.setBackgroundResource(R.drawable.bg_product_normal)
+        }
+    }
+
+    private fun handleProductClick(productInfo: ProductInfo) {
+        // Navigate to product detail
+        Toast.makeText(this, "Opening: ${productInfo.productName}", Toast.LENGTH_SHORT).show()
+
+        // You can navigate to product detail here
+         navigateToProductDetail(productInfo.productId)
+    }
+
+    private fun navigateToProductDetail(productId: Int) {
+        try {
+            val intent = Intent(this, DetailProductActivity::class.java).apply {
+                putExtra("PRODUCT_ID", productId)
+                // Add other necessary extras
+            }
+            startActivity(intent)
+        } catch (e: Exception) {
+            Toast.makeText(this, "Cannot open product details", Toast.LENGTH_SHORT).show()
+            Log.e(TAG, "Error navigating to product detail", e)
+        }
     }
 
     private fun showOptionsMenu() {
@@ -538,7 +648,8 @@ class ChatActivity : AppCompatActivity() {
             productRating: String? = null,
             storeName: String? = null,
             chatRoomId: Int = 0,
-            storeImage: String? = null
+            storeImage: String? = null,
+            attachProduct: Boolean = false // NEW: Flag to auto-attach product
         ) {
             val intent = Intent(context, ChatActivity::class.java).apply {
                 putExtra(Constants.EXTRA_STORE_ID, storeId)
@@ -547,6 +658,7 @@ class ChatActivity : AppCompatActivity() {
                 putExtra(Constants.EXTRA_PRODUCT_PRICE, productPrice)
                 putExtra(Constants.EXTRA_PRODUCT_IMAGE, productImage)
                 putExtra(Constants.EXTRA_STORE_IMAGE, storeImage)
+                putExtra(Constants.EXTRA_ATTACH_PRODUCT, attachProduct) // NEW
 
                 // Convert productRating string to float if provided
                 if (productRating != null) {

@@ -7,6 +7,7 @@ import com.alya.ecommerce_serang.data.api.response.chat.ChatHistoryResponse
 import com.alya.ecommerce_serang.data.api.response.chat.ChatItemList
 import com.alya.ecommerce_serang.data.api.response.chat.SendChatResponse
 import com.alya.ecommerce_serang.data.api.response.chat.UpdateChatResponse
+import com.alya.ecommerce_serang.data.api.response.customer.product.ProductResponse
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
@@ -291,6 +292,24 @@ class ChatRepository @Inject constructor(
         } catch (e: Exception) {
             Log.e("ChatRepository", "Exception during getChatListStore", e)
             Result.Error(e)
+        }
+    }
+
+    suspend fun fetchProductDetail(productId: Int): ProductResponse? {
+        return try {
+            val response = apiService.getDetailProduct(productId)
+            if (response.isSuccessful) {
+                val productResponse = response.body()
+                Log.d("Order Repository", "Product detail fetched successfully: ${productResponse?.product?.productName}")
+                productResponse
+            } else {
+                val errorBody = response.errorBody()?.string() ?: "Unknown error"
+                Log.e("Order Repository", "Error fetching product detail. Code: ${response.code()}, Error: $errorBody")
+                null
+            }
+        } catch (e: Exception) {
+            Log.e("Order Repository", "Exception fetching product", e)
+            null
         }
     }
 }
