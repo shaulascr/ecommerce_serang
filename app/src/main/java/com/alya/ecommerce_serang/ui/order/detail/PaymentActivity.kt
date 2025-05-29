@@ -3,6 +3,7 @@ package com.alya.ecommerce_serang.ui.order.detail
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -43,65 +44,88 @@ class PaymentActivity : AppCompatActivity() {
 
         sessionManager = SessionManager(this)
 
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+        setupWindowInsets()
 
-        enableEdgeToEdge()
-
-        // Apply insets to your root layout
-        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, windowInsets ->
-            val systemBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-            view.setPadding(
-                systemBars.left,
-                systemBars.top,
-                systemBars.right,
-                systemBars.bottom
-            )
-            windowInsets
-        }
-
-        // Mengambil data dari intent
+        // Get data from intent
         val orderId = intent.getIntExtra("ORDER_ID", 0)
         val paymentInfoId = intent.getIntExtra("ORDER_PAYMENT_ID", 0)
 
         if (orderId == 0) {
             Toast.makeText(this, "ID pesanan tidak valid", Toast.LENGTH_SHORT).show()
             finish()
+            return
         }
 
-        // Setup toolbar
+        // Setup observers FIRST
+        observeData()
+
+        // Setup UI
+        setupToolbar()
+        setupClickListeners(orderId, paymentInfoId)
+
+        // Load data LAST
+        Log.d(TAG, "Fetching order details for Order ID: $orderId")
+        viewModel.getOrderDetails(orderId)
+    }
+
+    private fun setupWindowInsets() {
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        enableEdgeToEdge()
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, windowInsets ->
+            val systemBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            windowInsets
+        }
+    }
+
+    private fun setupToolbar() {
         binding.toolbar.setNavigationOnClickListener {
-            onBackPressedDispatcher
             finish()
         }
+    }
 
-        // Setup petunjuk transfer
+    private fun setupClickListeners(orderId: Int, paymentInfoId: Int) {
+        // Instructions clicks
         binding.layoutMBankingInstructions.setOnClickListener {
-            // Tampilkan instruksi mBanking
             showInstructions("mBanking")
         }
 
         binding.layoutATMInstructions.setOnClickListener {
-            // Tampilkan instruksi ATM
             showInstructions("ATM")
         }
 
-        // Setup button upload bukti bayar
-        binding.btnUploadPaymentProof.setOnClickListener {
-//             Intent ke activity upload bukti bayar
-            val intent = Intent(this, AddEvidencePaymentActivity::class.java)
-            intent.putExtra("ORDER_ID", orderId)
-            intent.putExtra("PAYMENT_INFO_ID", paymentInfoId)
-            intent.putExtra("TOTAL_AMOUNT", binding.tvTotalAmount.text.toString())
-            Log.d(TAG, "Received Order ID: $orderId, Payment Info ID: $paymentInfoId, Total Amount: ${binding.tvTotalAmount.text}")
+        // Upload button
+//        binding.btnUploadPaymentProof.setOnClickListener { view ->
+//            Log.d(TAG, "Button clicked - showing toast")
+//            Toast.makeText(this@PaymentActivity, "Button works! OrderID: $orderId", Toast.LENGTH_LONG).show()
+//        }
+        binding.btnUploadPaymentProof.apply {
+            isEnabled = true
+            isClickable = true
 
-            startActivity(intent)
+            setOnClickListener {
+                Log.d(TAG, "Button clicked!")
+
+                val intent = Intent(this@PaymentActivity, AddEvidencePaymentActivity::class.java).apply {
+                    putExtra("ORDER_ID", orderId)
+                    putExtra("PAYMENT_INFO_ID", paymentInfoId)
+                    putExtra("TOTAL_AMOUNT", binding.tvTotalAmount.text.toString())
+                }
+
+                Log.d(TAG, "Starting AddEvidencePaymentActivity with Order ID: $orderId, Payment Info ID: $paymentInfoId")
+                startActivity(intent)
+            }
+
+            // Debug touch events
+            setOnTouchListener { _, event ->
+                Log.d(TAG, "Button touched: ${event.action}")
+                false
+            }
         }
-        // Observe data
-        observeData()
 
-        // Load data
-        Log.d(TAG, "Fetching order details for Order ID: $orderId")
-        viewModel.getOrderDetails(orderId)
+        // Debug button state
+        Log.d(TAG, "Button setup - isEnabled: ${binding.btnUploadPaymentProof.isEnabled}, isClickable: ${binding.btnUploadPaymentProof.isClickable}")
     }
 
     private fun observeData() {
@@ -124,13 +148,14 @@ class PaymentActivity : AppCompatActivity() {
             setupPaymentDueDate(order.updatedAt)
         }
 
-        // Observe loading state
         viewModel.isLoading.observe(this) { isLoading ->
-            // Show loading indicator if needed
-            // binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+            Log.d(TAG, "Loading state changed: $isLoading")
+            // Fix this line:
+            binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+
+            Log.d(TAG, "Button enabled: ${binding.btnUploadPaymentProof.isEnabled}")
         }
 
-        // Observe error
         viewModel.error.observe(this) { error ->
             if (error.isNotEmpty()) {
                 Toast.makeText(this, error, Toast.LENGTH_SHORT).show()
