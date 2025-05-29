@@ -6,10 +6,10 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.alya.ecommerce_serang.BuildConfig.BASE_URL
 import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.response.customer.order.OrderItemsItem
 import com.bumptech.glide.Glide
-import com.google.android.material.button.MaterialButton
 
 class OrderProductAdapter : RecyclerView.Adapter<OrderProductAdapter.ProductViewHolder>() {
 
@@ -48,9 +48,15 @@ class OrderProductAdapter : RecyclerView.Adapter<OrderProductAdapter.ProductView
             // Set price with currency format
             tvProductPrice.text = formatCurrency(product.price)
 
+            val fullImageUrl = when (val img = product.productImage) {
+                is String -> {
+                    if (img.startsWith("/")) BASE_URL + img.substring(1) else img
+                }
+                else -> R.drawable.placeholder_image // Default image for null
+            }
             // Load product image using Glide
             Glide.with(itemView.context)
-                .load(product.productImage)
+                .load(fullImageUrl)
                 .placeholder(R.drawable.placeholder_image)
 //                .error(R.drawable.error_image)
                 .into(ivProductImage)

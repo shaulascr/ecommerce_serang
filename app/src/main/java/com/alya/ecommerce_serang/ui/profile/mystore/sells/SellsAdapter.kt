@@ -5,16 +5,15 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.ImageView
 import android.widget.TextView
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.response.store.orders.OrdersItem
 import com.alya.ecommerce_serang.ui.profile.mystore.sells.payment.DetailPaymentActivity
 import com.alya.ecommerce_serang.ui.profile.mystore.sells.shipment.DetailShipmentActivity
 import com.alya.ecommerce_serang.utils.viewmodel.SellsViewModel
-import com.bumptech.glide.Glide
+import com.google.android.material.button.MaterialButton
 import com.google.gson.Gson
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -34,235 +33,310 @@ class SellsAdapter(
     }
 
     fun submitList(newSells: List<OrdersItem>) {
+        Log.d("SellsAdapter", "submitList called with ${newSells.size} items")
         sells.clear()
         sells.addAll(newSells)
         notifyDataSetChanged()
+        Log.d("SellsAdapter", "Adapter updated. Current size: ${sells.size}")
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SellsViewHolder {
+        Log.d("SellsAdapter", "onCreateViewHolder called")
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_sells, parent, false)
+        Log.d("SellsAdapter", "View inflated successfully")
         return SellsViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: SellsViewHolder, position: Int) {
-        holder.bind(sells[position])
+        Log.d("SellsAdapter", "onBindViewHolder called for position: $position")
+        Log.d("SellsAdapter", "Total items in adapter: ${sells.size}")
+        if (position < sells.size) {
+            holder.bind(sells[position])
+        } else {
+            Log.e("SellsAdapter", "Position $position is out of bounds for size ${sells.size}")
+        }
     }
 
     override fun getItemCount(): Int = sells.size
 
     inner class SellsViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val layoutOrders: View = itemView.findViewById(R.id.layout_orders)
-        private val layoutPayments: View = itemView.findViewById(R.id.layout_payments)
-        private val layoutShipments: View = itemView.findViewById(R.id.layout_shipments)
+        private val tvStoreName: TextView = itemView.findViewById(R.id.tvUserName)
+        private val rvOrderItems: RecyclerView = itemView.findViewById(R.id.rvSellsItems)
+        private val tvShowMore: TextView = itemView.findViewById(R.id.tvShowMores)
+        private val tvTotalAmount: TextView = itemView.findViewById(R.id.tvTotalAmounts)
+        private val tvItemCountLabel: TextView = itemView.findViewById(R.id.tv_count_total_items)
 
-        private var tvSellsTitle: TextView = itemView.findViewById(R.id.tv_payment_title)
-        private var tvSellsNumber: TextView = itemView.findViewById(R.id.tv_payment_number)
-        private var tvSellsDueDesc: TextView = itemView.findViewById(R.id.tv_payment_due_desc)
-        private var tvSellsDue: TextView = itemView.findViewById(R.id.tv_payment_due)
-        private var tvSellsLocation: TextView = itemView.findViewById(R.id.tv_payment_location)
-        private var tvSellsCustomer: TextView = itemView.findViewById(R.id.tv_payment_customer)
-        private var ivSellsProduct: ImageView = itemView.findViewById(R.id.iv_payment_product)
-        private var tvSellsProductName: TextView = itemView.findViewById(R.id.tv_payment_product_name)
-        private var tvSellsProductQty: TextView = itemView.findViewById(R.id.tv_payment_product_qty)
-        private var tvSellsProductPrice: TextView = itemView.findViewById(R.id.tv_payment_product_price)
-        private var tvSeeMore: TextView = itemView.findViewById(R.id.tv_see_more_payment)
-        private var tvSellsQty: TextView = itemView.findViewById(R.id.tv_payment_qty)
-        private var tvSellsPrice: TextView = itemView.findViewById(R.id.tv_payment_price)
-        private val btnConfirmPayment: Button = itemView.findViewById(R.id.btn_confirm_payment)
-        private val btnConfirmShipment: Button = itemView.findViewById(R.id.btn_confirm_shipment)
+        fun bind(order: OrdersItem) {
+            Log.d("SellsAdapter", "=== ViewHolder.bind() called ===")
+            Log.d("SellsAdapter", "Binding order: ${order.orderId} with status: ${order.status}")
 
-        fun bind(sells: OrdersItem) {
+            // Show customer/buyer name (seller's perspective)
+            tvStoreName.text = order.username ?: "Unknown Customer"
+            Log.d("SellsAdapter", "Customer name set: ${order.username}")
 
-            tvSellsNumber.text = "No. Pesanan: ${sells.orderId}"
-            tvSellsLocation.text = sells.subdistrict
-            tvSellsCustomer.text = sells.username
+            // Set total amount
+            tvTotalAmount.text = "Rp${order.totalAmount}"
+            Log.d("SellsAdapter", "Total amount set: ${order.totalAmount}")
 
-            val product = sells.orderItems?.get(0)
-            product?.let {
-                tvSellsProductName.text = it.productName
-                tvSellsProductQty.text = "x${it.quantity}"
-                tvSellsProductPrice.text = "Rp${it.price}"
+            // Set item count
+            val itemCount = order.orderItems?.size ?: 0
+            tvItemCountLabel.text = itemView.context.getString(R.string.item_count_prod, itemCount)
+            Log.d("SellsAdapter", "Item count set: $itemCount")
 
-                Glide.with(itemView.context)
-                    .load(it.productImage)
-                    .placeholder(R.drawable.placeholder_image)
-                    .into(ivSellsProduct)
+            // Set up the order items RecyclerView
+            val productAdapter = SellsProductAdapter()
+            rvOrderItems.apply {
+                layoutManager = LinearLayoutManager(itemView.context)
+                adapter = productAdapter
             }
+            Log.d("SellsAdapter", "Product RecyclerView configured")
 
-            sells.orderItems?.size?.let {
-                if (it > 1) {
-                    tvSeeMore.visibility = View.VISIBLE
-                    tvSeeMore.text = "Lihat ${it.minus(1)} produk lainnya"
+            // Display only the first product and show "View more" for the rest
+            order.orderItems?.let { items ->
+                if (items.isNotEmpty()) {
+                    productAdapter.submitList(items.take(1))
+                    Log.d("SellsAdapter", "Product list submitted: ${items.size} items")
+
+                    // Show or hide the "View more" text based on number of items
+                    if (items.size > 1) {
+                        val itemString = items.size - 1
+                        tvShowMore.visibility = View.VISIBLE
+                        tvShowMore.text = itemView.context.getString(R.string.show_more_product, itemString)
+                        Log.d("SellsAdapter", "Show more visible: $itemString more items")
+                    } else {
+                        tvShowMore.visibility = View.GONE
+                        Log.d("SellsAdapter", "Show more hidden: only 1 item")
+                    }
                 } else {
-                    tvSeeMore.visibility = View.GONE
+                    tvShowMore.visibility = View.GONE
+                    Log.w("SellsAdapter", "Order has no items!")
                 }
+            } ?: run {
+                tvShowMore.visibility = View.GONE
+                Log.w("SellsAdapter", "Order items is null!")
             }
 
-            tvSellsQty.text = "${sells.orderItems?.size} produk"
-            tvSellsPrice.text = "Rp${sells.totalAmount}"
-//
-//            itemView.setOnClickListener {
-//                onOrderClickListener(sells)
-//            }
+            // Set click listener for the entire order item
+            itemView.setOnClickListener {
+                onOrderClickListener(order)
+            }
 
-            adjustDisplay(fragmentStatus, sells)
+            val actualStatus = if (fragmentStatus == "all") order.status ?: "" else fragmentStatus
+            Log.d("SellsAdapter", "Adjusting UI for status: '$actualStatus' (fragmentStatus: '$fragmentStatus')")
+            adjustButtonsAndText(actualStatus, order)
+
+            Log.d("SellsAdapter", "=== ViewHolder.bind() completed ===")
         }
 
-        private fun adjustDisplay(status: String, sells: OrdersItem) {
-            Log.d("SellsAdapter", "Adjusting display for status: $status")
+        private fun adjustButtonsAndText(status: String, order: OrdersItem) {
+            Log.d("SellsAdapter", "Adjusting buttons for status: $status")
+
+            // Get references to buttons and status views
+            val btnLeft = itemView.findViewById<MaterialButton>(R.id.btn_left)
+            val btnRight = itemView.findViewById<MaterialButton>(R.id.btn_right)
+            val statusOrder = itemView.findViewById<TextView>(R.id.tvOrderStatus)
+            val deadlineLabel = itemView.findViewById<TextView>(R.id.tvDeadlineLabel)
+            val deadlineDate = itemView.findViewById<TextView>(R.id.tvDeadlineDate)
+
+            // Reset visibility
+            btnLeft.visibility = View.GONE
+            btnRight.visibility = View.GONE
+            statusOrder.visibility = View.GONE
+            deadlineLabel.visibility = View.GONE
+            deadlineDate.visibility = View.GONE
 
             when (status) {
-                "pending", "unpaid" -> {
-                    layoutOrders.visibility = View.VISIBLE
-                    layoutPayments.visibility = View.GONE
-                    layoutShipments.visibility = View.GONE
-
-                    tvSellsTitle = itemView.findViewById(R.id.tv_order_title)
-                    tvSellsNumber = itemView.findViewById(R.id.tv_order_number)
-                    tvSellsDue = itemView.findViewById(R.id.tv_order_due)
-                    tvSellsCustomer = itemView.findViewById(R.id.tv_order_customer)
-                    tvSellsProductName = itemView.findViewById(R.id.tv_order_product_name)
-                    tvSellsProductQty = itemView.findViewById(R.id.tv_order_product_qty)
-                    tvSellsProductPrice = itemView.findViewById(R.id.tv_order_product_price)
-                    tvSeeMore = itemView.findViewById(R.id.tv_see_more_order)
-                    tvSellsQty = itemView.findViewById(R.id.tv_order_qty)
-                    tvSellsPrice = itemView.findViewById(R.id.tv_order_price)
-
-                    tvSellsDue.text = formatDueDate(sells.updatedAt.toString(), 1)
-
-                    val product = sells.orderItems?.get(0)
-                    product?.let {
-                        tvSellsProductName.text = it.productName
-                        tvSellsProductQty.text = "x${it.quantity}"
-                        tvSellsProductPrice.text = "Rp${it.price}"
-                        Glide.with(itemView.context)
-                            .load(it.productImage)
-                            .placeholder(R.drawable.placeholder_image)
-                            .into(ivSellsProduct)
+                "pending" -> {
+                    statusOrder.apply {
+                        visibility = View.VISIBLE
+                        text = "Menunggu Tagihan"
                     }
-
-                    tvSellsQty.text = "${sells.orderItems?.size} produk"
-                    tvSellsPrice.text = "Rp${sells.totalAmount}"
+                    deadlineLabel.apply {
+                        visibility = View.VISIBLE
+                        text = "Batas waktu konfirmasi:"
+                    }
+                    deadlineDate.apply {
+                        visibility = View.VISIBLE
+                        text = formatDate(order.createdAt ?: "")
+                    }
+                    btnLeft.apply {
+                        visibility = View.VISIBLE
+                        text = "Tolak Pesanan"
+                        setOnClickListener {
+                            // Handle reject order
+                            viewModel.updateOrderStatus(order.orderId, "canceled")
+                            viewModel.refreshOrders()
+                        }
+                    }
+                    btnRight.apply {
+                        visibility = View.VISIBLE
+                        text = "Terima Pesanan"
+                        setOnClickListener {
+                            // Handle accept order
+                            viewModel.updateOrderStatus(order.orderId, "unpaid")
+                            viewModel.refreshOrders()
+                        }
+                    }
+                }
+                "unpaid" -> {
+                    statusOrder.apply {
+                        visibility = View.VISIBLE
+                        text = "Konfirmasi Bayar"
+                    }
+                    deadlineLabel.apply {
+                        visibility = View.VISIBLE
+                        text = "Batas pembayaran:"
+                    }
+                    deadlineDate.apply {
+                        visibility = View.VISIBLE
+                        text = formatDatePay(order.updatedAt ?: "")
+                    }
+                    btnLeft.apply {
+                        visibility = View.VISIBLE
+                        text = "Batalkan"
+                        setOnClickListener {
+                            viewModel.updateOrderStatus(order.orderId, "canceled")
+                            viewModel.refreshOrders()
+                        }
+                    }
                 }
                 "paid" -> {
-                    layoutOrders.visibility = View.GONE
-                    layoutPayments.visibility = View.VISIBLE
-                    layoutShipments.visibility = View.GONE
-
-                    tvSellsDue.text = formatDueDate(sells.updatedAt.toString(), 2)
-                    btnConfirmPayment.setOnClickListener {
-
-                        val context = itemView.context
-                        val intent = Intent(context, DetailPaymentActivity::class.java)
-                        intent.putExtra("sells_data", Gson().toJson(sells))
-                        context.startActivity(intent)
-                        viewModel.refreshOrders()
+                    statusOrder.apply {
+                        visibility = View.VISIBLE
+                        text = "Sudah Dibayar"
                     }
-
-                    tvSellsTitle.text = "Pesanan Telah Dibayar"
-                    tvSellsDueDesc.text = "Konfirmasi pembayaran sebelum:"
-                    tvSellsDue.text = formatDueDate(sells.updatedAt.toString(), 2)
-
+                    deadlineLabel.apply {
+                        visibility = View.VISIBLE
+                        text = "Konfirmasi pembayaran sebelum:"
+                    }
+                    deadlineDate.apply {
+                        visibility = View.VISIBLE
+                        text = formatDatePay(order.updatedAt ?: "")
+                    }
+                    btnRight.apply {
+                        visibility = View.VISIBLE
+                        text = "Konfirmasi Pembayaran"
+                        setOnClickListener {
+                            val context = itemView.context
+                            val intent = Intent(context, DetailPaymentActivity::class.java)
+                            intent.putExtra("sells_data", Gson().toJson(order))
+                            context.startActivity(intent)
+                        }
+                    }
                 }
                 "processed" -> {
-                    layoutOrders.visibility = View.GONE
-                    layoutPayments.visibility = View.GONE
-                    layoutShipments.visibility = View.VISIBLE
-
-                    tvSellsTitle = itemView.findViewById(R.id.tv_shipment_title)
-                    tvSellsNumber = itemView.findViewById(R.id.tv_shipment_number)
-                    tvSellsDue = itemView.findViewById(R.id.tv_shipment_due)
-                    tvSellsLocation = itemView.findViewById(R.id.tv_shipment_location)
-                    tvSellsCustomer = itemView.findViewById(R.id.tv_shipment_customer)
-                    tvSellsProductName = itemView.findViewById(R.id.tv_shipment_product_name)
-                    tvSellsProductQty = itemView.findViewById(R.id.tv_shipment_product_qty)
-                    tvSeeMore = itemView.findViewById(R.id.tv_see_more_shipment)
-
-                    tvSellsDue.text = formatDueDate(sells.updatedAt.toString(), 2)
-                    btnConfirmShipment.setOnClickListener {
-                        val context = itemView.context
-                        val intent = Intent(context, DetailShipmentActivity::class.java)
-                        intent.putExtra("sells_data", Gson().toJson(sells))
-                        context.startActivity(intent)
+                    statusOrder.apply {
+                        visibility = View.VISIBLE
+                        text = "Diproses"
                     }
-
-                    tvSellsTitle.text = "Pesanan Perlu Dikirim"
-                    tvSellsNumber.text = "No. Pesanan: ${sells.orderId}"
-                    tvSellsLocation.text = sells.subdistrict
-                    tvSellsCustomer.text = sells.username
-                    tvSellsDue.text = formatDueDate(sells.updatedAt.toString(), 2)
+                    deadlineLabel.apply {
+                        visibility = View.VISIBLE
+                        text = "Kirim sebelum:"
+                    }
+                    deadlineDate.apply {
+                        visibility = View.VISIBLE
+                        text = formatDatePay(order.updatedAt ?: "")
+                    }
+                    btnRight.apply {
+                        visibility = View.VISIBLE
+                        text = "Kirim Pesanan"
+                        setOnClickListener {
+                            val context = itemView.context
+                            val intent = Intent(context, DetailShipmentActivity::class.java)
+                            intent.putExtra("sells_data", Gson().toJson(order))
+                            context.startActivity(intent)
+                        }
+                    }
                 }
                 "shipped" -> {
-                    layoutOrders.visibility = View.GONE
-                    layoutPayments.visibility = View.VISIBLE
-                    layoutShipments.visibility = View.GONE
-
-                    tvSellsTitle.text = "Pesanan Telah Dikirim"
-                    tvSellsDueDesc.text = "Dikirimkan pada"
-
-                    tvSellsDue.text = formatDueDate(sells.updatedAt.toString(), 0)
-                    tvSellsDue.background = itemView.context.getDrawable(R.drawable.bg_product_inactive)
-                    btnConfirmPayment.visibility = View.GONE
-                }
-                "delivered" -> {
-                    layoutOrders.visibility = View.GONE
-                    layoutPayments.visibility = View.VISIBLE
-                    layoutShipments.visibility = View.GONE
-
-                    tvSellsTitle.text = "Pesanan Telah Dikirim"
-                    tvSellsDueDesc.text = "Dikirimkan pada"
-
-                    tvSellsDue.text = formatDueDate(sells.updatedAt.toString(), 0)
-                    tvSellsDue.background = itemView.context.getDrawable(R.drawable.bg_product_inactive)
-                    btnConfirmPayment.visibility = View.GONE
+                    statusOrder.apply {
+                        visibility = View.VISIBLE
+                        text = "Dikirim"
+                    }
+                    deadlineLabel.apply {
+                        visibility = View.VISIBLE
+                        text = "Dikirimkan pada:"
+                    }
+                    deadlineDate.apply {
+                        visibility = View.VISIBLE
+                        text = formatDate(order.updatedAt ?: "")
+                    }
                 }
                 "completed" -> {
-                    layoutOrders.visibility = View.GONE
-                    layoutPayments.visibility = View.VISIBLE
-                    layoutShipments.visibility = View.GONE
-
-                    tvSellsTitle.text = "Pesanan Selesai"
-                    tvSellsDueDesc.text = "Selesai pada"
-
-                    tvSellsDue.text = formatDueDate(sells.updatedAt.toString(), 0)
-                    tvSellsDue.background = itemView.context.getDrawable(R.drawable.bg_product_inactive)
-                    btnConfirmPayment.visibility = View.GONE
+                    statusOrder.apply {
+                        visibility = View.VISIBLE
+                        text = "Selesai"
+                    }
+                    deadlineLabel.apply {
+                        visibility = View.VISIBLE
+                        text = "Selesai pada:"
+                    }
+                    deadlineDate.apply {
+                        visibility = View.VISIBLE
+                        text = formatDate(order.updatedAt ?: "")
+                    }
                 }
                 "canceled" -> {
-                    layoutOrders.visibility = View.GONE
-                    layoutPayments.visibility = View.VISIBLE
-                    layoutShipments.visibility = View.GONE
-
-                    tvSellsTitle.text = "Pesanan Dibatalkan"
-                    tvSellsDueDesc.text = "Dibatalkan pada"
-
-                    tvSellsDue.text = formatDueDate(sells.updatedAt.toString(), 0)
-                    tvSellsDue.background = itemView.context.getDrawable(R.drawable.bg_product_inactive)
-                    btnConfirmPayment.visibility = View.GONE
+                    statusOrder.apply {
+                        visibility = View.VISIBLE
+                        text = "Dibatalkan"
+                    }
+                    deadlineLabel.apply {
+                        visibility = View.VISIBLE
+                        text = "Dibatalkan pada:"
+                    }
+                    deadlineDate.apply {
+                        visibility = View.VISIBLE
+                        text = formatDate(order.cancelDate ?: "")
+                    }
                 }
             }
         }
 
-        private fun formatDueDate(date: String, dueDay: Int): String {
+        private fun formatDate(dateString: String): String {
             return try {
                 val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
                 inputFormat.timeZone = TimeZone.getTimeZone("UTC")
 
-                val outputFormat = SimpleDateFormat("dd MM; HH.mm", Locale("id", "ID"))
+                val outputFormat = SimpleDateFormat("HH:mm dd MMMM yyyy", Locale("id", "ID"))
 
-                val date = inputFormat.parse(date)
+                val date = inputFormat.parse(dateString)
 
                 date?.let {
                     val calendar = Calendar.getInstance()
                     calendar.time = it
-                    calendar.add(Calendar.DATE, dueDay)
+                    calendar.set(Calendar.HOUR_OF_DAY, 23)
+                    calendar.set(Calendar.MINUTE, 59)
 
                     outputFormat.format(calendar.time)
-                } ?: date
+                } ?: dateString
             } catch (e: Exception) {
-                Log.e("DueDateFormatting", "Error formatting date: ${e.message}")
-                date
-            }.toString()
+                Log.e("DateFormatting", "Error formatting date: ${e.message}")
+                dateString
+            }
+        }
+
+        private fun formatDatePay(dateString: String): String {
+            return try {
+                // Parse the ISO 8601 date
+                val isoDateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
+                isoDateFormat.timeZone = TimeZone.getTimeZone("UTC")
+
+                val createdDate = isoDateFormat.parse(dateString)
+
+                // Add 24 hours to get due date
+                val calendar = Calendar.getInstance()
+                calendar.time = createdDate
+                calendar.add(Calendar.HOUR, 24)
+
+                // Format due date for display
+                val dueDateFormat = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
+                dueDateFormat.format(calendar.time)
+
+            } catch (e: Exception) {
+                Log.e("DateFormatting", "Error formatting date: ${e.message}")
+                dateString
+            }
         }
     }
 }

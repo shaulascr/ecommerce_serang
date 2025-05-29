@@ -11,6 +11,7 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.alya.ecommerce_serang.data.api.response.store.orders.OrdersItem
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
+import com.alya.ecommerce_serang.data.repository.Result
 import com.alya.ecommerce_serang.data.repository.SellsRepository
 import com.alya.ecommerce_serang.databinding.FragmentSellsListBinding
 import com.alya.ecommerce_serang.ui.order.address.ViewState
@@ -22,7 +23,7 @@ class SellsListFragment : Fragment() {
 
     private var _binding: FragmentSellsListBinding? = null
     private val binding get() = _binding!!
-    private lateinit var  sessionManager: SessionManager
+    private lateinit var sessionManager: SessionManager
 
     private val viewModel: SellsViewModel by viewModels {
         BaseViewModelFactory {
@@ -31,39 +32,45 @@ class SellsListFragment : Fragment() {
             SellsViewModel(sellsRepository)
         }
     }
-
     private lateinit var sellsAdapter: SellsAdapter
+
     private var status: String = "all"
 
     companion object {
         private const val TAG = "SellsListFragment"
+
         private const val ARG_STATUS = "status"
 
         fun newInstance(status: String): SellsListFragment {
-            Log.d(TAG, "=== Creating new instance ===")
-            Log.d(TAG, "Status: '$status'")
+            Log.d(TAG, "Creating new instance with status: '$status'")
 
             return SellsListFragment().apply {
                 arguments = Bundle().apply {
                     putString(ARG_STATUS, status)
                 }
-                Log.d(TAG, "Fragment instance created with status: '$status'")
             }
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d(TAG, "onCreate called")
+
         sessionManager = SessionManager(requireContext())
         arguments?.let {
             status = it.getString(ARG_STATUS) ?: "all"
         }
+        Log.d(TAG, "Fragment status set to: '$status'")
+
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
+        Log.d(TAG, "onCreateView called")
+
         _binding = FragmentSellsListBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -73,90 +80,104 @@ class SellsListFragment : Fragment() {
 
         setupRecyclerView()
         observeSellsList()
+        observePaymentConfirmation()
         loadSells()
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
-
-
-
     private fun setupRecyclerView() {
+        Log.d(TAG, "Setting up RecyclerView")
         sellsAdapter = SellsAdapter(
-            onOrderClickListener = { sells ->
-                Log.d(TAG, "Order clicked: ${sells.orderId} in status '$status'")
-                navigateToSellsDetail(sells)
+            onOrderClickListener = { order ->
+                Log.d(TAG, "Order clicked: ${order.orderId}")
+                navigateToSellsDetail(order)
             },
             viewModel = viewModel
         )
 
-        Log.d(TAG, "Setting adapter fragment status to: '$status'")
         sellsAdapter.setFragmentStatus(status)
+        Log.d(TAG, "Adapter fragment status set to: '$status'")
 
         binding.rvSells.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = sellsAdapter
-            Log.d(TAG, "RecyclerView configured with LinearLayoutManager and adapter")
         }
-
-        // Log RecyclerView visibility and properties
-        Log.d(TAG, "RecyclerView visibility: ${binding.rvSells.visibility}")
-        Log.d(TAG, "RecyclerView parent: ${binding.rvSells.parent}")
+        Log.d(TAG, "RecyclerView configured")
     }
 
     private fun observeSellsList() {
+        Log.d(TAG, "Setting up sells list observer")
+
         viewModel.sells.observe(viewLifecycleOwner) { result ->
+            Log.d(TAG, "Sells list observer triggered with result: ${result.javaClass.simpleName}")
             when (result) {
                 is ViewState.Success -> {
                     binding.progressBar.visibility = View.GONE
+                    Log.d(TAG, "Data received: ${result.data?.size ?: 0} items")
 
                     if (result.data.isNullOrEmpty()) {
                         binding.tvEmptyState.visibility = View.VISIBLE
                         binding.rvSells.visibility = View.GONE
+                        Log.d(TAG, "Showing empty state")
+
                     } else {
+                        Log.d(TAG, "✅ Data is available: ${result.data.size} items")
                         binding.tvEmptyState.visibility = View.GONE
                         binding.rvSells.visibility = View.VISIBLE
-                        result.data.forEachIndexed { index, order ->
-                            Log.d(TAG, "Order $index:")
-                            Log.d(TAG, "  - ID: ${order.orderId}")
-                            Log.d(TAG, "  - Status: ${order.status}")
-                            Log.d(TAG, "  - Customer: ${order.username}")
-                            Log.d(TAG, "  - Total: ${order.totalAmount}")
-                            Log.d(TAG, "  - Items: ${order.orderItems?.size ?: 0}")
+// Log first few items for debugging
+                        result.data.take(3).forEachIndexed { index, order ->
+                            Log.d(TAG, "Order ${index + 1}: ID=${order.orderId}, Status=${order.status}, Customer=${order.username}")
                         }
-                        sellsAdapter.submitList(result.data)
 
-                        Log.d(TAG, "Final UI state:")
-                        Log.d(TAG, "  - ProgressBar visibility: ${binding.progressBar.visibility}")
-                        Log.d(TAG, "  - EmptyState visibility: ${binding.tvEmptyState.visibility}")
-                        Log.d(TAG, "  - RecyclerView visibility: ${binding.rvSells.visibility}")
-                        Log.d(TAG, "  - Adapter item count: ${sellsAdapter.itemCount}")
-                    }
+                        sellsAdapter.submitList(result.data)
+                        Log.d(TAG, "Data submitted to adapter")
+                        Log.d(TAG, "Adapter item count: ${sellsAdapter.itemCount}")                    }
                 }
                 is ViewState.Error -> {
+                    Log.e(TAG, "❌ ViewState.Error received: ${result.message}")
+
                     binding.progressBar.visibility = View.GONE
                     binding.tvEmptyState.visibility = View.VISIBLE
                     Toast.makeText(requireContext(), result.message, Toast.LENGTH_SHORT).show()
                 }
                 is ViewState.Loading -> {
                     binding.progressBar.visibility = View.VISIBLE
-                    binding.rvSells.visibility = View.GONE
-                    binding.tvEmptyState.visibility = View.GONE
+                }
+            }
+        }
+    }
+
+    private fun observePaymentConfirmation() {
+        viewModel.confirmPaymentStore.observe(viewLifecycleOwner) { result ->
+            when (result) {
+                is Result.Loading -> {
+                    // Handle loading state if needed
+                }
+                is Result.Success -> {
+                    Toast.makeText(requireContext(), "Payment confirmed successfully!", Toast.LENGTH_SHORT).show()
+                    loadSells()
+                }
+                is Result.Error -> {
+                    Toast.makeText(requireContext(), "Failed to payment confirm order: ${result.exception.message}", Toast.LENGTH_SHORT).show()
                 }
             }
         }
     }
 
     private fun loadSells() {
-        Log.d(TAG, "Calling viewModel.getSellList('$status')")
+        Log.d(TAG, "Loading sells with status: '$status'")
         viewModel.getSellList(status)
+        Log.d(TAG, "getSellList called")
     }
 
-    private fun navigateToSellsDetail(sells: OrdersItem) {
-        // In a real app, you would navigate to sells detail screen
-        // For example: findNavController().navigate(SellsListFragmentDirections.actionToSellsDetail(sells.orderId))
-        Toast.makeText(requireContext(), "Order ID: ${sells.orderId}", Toast.LENGTH_SHORT).show()
+    private fun navigateToSellsDetail(order: OrdersItem) {
+        Log.d(TAG, "Navigating to sells detail for order: ${order.orderId}")
+        // Navigate to order detail from seller's perspective
+        // Seller views customer's order details to manage fulfillment
+        Toast.makeText(requireContext(), "Customer Order ID: ${order.orderId}", Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

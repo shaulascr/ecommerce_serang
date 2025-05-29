@@ -15,17 +15,18 @@ class DetailShipmentActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityDetailShipmentBinding
     private lateinit var sells: OrdersItem
+    private lateinit var productAdapter: SellsProductAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityDetailShipmentBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val orderJson = intent.getStringExtra("order_data")
+        val orderJson = intent.getStringExtra("sells_data")
         sells = Gson().fromJson(orderJson, OrdersItem::class.java)
 
-        bindOrderDetails()
         setupRecyclerView()
+        bindOrderDetails()
     }
 
     private fun bindOrderDetails() = with(binding) {
@@ -45,10 +46,15 @@ class DetailShipmentActivity : AppCompatActivity() {
     }
 
     private fun setupRecyclerView() {
+        productAdapter = SellsProductAdapter()
+
         binding.rvProductItems.apply {
             layoutManager = LinearLayoutManager(this@DetailShipmentActivity)
-            adapter = SellsProductAdapter(sells.orderItems ?: emptyList())
+            adapter = productAdapter
         }
+
+        // Submit the order items to the adapter
+        productAdapter.submitList(sells.orderItems ?: emptyList())
     }
 
     private fun formatDate(dateStr: String?): String {
