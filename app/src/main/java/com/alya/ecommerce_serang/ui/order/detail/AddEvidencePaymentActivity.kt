@@ -2,11 +2,14 @@ package com.alya.ecommerce_serang.ui.order.detail
 
 import android.Manifest
 import android.R
+import android.app.Activity
 import android.app.DatePickerDialog
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import android.util.Log
 import android.view.View
 import android.webkit.MimeTypeMap
@@ -46,6 +49,7 @@ class AddEvidencePaymentActivity : AppCompatActivity() {
     private lateinit var productPrice: String
     private var selectedImageUri: Uri? = null
 
+
     private val viewModel: PaymentViewModel by viewModels {
         BaseViewModelFactory {
             val apiService = ApiConfig.getApiService(sessionManager)
@@ -62,55 +66,65 @@ class AddEvidencePaymentActivity : AppCompatActivity() {
         "Cash on Delivery"
     )
 
-    private val getContent = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-        uri?.let {
-            selectedImageUri = it
-            binding.ivUploadedImage.setImageURI(selectedImageUri)
-            binding.ivUploadedImage.visibility = View.VISIBLE
-            binding.layoutUploadPlaceholder.visibility = View.GONE
+//    private val getContent = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+//        uri?.let {
+//            selectedImageUri = it
+//            binding.ivUploadedImage.setImageURI(selectedImageUri)
+//            binding.ivUploadedImage.visibility = View.VISIBLE
+//            binding.layoutUploadPlaceholder.visibility = View.GONE
+//        }
+//    }
+
+    private val pickImageLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            result.data?.data?.let { uri ->
+                handleSelectedImage(uri)
+            }
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityAddEvidencePaymentBinding.inflate(layoutInflater)
-        setContentView(binding.root)
 
-        sessionManager = SessionManager(this)
+        try {
+            binding = ActivityAddEvidencePaymentBinding.inflate(layoutInflater)
+            setContentView(binding.root)
 
-        intent.extras?.let { bundle ->
-            orderId = bundle.getInt("ORDER_ID", 0)
-            paymentInfoId = bundle.getInt("PAYMENT_INFO_ID", 0)
-            productPrice = intent.getStringExtra("TOTAL_AMOUNT") ?: "Rp0"
+            sessionManager = SessionManager(this)
 
+            intent.extras?.let { bundle ->
+                orderId = bundle.getInt("ORDER_ID", 0)
+                paymentInfoId = bundle.getInt("PAYMENT_INFO_ID", 0)
+                productPrice = intent.getStringExtra("TOTAL_AMOUNT") ?: "Rp0"
+                Log.d(TAG, "Intent data: OrderID=$orderId, PaymentInfoId=$paymentInfoId, Price=$productPrice")
+            }
+
+            WindowCompat.setDecorFitsSystemWindows(window, false)
+            enableEdgeToEdge()
+
+            ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, windowInsets ->
+                val systemBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+                view.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+                windowInsets
+            }
+
+            Log.d(TAG, "7. About to setup toolbar - COMMENTING OUT PROBLEMATIC LINE")
+            // COMMENT OUT THIS LINE TEMPORARILY:
+//             binding.toolbar.navigationIcon.apply { finish() }
+
+            setupUI()
+
+            viewModel.getOrderDetails(orderId)
+
+            setupListeners()
+            setupObservers()
+
+        } catch (e: Exception) {
+            Log.e(TAG, "ERROR in AddEvidencePaymentActivity onCreate: ${e.message}", e)
+            Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_LONG).show()
         }
-
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-
-        enableEdgeToEdge()
-
-        // Apply insets to your root layout
-        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, windowInsets ->
-            val systemBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-            view.setPadding(
-                systemBars.left,
-                systemBars.top,
-                systemBars.right,
-                systemBars.bottom
-            )
-            windowInsets
-        }
-
-        binding.toolbar.navigationIcon.apply {
-            onBackPressed()
-        }
-
-        setupUI()
-        viewModel.getOrderDetails(orderId)
-
-
-        setupListeners()
-        setupObservers()
     }
 
     private fun setupUI() {
@@ -126,11 +140,11 @@ class AddEvidencePaymentActivity : AppCompatActivity() {
 
         // Upload image button
         binding.tvAddPhoto.setOnClickListener {
-            checkPermissionAndPickImage()
+            checkPermissionsAndShowImagePicker()
         }
 
         binding.frameUploadImage.setOnClickListener {
-            checkPermissionAndPickImage()
+            checkPermissionsAndShowImagePicker()
         }
 
         // Date picker
@@ -158,6 +172,7 @@ class AddEvidencePaymentActivity : AppCompatActivity() {
         // Submit button
         binding.btnSubmit.setOnClickListener {
             validateAndUpload()
+            Log.d(TAG, "AddEvidencePaymentActivity onCreate completed")
         }
     }
 
@@ -178,6 +193,112 @@ class AddEvidencePaymentActivity : AppCompatActivity() {
                     // Show loading indicator if needed
                     Log.d(TAG, "Uploading payment proof...")
                 }
+            }
+        }
+    }
+
+    private fun checkPermissionsAndShowImagePicker() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            // For Android 13+ (API 33+), use READ_MEDIA_IMAGES
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_MEDIA_IMAGES), REQUEST_CODE_STORAGE_PERMISSION)
+            } else {
+                showImagePickerOptions()
+            }
+        } else {
+            // For older versions, use READ_EXTERNAL_STORAGE
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), REQUEST_CODE_STORAGE_PERMISSION)
+            } else {
+                showImagePickerOptions()
+            }
+        }
+    }
+
+    // Exact same approach as ChatActivity
+    private fun showImagePickerOptions() {
+        val options = arrayOf(
+            "Pilih dari Galeri",
+            "Batal"
+        )
+
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("Pilih Bukti Pembayaran")
+            .setItems(options) { dialog, which ->
+                when (which) {
+                    0 -> openGallery() // Gallery
+                    1 -> dialog.dismiss() // Cancel
+                }
+            }
+            .show()
+    }
+
+    // Using the same gallery opening method as ChatActivity
+    private fun openGallery() {
+        try {
+            val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+            pickImageLauncher.launch(intent)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error opening gallery", e)
+            Toast.makeText(this, "Gagal membuka galeri", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun handleSelectedImage(uri: Uri) {
+        try {
+            Log.d(TAG, "Processing selected image: $uri")
+
+            // Use the same copy-to-cache approach as ChatActivity
+            contentResolver.openInputStream(uri)?.use { inputStream ->
+                val fileName = "evidence_${System.currentTimeMillis()}.jpg"
+                val outputFile = File(cacheDir, fileName)
+
+                outputFile.outputStream().use { outputStream ->
+                    inputStream.copyTo(outputStream)
+                }
+
+                if (outputFile.exists() && outputFile.length() > 0) {
+                    // Check file size (max 5MB like ChatActivity)
+                    if (outputFile.length() > 5 * 1024 * 1024) {
+                        Log.e(TAG, "File too large: ${outputFile.length()} bytes")
+                        Toast.makeText(this, "Gambar terlalu besar (maksimal 5MB)", Toast.LENGTH_SHORT).show()
+                        outputFile.delete()
+                        return
+                    }
+
+                    // Success - update UI
+                    selectedImageUri = Uri.fromFile(outputFile)
+                    binding.ivUploadedImage.setImageURI(selectedImageUri)
+                    binding.ivUploadedImage.visibility = View.VISIBLE
+                    binding.layoutUploadPlaceholder.visibility = View.GONE
+
+                    Log.d(TAG, "Image processed successfully: ${outputFile.absolutePath}, size: ${outputFile.length()}")
+                    Toast.makeText(this, "Gambar berhasil dipilih", Toast.LENGTH_SHORT).show()
+                } else {
+                    Log.e(TAG, "Failed to create image file")
+                    Toast.makeText(this, "Gagal memproses gambar", Toast.LENGTH_SHORT).show()
+                }
+            } ?: run {
+                Log.e(TAG, "Could not open input stream for URI: $uri")
+                Toast.makeText(this, "Tidak dapat mengakses gambar", Toast.LENGTH_SHORT).show()
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error handling selected image", e)
+            Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == REQUEST_CODE_STORAGE_PERMISSION) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                showImagePickerOptions()
+            } else {
+                Toast.makeText(this, "Izin diperlukan untuk mengakses galeri", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -298,40 +419,6 @@ class AddEvidencePaymentActivity : AppCompatActivity() {
             Toast.makeText(applicationContext, "Error processing image: ${e.message}", Toast.LENGTH_SHORT).show()
             return null
         }
-    }
-
-
-
-
-    private fun checkPermissionAndPickImage() {
-        val permission = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-            Manifest.permission.READ_MEDIA_IMAGES
-        } else {
-            Manifest.permission.READ_EXTERNAL_STORAGE
-        }
-
-        if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, arrayOf(permission), REQUEST_CODE_STORAGE_PERMISSION)
-        } else {
-            pickImage()
-        }
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == REQUEST_CODE_STORAGE_PERMISSION && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            pickImage()
-        } else {
-            Toast.makeText(this, "Izin dibutuhkan untuk memilih gambar", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private fun pickImage() {
-        getContent.launch("image/*")
     }
 
 

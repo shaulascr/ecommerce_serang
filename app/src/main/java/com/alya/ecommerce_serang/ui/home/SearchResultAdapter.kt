@@ -42,19 +42,19 @@ class SearchResultsAdapter(
         }
 
         fun bind(product: ProductsItem) {
-            binding.productName.text = product.name
-            binding.productPrice.text = (product.price)
+            binding.tvProductName.text = product.name
+            binding.tvProductPrice.text = (product.price)
 
             // Load image with Glide
             Glide.with(binding.root.context)
                 .load(product.image)
                 .placeholder(R.drawable.placeholder_image)
 //                .error(R.drawable.error_image)
-                .into(binding.productImage)
+                .into(binding.ivProductImage)
 
             // Set store name if available
             product.storeId?.toString().let {
-                binding.storeName.text = it
+                binding.tvStoreName.text = it
             }
         }
     }

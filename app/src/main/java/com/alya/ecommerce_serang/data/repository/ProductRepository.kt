@@ -286,6 +286,58 @@ class ProductRepository(private val apiService: ApiService) {
         }
     }
 
+    suspend fun getProductsByCategory(categoryId: Int): Result<List<ProductsItem>> =
+        withContext(Dispatchers.IO) {
+            try {
+                Log.d(TAG, "Attempting to fetch products for category: $categoryId")
+                val response = apiService.getAllProduct()
+
+                if (response.isSuccessful) {
+                    val allProducts = response.body()?.products ?: emptyList()
+
+                    // Filter products by category_id
+                    val filteredProducts = allProducts.filter { product ->
+                        product.categoryId == categoryId
+                    }
+
+                    Log.d(TAG, "Filtered products for category $categoryId: ${filteredProducts.size} products")
+
+                    Result.Success(filteredProducts)
+                } else {
+                    val errorBody = response.errorBody()?.string() ?: "Unknown error"
+                    Log.e(TAG, "Failed to fetch products. Code: ${response.code()}, Error: $errorBody")
+                    Result.Error(Exception("Failed to fetch products. Code: ${response.code()}"))
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Exception while fetching products by category", e)
+                Result.Error(e)
+            }
+        }
+
+    // Optional: Get category by ID if needed
+    suspend fun getCategoryById(categoryId: Int): Result<CategoryItem?> =
+        withContext(Dispatchers.IO) {
+            try {
+                Log.d(TAG, "Attempting to fetch category: $categoryId")
+                val response = apiService.allCategory()
+
+                if (response.isSuccessful) {
+                    val categories = response.body()?.category ?: emptyList()
+                    val category = categories.find { it.id == categoryId }
+
+                    Log.d(TAG, "Category found: ${category?.name}")
+                    Result.Success(category)
+                } else {
+                    val errorBody = response.errorBody()?.string() ?: "Unknown error"
+                    Log.e(TAG, "Failed to fetch category. Code: ${response.code()}, Error: $errorBody")
+                    Result.Error(Exception("Failed to fetch category. Code: ${response.code()}"))
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Exception while fetching category by ID", e)
+                Result.Error(e)
+            }
+        }
+
     companion object {
         private const val TAG = "ProductRepository"
     }
