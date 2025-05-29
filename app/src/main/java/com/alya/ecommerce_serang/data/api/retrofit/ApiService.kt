@@ -14,6 +14,7 @@ import com.alya.ecommerce_serang.data.api.dto.LoginRequest
 import com.alya.ecommerce_serang.data.api.dto.OrderRequest
 import com.alya.ecommerce_serang.data.api.dto.OrderRequestBuy
 import com.alya.ecommerce_serang.data.api.dto.OtpRequest
+import com.alya.ecommerce_serang.data.api.dto.PaymentConfirmRequest
 import com.alya.ecommerce_serang.data.api.dto.ProvinceResponse
 import com.alya.ecommerce_serang.data.api.dto.RegisterRequest
 import com.alya.ecommerce_serang.data.api.dto.ReviewProductItem
@@ -65,6 +66,7 @@ import com.alya.ecommerce_serang.data.api.response.order.ComplaintResponse
 import com.alya.ecommerce_serang.data.api.response.order.CompletedOrderResponse
 import com.alya.ecommerce_serang.data.api.response.product.CreateSearchResponse
 import com.alya.ecommerce_serang.data.api.response.product.SearchHistoryResponse
+import com.alya.ecommerce_serang.data.api.response.store.orders.PaymentConfirmationResponse
 import com.alya.ecommerce_serang.data.api.response.store.product.CreateProductResponse
 import com.alya.ecommerce_serang.data.api.response.store.product.DeleteProductResponse
 import com.alya.ecommerce_serang.data.api.response.store.product.UpdateProductResponse
@@ -365,6 +367,11 @@ interface ApiService {
         @Part("bank_name") bankName: RequestBody,
         @Part("bank_num") bankNum: RequestBody
     ): Response<BalanceTopUpResponse>
+
+    @PUT("store/payment/update")
+    suspend fun paymentConfirmation(
+        @Body confirmPaymentReq : PaymentConfirmRequest
+    ): Response<PaymentConfirmationResponse>
 
     @Multipart
     @PUT("mystore/edit")

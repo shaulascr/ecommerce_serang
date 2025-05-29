@@ -10,9 +10,15 @@ import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.response.store.orders.OrderItemsItem
 import com.bumptech.glide.Glide
 
-class SellsProductAdapter(
-    private val items: List<OrderItemsItem?>
-) : RecyclerView.Adapter<SellsProductAdapter.ProductViewHolder>() {
+class SellsProductAdapter : RecyclerView.Adapter<SellsProductAdapter.ProductViewHolder>() {
+
+    private val items = mutableListOf<OrderItemsItem?>()
+
+    fun submitList(newItems: List<OrderItemsItem?>) {
+        items.clear()
+        items.addAll(newItems)
+        notifyDataSetChanged()
+    }
 
     inner class ProductViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val ivProduct: ImageView = view.findViewById(R.id.iv_order_product)

@@ -63,7 +63,7 @@ class HistoryActivity : AppCompatActivity() {
         supportActionBar?.setDisplayShowTitleEnabled(false)
 
         binding.btnBack.setOnClickListener {
-            onBackPressed()
+//            onBackPressed()
             finish()
         }
     }

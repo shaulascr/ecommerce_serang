@@ -77,7 +77,7 @@ data class OrdersItem(
 	val cancelDate: String? = null,
 
 	@field:SerializedName("payment_evidence")
-	val paymentEvidence: Any? = null,
+	val paymentEvidence: String,
 
 	@field:SerializedName("longitude")
 	val longitude: String? = null,
@@ -152,7 +152,7 @@ data class OrdersItem(
 	val postalCode: String? = null,
 
 	@field:SerializedName("order_id")
-	val orderId: Int? = null,
+	val orderId: Int,
 
 	@field:SerializedName("username")
 	val username: String? = null,
