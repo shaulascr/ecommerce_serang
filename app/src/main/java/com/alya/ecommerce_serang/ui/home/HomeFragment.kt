@@ -24,6 +24,7 @@ import com.alya.ecommerce_serang.databinding.FragmentHomeBinding
 import com.alya.ecommerce_serang.ui.cart.CartActivity
 import com.alya.ecommerce_serang.ui.notif.NotificationActivity
 import com.alya.ecommerce_serang.ui.product.DetailProductActivity
+import com.alya.ecommerce_serang.ui.product.category.CategoryProductsActivity
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.HorizontalMarginItemDecoration
 import com.alya.ecommerce_serang.utils.SessionManager
@@ -211,7 +212,10 @@ class HomeFragment : Fragment() {
     }
 
     private fun handleCategoryProduct(category: CategoryItem) {
-        // Your implementation
+        // Navigate to CategoryProductsActivity when category is clicked
+        val intent = Intent(requireContext(), CategoryProductsActivity::class.java)
+        intent.putExtra(CategoryProductsActivity.EXTRA_CATEGORY, category)
+        startActivity(intent)
     }
 
     override fun onDestroyView() {
