@@ -66,17 +66,26 @@
     <string name="dl_date_wait">23:59 15 April 2025</string>
     <string name="no_available_orders">Tidak ada order</string>
     <string name="item_count_prod">%d produk</string>
-    <string name="show_more_product">%d produk lainnya</string>
-    <!--    status order-->
+    <string name="show_more_product">Lihat %d produk lainnya</string>
+    <!--    status order -->
     <string name="all_orders">Semua Pesanan </string>
     <string name="pending_orders">Menunggu Tagihan</string>
-    <string name="unpaid_orders">Konfrimasi Bayar</string>
+    <string name="unpaid_orders">Perlu Dibayar</string>
     <string name="processed_orders">Diproses</string>
     <string name="paid_orders">Sudah Dibayar</string>
     <string name="delivered_orders">Pesanan Sampai</string>
     <string name="completed_orders">Selesai</string>
     <string name="shipped_orders">Dikirim</string>
     <string name="canceled_orders">Dibatalkan</string>
+    <!--    status penjualan -->
+    <string name="all_sells">Semua Penjualan</string>
+    <string name="unpaid_sells">Belum Dibayar</string>
+    <string name="paid_sells">Konfirmasi Pembayaran</string>
+    <string name="processed_sells">Perlu Dikirim</string>
+    <string name="shipped_sells">Dikirim</string>
+    <string name="delivered_sells">Pengiriman Sampai</string>
+    <string name="completed_sells">Selesai</string>
+    <string name="canceled_sells">Dibatalkan</string>
     <!--    deadline label -->
     <string name="dl_pending">Batas Tagihan</string>
     <string name="dl_unpaid">Batas Pembayaran</string>

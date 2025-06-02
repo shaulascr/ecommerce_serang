@@ -1,163 +1,873 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="8dp"
-    app:cardCornerRadius="8dp"
-    app:cardElevation="2dp">
+    android:orientation="vertical">
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_orders"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp">
+        android:background="@color/white"
+        android:paddingTop="16dp">
 
-        <TextView
-            android:id="@+id/tvUserName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@android:color/black"
-            android:textSize="16sp"
-            android:textStyle="bold"
+        <!-- Order Header -->
+        <View
+            android:id="@+id/shape_order_title"
+            android:layout_width="4dp"
+            android:layout_height="48dp"
+            android:background="@drawable/shape_sells_title"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="Customer Name" />
+            app:layout_constraintTop_toTopOf="parent"/>
 
-        <TextView
-            android:id="@+id/tvOrderStatus"
+        <LinearLayout
+            android:id="@+id/layout_order_header"
+            android:layout_width="220dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            app:layout_constraintStart_toStartOf="@id/shape_order_title"
+            app:layout_constraintTop_toTopOf="parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_order_title"
+                style="@style/label_medium_prominent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:text="Pesanan Belum Dibayar"/>
+
+            <TextView
+                android:id="@+id/tv_order_number"
+                style="@style/label_small"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:textColor="@color/black_300"
+                android:text="No. Pesanan: 123456789"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_person"/>
+
+                <TextView
+                    android:id="@+id/tv_order_customer"
+                    style="@style/label_small"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:maxLines="1"
+                    android:layout_marginStart="4dp"
+                    android:textColor="@color/black_300"
+                    android:text="Gracia Hotmauli"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/blue_500"
-            android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            android:visibility="gone"
-            tools:text="Menunggu Tagihan" />
+            android:orientation="vertical"
+            android:layout_marginEnd="16dp"
+            android:gravity="end">
+
+            <TextView
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                style="@style/label_small"
+                android:textAlignment="textEnd"
+                android:text="Batas waktu pembayaran:"
+                android:textColor="@color/black_300" />
+
+            <TextView
+                android:id="@+id/tv_order_due"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="25 Okt; 23.59"
+                style="@style/label_small"
+                android:paddingHorizontal="4dp"
+                android:textColor="@color/darkblue_500"
+                android:background="@drawable/bg_product_active" />
+
+        </LinearLayout>
+
+        <!-- Order Detail -->
+        <LinearLayout
+            android:id="@+id/layout_order_detail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/layout_order_header"
+            android:paddingHorizontal="16dp"
+            android:layout_marginTop="8dp"
+            android:orientation="vertical">
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/black_50"/>
+
+            <!-- Product Detail -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/layout_order_product_detail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingVertical="12dp">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/iv_order_product"
+                    android:layout_width="95dp"
+                    android:layout_height="64dp"
+                    android:src="@drawable/placeholder_image"
+                    android:scaleType="centerCrop"
+                    android:contentDescription="Order Product Image"
+                    app:shapeAppearanceOverlay="@style/store_product_image"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"/>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginStart="13dp"
+                    app:layout_constraintStart_toEndOf="@id/iv_order_product"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <TextView
+                        android:id="@+id/tv_order_product_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:maxLines="1"
+                        android:text="Jaket Pink Fuschia"
+                        style="@style/label_medium_prominent"/>
+
+                    <!--                <TextView-->
+                    <!--                    android:id="@+id/tv_order_product_variant"-->
+                    <!--                    android:layout_width="match_parent"-->
+                    <!--                    android:layout_height="wrap_content"-->
+                    <!--                    android:maxLines="1"-->
+                    <!--                    android:text="S"-->
+                    <!--                    style="@style/label_medium"-->
+                    <!--                    android:textColor="@color/black_300"/>-->
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginStart="13dp"
+                    android:gravity="end"
+                    app:layout_constraintStart_toEndOf="@id/iv_order_product"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="@id/iv_order_product">
+
+                    <TextView
+                        android:id="@+id/tv_order_product_qty"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:maxLines="1"
+                        android:text="x2"
+                        style="@style/label_medium"
+                        android:textColor="@color/black_300"
+                        android:textAlignment="textEnd"/>
+
+                    <TextView
+                        android:id="@+id/tv_order_product_price"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:maxLines="1"
+                        android:text="Rp150.000"
+                        style="@style/label_medium"
+                        android:textAlignment="textEnd"/>
+
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tv_see_more_order"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:focusable="true"
+                    android:text="Lihat 3 produk lainnya"
+                    android:gravity="center"
+                    style="@style/label_small"
+                    android:fontFamily="@font/dmsans_italic"
+                    android:textColor="@color/black_300"
+                    app:layout_constraintTop_toBottomOf="@id/iv_order_product"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:layout_marginVertical="8dp"
+                    android:clickable="true"
+                    android:visibility="gone"/>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/black_50"/>
+
+            <!-- Total Price -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingVertical="8dp">
+
+                <TextView
+                    android:id="@+id/tv_order_qty"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="2 produk"
+                    style="@style/label_large"
+                    android:layout_alignParentStart="true"/>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_alignParentEnd="true">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Total:"
+                        style="@style/label_large_prominent"
+                        android:textAlignment="textEnd"/>
+
+                    <TextView
+                        android:id="@+id/tv_order_price"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Rp300.000"
+                        style="@style/label_large_prominent"
+                        android:textColor="@color/blue_500"
+                        android:layout_marginStart="5dp"
+                        android:textAlignment="textEnd"/>
+
+                </LinearLayout>
+
+            </RelativeLayout>
+
+            <!--            <View-->
+            <!--                android:layout_width="match_parent"-->
+            <!--                android:layout_height="1dp"-->
+            <!--                android:background="@color/black_50"/>-->
+            <!--    -->
+            <!--            &lt;!&ndash; Action Buttons &ndash;&gt;-->
+            <!--    -->
+            <!--            <LinearLayout-->
+            <!--                android:layout_width="match_parent"-->
+            <!--                android:layout_height="wrap_content"-->
+            <!--                android:layout_marginTop="13dp"-->
+            <!--                android:orientation="horizontal">-->
+            <!--    -->
+            <!--                <Button-->
+            <!--                    android:id="@+id/btn_edit_order"-->
+            <!--                    style="@style/button.small.secondary.medium"-->
+            <!--                    android:text="Ubah Tagihan"-->
+            <!--                    android:layout_marginEnd="10dp"/>-->
+            <!--    -->
+            <!--                <Button-->
+            <!--                    android:id="@+id/btn_confirm_order"-->
+            <!--                    style="@style/button.small.active.medium"-->
+            <!--                    android:text="Konfirmasi Tagihan" />-->
+            <!--    -->
+            <!--            </LinearLayout>-->
+
+        </LinearLayout>
 
         <View
-            android:id="@+id/divider"
             android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginTop="8dp"
-            android:background="#E0E0E0"
-            app:layout_constraintTop_toBottomOf="@+id/tvUserName" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvSellsItems"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            app:layout_constraintTop_toBottomOf="@+id/divider"
-            tools:itemCount="1"
-            tools:listitem="@layout/item_order_product" />
-
-        <TextView
-            android:id="@+id/tvShowMores"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:gravity="center_vertical"
-            android:textColor="@android:color/darker_gray"
-            android:textSize="14sp"
-            android:visibility="gone"
+            android:layout_height="8dp"
+            android:background="@color/black_50"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/rvSellsItems"
-            app:layout_constraintEnd_toEndOf="parent"
-            tools:text="@string/show_more_product" />
-
-        <View
-            android:id="@+id/divider2"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginTop="8dp"
-            android:background="#E0E0E0"
-            app:layout_constraintTop_toBottomOf="@+id/tvShowMores" />
-
-        <TextView
-            android:id="@+id/tv_count_total_items"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/item_count_prod"
-            android:textSize="14sp"
-            android:fontFamily="@font/dmsans_bold"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/divider2" />
-
-        <TextView
-            android:id="@+id/tvTotalLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/total_order"
-            android:textColor="@android:color/black"
-            android:textSize="14sp"
-            android:fontFamily="@font/dmsans_bold"
-            app:layout_constraintEnd_toStartOf="@+id/tvTotalAmounts"
-            app:layout_constraintTop_toBottomOf="@+id/divider2"/>
-
-        <TextView
-            android:id="@+id/tvTotalAmounts"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:textColor="@android:color/black"
-            android:textSize="14sp"
-            android:fontFamily="@font/dmsans_semibold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/divider2"
-            tools:text="Rp500.000" />
-
-        <TextView
-            android:id="@+id/tvDeadlineLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/batas_tagihan"
-            android:textSize="14sp"
-            android:visibility="gone"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tv_count_total_items" />
-
-        <TextView
-            android:id="@+id/tvDeadlineDate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
-            android:layout_marginTop="8dp"
-            android:textColor="@android:color/black"
-            android:textSize="14sp"
-            android:visibility="gone"
-            app:layout_constraintStart_toEndOf="@+id/tvDeadlineLabel"
-            app:layout_constraintTop_toBottomOf="@+id/tv_count_total_items"
-            tools:text="28 Oktober 2024" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_left"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_button_outline"
-            android:backgroundTint="@color/white"
-            android:visibility="gone"
-            android:text="Tolak"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvDeadlineDate"
-            app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginTop="8dp"/>
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_right"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_button_filled"
-            android:visibility="gone"
-            android:text="Terima"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvDeadlineDate"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="8dp"/>
+            app:layout_constraintTop_toBottomOf="@id/layout_order_detail"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-</androidx.cardview.widget.CardView>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_payments"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:paddingTop="16dp">
+
+        <!-- Payment Header -->
+        <View
+            android:id="@+id/shape_payment_order_title"
+            android:layout_width="4dp"
+            android:layout_height="32dp"
+            android:background="@drawable/shape_sells_title"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <LinearLayout
+            android:id="@+id/layout_payment_order_header"
+            android:layout_width="220dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            app:layout_constraintStart_toStartOf="@id/shape_payment_order_title"
+            app:layout_constraintTop_toTopOf="parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_payment_title"
+                style="@style/label_medium_prominent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:text="Pesanan Telah Dibayar"/>
+
+            <TextView
+                android:id="@+id/tv_payment_number"
+                style="@style/label_small"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:textColor="@color/black_300"
+                android:text="No. Pesanan: 123456789"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:orientation="vertical"
+            android:layout_marginEnd="16dp"
+            android:gravity="end">
+
+            <TextView
+                android:id="@+id/tv_payment_due_desc"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                style="@style/label_small"
+                android:textAlignment="textEnd"
+                android:text="Konfirmasi pembayaran sebelum:"
+                android:textColor="@color/black_300" />
+
+            <TextView
+                android:id="@+id/tv_payment_due"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="25 Okt; 23.59"
+                style="@style/label_small"
+                android:paddingHorizontal="4dp"
+                android:textColor="@color/darkblue_500"
+                android:background="@drawable/bg_product_active" />
+
+        </LinearLayout>
+
+        <!-- Order Detail -->
+        <LinearLayout
+            android:id="@+id/layout_payment_detail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/layout_payment_order_header"
+            android:paddingHorizontal="16dp"
+            android:layout_marginTop="8dp"
+            android:orientation="vertical">
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/black_50"/>
+
+            <!-- Product Detail -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/layout_payment_product_detail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingVertical="12dp">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/iv_payment_product"
+                    android:layout_width="95dp"
+                    android:layout_height="64dp"
+                    android:src="@drawable/placeholder_image"
+                    android:scaleType="centerCrop"
+                    android:contentDescription="Payment Product Image"
+                    app:shapeAppearanceOverlay="@style/store_product_image"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"/>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginStart="13dp"
+                    app:layout_constraintStart_toEndOf="@id/iv_payment_product"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <TextView
+                        android:id="@+id/tv_payment_product_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:maxLines="1"
+                        android:text="Jaket Pink Fuschia"
+                        style="@style/label_medium_prominent"/>
+
+                    <!--                <TextView-->
+                    <!--                    android:id="@+id/tv_payment_product_variant"-->
+                    <!--                    android:layout_width="match_parent"-->
+                    <!--                    android:layout_height="wrap_content"-->
+                    <!--                    android:maxLines="1"-->
+                    <!--                    android:text="S"-->
+                    <!--                    style="@style/label_medium"-->
+                    <!--                    android:textColor="@color/black_300"/>-->
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginStart="13dp"
+                    android:gravity="end"
+                    app:layout_constraintStart_toEndOf="@id/iv_payment_product"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="@id/iv_payment_product">
+
+                    <TextView
+                        android:id="@+id/tv_payment_product_qty"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:maxLines="1"
+                        android:text="x2"
+                        style="@style/label_medium"
+                        android:textColor="@color/black_300"
+                        android:textAlignment="textEnd"/>
+
+                    <TextView
+                        android:id="@+id/tv_payment_product_price"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:maxLines="1"
+                        android:text="Rp150.000"
+                        style="@style/label_medium"
+                        android:textAlignment="textEnd"/>
+
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tv_see_more_payment"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:focusable="true"
+                    android:text="Lihat 3 produk lainnya"
+                    android:gravity="center"
+                    style="@style/label_small"
+                    android:fontFamily="@font/dmsans_italic"
+                    android:textColor="@color/black_300"
+                    app:layout_constraintTop_toBottomOf="@id/iv_payment_product"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:layout_marginVertical="8dp"
+                    android:clickable="true"
+                    android:visibility="gone"/>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/black_50"/>
+
+            <!-- Total Price -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingVertical="8dp">
+
+                <TextView
+                    android:id="@+id/tv_payment_qty"
+                    style="@style/label_large"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:text="2 produk" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_alignParentEnd="true">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Total:"
+                        style="@style/label_large_prominent"
+                        android:textAlignment="textEnd"/>
+
+                    <TextView
+                        android:id="@+id/tv_payment_price"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Rp300.000"
+                        style="@style/label_large_prominent"
+                        android:textColor="@color/blue_500"
+                        android:layout_marginStart="5dp"
+                        android:textAlignment="textEnd"/>
+
+                </LinearLayout>
+
+            </RelativeLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/black_50"/>
+
+            <!-- Action Buttons -->
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="13dp"
+                android:gravity="center_vertical">
+
+                <LinearLayout
+                    android:layout_width="158dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_alignParentStart="true">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:src="@drawable/ic_person"
+                            app:tint="@color/black_500" />
+
+                        <TextView
+                            android:id="@+id/tv_payment_customer"
+                            style="@style/label_small"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:maxLines="1"
+                            android:layout_marginStart="4dp"
+                            android:textColor="@color/black_500"
+                            android:text="Gracia Hotmauli"/>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:src="@drawable/ic_location" />
+
+                        <TextView
+                            android:id="@+id/tv_payment_location"
+                            style="@style/label_small"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:maxLines="1"
+                            android:layout_marginStart="4dp"
+                            android:textColor="@color/black_500"
+                            android:text="Serang"/>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/btn_confirm_payment"
+                    style="@style/button.small.active.medium"
+                    android:text="Konfirmasi Pembayaran"
+                    android:layout_alignParentEnd="true"/>
+
+            </RelativeLayout>
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="8dp"
+            android:background="@color/black_50"
+            android:layout_marginTop="16dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/layout_payment_detail"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_shipments"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:paddingTop="16dp">
+
+        <!-- Shipment Header -->
+        <View
+            android:id="@+id/shape_shipment_order_title"
+            android:layout_width="4dp"
+            android:layout_height="32dp"
+            android:background="@drawable/shape_sells_title"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <LinearLayout
+            android:id="@+id/layout_shipment_order_header"
+            android:layout_width="220dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            app:layout_constraintStart_toStartOf="@id/shape_shipment_order_title"
+            app:layout_constraintTop_toTopOf="parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_shipment_title"
+                style="@style/label_medium_prominent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:text="Pesanan Perlu Dikirim"/>
+
+            <TextView
+                android:id="@+id/tv_shipment_number"
+                style="@style/label_small"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:textColor="@color/black_300"
+                android:text="No. Pesanan: 123456789"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:orientation="vertical"
+            android:layout_marginEnd="16dp"
+            android:gravity="end">
+
+            <TextView
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                style="@style/label_small"
+                android:textAlignment="textEnd"
+                android:text="Kirim sebelum:"
+                android:textColor="@color/black_300" />
+
+            <TextView
+                android:id="@+id/tv_shipment_due"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="25 Okt; 23.59"
+                style="@style/label_small"
+                android:paddingHorizontal="4dp"
+                android:textColor="@color/darkblue_500"
+                android:background="@drawable/bg_product_active" />
+
+        </LinearLayout>
+
+        <!-- Order Detail -->
+        <LinearLayout
+            android:id="@+id/layout_shipment_detail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/layout_shipment_order_header"
+            android:paddingHorizontal="16dp"
+            android:layout_marginTop="8dp"
+            android:orientation="vertical">
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/black_50"/>
+
+            <!-- Product Detail -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/layout_shipment_product_detail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingVertical="12dp">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/iv_shipment_product"
+                    android:layout_width="95dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/placeholder_image"
+                    android:scaleType="centerCrop"
+                    android:contentDescription="Shipment Product Image"
+                    app:shapeAppearanceOverlay="@style/store_product_image"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"/>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginStart="13dp"
+                    app:layout_constraintStart_toEndOf="@id/iv_shipment_product"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <TextView
+                        android:id="@+id/tv_shipment_product_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:maxLines="1"
+                        android:text="Jaket Pink Fuschia"
+                        style="@style/label_medium_prominent"/>
+
+                    <!--                <TextView-->
+                    <!--                    android:id="@+id/tv_shipment_product_variant"-->
+                    <!--                    android:layout_width="match_parent"-->
+                    <!--                    android:layout_height="wrap_content"-->
+                    <!--                    android:maxLines="1"-->
+                    <!--                    android:text="S"-->
+                    <!--                    style="@style/label_medium"-->
+                    <!--                    android:textColor="@color/black_300"/>-->
+
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tv_shipment_product_qty"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:maxLines="1"
+                    android:text="x2"
+                    style="@style/label_medium"
+                    android:layout_marginStart="13dp"
+                    android:gravity="end"
+                    android:textAlignment="textEnd"
+                    app:layout_constraintStart_toEndOf="@id/iv_shipment_product"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="@id/iv_shipment_product"/>
+
+                <TextView
+                    android:id="@+id/tv_see_more_shipment"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:focusable="true"
+                    android:text="Lihat 3 produk lainnya"
+                    android:gravity="center"
+                    style="@style/label_small"
+                    android:fontFamily="@font/dmsans_italic"
+                    android:textColor="@color/black_300"
+                    app:layout_constraintTop_toBottomOf="@id/iv_shipment_product"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:layout_marginVertical="8dp"
+                    android:clickable="true"
+                    android:visibility="gone"/>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/black_50"/>
+
+            <!-- Action Buttons -->
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="13dp"
+                android:gravity="center_vertical">
+
+                <LinearLayout
+                    android:layout_width="158dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_alignParentStart="true">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:src="@drawable/ic_person"
+                            app:tint="@color/black_500" />
+
+                        <TextView
+                            android:id="@+id/tv_shipment_customer"
+                            style="@style/label_small"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:maxLines="1"
+                            android:layout_marginStart="4dp"
+                            android:textColor="@color/black_500"
+                            android:text="Gracia Hotmauli"/>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:src="@drawable/ic_location" />
+
+                        <TextView
+                            android:id="@+id/tv_shipment_location"
+                            style="@style/label_small"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:maxLines="1"
+                            android:layout_marginStart="4dp"
+                            android:textColor="@color/black_500"
+                            android:text="Serang"/>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/btn_confirm_shipment"
+                    style="@style/button.small.active.medium"
+                    android:text="Kirim Pesanan"
+                    android:layout_alignParentEnd="true"/>
+
+            </RelativeLayout>
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="8dp"
+            android:background="@color/black_50"
+            android:layout_marginTop="16dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/layout_shipment_detail"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</LinearLayout>

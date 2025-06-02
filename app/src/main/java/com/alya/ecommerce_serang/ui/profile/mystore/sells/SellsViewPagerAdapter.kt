@@ -10,14 +10,14 @@ class SellsViewPagerAdapter(
 
     // Define all possible sells statuses - keeping your original list
     private val sellsStatuses = listOf(
-        "all",          // Position 0: "Semua Pesanan"
-        "pending",      // Position 1: "Menunggu Tagihan"
-        "unpaid",       // Position 2: "Konfirmasi Bayar"
-        "paid",         // Position 3: "Diproses"
-        "processed",    // Position 4: "Sudah Dibayar"
-        "shipped",      // Position 5: "Dikirim"
-        "completed",    // Position 6: "Selesai"
-        "canceled"      // Position 7: "Dibatalkan"
+        "all",
+        "unpaid",
+        "paid",
+        "processed",
+        "shipped",
+        "delivered",
+        "completed",
+        "canceled"
     )
 
     override fun getItemCount(): Int = sellsStatuses.size
