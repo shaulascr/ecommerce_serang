@@ -2,8 +2,8 @@ package com.alya.ecommerce_serang.data.repository
 
 import android.util.Log
 import com.alya.ecommerce_serang.data.api.dto.PaymentConfirmRequest
-import com.alya.ecommerce_serang.data.api.response.store.orders.OrderListResponse
-import com.alya.ecommerce_serang.data.api.response.store.orders.PaymentConfirmationResponse
+import com.alya.ecommerce_serang.data.api.response.store.sells.OrderListResponse
+import com.alya.ecommerce_serang.data.api.response.store.sells.PaymentConfirmationResponse
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
 
 class SellsRepository(private val apiService: ApiService) {

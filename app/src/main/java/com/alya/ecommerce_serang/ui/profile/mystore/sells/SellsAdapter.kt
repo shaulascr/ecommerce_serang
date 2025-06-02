@@ -11,12 +11,11 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.alya.ecommerce_serang.BuildConfig.BASE_URL
 import com.alya.ecommerce_serang.R
-import com.alya.ecommerce_serang.data.api.response.store.orders.OrdersItem
+import com.alya.ecommerce_serang.data.api.response.store.sells.OrdersItem
 import com.alya.ecommerce_serang.ui.profile.mystore.sells.payment.DetailPaymentActivity
 import com.alya.ecommerce_serang.ui.profile.mystore.sells.shipment.DetailShipmentActivity
 import com.alya.ecommerce_serang.utils.viewmodel.SellsViewModel
 import com.bumptech.glide.Glide
-import com.google.android.material.button.MaterialButton
 import com.google.gson.Gson
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -67,9 +66,9 @@ class SellsAdapter(
         private val layoutPayments: View = itemView.findViewById(R.id.layout_payments)
         private val layoutShipments: View = itemView.findViewById(R.id.layout_shipments)
 
-        private var tvSellsTitle: TextView = itemView.findViewById(R.id.tv_payment_title)
+        private var tvSellsTitle: TextView = itemView.findViewById(R.id.tv_order_sells_title)
         private var tvSellsNumber: TextView = itemView.findViewById(R.id.tv_payment_number)
-        private var tvSellsDueDesc: TextView = itemView.findViewById(R.id.tv_payment_due_desc)
+        private var tvSellsDueDesc: TextView = itemView.findViewById(R.id.tv_order_sells_desc)
         private var tvSellsDue: TextView = itemView.findViewById(R.id.tv_payment_due)
         private var tvSellsLocation: TextView = itemView.findViewById(R.id.tv_payment_location)
         private var tvSellsCustomer: TextView = itemView.findViewById(R.id.tv_payment_customer)

@@ -1,5 +1,6 @@
 package com.alya.ecommerce_serang.ui.profile.mystore.sells
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -9,15 +10,18 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.alya.ecommerce_serang.data.api.response.store.orders.OrdersItem
+import com.alya.ecommerce_serang.data.api.response.store.sells.OrdersItem
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.repository.Result
 import com.alya.ecommerce_serang.data.repository.SellsRepository
 import com.alya.ecommerce_serang.databinding.FragmentSellsListBinding
 import com.alya.ecommerce_serang.ui.order.address.ViewState
+import com.alya.ecommerce_serang.ui.profile.mystore.sells.payment.DetailPaymentActivity
+import com.alya.ecommerce_serang.ui.profile.mystore.sells.shipment.DetailShipmentActivity
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
 import com.alya.ecommerce_serang.utils.viewmodel.SellsViewModel
+import com.google.gson.Gson
 
 class SellsListFragment : Fragment() {
 
@@ -169,9 +173,14 @@ class SellsListFragment : Fragment() {
 
     private fun navigateToSellsDetail(order: OrdersItem) {
         Log.d(TAG, "Navigating to sells detail for order: ${order.orderId}")
-        // Navigate to order detail from seller's perspective
-        // Seller views customer's order details to manage fulfillment
-        Toast.makeText(requireContext(), "Customer Order ID: ${order.orderId}", Toast.LENGTH_SHORT).show()
+        val context = requireContext()
+        val intent = when (status) {
+            "paid" -> Intent(context, DetailPaymentActivity::class.java)
+            "processed" -> Intent(context, DetailShipmentActivity::class.java)
+            else -> Intent(context, DetailSellsActivity::class.java)
+        }
+        intent.putExtra("sells_data", Gson().toJson(order))
+        context.startActivity(intent)
     }
 
     override fun onDestroyView() {

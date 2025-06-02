@@ -66,7 +66,7 @@ import com.alya.ecommerce_serang.data.api.response.order.ComplaintResponse
 import com.alya.ecommerce_serang.data.api.response.order.CompletedOrderResponse
 import com.alya.ecommerce_serang.data.api.response.product.CreateSearchResponse
 import com.alya.ecommerce_serang.data.api.response.product.SearchHistoryResponse
-import com.alya.ecommerce_serang.data.api.response.store.orders.PaymentConfirmationResponse
+import com.alya.ecommerce_serang.data.api.response.store.sells.PaymentConfirmationResponse
 import com.alya.ecommerce_serang.data.api.response.store.product.CreateProductResponse
 import com.alya.ecommerce_serang.data.api.response.store.product.DeleteProductResponse
 import com.alya.ecommerce_serang.data.api.response.store.product.UpdateProductResponse
@@ -325,7 +325,7 @@ interface ApiService {
     @GET("mystore/orders/{status}")
     suspend fun getSellList(
         @Path("status") status: String
-    ): Response<com.alya.ecommerce_serang.data.api.response.store.orders.OrderListResponse>
+    ): Response<com.alya.ecommerce_serang.data.api.response.store.sells.OrderListResponse>
 
     @PUT("store/order/update")
     suspend fun confirmOrder(
@@ -336,7 +336,7 @@ interface ApiService {
     suspend fun updateOrder(
         @Query("order_id") orderId: Int?,
         @Query("status") status: String
-    ): Response<com.alya.ecommerce_serang.data.api.response.store.orders.UpdateOrderItemResponse>
+    ): Response<com.alya.ecommerce_serang.data.api.response.store.sells.UpdateOrderItemResponse>
 
     @Multipart
     @POST("addcomplaint")

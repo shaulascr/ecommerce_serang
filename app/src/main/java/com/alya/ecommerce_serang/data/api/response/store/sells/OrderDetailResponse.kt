@@ -1,50 +1,17 @@
-package com.alya.ecommerce_serang.data.api.response.store.orders
+package com.alya.ecommerce_serang.data.api.response.store.sells
 
 import com.google.gson.annotations.SerializedName
 
-data class OrderListResponse(
+data class OrderDetailResponse(
 
 	@field:SerializedName("orders")
-	val orders: List<OrdersItem>,
+	val orders: Orders? = null,
 
 	@field:SerializedName("message")
 	val message: String? = null
 )
 
-data class OrderItemsItem(
-
-	@field:SerializedName("order_item_id")
-	val orderItemId: Int? = null,
-
-	@field:SerializedName("review_id")
-	val reviewId: Any? = null,
-
-	@field:SerializedName("quantity")
-	val quantity: Int? = null,
-
-	@field:SerializedName("price")
-	val price: Int? = null,
-
-	@field:SerializedName("subtotal")
-	val subtotal: Int? = null,
-
-	@field:SerializedName("product_image")
-	val productImage: String? = null,
-
-	@field:SerializedName("product_id")
-	val productId: Int? = null,
-
-	@field:SerializedName("store_name")
-	val storeName: String? = null,
-
-	@field:SerializedName("product_price")
-	val productPrice: Int? = null,
-
-	@field:SerializedName("product_name")
-	val productName: String? = null
-)
-
-data class OrdersItem(
+data class Orders(
 
 	@field:SerializedName("receipt_num")
 	val receiptNum: Any? = null,
@@ -53,7 +20,7 @@ data class OrdersItem(
 	val paymentUploadAt: Any? = null,
 
 	@field:SerializedName("latitude")
-	val latitude: String? = null,
+	val latitude: Any? = null,
 
 	@field:SerializedName("pay_info_name")
 	val payInfoName: String? = null,
@@ -63,6 +30,9 @@ data class OrdersItem(
 
 	@field:SerializedName("voucher_code")
 	val voucherCode: Any? = null,
+
+	@field:SerializedName("order_status")
+	val orderStatus: String? = null,
 
 	@field:SerializedName("updated_at")
 	val updatedAt: String? = null,
@@ -74,13 +44,13 @@ data class OrdersItem(
 	val street: String? = null,
 
 	@field:SerializedName("cancel_date")
-	val cancelDate: String? = null,
+	val cancelDate: Any? = null,
 
 	@field:SerializedName("payment_evidence")
-	val paymentEvidence: String,
+	val paymentEvidence: Any? = null,
 
 	@field:SerializedName("longitude")
-	val longitude: String? = null,
+	val longitude: Any? = null,
 
 	@field:SerializedName("shipment_status")
 	val shipmentStatus: String? = null,
@@ -106,20 +76,17 @@ data class OrdersItem(
 	@field:SerializedName("address_id")
 	val addressId: Int? = null,
 
-	@field:SerializedName("is_negotiable")
-	val isNegotiable: Boolean? = null,
-
 	@field:SerializedName("payment_amount")
 	val paymentAmount: Any? = null,
 
 	@field:SerializedName("cancel_reason")
-	val cancelReason: String? = null,
-
-	@field:SerializedName("user_id")
-	val userId: Int? = null,
+	val cancelReason: Any? = null,
 
 	@field:SerializedName("total_amount")
 	val totalAmount: String? = null,
+
+	@field:SerializedName("user_id")
+	val userId: Int? = null,
 
 	@field:SerializedName("province_id")
 	val provinceId: Int? = null,
@@ -152,13 +119,10 @@ data class OrdersItem(
 	val postalCode: String? = null,
 
 	@field:SerializedName("order_id")
-	val orderId: Int,
+	val orderId: Int? = null,
 
 	@field:SerializedName("username")
 	val username: String? = null,
-
-	@field:SerializedName("status")
-	val status: String? = null,
 
 	@field:SerializedName("city_id")
 	val cityId: Int? = null
