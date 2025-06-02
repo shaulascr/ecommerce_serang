@@ -42,14 +42,14 @@ class SellsFragment : Fragment() {
         // Connect TabLayout with ViewPager2
         TabLayoutMediator(binding.tabLayoutSells, binding.viewPagerSells) { tab, position ->
             tab.text = when (position) {
-                0 -> getString(R.string.all_orders)           // "Semua Pesanan"
-                1 -> getString(R.string.pending_orders)       // "Menunggu Tagihan"
-                2 -> getString(R.string.unpaid_orders)        // "Konfirmasi Bayar"
-                3 -> getString(R.string.paid_orders)          // "Diproses"
-                4 -> getString(R.string.processed_orders)     // "Sudah Dibayar"
-                5 -> getString(R.string.shipped_orders)       // "Dikirim"
-                6 -> getString(R.string.completed_orders)     // "Selesai"
-                7 -> getString(R.string.canceled_orders)      // "Dibatalkan"
+                0 -> getString(R.string.all_sells)
+                1 -> getString(R.string.unpaid_sells)
+                2 -> getString(R.string.paid_sells)
+                3 -> getString(R.string.processed_sells)
+                4 -> getString(R.string.shipped_sells)
+                5 -> getString(R.string.delivered_sells)
+                6 -> getString(R.string.completed_sells)
+                7 -> getString(R.string.canceled_sells)
                 else -> "Tab $position"
             }
         }.attach()

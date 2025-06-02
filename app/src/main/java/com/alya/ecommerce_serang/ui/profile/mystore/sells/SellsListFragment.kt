@@ -33,12 +33,10 @@ class SellsListFragment : Fragment() {
         }
     }
     private lateinit var sellsAdapter: SellsAdapter
-
     private var status: String = "all"
 
     companion object {
         private const val TAG = "SellsListFragment"
-
         private const val ARG_STATUS = "status"
 
         fun newInstance(status: String): SellsListFragment {
@@ -123,7 +121,7 @@ class SellsListFragment : Fragment() {
                         Log.d(TAG, "✅ Data is available: ${result.data.size} items")
                         binding.tvEmptyState.visibility = View.GONE
                         binding.rvSells.visibility = View.VISIBLE
-// Log first few items for debugging
+
                         result.data.take(3).forEachIndexed { index, order ->
                             Log.d(TAG, "Order ${index + 1}: ID=${order.orderId}, Status=${order.status}, Customer=${order.username}")
                         }
