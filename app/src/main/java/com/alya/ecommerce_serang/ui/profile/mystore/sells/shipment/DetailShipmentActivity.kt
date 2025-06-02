@@ -3,7 +3,7 @@ package com.alya.ecommerce_serang.ui.profile.mystore.sells.shipment
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.alya.ecommerce_serang.data.api.response.store.orders.OrdersItem
+import com.alya.ecommerce_serang.data.api.response.store.sells.OrdersItem
 import com.alya.ecommerce_serang.databinding.ActivityDetailShipmentBinding
 import com.alya.ecommerce_serang.ui.profile.mystore.sells.SellsProductAdapter
 import com.google.gson.Gson

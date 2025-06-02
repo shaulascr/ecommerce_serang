@@ -48,6 +48,13 @@ class MyStoreActivity : AppCompatActivity() {
 
         enableEdgeToEdge()
 
+        binding.header.headerTitle.text = "Toko Saya"
+
+        binding.header.headerLeftIcon.setOnClickListener {
+            onBackPressed()
+            finish()
+        }
+
         viewModel.loadMyStore()
 
         viewModel.myStoreProfile.observe(this){ user ->

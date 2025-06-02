@@ -18,7 +18,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.alya.ecommerce_serang.BuildConfig.BASE_URL
 import com.alya.ecommerce_serang.R
-import com.alya.ecommerce_serang.data.api.response.store.orders.OrdersItem
+import com.alya.ecommerce_serang.data.api.response.store.sells.OrdersItem
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.repository.SellsRepository
 import com.alya.ecommerce_serang.databinding.ActivityDetailPaymentBinding
@@ -106,7 +106,7 @@ class DetailPaymentActivity : AppCompatActivity() {
     }
 
     private fun setupPaymentEvidenceViewer() {
-        binding.tvPaymentDueDesc.setOnClickListener {
+        binding.tvOrderSellsDesc.setOnClickListener {
             val paymentEvidence = sells.paymentEvidence
             if (!paymentEvidence.isNullOrEmpty()) {
                 showPaymentEvidenceDialog(paymentEvidence)

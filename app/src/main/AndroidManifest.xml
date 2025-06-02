@@ -30,6 +30,9 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".ui.profile.mystore.sells.DetailSellsActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.product.category.CategoryProductsActivity"
             android:exported="false" />
         <activity
@@ -55,17 +58,10 @@
             android:name=".ui.profile.mystore.sells.shipment.ShipmentConfirmationActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.profile.mystore.profile.EditStoreProfileActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
             android:name=".ui.profile.mystore.sells.shipment.DetailShipmentActivity"
             android:exported="false" />
         <activity
             android:name=".ui.profile.mystore.sells.payment.DetailPaymentActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.profile.mystore.sells.order.DetailOrderActivity"
             android:exported="false" />
         <activity
             android:name=".ui.chat.ChatActivity"

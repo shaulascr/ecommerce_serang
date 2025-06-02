@@ -7,8 +7,9 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.alya.ecommerce_serang.R
-import com.alya.ecommerce_serang.data.api.response.store.orders.OrderItemsItem
+import com.alya.ecommerce_serang.data.api.response.store.sells.OrderItemsItem
 import com.bumptech.glide.Glide
+import java.util.Locale
 
 class SellsProductAdapter : RecyclerView.Adapter<SellsProductAdapter.ProductViewHolder>() {
 
@@ -30,9 +31,8 @@ class SellsProductAdapter : RecyclerView.Adapter<SellsProductAdapter.ProductView
         fun bind(item: OrderItemsItem) {
             tvName.text = item.productName
             tvQty.text = "${item.quantity} x "
-            tvPrice.text = "Rp${item.price}"
-            val total = (item.quantity ?: 1) * (item.price ?: 0)
-            tvTotal.text = "Rp$total"
+            tvPrice.text = formatPrice(item.price.toString())
+            tvTotal.text = formatPrice(item.subtotal.toString())
             Glide.with(ivProduct.context)
                 .load(item.productImage)
                 .placeholder(R.drawable.placeholder_image)
@@ -50,5 +50,11 @@ class SellsProductAdapter : RecyclerView.Adapter<SellsProductAdapter.ProductView
 
     override fun onBindViewHolder(holder: ProductViewHolder, position: Int) {
         items[position]?.let { holder.bind(it) }
+    }
+
+    private fun formatPrice(price: String): String {
+        val priceDouble = price.toDoubleOrNull() ?: 0.0
+        val formattedPrice = String.format(Locale("id", "ID"), "Rp%,.0f", priceDouble)
+        return formattedPrice
     }
 }

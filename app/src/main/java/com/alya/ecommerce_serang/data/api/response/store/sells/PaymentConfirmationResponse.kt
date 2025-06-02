@@ -1,4 +1,4 @@
-package com.alya.ecommerce_serang.data.api.response.store.orders
+package com.alya.ecommerce_serang.data.api.response.store.sells
 
 import com.google.gson.annotations.SerializedName
 

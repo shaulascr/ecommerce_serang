@@ -41,7 +41,7 @@
                     app:layout_constraintTop_toTopOf="parent"/>
 
                 <RelativeLayout
-                    android:id="@+id/layout_payment_order_header"
+                    android:id="@+id/layout_order_sells_header"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="12dp"
@@ -51,7 +51,7 @@
                     android:gravity="center">
 
                     <TextView
-                        android:id="@+id/tv_payment_title"
+                        android:id="@+id/tv_order_sells_title"
                         style="@style/label_large_prominent"
                         android:layout_width="220dp"
                         android:layout_height="wrap_content"
@@ -59,7 +59,7 @@
                         android:text="Pesanan Telah Dibayar"/>
 
                     <TextView
-                        android:id="@+id/tv_payment_due_desc"
+                        android:id="@+id/tv_order_sells_desc"
                         android:layout_width="150dp"
                         android:layout_height="wrap_content"
                         android:focusable="true"
@@ -77,11 +77,11 @@
 
                 <!-- Order Detail -->
                 <LinearLayout
-                    android:id="@+id/layout_payment_detail"
+                    android:id="@+id/layout_sells_detail"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/layout_payment_order_header"
+                    app:layout_constraintTop_toBottomOf="@id/layout_order_sells_header"
                     android:paddingHorizontal="16dp"
                     android:layout_marginTop="8dp"
                     android:orientation="vertical">
@@ -191,7 +191,7 @@
                     android:background="@color/black_50"
                     android:layout_marginTop="16dp"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/layout_payment_detail"/>
+                    app:layout_constraintTop_toBottomOf="@id/layout_sells_detail"/>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
