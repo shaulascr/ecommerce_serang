@@ -6,8 +6,9 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.alya.ecommerce_serang.BuildConfig.BASE_URL
 import com.alya.ecommerce_serang.R
-import com.alya.ecommerce_serang.data.api.response.store.sells.OrderItemsItem
+import com.alya.ecommerce_serang.data.api.dto.OrderItemsItem
 import com.bumptech.glide.Glide
 import java.util.Locale
 
@@ -33,9 +34,18 @@ class SellsProductAdapter : RecyclerView.Adapter<SellsProductAdapter.ProductView
             tvQty.text = "${item.quantity} x "
             tvPrice.text = formatPrice(item.price.toString())
             tvTotal.text = formatPrice(item.subtotal.toString())
+
+            val fullImageUrl = when (val img = item.productImage) {
+                is String -> {
+                    if (img.startsWith("/")) BASE_URL + img.substring(1) else img
+                }
+                else -> R.drawable.placeholder_image
+            }
+
             Glide.with(ivProduct.context)
-                .load(item.productImage)
+                .load(fullImageUrl)
                 .placeholder(R.drawable.placeholder_image)
+                .error(R.drawable.placeholder_image)
                 .into(ivProduct)
         }
     }

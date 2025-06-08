@@ -5,12 +5,15 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.alya.ecommerce_serang.data.api.dto.OrderItemsItem
 import com.alya.ecommerce_serang.data.api.dto.PaymentConfirmRequest
+import com.alya.ecommerce_serang.data.api.response.store.sells.Orders
 import com.alya.ecommerce_serang.data.api.response.store.sells.OrdersItem
 import com.alya.ecommerce_serang.data.api.response.store.sells.PaymentConfirmationResponse
 import com.alya.ecommerce_serang.data.repository.Result
 import com.alya.ecommerce_serang.data.repository.SellsRepository
 import com.alya.ecommerce_serang.ui.order.address.ViewState
+import com.alya.ecommerce_serang.ui.order.history.HistoryViewModel
 import kotlinx.coroutines.launch
 
 class SellsViewModel(private val repository: SellsRepository) : ViewModel() {
@@ -22,8 +25,27 @@ class SellsViewModel(private val repository: SellsRepository) : ViewModel() {
     private val _sells = MutableLiveData<ViewState<List<OrdersItem>>>()
     val sells: LiveData<ViewState<List<OrdersItem>>> = _sells
 
+    private val _sellDetails = MutableLiveData<Orders?>()
+    val sellDetails: LiveData<Orders?> get() = _sellDetails
+
     private val _confirmPaymentStore = MutableLiveData<Result<PaymentConfirmationResponse>>()
     val confirmPaymentStore: LiveData<Result<PaymentConfirmationResponse>> = _confirmPaymentStore
+
+    // LiveData untuk OrderItems
+    private val _orderItems = MutableLiveData<List<OrderItemsItem>?>()
+    val orderItems: LiveData<List<OrderItemsItem>?> get() = _orderItems
+
+    private val _isLoading = MutableLiveData<Boolean>()
+    val isLoading: LiveData<Boolean> = _isLoading
+
+    private val _message = MutableLiveData<String>()
+    val message: LiveData<String> = _message
+
+    private val _isSuccess = MutableLiveData<Boolean>()
+    val isSuccess: LiveData<Boolean> = _isSuccess
+
+    private val _error = MutableLiveData<String>()
+    val error: LiveData<String> get() = _error
 
     fun getSellList(status: String) {
         Log.d(TAG, "========== Starting getSellList ==========")
@@ -48,15 +70,15 @@ class SellsViewModel(private val repository: SellsRepository) : ViewModel() {
 
                         // Log the entire result data structure
                         Log.d(TAG, "Raw result data: ${result.data}")
-                        Log.d(TAG, "Result data class: ${result.data?.javaClass?.simpleName}")
+                        Log.d(TAG, "Result data class: ${result.data.javaClass.simpleName}")
 
                         val orders = result.data.orders
                         Log.d(TAG, "Extracted orders list: $orders")
-                        Log.d(TAG, "Orders list class: ${orders?.javaClass?.simpleName}")
-                        Log.d(TAG, "Orders count: ${orders?.size ?: 0}")
+                        Log.d(TAG, "Orders list class: ${orders.javaClass.simpleName}")
+                        Log.d(TAG, "Orders count: ${orders.size}")
 
                         // Check if orders list is null or empty
-                        if (orders == null) {
+                        if (false) {
                             Log.w(TAG, "⚠️ Orders list is NULL")
                         } else if (orders.isEmpty()) {
                             Log.w(TAG, "⚠️ Orders list is EMPTY")
@@ -67,17 +89,17 @@ class SellsViewModel(private val repository: SellsRepository) : ViewModel() {
                             orders.forEachIndexed { index, order ->
                                 Log.d(TAG, "--- Order ${index + 1}/${orders.size} ---")
                                 Log.d(TAG, "  Order object: $order")
-                                Log.d(TAG, "  Order class: ${order?.javaClass?.simpleName}")
-                                Log.d(TAG, "  - ID: ${order?.orderId}")
-                                Log.d(TAG, "  - Status: '${order?.status}'")
-                                Log.d(TAG, "  - Customer: '${order?.username}'")
-                                Log.d(TAG, "  - Total: ${order?.totalAmount}")
-                                Log.d(TAG, "  - Items count: ${order?.orderItems?.size ?: 0}")
-                                Log.d(TAG, "  - Created at: ${order?.createdAt}")
-                                Log.d(TAG, "  - Updated at: ${order?.updatedAt}")
+                                Log.d(TAG, "  Order class: ${order.javaClass.simpleName}")
+                                Log.d(TAG, "  - ID: ${order.orderId}")
+                                Log.d(TAG, "  - Status: '${order.status}'")
+                                Log.d(TAG, "  - Customer: '${order.username}'")
+                                Log.d(TAG, "  - Total: ${order.totalAmount}")
+                                Log.d(TAG, "  - Items count: ${order.orderItems?.size ?: 0}")
+                                Log.d(TAG, "  - Created at: ${order.createdAt}")
+                                Log.d(TAG, "  - Updated at: ${order.updatedAt}")
 
                                 // Log order items if available
-                                order?.orderItems?.let { items ->
+                                order.orderItems?.let { items ->
                                     Log.d(TAG, "  Order items:")
                                     items.forEachIndexed { itemIndex, item ->
                                         Log.d(TAG, "    Item ${itemIndex + 1}: ${item?.productName} (Qty: ${item?.quantity})")
@@ -87,8 +109,8 @@ class SellsViewModel(private val repository: SellsRepository) : ViewModel() {
                         }
 
                         // Set the ViewState to Success
-                        _sells.value = ViewState.Success(orders ?: emptyList())
-                        Log.d(TAG, "✅ ViewState.Success set with ${orders?.size ?: 0} orders")
+                        _sells.value = ViewState.Success(orders)
+                        Log.d(TAG, "✅ ViewState.Success set with ${orders.size} orders")
                     }
 
                     is Result.Error -> {
@@ -123,6 +145,28 @@ class SellsViewModel(private val repository: SellsRepository) : ViewModel() {
         }
 
         Log.d(TAG, "========== getSellList method completed ==========")
+    }
+
+    fun getSellDetails(orderId: Int) {
+        Log.d(TAG, "========== Starting getSellDetails ==========")
+        Log.d(TAG, "Fetching details for order ID: $orderId")
+        _isLoading.value = true
+        viewModelScope.launch {
+            try {
+                val response = repository.getSellDetails(orderId)
+                if (response != null) {
+                    _sellDetails.value = response.orders
+                    _orderItems.value = response.orders?.orderItems?.filterNotNull()
+                } else {
+                    _error.value = "Gagal memuat detail pesanan"
+                }
+            } catch (e: Exception) {
+                _error.value = "Terjadi kesalahan: ${e.message}"
+                Log.e(SellsViewModel.Companion.TAG, "Error fetching order details", e)
+            } finally {
+                _isLoading.value = false
+            }
+        }
     }
 
     fun updateOrderStatus(orderId: Int?, status: String) {

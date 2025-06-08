@@ -46,8 +46,7 @@
                     android:layout_marginStart="12dp"
                     app:layout_constraintStart_toStartOf="@id/shape_payment_order_title"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    android:gravity="center">
+                    app:layout_constraintTop_toTopOf="parent">
 
                     <TextView
                         android:id="@+id/tv_order_sells_title"
@@ -70,7 +69,8 @@
                         android:textAlignment="textEnd"
                         android:textColor="@color/blue_500"
                         android:clickable="true"
-                        android:layout_marginEnd="16dp"/>
+                        android:layout_marginEnd="16dp"
+                        android:visibility="gone"/>
 
                 </RelativeLayout>
 
@@ -376,20 +376,5 @@
         </LinearLayout>
 
     </ScrollView>
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:orientation="horizontal"
-        android:gravity="bottom">
-
-        <Button
-            android:id="@+id/btn_confirm_payment"
-            style="@style/button.large.active.long"
-            android:text="Kirim Pesanan"
-            android:layout_alignParentEnd="true"/>
-
-    </RelativeLayout>
 
 </LinearLayout>

@@ -1,5 +1,6 @@
 package com.alya.ecommerce_serang.data.api.response.store.sells
 
+import com.alya.ecommerce_serang.data.api.dto.OrderItemsItem
 import com.google.gson.annotations.SerializedName
 
 data class OrderDetailResponse(
@@ -17,7 +18,7 @@ data class Orders(
 	val receiptNum: Any? = null,
 
 	@field:SerializedName("payment_upload_at")
-	val paymentUploadAt: Any? = null,
+	val paymentUploadAt: String? = null,
 
 	@field:SerializedName("latitude")
 	val latitude: Any? = null,
@@ -44,10 +45,10 @@ data class Orders(
 	val street: String? = null,
 
 	@field:SerializedName("cancel_date")
-	val cancelDate: Any? = null,
+	val cancelDate: String? = null,
 
 	@field:SerializedName("payment_evidence")
-	val paymentEvidence: Any? = null,
+	val paymentEvidence: String? = null,
 
 	@field:SerializedName("longitude")
 	val longitude: Any? = null,
@@ -71,22 +72,25 @@ data class Orders(
 	val voucherName: Any? = null,
 
 	@field:SerializedName("payment_status")
-	val paymentStatus: Any? = null,
+	val paymentStatus: String? = null,
 
 	@field:SerializedName("address_id")
 	val addressId: Int? = null,
 
 	@field:SerializedName("payment_amount")
-	val paymentAmount: Any? = null,
+	val paymentAmount: String? = null,
 
 	@field:SerializedName("cancel_reason")
-	val cancelReason: Any? = null,
+	val cancelReason: String? = null,
 
 	@field:SerializedName("total_amount")
 	val totalAmount: String? = null,
 
 	@field:SerializedName("user_id")
 	val userId: Int? = null,
+
+	@field:SerializedName("phone")
+	val phone: String? = null,
 
 	@field:SerializedName("province_id")
 	val provinceId: Int? = null,
@@ -102,6 +106,9 @@ data class Orders(
 
 	@field:SerializedName("pay_info_num")
 	val payInfoNum: String? = null,
+
+	@field:SerializedName("recipient")
+	val recipient: String? = null,
 
 	@field:SerializedName("shipment_price")
 	val shipmentPrice: String? = null,
