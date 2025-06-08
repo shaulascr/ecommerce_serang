@@ -327,6 +327,11 @@ interface ApiService {
         @Path("status") status: String
     ): Response<com.alya.ecommerce_serang.data.api.response.store.sells.OrderListResponse>
 
+    @GET("order/detail/{id}")
+    suspend fun getSellDetail(
+        @Path("id") orderId: Int
+    ): Response<com.alya.ecommerce_serang.data.api.response.store.sells.OrderDetailResponse>
+
     @PUT("store/order/update")
     suspend fun confirmOrder(
         @Body confirmOrder : CompletedOrderRequest

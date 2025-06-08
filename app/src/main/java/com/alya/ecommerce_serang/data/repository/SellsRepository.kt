@@ -2,6 +2,7 @@ package com.alya.ecommerce_serang.data.repository
 
 import android.util.Log
 import com.alya.ecommerce_serang.data.api.dto.PaymentConfirmRequest
+import com.alya.ecommerce_serang.data.api.response.store.sells.OrderDetailResponse
 import com.alya.ecommerce_serang.data.api.response.store.sells.OrderListResponse
 import com.alya.ecommerce_serang.data.api.response.store.sells.PaymentConfirmationResponse
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
@@ -29,6 +30,16 @@ class SellsRepository(private val apiService: ApiService) {
         } catch (e: Exception) {
             Log.e("SellsRepository", "Exception Add Evidence ", e)
             Result.Error(e)
+        }
+    }
+
+    suspend fun getSellDetails(orderId: Int): OrderDetailResponse? {
+        return try {
+            val response = apiService.getSellDetail(orderId)
+            if (response.isSuccessful) response.body() else null
+        } catch (e: Exception) {
+            Log.e("SellsRepository", "Error getting order details", e)
+            null
         }
     }
 

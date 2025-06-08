@@ -1,5 +1,6 @@
 package com.alya.ecommerce_serang.data.api.response.store.sells
 
+import com.alya.ecommerce_serang.data.api.dto.OrderItemsItem
 import com.google.gson.annotations.SerializedName
 
 data class OrderListResponse(
@@ -9,39 +10,6 @@ data class OrderListResponse(
 
 	@field:SerializedName("message")
 	val message: String? = null
-)
-
-data class OrderItemsItem(
-
-	@field:SerializedName("order_item_id")
-	val orderItemId: Int? = null,
-
-	@field:SerializedName("review_id")
-	val reviewId: Any? = null,
-
-	@field:SerializedName("quantity")
-	val quantity: Int? = null,
-
-	@field:SerializedName("price")
-	val price: Int? = null,
-
-	@field:SerializedName("subtotal")
-	val subtotal: Int? = null,
-
-	@field:SerializedName("product_image")
-	val productImage: String? = null,
-
-	@field:SerializedName("product_id")
-	val productId: Int? = null,
-
-	@field:SerializedName("store_name")
-	val storeName: String? = null,
-
-	@field:SerializedName("product_price")
-	val productPrice: Int? = null,
-
-	@field:SerializedName("product_name")
-	val productName: String? = null
 )
 
 data class OrdersItem(
