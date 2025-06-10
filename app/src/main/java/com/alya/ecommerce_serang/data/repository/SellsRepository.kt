@@ -2,10 +2,12 @@ package com.alya.ecommerce_serang.data.repository
 
 import android.util.Log
 import com.alya.ecommerce_serang.data.api.dto.PaymentConfirmRequest
+import com.alya.ecommerce_serang.data.api.response.store.GenericResponse
 import com.alya.ecommerce_serang.data.api.response.store.sells.OrderDetailResponse
 import com.alya.ecommerce_serang.data.api.response.store.sells.OrderListResponse
 import com.alya.ecommerce_serang.data.api.response.store.sells.PaymentConfirmationResponse
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
+import retrofit2.Response
 
 class SellsRepository(private val apiService: ApiService) {
     suspend fun getSellList(status: String): Result<OrderListResponse> {
@@ -43,40 +45,25 @@ class SellsRepository(private val apiService: ApiService) {
         }
     }
 
-    suspend fun updateOrderStatus(orderId: Int?, status: String) {
-        try {
-            val response = apiService.updateOrder(orderId, status)
-            if (response.isSuccessful) {
-                Log.d("SellsRepository", "Order status updated successfully: orderId=$orderId, status=$status")
-            } else {
-                Log.e("SellsRepository", "Error updating order status: orderId=$orderId, status=$status")
-            }
-        } catch (e: Exception) {
-            Log.e("SellsRepository", "Exception updating order status", e)
-        }
-    }
-
-    suspend fun confirmPaymentStore(request: PaymentConfirmRequest): Result<PaymentConfirmationResponse> {
+    suspend fun confirmPayment(orderId: Int, status: String): Response<GenericResponse> {
         return try {
-            Log.d("SellsRepository", "Conforming order request completed: $request")
-            val response = apiService.paymentConfirmation(request)
-
-            if(response.isSuccessful) {
-                val paymentConfirmResponse = response.body()
-                if (paymentConfirmResponse != null) {
-                    Log.d("SellsRepository", "Order confirmed successfully: ${paymentConfirmResponse.message}")
-                    Result.Success(paymentConfirmResponse)
-                } else {
-                    Log.e("SellsRepository", "Response body was null")
-                    Result.Error(Exception("Empty response from server"))
-                }
-            } else {
-                val errorBody = response.errorBody()?.string() ?: "Unknown Error"
-                Log.e("SellsRepository", "Error confirming order: $errorBody")
-                Result.Error(Exception(errorBody))
-            }
-        } catch (e: Exception){
-            Result.Error(e)
+            Log.d("SellsRepository", "Calling confirmPayment with orderId=$orderId, status=$status")
+            apiService.confirmPayment(orderId, status)
+        } catch (e: Exception) {
+            Log.e("SellsRepository", "Error during confirmPayment", e)
+            throw e
         }
     }
+
+    suspend fun confirmShipment(orderId: Int, receiptNum: String): Response<GenericResponse> {
+        return try {
+            apiService.confirmShipment(
+                receiptNum = receiptNum,
+                orderId = orderId
+            )
+        } catch (e: Exception) {
+            throw e
+        }
+    }
+
 }

@@ -71,7 +71,7 @@ import com.alya.ecommerce_serang.data.api.response.store.product.CreateProductRe
 import com.alya.ecommerce_serang.data.api.response.store.product.DeleteProductResponse
 import com.alya.ecommerce_serang.data.api.response.store.product.UpdateProductResponse
 import com.alya.ecommerce_serang.data.api.response.store.product.ViewStoreProductsResponse
-import com.alya.ecommerce_serang.data.api.response.store.profile.GenericResponse
+import com.alya.ecommerce_serang.data.api.response.store.GenericResponse
 import com.alya.ecommerce_serang.data.api.response.store.profile.StoreDataResponse
 import com.alya.ecommerce_serang.data.api.response.store.topup.BalanceTopUpResponse
 import com.alya.ecommerce_serang.data.api.response.store.topup.TopUpResponse
@@ -339,9 +339,21 @@ interface ApiService {
 
     @PUT("store/order/update")
     suspend fun updateOrder(
-        @Query("order_id") orderId: Int?,
-        @Query("status") status: String
+        @Part("order_id") orderId: Int?,
+        @Part("status") status: String
     ): Response<com.alya.ecommerce_serang.data.api.response.store.sells.UpdateOrderItemResponse>
+
+    @PUT("store/payment/update")
+    suspend fun confirmPayment(
+        @Part("order_id") orderId: Int?,
+        @Part("status") status: String
+    ): Response<GenericResponse>
+
+    @PUT("store/shipping/receiptnum")
+    suspend fun confirmShipment(
+        @Part("receipt_num") receiptNum: String,
+        @Part("order_id") orderId: Int?
+    ): Response<GenericResponse>
 
     @Multipart
     @POST("addcomplaint")
