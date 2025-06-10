@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/black">
+    android:background="@color/white">
 
     <!-- Header with title and close button -->
     <LinearLayout
@@ -23,18 +23,15 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Bukti Pembayaran"
-            android:textColor="@android:color/white"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+            style="@style/title_large" />
 
         <ImageButton
             android:id="@+id/btn_close"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_close"
-            android:contentDescription="Close"
-            app:tint="@android:color/white" />
+            android:contentDescription="Close" />
 
     </LinearLayout>
 

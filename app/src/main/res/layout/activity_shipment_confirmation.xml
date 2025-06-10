@@ -59,7 +59,7 @@
                 android:orientation="vertical"
                 android:layout_marginBottom="24dp">
 
-                <!-- Label Kurir Pengiriman -->
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -72,47 +72,37 @@
                         style="@style/body_medium"
                         android:layout_marginEnd="4dp"/>
 
-                </LinearLayout>
-
-                <!-- Spinner Dropdown dengan Chevron -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:background="@drawable/bg_text_field_disabled"
-                    android:gravity="center_vertical"
-                    android:layout_marginTop="10dp">
-
-                    <Spinner
-                        android:id="@+id/spinner_kurir"
+                    <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:padding="8dp"
-                        style="@style/body_small"
-                        android:background="@null"
-                        android:clickable="false"/>
-
-                    <!-- Chevron Down Icon -->
-                    <ImageView
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:src="@drawable/ic_down"
-                        android:layout_marginEnd="8dp"
-                        android:contentDescription="Chevron Down" />
+                        android:text="*"
+                        style="@style/body_medium"
+                        android:textColor="@color/red_required"
+                        android:layout_gravity="end"/>
 
                 </LinearLayout>
 
+                <EditText
+                    android:id="@+id/edt_kurir"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_text_field"
+                    android:hint="Isi kurir pengiriman di sini"
+                    android:padding="8dp"
+                    style="@style/body_small"
+                    android:layout_marginTop="4dp"/>
+
             </LinearLayout>
 
-            <!-- Paket Pengiriman -->
+            <!-- Layanan Pengiriman -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:layout_marginBottom="24dp">
 
-                <!-- Label Kondisi Produk -->
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -121,43 +111,32 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Paket Pengiriman"
+                        android:text="Layanan Pengiriman"
                         style="@style/body_medium"
                         android:layout_marginEnd="4dp"/>
 
-                </LinearLayout>
-
-                <!-- Spinner Dropdown dengan Chevron -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:background="@drawable/bg_text_field_disabled"
-                    android:gravity="center_vertical"
-                    android:layout_marginTop="10dp">
-
-                    <Spinner
-                        android:id="@+id/spinner_paket_kirim"
+                    <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:padding="8dp"
-                        style="@style/body_small"
-                        android:background="@null"
-                        android:clickable="false"/>
-
-                    <!-- Chevron Down Icon -->
-                    <ImageView
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:src="@drawable/ic_down"
-                        android:layout_marginEnd="8dp"
-                        android:contentDescription="Chevron Down" />
+                        android:text="*"
+                        style="@style/body_medium"
+                        android:textColor="@color/red_required"
+                        android:layout_gravity="end"/>
 
                 </LinearLayout>
 
-            </LinearLayout>
+                <EditText
+                    android:id="@+id/edt_layanan_kirim"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_text_field"
+                    android:hint="Isi layanan pengiriman dari kurir di sini"
+                    android:padding="8dp"
+                    style="@style/body_small"
+                    android:layout_marginTop="4dp"/>
 
+            </LinearLayout>
 
             <!-- Nomor Resi -->
             <LinearLayout

@@ -16,7 +16,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.alya.ecommerce_serang.BuildConfig.BASE_URL
 import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.response.store.sells.Orders
@@ -26,7 +25,6 @@ import com.alya.ecommerce_serang.data.repository.AddressRepository
 import com.alya.ecommerce_serang.data.repository.SellsRepository
 import com.alya.ecommerce_serang.databinding.ActivityDetailPaymentBinding
 import com.alya.ecommerce_serang.ui.profile.mystore.sells.SellsProductAdapter
-import com.alya.ecommerce_serang.ui.profile.mystore.sells.shipment.DetailShipmentActivity
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
 import com.alya.ecommerce_serang.utils.viewmodel.AddressViewModel
@@ -40,6 +38,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 import java.util.TimeZone
+import androidx.core.graphics.drawable.toDrawable
 
 class DetailPaymentActivity : AppCompatActivity() {
 
@@ -84,6 +83,32 @@ class DetailPaymentActivity : AppCompatActivity() {
 
         observeOrderDetails()
 
+        binding.tvOrderSellsDesc.setOnClickListener {
+            val paymentEvidence = sells?.paymentEvidence
+            if (!paymentEvidence.isNullOrEmpty()) {
+                showPaymentEvidenceDialog(paymentEvidence)
+            } else {
+                Toast.makeText(this, "Bukti pembayaran tidak tersedia", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        binding.btnHoldPayment.setOnClickListener {
+            sells?.orderId?.let {
+                viewModel.confirmPayment(it, "onhold")
+                Toast.makeText(this, "Otomatis pembayaran dinonaktifkan", Toast.LENGTH_SHORT).show()
+            } ?: run {
+                Log.e("DetailPaymentActivity", "No order passed in intent")
+            }
+        }
+
+        binding.btnConfirmPayment.setOnClickListener {
+            sells?.orderId?.let {
+                viewModel.confirmPayment(it, "confirmed")
+                Toast.makeText(this, "Pembayaran dikonfirmasi", Toast.LENGTH_SHORT).show()
+            } ?: run {
+                Log.e("DetailPaymentActivity", "No order passed in intent")
+            }
+        }
     }
 
     private fun observeOrderDetails() {
@@ -173,17 +198,6 @@ class DetailPaymentActivity : AppCompatActivity() {
         return String.format(Locale("id", "ID"), "Rp%,.0f", priceDouble)
     }
 
-    private fun setupPaymentEvidenceViewer() {
-        binding.tvOrderSellsDesc.setOnClickListener {
-            val paymentEvidence = sells?.paymentEvidence
-            if (!paymentEvidence.isNullOrEmpty()) {
-                showPaymentEvidenceDialog(paymentEvidence)
-            } else {
-                Toast.makeText(this, "Bukti pembayaran tidak tersedia", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
-
     private fun showPaymentEvidenceDialog(paymentEvidence: String) {
         val dialog = Dialog(this)
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
@@ -193,7 +207,7 @@ class DetailPaymentActivity : AppCompatActivity() {
         // Set dialog to fullscreen
         val window = dialog.window
         window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
-        window?.setBackgroundDrawable(ColorDrawable(Color.BLACK))
+        window?.setBackgroundDrawable(Color.WHITE.toDrawable())
 
         // Get views from dialog
         val imageView = dialog.findViewById<ImageView>(R.id.iv_payment_evidence)
@@ -201,21 +215,13 @@ class DetailPaymentActivity : AppCompatActivity() {
         val tvTitle = dialog.findViewById<TextView>(R.id.tv_title)
         val progressBar = dialog.findViewById<ProgressBar>(R.id.progress_bar)
 
-        // Set title
         tvTitle.text = "Bukti Pembayaran"
+        val fullImageUrl =
+            if (paymentEvidence.startsWith("/")) BASE_URL + paymentEvidence.substring(1)
+            else paymentEvidence
 
-        // Build image URL
-        val fullImageUrl = when (val img = paymentEvidence) {
-            is String -> {
-                if (img.startsWith("/")) BASE_URL + img.substring(1) else img
-            }
-            else -> R.drawable.placeholder_image // Default image for null
-        }
-
-        // Show progress bar while loading
         progressBar.visibility = View.VISIBLE
 
-        // Load image with Glide
         Glide.with(this)
             .load(fullImageUrl)
             .placeholder(R.drawable.placeholder_image)
@@ -239,16 +245,8 @@ class DetailPaymentActivity : AppCompatActivity() {
                 }
             })
 
-
-        // Close button click listener
-        btnClose.setOnClickListener {
-            dialog.dismiss()
-        }
-
-        // Click outside to close
-        imageView.setOnClickListener {
-            dialog.dismiss()
-        }
+        btnClose.setOnClickListener { dialog.dismiss() }
+        imageView.setOnClickListener { dialog.dismiss() }
 
         dialog.show()
     }

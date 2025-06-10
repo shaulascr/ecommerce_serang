@@ -169,42 +169,53 @@ class SellsViewModel(private val repository: SellsRepository) : ViewModel() {
         }
     }
 
-    fun updateOrderStatus(orderId: Int?, status: String) {
-        Log.d(TAG, "========== Starting updateOrderStatus ==========")
-        Log.d(TAG, "Updating order status: orderId=$orderId, status='$status'")
+    fun confirmPayment(orderId: Int, status: String) {
+        Log.d(TAG, "Confirming order completed: orderId=$orderId, status=$status")
+        _isLoading.value = true
 
         viewModelScope.launch {
             try {
-                Log.d(TAG, "Calling repository.updateOrderStatus")
-                val startTime = System.currentTimeMillis()
-
-                repository.updateOrderStatus(orderId, status)
-
-                val endTime = System.currentTimeMillis()
-                Log.d(TAG, "✅ Order status updated successfully in ${endTime - startTime}ms")
-                Log.d(TAG, "Updated orderId=$orderId to status='$status'")
-
+                val response = repository.confirmPayment(orderId, status)
+                if (response.isSuccessful) {
+                    val body = response.body()
+                    Log.d(TAG, "confirmPayment success: ${body?.message}")
+                    _message.value = body?.message ?: "Status berhasil diperbarui"
+                    _isSuccess.value = true
+                } else {
+                    val errorMsg = response.errorBody()?.string() ?: "Unknown error"
+                    Log.e(TAG, "confirmPayment failed: $errorMsg")
+                    _error.value = "Gagal memperbarui status: $errorMsg"
+                    _isSuccess.value = false
+                }
             } catch (e: Exception) {
-                Log.e(TAG, "❌ Error updating order status")
-                Log.e(TAG, "Exception type: ${e.javaClass.simpleName}")
-                Log.e(TAG, "Exception message: ${e.message}")
-                Log.e(TAG, "Exception stack trace:", e)
+                Log.e(TAG, "Exception in confirmPayment", e)
+                _error.value = "Terjadi kesalahan: ${e.message}"
+                _isSuccess.value = false
+            } finally {
+                _isLoading.value = false
             }
         }
-
-        Log.d(TAG, "========== updateOrderStatus method completed ==========")
     }
 
-    fun confirmPayment(orderId: Int, status: String) {
-        Log.d(TAG, "Confirming order completed: orderId=$orderId, status=$status")
+    fun confirmShipment(orderId: Int, receiptNum: String) {
+        _isLoading.value = true
         viewModelScope.launch {
-            _confirmPaymentStore.value = Result.Loading
-            val request = PaymentConfirmRequest(orderId, status)
-
-            Log.d(TAG, "Sending order completion request: $request")
-            val result = repository.confirmPaymentStore(request)
-            Log.d(TAG, "Order completion result: $result")
-            _confirmPaymentStore.value = result
+            try {
+                val response = repository.confirmShipment(orderId, receiptNum)
+                if (response.isSuccessful) {
+                    _message.value = response.body()?.message ?: "Berhasil mengonfirmasi pengiriman"
+                    _isSuccess.value = true
+                } else {
+                    val errorMsg = response.errorBody()?.string() ?: "Gagal konfirmasi pengiriman"
+                    _error.value = errorMsg
+                    _isSuccess.value = false
+                }
+            } catch (e: Exception) {
+                _error.value = "Terjadi kesalahan: ${e.message}"
+                _isSuccess.value = false
+            } finally {
+                _isLoading.value = false
+            }
         }
     }
 

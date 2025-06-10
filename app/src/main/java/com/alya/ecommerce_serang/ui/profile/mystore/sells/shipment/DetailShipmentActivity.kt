@@ -1,7 +1,9 @@
 package com.alya.ecommerce_serang.ui.profile.mystore.sells.shipment
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.alya.ecommerce_serang.data.api.response.store.sells.Orders
@@ -64,6 +66,16 @@ class DetailShipmentActivity : AppCompatActivity() {
         }
 
         observeOrderDetails()
+
+        binding.btnConfirmShipment.setOnClickListener {
+            sells?.let {
+                val intent = Intent(this, ShipmentConfirmationActivity::class.java)
+                intent.putExtra("sells_data", Gson().toJson(it))
+                startActivity(intent)
+            } ?: run {
+                Toast.makeText(this, "Data pesanan tidak tersedia", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun observeOrderDetails() {

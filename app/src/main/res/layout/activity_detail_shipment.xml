@@ -31,7 +31,7 @@
 
                 <!-- Payment Header -->
                 <View
-                    android:id="@+id/shape_payment_order_title"
+                    android:id="@+id/shape_shipment_order_title"
                     android:layout_width="4dp"
                     android:layout_height="10dp"
                     android:layout_marginTop="3dp"
@@ -44,7 +44,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="12dp"
-                    app:layout_constraintStart_toStartOf="@id/shape_payment_order_title"
+                    app:layout_constraintStart_toStartOf="@id/shape_shipment_order_title"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     android:gravity="center">
@@ -278,7 +278,7 @@
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:layout_constraintStart_toStartOf="@id/shape_payment_order_title"
+                    app:layout_constraintStart_toStartOf="@id/shape_shipment_order_title"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     android:gravity="center">
@@ -409,7 +409,7 @@
         android:gravity="bottom">
 
         <Button
-            android:id="@+id/btn_confirm_payment"
+            android:id="@+id/btn_confirm_shipment"
             style="@style/button.large.active.long"
             android:text="Kirim Pesanan"
             android:layout_alignParentEnd="true"/>
