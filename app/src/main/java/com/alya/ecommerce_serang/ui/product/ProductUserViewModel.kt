@@ -10,7 +10,7 @@ import com.alya.ecommerce_serang.data.api.dto.ProductsItem
 import com.alya.ecommerce_serang.data.api.response.customer.cart.AddCartResponse
 import com.alya.ecommerce_serang.data.api.response.customer.product.Product
 import com.alya.ecommerce_serang.data.api.response.customer.product.ReviewsItem
-import com.alya.ecommerce_serang.data.api.response.customer.product.StoreProduct
+import com.alya.ecommerce_serang.data.api.response.customer.product.StoreItem
 import com.alya.ecommerce_serang.data.repository.ProductRepository
 import com.alya.ecommerce_serang.data.repository.Result
 import kotlinx.coroutines.launch
@@ -20,8 +20,8 @@ class ProductUserViewModel(private val repository: ProductRepository) : ViewMode
     private val _productDetail = MutableLiveData<Product?>()
     val productDetail: LiveData<Product?> get() = _productDetail
 
-    private val _storeDetail = MutableLiveData<Result<StoreProduct?>>()
-    val storeDetail : LiveData<Result<StoreProduct?>> get() = _storeDetail
+    private val _storeDetail = MutableLiveData<Result<StoreItem>>()
+    val storeDetail : LiveData<Result<StoreItem>> get() = _storeDetail
 
     private val _reviewProduct = MutableLiveData<List<ReviewsItem>>()
     val reviewProduct: LiveData<List<ReviewsItem>> get() = _reviewProduct
@@ -51,7 +51,7 @@ class ProductUserViewModel(private val repository: ProductRepository) : ViewMode
                     loadStoreDetail(storeId)
                 }
             } catch (e: Exception) {
-                Log.e("ProductViewModel", "Error loading product details: ${e.message}")
+                Log.e(TAG, "Error loading product details: ${e.message}")
                 _error.value = "Failed to load product details: ${e.message}"
             } finally {
                 _isLoading.value = false
@@ -64,9 +64,10 @@ class ProductUserViewModel(private val repository: ProductRepository) : ViewMode
             try {
                 _storeDetail.value = Result.Loading
                 val result = repository.fetchStoreDetail(storeId)
+                Log.d(TAG, "Success call detail store: $result store id = $storeId")
                 _storeDetail.value = result
             } catch (e: Exception) {
-                Log.e("ProductViewModel", "Error loading store details: ${e.message}")
+                Log.e(TAG, "Error loading store details: ${e.message}")
                 _storeDetail.value = Result.Error(e)
             }
         }
@@ -78,7 +79,7 @@ class ProductUserViewModel(private val repository: ProductRepository) : ViewMode
                 val reviews = repository.fetchProductReview(productId)
                 _reviewProduct.value = reviews ?: emptyList()
             } catch (e: Exception) {
-                Log.e("ProductViewModel", "Error loading reviews: ${e.message}")
+                Log.e(TAG, "Error loading reviews: ${e.message}")
                 _reviewProduct.value = emptyList()
             }
         }
@@ -96,11 +97,11 @@ class ProductUserViewModel(private val repository: ProductRepository) : ViewMode
                     } // Filter by storeId and exclude current product
                     _otherProducts.value = filteredProducts // Update LiveData
                 } else if (result is Result.Error) {
-                    Log.e("ProductViewModel", "Error loading other products: ${result.exception.message}")
+                    Log.e(TAG, "Error loading other products: ${result.exception.message}")
                     _otherProducts.value = emptyList() // Set empty list on failure
                 }
             } catch (e: Exception) {
-                Log.e("ProductViewModel", "Exception loading other products: ${e.message}")
+                Log.e(TAG, "Exception loading other products: ${e.message}")
                 _otherProducts.value = emptyList()
             }
         }
@@ -123,6 +124,10 @@ class ProductUserViewModel(private val repository: ProductRepository) : ViewMode
                 }
             }
         }
+    }
+
+    companion object{
+        private var TAG = "ProductUserViewModel"
     }
 
 }

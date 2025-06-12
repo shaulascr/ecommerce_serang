@@ -28,8 +28,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <!-- Remove searchContainer from here, it's now at the top level -->
-
             <androidx.viewpager2.widget.ViewPager2
                 android:id="@+id/banners"
                 android:layout_width="match_parent"
@@ -180,13 +178,3 @@
         layout="@layout/view_error"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-    <!--            <com.zhpan.indicator.IndicatorView-->
-    <!--                android:id="@+id/indicator"-->
-    <!--                android:layout_width="wrap_content"-->
-    <!--                android:layout_height="wrap_content"-->
-    <!--                android:layout_marginTop="20dp"-->
-    <!--                app:layout_constraintEnd_toEndOf="parent"-->
-    <!--                app:layout_constraintStart_toStartOf="parent"-->
-    <!--                app:layout_constraintTop_toBottomOf="@+id/banners" />-->

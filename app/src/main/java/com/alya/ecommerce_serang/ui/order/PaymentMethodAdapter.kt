@@ -6,14 +6,14 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.alya.ecommerce_serang.R
-import com.alya.ecommerce_serang.data.api.response.customer.product.PaymentItemDetail
+import com.alya.ecommerce_serang.data.api.response.customer.product.DetailPaymentItem
 import com.alya.ecommerce_serang.databinding.ItemPaymentMethodBinding
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 
 class PaymentMethodAdapter(
-    private val paymentMethods: List<PaymentItemDetail>,
-    private val onPaymentSelected: (PaymentItemDetail) -> Unit
+    private val paymentMethods: List<DetailPaymentItem>,
+    private val onPaymentSelected: (DetailPaymentItem) -> Unit
 ) : RecyclerView.Adapter<PaymentMethodAdapter.PaymentMethodViewHolder>() {
 
     // Track the selected payment by ID
@@ -118,7 +118,7 @@ class PaymentMethodAdapter(
     }
 
     // Set selected payment object
-    fun setSelectedPayment(payment: PaymentItemDetail) {
+    fun setSelectedPayment(payment: DetailPaymentItem) {
         setSelectedPaymentId(payment.id)
     }
 }

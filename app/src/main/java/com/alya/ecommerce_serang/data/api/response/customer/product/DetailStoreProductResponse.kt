@@ -5,19 +5,19 @@ import com.google.gson.annotations.SerializedName
 data class DetailStoreProductResponse(
 
 	@field:SerializedName("shipping")
-	val shipping: List<ShippingItemDetail>,
+	val shipping: List<DetailShippingItem>,
 
 	@field:SerializedName("payment")
-	val payment: List<PaymentItemDetail>,
+	val payment: List<DetailPaymentItem>,
 
 	@field:SerializedName("store")
-	val store: StoreProduct,
+	val store: List<StoreItem>,
 
 	@field:SerializedName("message")
 	val message: String
 )
 
-data class StoreProduct(
+data class StoreItem(
 
 	@field:SerializedName("store_id")
 	val storeId: Int,
@@ -38,19 +38,19 @@ data class StoreProduct(
 	val storeLocation: String,
 
 	@field:SerializedName("store_image")
-	val storeImage: String? = null,
+	val storeImage: String,
 
 	@field:SerializedName("status")
 	val status: String
 )
 
-data class ShippingItemDetail(
+data class DetailShippingItem(
 
 	@field:SerializedName("courier")
 	val courier: String
 )
 
-data class PaymentItemDetail(
+data class DetailPaymentItem(
 
 	@field:SerializedName("qris_image")
 	val qrisImage: String,
@@ -59,7 +59,7 @@ data class PaymentItemDetail(
 	val bankNum: String,
 
 	@field:SerializedName("account_name")
-	val accountName: Any,
+	val accountName: String,
 
 	@field:SerializedName("bank_name")
 	val bankName: String,

@@ -23,7 +23,7 @@ import com.alya.ecommerce_serang.data.api.dto.CartItem
 import com.alya.ecommerce_serang.data.api.dto.ProductsItem
 import com.alya.ecommerce_serang.data.api.response.customer.product.Product
 import com.alya.ecommerce_serang.data.api.response.customer.product.ReviewsItem
-import com.alya.ecommerce_serang.data.api.response.customer.product.StoreProduct
+import com.alya.ecommerce_serang.data.api.response.customer.product.StoreItem
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
 import com.alya.ecommerce_serang.data.repository.ProductRepository
@@ -157,7 +157,7 @@ class DetailProductActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateStoreInfo(store: StoreProduct?) {
+    private fun updateStoreInfo(store: StoreItem?) {
         store?.let {
             binding.tvSellerName.text = it.storeName
             binding.tvSellerRating.text = it.storeRating

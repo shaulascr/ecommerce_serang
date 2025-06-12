@@ -19,7 +19,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.alya.ecommerce_serang.data.api.dto.CheckoutData
 import com.alya.ecommerce_serang.data.api.dto.OrderRequest
 import com.alya.ecommerce_serang.data.api.dto.OrderRequestBuy
-import com.alya.ecommerce_serang.data.api.response.customer.product.PaymentItemDetail
+import com.alya.ecommerce_serang.data.api.response.customer.product.DetailPaymentItem
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.repository.OrderRepository
 import com.alya.ecommerce_serang.databinding.ActivityCheckoutBinding
@@ -185,7 +185,7 @@ class CheckoutActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupPaymentMethodsRecyclerView(paymentMethods: List<PaymentItemDetail>) {
+    private fun setupPaymentMethodsRecyclerView(paymentMethods: List<DetailPaymentItem>) {
         if (paymentMethods.isEmpty()) {
             Log.e("CheckoutActivity", "Payment methods list is empty")
             Toast.makeText(this, "No payment methods available", Toast.LENGTH_SHORT).show()
@@ -210,7 +210,7 @@ class CheckoutActivity : AppCompatActivity() {
         }
     }
 
-    private fun updatePaymentMethodsAdapter(paymentMethods: List<PaymentItemDetail>, selectedId: Int?) {
+    private fun updatePaymentMethodsAdapter(paymentMethods: List<DetailPaymentItem>, selectedId: Int?) {
         Log.d("CheckoutActivity", "Updating payment adapter with ${paymentMethods.size} methods")
 
         // Simple test adapter

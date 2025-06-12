@@ -7,12 +7,12 @@ import com.alya.ecommerce_serang.data.api.dto.Preorder
 import com.alya.ecommerce_serang.data.api.dto.ProductsItem
 import com.alya.ecommerce_serang.data.api.dto.SearchRequest
 import com.alya.ecommerce_serang.data.api.dto.Wholesale
-import com.alya.ecommerce_serang.data.api.response.store.product.CreateProductResponse
 import com.alya.ecommerce_serang.data.api.response.customer.cart.AddCartResponse
 import com.alya.ecommerce_serang.data.api.response.customer.product.ProductResponse
 import com.alya.ecommerce_serang.data.api.response.customer.product.ReviewsItem
-import com.alya.ecommerce_serang.data.api.response.customer.product.StoreProduct
+import com.alya.ecommerce_serang.data.api.response.customer.product.StoreItem
 import com.alya.ecommerce_serang.data.api.response.product.Search
+import com.alya.ecommerce_serang.data.api.response.store.product.CreateProductResponse
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -118,13 +118,13 @@ class ProductRepository(private val apiService: ApiService) {
         }
     }
 
-    suspend fun fetchStoreDetail(storeId: Int): Result<StoreProduct> {
+    suspend fun fetchStoreDetail(storeId: Int): Result<StoreItem> {
         return try {
             val response = apiService.getDetailStore(storeId)
             if (response.isSuccessful) {
                 val store = response.body()?.store
                 if (store != null) {
-                    Result.Success(store)
+                    Result.Success(store[0])
                 } else {
                     Result.Error(Throwable("Empty response body"))
                 }

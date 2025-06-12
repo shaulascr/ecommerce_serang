@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.alya.ecommerce_serang.BuildConfig.BASE_URL
 import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.dto.ProductsItem
-import com.alya.ecommerce_serang.data.api.response.customer.product.StoreProduct
+import com.alya.ecommerce_serang.data.api.response.customer.product.StoreItem
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
 import com.alya.ecommerce_serang.data.repository.ProductRepository
@@ -117,7 +117,7 @@ class StoreDetailActivity : AppCompatActivity() {
         viewModel.loadStoreDetail(storeId)
     }
 
-    private fun updateStoreInfo(store: StoreProduct?) {
+    private fun updateStoreInfo(store: StoreItem?) {
         store?.let {
             binding.tvStoreName.text = it.storeName
             binding.tvStoreRating.text = it.storeRating
