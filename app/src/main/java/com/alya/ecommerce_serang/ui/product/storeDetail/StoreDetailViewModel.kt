@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.alya.ecommerce_serang.data.api.dto.ProductsItem
 import com.alya.ecommerce_serang.data.api.response.customer.product.Product
-import com.alya.ecommerce_serang.data.api.response.customer.product.StoreProduct
+import com.alya.ecommerce_serang.data.api.response.customer.product.StoreItem
 import com.alya.ecommerce_serang.data.repository.ProductRepository
 import com.alya.ecommerce_serang.data.repository.Result
 import kotlinx.coroutines.launch
@@ -27,8 +27,8 @@ class StoreDetailViewModel (private val repository: ProductRepository
     private val _error = MutableLiveData<String>()
     val error: LiveData<String> get() = _error
 
-    private val _storeDetail = MutableLiveData<Result<StoreProduct>>()
-    val storeDetail : LiveData<Result<StoreProduct>> get() = _storeDetail
+    private val _storeDetail = MutableLiveData<Result<StoreItem>>()
+    val storeDetail : LiveData<Result<StoreItem>> get() = _storeDetail
 
     fun loadOtherProducts(storeId: Int) {
         viewModelScope.launch {

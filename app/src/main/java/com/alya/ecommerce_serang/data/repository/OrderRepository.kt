@@ -20,9 +20,9 @@ import com.alya.ecommerce_serang.data.api.response.customer.order.ListCityRespon
 import com.alya.ecommerce_serang.data.api.response.customer.order.ListProvinceResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.OrderDetailResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.OrderListResponse
-import com.alya.ecommerce_serang.data.api.response.customer.product.PaymentItemDetail
+import com.alya.ecommerce_serang.data.api.response.customer.product.DetailPaymentItem
 import com.alya.ecommerce_serang.data.api.response.customer.product.ProductResponse
-import com.alya.ecommerce_serang.data.api.response.customer.product.StoreProduct
+import com.alya.ecommerce_serang.data.api.response.customer.product.StoreItem
 import com.alya.ecommerce_serang.data.api.response.customer.product.StoreResponse
 import com.alya.ecommerce_serang.data.api.response.customer.profile.AddressResponse
 import com.alya.ecommerce_serang.data.api.response.customer.profile.CreateAddressResponse
@@ -217,7 +217,7 @@ class OrderRepository(private val apiService: ApiService) {
         }
     }
 
-    suspend fun fetchStoreDetail(storeId: Int): Result<StoreProduct?> {
+    suspend fun fetchStoreDetail(storeId: Int): Result<List<StoreItem>> {
         return try {
             val response = apiService.getDetailStore(storeId)
             if (response.isSuccessful) {
@@ -238,7 +238,7 @@ class OrderRepository(private val apiService: ApiService) {
         }
     }
 
-    suspend fun fetchPaymentStore(storeId: Int): Result<List<PaymentItemDetail?>> {
+    suspend fun fetchPaymentStore(storeId: Int): Result<List<DetailPaymentItem?>> {
         return try {
             val response = apiService.getDetailStore(storeId)
             if (response.isSuccessful) {

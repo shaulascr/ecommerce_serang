@@ -8,7 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.alya.ecommerce_serang.data.api.response.chat.ChatItem
 import com.alya.ecommerce_serang.data.api.response.chat.ChatItemList
 import com.alya.ecommerce_serang.data.api.response.chat.ChatLine
-import com.alya.ecommerce_serang.data.api.response.customer.product.StoreProduct
+import com.alya.ecommerce_serang.data.api.response.customer.product.StoreItem
 import com.alya.ecommerce_serang.data.repository.ChatRepository
 import com.alya.ecommerce_serang.data.repository.Result
 import com.alya.ecommerce_serang.utils.Constants
@@ -44,8 +44,8 @@ class ChatViewModel @Inject constructor(
     private val _chatListStore = MutableLiveData<Result<List<ChatItemList>>>()
     val chatListStore: LiveData<Result<List<ChatItemList>>> = _chatListStore
 
-    private val _storeDetail = MutableLiveData<Result<StoreProduct?>>()
-    val storeDetail: LiveData<Result<StoreProduct?>> get() = _storeDetail
+    private val _storeDetail = MutableLiveData<Result<List<StoreItem?>>>()
+    val storeDetail: LiveData<Result<List<StoreItem?>>> get() = _storeDetail
 
     // Chat parameters
     private var storeId: Int = 0

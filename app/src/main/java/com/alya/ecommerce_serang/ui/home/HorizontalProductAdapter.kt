@@ -66,7 +66,7 @@ class HorizontalProductAdapter(
 
     fun updateLimitedProducts(newProducts: List<ProductsItem>) {
         val diffCallback = ProductDiffCallback(products, newProducts)
-        val limitedProducts = newProducts.take(10) // Limit to 10 items
+        val limitedProducts = newProducts.take(10) //limit 10 produk
         val diffResult = DiffUtil.calculateDiff(diffCallback)
         diffResult.dispatchUpdatesTo(this)
         updateProducts(limitedProducts)

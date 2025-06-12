@@ -10,7 +10,7 @@ import com.alya.ecommerce_serang.data.api.dto.OrderRequest
 import com.alya.ecommerce_serang.data.api.dto.OrderRequestBuy
 import com.alya.ecommerce_serang.data.api.response.customer.cart.CartItemsItem
 import com.alya.ecommerce_serang.data.api.response.customer.cart.DataItemCart
-import com.alya.ecommerce_serang.data.api.response.customer.product.PaymentItemDetail
+import com.alya.ecommerce_serang.data.api.response.customer.product.DetailPaymentItem
 import com.alya.ecommerce_serang.data.api.response.customer.profile.AddressesItem
 import com.alya.ecommerce_serang.data.repository.OrderRepository
 import com.alya.ecommerce_serang.data.repository.Result
@@ -24,12 +24,12 @@ class CheckoutViewModel(private val repository: OrderRepository) : ViewModel() {
     private val _addressDetails = MutableLiveData<AddressesItem?>()
     val addressDetails: LiveData<AddressesItem?> = _addressDetails
 
-    private val _availablePaymentMethods = MutableLiveData<List<PaymentItemDetail>>()
-    val availablePaymentMethods: LiveData<List<PaymentItemDetail>> = _availablePaymentMethods
+    private val _availablePaymentMethods = MutableLiveData<List<DetailPaymentItem>>()
+    val availablePaymentMethods: LiveData<List<DetailPaymentItem>> = _availablePaymentMethods
 
     // Selected payment method
-    private val _selectedPayment = MutableLiveData<PaymentItemDetail?>()
-    val selectedPayment: LiveData<PaymentItemDetail?> = _selectedPayment
+    private val _selectedPayment = MutableLiveData<DetailPaymentItem?>()
+    val selectedPayment: LiveData<DetailPaymentItem?> = _selectedPayment
 
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading
