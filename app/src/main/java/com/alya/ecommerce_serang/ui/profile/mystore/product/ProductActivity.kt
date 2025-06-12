@@ -40,7 +40,6 @@ class ProductActivity : AppCompatActivity() {
 
         binding.progressBar.visibility = View.VISIBLE
         viewModel.loadMyStoreProducts()
-
     }
 
     override fun onResume() {
@@ -58,7 +57,7 @@ class ProductActivity : AppCompatActivity() {
                     binding.progressBar.visibility = View.GONE
                     val products = result.data
                     binding.rvStoreProduct.adapter = ProductAdapter(products) {
-                        Toast.makeText(this, "Clicked: ${it.name}", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "Produk: ${it.name}", Toast.LENGTH_SHORT).show()
                     }
                 }
                 is Result.Error -> {

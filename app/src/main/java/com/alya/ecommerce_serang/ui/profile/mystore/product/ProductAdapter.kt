@@ -45,9 +45,9 @@ class ProductAdapter(
             }
 
             val imageUrl = if (product.image.startsWith("/")) {
-                BASE_URL + product.image.removePrefix("/") // Append base URL if the path starts with "/"
+                BASE_URL + product.image.removePrefix("/")
             } else {
-                product.image // Use as is if it's already a full URL
+                product.image
             }
             Glide.with(itemView.context)
                 .load(imageUrl)

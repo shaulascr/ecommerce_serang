@@ -7,6 +7,8 @@ import com.alya.ecommerce_serang.data.api.dto.CancelOrderReq
 import com.alya.ecommerce_serang.data.api.dto.CartItem
 import com.alya.ecommerce_serang.data.api.dto.CityResponse
 import com.alya.ecommerce_serang.data.api.dto.CompletedOrderRequest
+import com.alya.ecommerce_serang.data.api.dto.ConfirmPaymentRequest
+import com.alya.ecommerce_serang.data.api.dto.ConfirmShipmentRequest
 import com.alya.ecommerce_serang.data.api.dto.CourierCostRequest
 import com.alya.ecommerce_serang.data.api.dto.CreateAddressRequest
 import com.alya.ecommerce_serang.data.api.dto.FcmReq
@@ -337,22 +339,14 @@ interface ApiService {
         @Body confirmOrder : CompletedOrderRequest
     ): Response<CompletedOrderResponse>
 
-    @PUT("store/order/update")
-    suspend fun updateOrder(
-        @Part("order_id") orderId: Int?,
-        @Part("status") status: String
-    ): Response<com.alya.ecommerce_serang.data.api.response.store.sells.UpdateOrderItemResponse>
-
     @PUT("store/payment/update")
     suspend fun confirmPayment(
-        @Part("order_id") orderId: Int?,
-        @Part("status") status: String
+        @Body confirmPayment : ConfirmPaymentRequest
     ): Response<GenericResponse>
 
     @PUT("store/shipping/receiptnum")
     suspend fun confirmShipment(
-        @Part("receipt_num") receiptNum: String,
-        @Part("order_id") orderId: Int?
+        @Body confirmShipment: ConfirmShipmentRequest
     ): Response<GenericResponse>
 
     @Multipart

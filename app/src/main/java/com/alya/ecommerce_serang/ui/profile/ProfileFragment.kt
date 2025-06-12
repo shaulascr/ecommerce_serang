@@ -71,11 +71,11 @@ class ProfileFragment : Fragment() {
             Log.d("Profile Fragment", "Check store $hasStore")
 
             if (hasStore == true){
-                binding.tvBukaToko.text = "Buka Toko Saya"
+                binding.tvBukaToko.text = "Lihat Toko Saya"
                 val intentBuka = Intent(requireContext(), MyStoreActivity::class.java)
                 startActivity(intentBuka)
             } else {
-                binding.tvBukaToko.text = "Daftar Toko Saya"
+                binding.tvBukaToko.text = "Buka Toko"
                 val intentBuka = Intent(requireContext(), RegisterStoreActivity::class.java)
                 startActivity(intentBuka)
             }

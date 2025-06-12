@@ -5,15 +5,15 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.alya.ecommerce_serang.data.api.dto.ConfirmPaymentRequest
+import com.alya.ecommerce_serang.data.api.dto.ConfirmShipmentRequest
 import com.alya.ecommerce_serang.data.api.dto.OrderItemsItem
-import com.alya.ecommerce_serang.data.api.dto.PaymentConfirmRequest
 import com.alya.ecommerce_serang.data.api.response.store.sells.Orders
 import com.alya.ecommerce_serang.data.api.response.store.sells.OrdersItem
 import com.alya.ecommerce_serang.data.api.response.store.sells.PaymentConfirmationResponse
 import com.alya.ecommerce_serang.data.repository.Result
 import com.alya.ecommerce_serang.data.repository.SellsRepository
 import com.alya.ecommerce_serang.ui.order.address.ViewState
-import com.alya.ecommerce_serang.ui.order.history.HistoryViewModel
 import kotlinx.coroutines.launch
 
 class SellsViewModel(private val repository: SellsRepository) : ViewModel() {
@@ -175,7 +175,8 @@ class SellsViewModel(private val repository: SellsRepository) : ViewModel() {
 
         viewModelScope.launch {
             try {
-                val response = repository.confirmPayment(orderId, status)
+                val request = ConfirmPaymentRequest(orderId, status)
+                val response = repository.confirmPayment(request)
                 if (response.isSuccessful) {
                     val body = response.body()
                     Log.d(TAG, "confirmPayment success: ${body?.message}")
@@ -201,7 +202,8 @@ class SellsViewModel(private val repository: SellsRepository) : ViewModel() {
         _isLoading.value = true
         viewModelScope.launch {
             try {
-                val response = repository.confirmShipment(orderId, receiptNum)
+                val request = ConfirmShipmentRequest(receiptNum, orderId)
+                val response = repository.confirmShipment(request)
                 if (response.isSuccessful) {
                     _message.value = response.body()?.message ?: "Berhasil mengonfirmasi pengiriman"
                     _isSuccess.value = true

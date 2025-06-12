@@ -1,6 +1,8 @@
 package com.alya.ecommerce_serang.data.repository
 
 import android.util.Log
+import com.alya.ecommerce_serang.data.api.dto.ConfirmPaymentRequest
+import com.alya.ecommerce_serang.data.api.dto.ConfirmShipmentRequest
 import com.alya.ecommerce_serang.data.api.dto.PaymentConfirmRequest
 import com.alya.ecommerce_serang.data.api.response.store.GenericResponse
 import com.alya.ecommerce_serang.data.api.response.store.sells.OrderDetailResponse
@@ -45,22 +47,20 @@ class SellsRepository(private val apiService: ApiService) {
         }
     }
 
-    suspend fun confirmPayment(orderId: Int, status: String): Response<GenericResponse> {
+    suspend fun confirmPayment(request: ConfirmPaymentRequest): Response<GenericResponse> {
         return try {
-            Log.d("SellsRepository", "Calling confirmPayment with orderId=$orderId, status=$status")
-            apiService.confirmPayment(orderId, status)
+            Log.d("SellsRepository", "Calling confirmPayment with orderId=${request.orderId}, status=${request.status}")
+            apiService.confirmPayment(request)
         } catch (e: Exception) {
             Log.e("SellsRepository", "Error during confirmPayment", e)
             throw e
         }
     }
 
-    suspend fun confirmShipment(orderId: Int, receiptNum: String): Response<GenericResponse> {
+    suspend fun confirmShipment(request: ConfirmShipmentRequest): Response<GenericResponse> {
         return try {
-            apiService.confirmShipment(
-                receiptNum = receiptNum,
-                orderId = orderId
-            )
+            Log.d("SellsRepository", "Calling confirmShipment with orderId=${request.orderId}, receipt num=${request.receiptNum}")
+            apiService.confirmShipment(request)
         } catch (e: Exception) {
             throw e
         }

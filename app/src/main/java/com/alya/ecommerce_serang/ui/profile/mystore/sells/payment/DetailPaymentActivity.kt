@@ -39,6 +39,8 @@ import java.util.Calendar
 import java.util.Locale
 import java.util.TimeZone
 import androidx.core.graphics.drawable.toDrawable
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.alya.ecommerce_serang.ui.profile.mystore.sells.DetailSellsActivity
 
 class DetailPaymentActivity : AppCompatActivity() {
 
@@ -65,6 +67,12 @@ class DetailPaymentActivity : AppCompatActivity() {
         binding.header.headerLeftIcon.setOnClickListener {
             onBackPressed()
             finish()
+        }
+
+        productAdapter = SellsProductAdapter()
+        binding.rvProductItems.apply {
+            adapter = productAdapter
+            layoutManager = LinearLayoutManager(this@DetailPaymentActivity)
         }
 
         val sellsJson = intent.getStringExtra("sells_data")

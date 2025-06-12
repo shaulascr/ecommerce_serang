@@ -5,6 +5,7 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -177,7 +178,7 @@ class DetailStoreProfileActivity : AppCompatActivity() {
         }
 
         viewModel.errorMessage.observe(this) {
-            Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
+            Log.e("DetailStoreProfileActivity", "Error: $it")
         }
     }
 
