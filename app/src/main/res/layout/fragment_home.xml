@@ -28,15 +28,15 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <androidx.viewpager2.widget.ViewPager2
-                android:id="@+id/banners"
-                android:layout_width="match_parent"
-                android:layout_height="132dp"
-                android:layout_marginTop="4dp"
-                android:orientation="vertical"
-                app:layout_constraintTop_toTopOf="parent"
-                android:background="@drawable/banner_default"
-                tools:layout_editor_absoluteX="16dp" />
+<!--            <androidx.viewpager2.widget.ViewPager2-->
+<!--                android:id="@+id/banners"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="132dp"-->
+<!--                android:layout_marginTop="8dp"-->
+<!--                android:background="@drawable/banner_default"-->
+<!--                android:orientation="vertical"-->
+<!--                app:layout_constraintTop_toTopOf="parent"-->
+<!--                tools:layout_editor_absoluteX="0dp" />-->
 
             <TextView
                 android:id="@+id/categoriesText"
@@ -49,7 +49,7 @@
                 android:fontFamily="@font/dmsans_bold"
                 android:textSize="18sp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/banners" />
+                app:layout_constraintTop_toTopOf="parent" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/showAll"
@@ -72,9 +72,12 @@
                 android:clipChildren="false"
                 android:clipToPadding="false"
                 android:orientation="horizontal"
-                android:paddingHorizontal="24dp"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                android:layout_marginHorizontal="16dp"
+                app:spanCount="2"
+                app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
                 app:layout_constraintTop_toBottomOf="@id/categoriesText"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
                 tools:layout_editor_absoluteX="0dp"
                 tools:listitem="@layout/item_category_home" />
 
@@ -110,7 +113,7 @@
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="16dp"
                 android:orientation="vertical"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
                 app:layout_constraintTop_toBottomOf="@id/new_products_text"
                 tools:itemCount="5"
                 tools:listitem="@layout/item_section_horizontal" />

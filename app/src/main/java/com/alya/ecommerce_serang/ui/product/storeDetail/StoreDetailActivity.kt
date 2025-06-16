@@ -101,7 +101,15 @@ class StoreDetailActivity : AppCompatActivity() {
             }
         }
         viewModel.otherProducts.observe(this) { products ->
-            updateOtherProducts(products)
+            viewModel.loadStoresForProducts(products)
+//            updateOtherProducts(products)
+        }
+
+        viewModel.storeMap.observe(this){ storeMap ->
+            val products = viewModel.otherProducts.value.orEmpty()
+            if (products.isNotEmpty()) {
+                updateProducts(products, storeMap)
+            }
         }
     }
 
@@ -140,20 +148,24 @@ class StoreDetailActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateOtherProducts(products: List<ProductsItem>) {
+    private fun updateProducts(products: List<ProductsItem>, storeMap: Map<Int, StoreItem>) {
         if (products.isEmpty()) {
             binding.rvProducts.visibility = View.GONE
+            Log.d("StoreDetailActivity", "Product list is empty, hiding RecyclerView")
         } else {
+            Log.d("StoreDetailActivity", "Displaying product list in RecyclerView")
+
             binding.rvProducts.visibility = View.VISIBLE
+            productAdapter = HorizontalProductAdapter(products, onClick = { product ->
+                handleProductClick(product)
+            }, storeMap = storeMap)
+            binding.rvProducts.adapter = productAdapter
             productAdapter?.updateProducts(products)
         }
     }
 
+
     private fun setupRecyclerViewOtherProducts(){
-        productAdapter = HorizontalProductAdapter(
-            products = emptyList(),
-            onClick = { productsItem -> handleProductClick(productsItem) }
-        )
 
         binding.rvProducts.apply {
             adapter = productAdapter

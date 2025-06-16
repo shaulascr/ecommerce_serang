@@ -20,8 +20,14 @@ class ProductUserViewModel(private val repository: ProductRepository) : ViewMode
     private val _productDetail = MutableLiveData<Product?>()
     val productDetail: LiveData<Product?> get() = _productDetail
 
+    private val _productList = MutableLiveData<Result<List<ProductsItem>>>()
+    val productList: LiveData<Result<List<ProductsItem>>> get() = _productList
+
     private val _storeDetail = MutableLiveData<Result<StoreItem>>()
     val storeDetail : LiveData<Result<StoreItem>> get() = _storeDetail
+
+    private val _storeMap = MutableLiveData<Map<Int, StoreItem>>()
+    val storeMap: LiveData<Map<Int, StoreItem>> get() = _storeMap
 
     private val _reviewProduct = MutableLiveData<List<ReviewsItem>>()
     val reviewProduct: LiveData<List<ReviewsItem>> get() = _reviewProduct
@@ -59,6 +65,23 @@ class ProductUserViewModel(private val repository: ProductRepository) : ViewMode
         }
     }
 
+    fun loadProductsList() {
+        _isLoading.value = true
+        viewModelScope.launch {
+            try {
+                val result = repository.getAllProducts()
+                _productList.value = result
+
+            } catch (e: Exception) {
+                Log.e(TAG, "Error loading product list: ${e.message}")
+                _error.value = "Failed to load product list ${e.message}"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+
     fun loadStoreDetail(storeId: Int) {
         viewModelScope.launch {
             try {
@@ -70,6 +93,28 @@ class ProductUserViewModel(private val repository: ProductRepository) : ViewMode
                 Log.e(TAG, "Error loading store details: ${e.message}")
                 _storeDetail.value = Result.Error(e)
             }
+        }
+    }
+
+    fun loadStoresForProducts(products: List<ProductsItem>) {
+        viewModelScope.launch {
+            val map = mutableMapOf<Int, StoreItem>()
+            val storeIds = products.mapNotNull { it.storeId }.toSet()
+
+            for (storeId in storeIds) {
+                try {
+                    val result = repository.fetchStoreDetail(storeId)
+                    if (result is Result.Success) {
+                        map[storeId] = result.data
+                    } else if (result is Result.Error) {
+                        Log.e(TAG, "Failed to load storeId $storeId", result.exception)
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Exception fetching storeId $storeId", e)
+                }
+            }
+
+            _storeMap.postValue(map)
         }
     }
 
