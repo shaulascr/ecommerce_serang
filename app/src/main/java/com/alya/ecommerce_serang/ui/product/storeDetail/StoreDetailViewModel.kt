@@ -21,6 +21,9 @@ class StoreDetailViewModel (private val repository: ProductRepository
     private val _otherProducts = MutableLiveData<List<ProductsItem>>()
     val otherProducts: LiveData<List<ProductsItem>> get() = _otherProducts
 
+    private val _storeMap = MutableLiveData<Map<Int, StoreItem>>()
+    val storeMap: LiveData<Map<Int, StoreItem>> get() = _storeMap
+
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> get() = _isLoading
 
@@ -82,6 +85,28 @@ class StoreDetailViewModel (private val repository: ProductRepository
                 Log.e("ProductViewModel", "Error loading store details: ${e.message}")
                 _storeDetail.value = Result.Error(e)
             }
+        }
+    }
+
+    fun loadStoresForProducts(products: List<ProductsItem>) {
+        viewModelScope.launch {
+            val map = mutableMapOf<Int, StoreItem>()
+            val storeIds = products.mapNotNull { it.storeId }.toSet()
+
+            for (storeId in storeIds) {
+                try {
+                    val result = repository.fetchStoreDetail(storeId)
+                    if (result is Result.Success) {
+                        map[storeId] = result.data
+                    } else if (result is Result.Error) {
+                        Log.e("ProductViewModel", "Failed to load storeId $storeId", result.exception)
+                    }
+                } catch (e: Exception) {
+                    Log.e("ProductViewModel", "Exception fetching storeId $storeId", e)
+                }
+            }
+
+            _storeMap.postValue(map)
         }
     }
 }

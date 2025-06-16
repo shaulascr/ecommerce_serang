@@ -16,10 +16,6 @@ class HomeCategoryAdapter(
     private val onClick:(category:CategoryItem) -> Unit
 ): RecyclerView.Adapter<HomeCategoryAdapter.ViewHolder>() {
 
-    /*
-    ViewHolder is responsible for caching and managing the view references for each item in
-    the RecyclerView.It binds the Category data to the corresponding views within the item layout.
-     */
     inner class ViewHolder(private val binding: ItemCategoryHomeBinding): RecyclerView.ViewHolder(binding.root){
         fun bind(category: CategoryItem) = with(binding) {
             Log.d("CategoriesAdapter", "Binding category: ${category.name}, Image: ${category.image}")
@@ -59,7 +55,7 @@ class HomeCategoryAdapter(
     }
 
     fun updateLimitedCategory(newCategories: List<CategoryItem>){
-        val limitedCategories = newCategories.take(10)
+        val limitedCategories = newCategories.take(9)
         updateData(limitedCategories)
     }
 }

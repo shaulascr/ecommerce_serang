@@ -14,10 +14,11 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.findNavController
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.dto.CategoryItem
 import com.alya.ecommerce_serang.data.api.dto.ProductsItem
+import com.alya.ecommerce_serang.data.api.response.customer.product.StoreItem
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.repository.ProductRepository
 import com.alya.ecommerce_serang.databinding.FragmentHomeBinding
@@ -25,8 +26,8 @@ import com.alya.ecommerce_serang.ui.cart.CartActivity
 import com.alya.ecommerce_serang.ui.notif.NotificationActivity
 import com.alya.ecommerce_serang.ui.product.DetailProductActivity
 import com.alya.ecommerce_serang.ui.product.category.CategoryProductsActivity
+import com.alya.ecommerce_serang.ui.product.listproduct.ListProductActivity
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
-import com.alya.ecommerce_serang.utils.HorizontalMarginItemDecoration
 import com.alya.ecommerce_serang.utils.SessionManager
 import com.alya.ecommerce_serang.utils.setLightStatusBar
 import com.alya.ecommerce_serang.utils.viewmodel.HomeUiState
@@ -75,11 +76,6 @@ class HomeFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        productAdapter = HorizontalProductAdapter(
-            products = emptyList(),
-            onClick = { product -> handleProductClick(product) }
-        )
-
         categoryAdapter = HomeCategoryAdapter(
             categories = emptyList(),
             onClick = { category ->  handleCategoryProduct(category)}
@@ -87,8 +83,9 @@ class HomeFragment : Fragment() {
 
         binding.newProducts.apply {
             adapter = productAdapter
-            layoutManager = LinearLayoutManager(
+            layoutManager = GridLayoutManager(
                 context,
+                2,
                 LinearLayoutManager.HORIZONTAL,
                 false
             )
@@ -96,11 +93,17 @@ class HomeFragment : Fragment() {
 
         binding.categories.apply {
             adapter = categoryAdapter
-            layoutManager = LinearLayoutManager(
+            layoutManager = GridLayoutManager(
                 context,
+                3,
                 LinearLayoutManager.HORIZONTAL,
                 false
             )
+        }
+
+        binding.productshowAll.setOnClickListener {
+            val intent = Intent(requireContext(), ListProductActivity::class.java)
+            startActivity(intent)
         }
     }
 
@@ -155,7 +158,10 @@ class HomeFragment : Fragment() {
                             binding.loading.root.isVisible = false
                             binding.error.root.isVisible = false
                             binding.home.isVisible = true
-                            productAdapter?.updateLimitedProducts(state.products)
+                            val products = state.products
+                            viewModel.loadStoresForProducts(products) // << add this here
+
+                            productAdapter?.updateLimitedProducts(products)
                         }
                         is HomeUiState.Error -> {
                             binding.loading.root.isVisible = false
@@ -168,7 +174,9 @@ class HomeFragment : Fragment() {
                         }
                     }
                 }
+
             }
+
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
@@ -179,30 +187,56 @@ class HomeFragment : Fragment() {
                 }
             }
         }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.storeMap.collect { storeMap ->
+                    val products = (viewModel.uiState.value as? HomeUiState.Success)?.products.orEmpty()
+                    if (products.isNotEmpty()) {
+                        updateProducts(products, storeMap)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun updateProducts(products: List<ProductsItem>, storeMap: Map<Int, StoreItem>) {
+        if (products.isEmpty()) {
+            Log.d("HomeFragment", "Product list is empty, hiding RecyclerView")
+            binding.newProducts.visibility = View.VISIBLE
+        } else {
+            Log.d("HomeFragment", "Displaying product list in RecyclerView")
+            binding.newProducts.visibility = View.VISIBLE  // <-- Fix here
+            productAdapter = HorizontalProductAdapter(products, onClick = { product ->
+                handleProductClick(product)
+            }, storeMap = storeMap)
+            binding.newProducts.adapter = productAdapter
+            productAdapter?.updateProducts(products)
+        }
     }
 
     private fun initUi() {
         // For LightStatusBar
         setLightStatusBar()
-        val banners = binding.banners
-        banners.offscreenPageLimit = 1
-
-        val nextItemVisiblePx = resources.getDimension(R.dimen.viewpager_next_item_visible)
-        val currentItemHorizontalMarginPx =
-            resources.getDimension(R.dimen.viewpager_current_item_horizontal_margin)
-        val pageTranslationX = nextItemVisiblePx + currentItemHorizontalMarginPx
-
-        banners.setPageTransformer { page, position ->
-            page.translationX = -pageTranslationX * position
-            page.scaleY = 1 - (0.25f * kotlin.math.abs(position))
-        }
-
-        banners.addItemDecoration(
-            HorizontalMarginItemDecoration(
-                requireContext(),
-                R.dimen.viewpager_current_item_horizontal_margin
-            )
-        )
+//        val banners = binding.banners
+//        banners.offscreenPageLimit = 1
+//
+//        val nextItemVisiblePx = resources.getDimension(R.dimen.viewpager_next_item_visible)
+//        val currentItemHorizontalMarginPx =
+//            resources.getDimension(R.dimen.viewpager_current_item_horizontal_margin)
+//        val pageTranslationX = nextItemVisiblePx + currentItemHorizontalMarginPx
+//
+//        banners.setPageTransformer { page, position ->
+//            page.translationX = -pageTranslationX * position
+//            page.scaleY = 1 - (0.25f * kotlin.math.abs(position))
+//        }
+//
+//        banners.addItemDecoration(
+//            HorizontalMarginItemDecoration(
+//                requireContext(),
+//                R.dimen.viewpager_current_item_horizontal_margin
+//            )
+//        )
     }
 
     private fun handleProductClick(product: ProductsItem) {

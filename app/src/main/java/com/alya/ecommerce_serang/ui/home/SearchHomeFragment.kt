@@ -117,9 +117,6 @@ class SearchHomeFragment : Fragment() {
     }
 
     private fun setupSearchResultsRecyclerView() {
-        searchResultsAdapter = SearchResultsAdapter { product ->
-            navigateToProductDetail(product)
-        }
 
         binding.searchResultsRecyclerView.apply {
             adapter = searchResultsAdapter
@@ -130,9 +127,26 @@ class SearchHomeFragment : Fragment() {
     private fun observeData() {
         viewModel.searchResults.observe(viewLifecycleOwner) { products ->
 
+            if (!products.isNullOrEmpty()){
+                viewModel.storeDetail(products)
+            }
+
             searchResultsAdapter?.submitList(products)
             binding.noResultsText.isVisible = products.isEmpty() && !viewModel.isSearching.value!!
             binding.searchResultsRecyclerView.isVisible = products.isNotEmpty()
+
+        }
+
+        viewModel.storeDetail.observe(viewLifecycleOwner) {storeMap ->
+            val products = viewModel.searchResults.value.orEmpty()
+            if (products.isNotEmpty()){
+                searchResultsAdapter = SearchResultsAdapter(
+                    onItemClick = {product -> navigateToProductDetail(product) },
+                    storeMap = storeMap
+                )
+                binding.searchResultsRecyclerView.adapter = searchResultsAdapter
+                searchResultsAdapter?.submitList(products)
+            }
         }
 
         viewModel.isSearching.observe(viewLifecycleOwner) { isSearching ->

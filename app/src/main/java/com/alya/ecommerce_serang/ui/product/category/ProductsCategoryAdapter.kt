@@ -2,7 +2,6 @@ package com.alya.ecommerce_serang.ui.product.category
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.alya.ecommerce_serang.BuildConfig
 import com.alya.ecommerce_serang.R
@@ -59,14 +58,14 @@ class ProductsCategoryAdapter(
                     onClick(product)
                 }
 
-                // Optional: Show stock status
-                if (product.stock > 0) {
-                    tvStockStatus.text = "Stock: ${product.stock}"
-                    tvStockStatus.setTextColor(ContextCompat.getColor(itemView.context, R.color.green))
-                } else {
-                    tvStockStatus.text = "Out of Stock"
-                    tvStockStatus.setTextColor(ContextCompat.getColor(itemView.context, R.color.red))
-                }
+//                // Optional: Show stock status
+//                if (product.stock > 0) {
+//                    tvStockStatus.text = "Stock: ${product.stock}"
+//                    tvStockStatus.setTextColor(ContextCompat.getColor(itemView.context, R.color.green))
+//                } else {
+//                    tvStockStatus.text = "Out of Stock"
+//                    tvStockStatus.setTextColor(ContextCompat.getColor(itemView.context, R.color.red))
+//                }
             }
         }
     }
