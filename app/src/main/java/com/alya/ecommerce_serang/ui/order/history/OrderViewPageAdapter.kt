@@ -11,8 +11,8 @@ class OrderViewPagerAdapter(
     // Define all possible order statuses
     private val orderStatuses = listOf(
         "all",        // All orders
-        "pending",    // Menunggu Tagihan
-        "unpaid",     // Belum Dibayar
+        "unpaid",    // Menunggu Tagihan
+        "paid",     // Belum Dibayar
         "processed",  // Diproses
         "shipped",    // Dikirim
         "completed",  // Selesai

@@ -12,7 +12,6 @@ import com.bumptech.glide.Glide
 
 class HomeCategoryAdapter(
     private var categories:List<CategoryItem>,
-    //A lambda function that will be invoked when a category item is clicked.
     private val onClick:(category:CategoryItem) -> Unit
 ): RecyclerView.Adapter<HomeCategoryAdapter.ViewHolder>() {
 

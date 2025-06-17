@@ -21,7 +21,7 @@ import com.alya.ecommerce_serang.ui.order.history.detailorder.DetailOrderStatusA
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
 
-class OrderListFragment : Fragment() {
+class OrderListFragment : Fragment(), OrderHistoryAdapter.OrderActionCallbacks {
 
     private var _binding: FragmentOrderListBinding? = null
     private val binding get() = _binding!!
@@ -72,6 +72,7 @@ class OrderListFragment : Fragment() {
 
         setupRecyclerView()
         observeOrderList()
+        observeViewModel()
         observeOrderCompletionStatus()
         loadOrders()
     }
@@ -81,7 +82,8 @@ class OrderListFragment : Fragment() {
             onOrderClickListener = { order ->
                 navigateToOrderDetail(order)
             },
-            viewModel = viewModel
+            viewModel = viewModel,
+            callbacks = this // Pass this fragment as callback
         )
 
         orderAdapter.setFragmentStatus(status)
@@ -120,6 +122,40 @@ class OrderListFragment : Fragment() {
         }
     }
 
+    private fun observeViewModel() {
+        // Observe order completion
+        viewModel.orderCompletionStatus.observe(viewLifecycleOwner) { result ->
+            when (result) {
+                is Result.Success -> {
+                    Toast.makeText(requireContext(), "Order completed successfully!", Toast.LENGTH_SHORT).show()
+                    loadOrders() // Refresh here
+                }
+                is Result.Error -> {
+                    Toast.makeText(requireContext(), "Failed: ${result.exception.message}", Toast.LENGTH_SHORT).show()
+                }
+                is Result.Loading -> {
+                    // Show loading if needed
+                }
+            }
+        }
+
+        // Observe cancel order status
+        viewModel.cancelOrderStatus.observe(viewLifecycleOwner) { result ->
+            when (result) {
+                is Result.Success -> {
+                    Toast.makeText(requireContext(), "Order cancelled successfully!", Toast.LENGTH_SHORT).show()
+                    loadOrders() // Refresh here
+                }
+                is Result.Error -> {
+                    Toast.makeText(requireContext(), "Failed to cancel: ${result.exception.message}", Toast.LENGTH_SHORT).show()
+                }
+                is Result.Loading -> {
+                    // Show loading if needed
+                }
+            }
+        }
+    }
+
     private fun loadOrders() {
         // Simple - just call getOrderList for any status including "all"
         viewModel.getOrderList(status)
@@ -140,6 +176,30 @@ class OrderListFragment : Fragment() {
             val actualStatus = if (status == "all") order.displayStatus ?: "" else status
             putExtra("ORDER_STATUS", actualStatus)        }
         detailOrderLauncher.launch(intent)
+    }
+
+
+
+    override fun onOrderCancelled(orderId: String, success: Boolean, message: String) {
+        if (success) {
+            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+            loadOrders() // Refresh the list
+        } else {
+            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    override fun onOrderCompleted(orderId: Int, success: Boolean, message: String) {
+        if (success) {
+            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+            loadOrders() // Refresh the list
+        } else {
+            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    override fun onShowLoading(show: Boolean) {
+        binding.progressBar.visibility = if (show) View.VISIBLE else View.GONE
     }
 
     override fun onDestroyView() {
