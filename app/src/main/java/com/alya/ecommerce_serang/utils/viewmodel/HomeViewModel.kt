@@ -1,6 +1,8 @@
 package com.alya.ecommerce_serang.utils.viewmodel
 
 import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.alya.ecommerce_serang.data.api.dto.CategoryItem
@@ -24,6 +26,9 @@ class HomeViewModel (
 
     private val _storeMap = MutableStateFlow<Map<Int, StoreItem>>(emptyMap())
     val storeMap: StateFlow<Map<Int, StoreItem>> = _storeMap.asStateFlow()
+
+    private val _category = MutableLiveData<List<CategoryItem>>()
+    val category: LiveData<List<CategoryItem>> get() = _category
 
     init {
         loadProducts()
@@ -70,6 +75,16 @@ class HomeViewModel (
             }
 
             _storeMap.value = map
+        }
+    }
+
+    fun loadCategory() {
+        viewModelScope.launch {
+            when (val result = productRepository.getAllCategories()) {
+                is Result.Success -> _category.value = result.data
+                is Result.Error -> Log.e("HomeViewModel", "Failed to fetch categories", result.exception)
+                is Result.Loading -> {}
+            }
         }
     }
 

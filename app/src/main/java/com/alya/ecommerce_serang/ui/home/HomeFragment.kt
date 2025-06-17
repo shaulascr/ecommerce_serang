@@ -26,6 +26,7 @@ import com.alya.ecommerce_serang.ui.cart.CartActivity
 import com.alya.ecommerce_serang.ui.notif.NotificationActivity
 import com.alya.ecommerce_serang.ui.product.DetailProductActivity
 import com.alya.ecommerce_serang.ui.product.category.CategoryProductsActivity
+import com.alya.ecommerce_serang.ui.product.listproduct.ListCategoryActivity
 import com.alya.ecommerce_serang.ui.product.listproduct.ListProductActivity
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
@@ -98,6 +99,11 @@ class HomeFragment : Fragment() {
 
         binding.productshowAll.setOnClickListener {
             val intent = Intent(requireContext(), ListProductActivity::class.java)
+            startActivity(intent)
+        }
+
+        binding.categoryShowAll.setOnClickListener {
+            val intent = Intent(requireContext(), ListCategoryActivity::class.java)
             startActivity(intent)
         }
     }

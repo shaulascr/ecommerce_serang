@@ -39,14 +39,15 @@
                 app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Minimal pembelian 10 buah untuk harga grosir"
-            android:fontFamily="@font/dmsans_mediumitalic"
-            android:textSize="12sp"
-            android:textColor="@color/black_300"
-            android:layout_marginBottom="8dp"/>
+<!--        <TextView-->
+<!--            android:id="@+id/tv_desc_wholesale"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:text="Minimal pembelian 10 buah untuk harga grosir"-->
+<!--            android:fontFamily="@font/dmsans_mediumitalic"-->
+<!--            android:textSize="12sp"-->
+<!--            android:textColor="@color/black_300"-->
+<!--            android:layout_marginBottom="8dp"/>-->
 
 
         <androidx.constraintlayout.widget.ConstraintLayout
