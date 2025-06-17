@@ -44,8 +44,8 @@ class OrderHistoryFragment : Fragment() {
         TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
             tab.text = when (position) {
                 0 -> getString(R.string.all_orders)
-                1 -> getString(R.string.pending_orders)
-                2 -> getString(R.string.unpaid_orders)
+                1 -> getString(R.string.unpaid_orders)
+                2 -> getString(R.string.paid_orders)
                 3 -> getString(R.string.processed_orders)
                 4 -> getString(R.string.shipped_orders)
                 5 -> getString(R.string.completed_orders)

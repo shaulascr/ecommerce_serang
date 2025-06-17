@@ -81,7 +81,7 @@
     <string name="dl_pending">Batas Tagihan</string>
     <string name="dl_unpaid">Batas Pembayaran</string>
     <string name="dl_processed">Batas Pengiriman</string>
-    <string name="dal_paid">Semua Pesanan </string>
+    <string name="dl_paid">Batas Konfirmasi Penjual</string>
     <string name="dl_delivered">Semua Pesanan </string>
     <string name="dl_completed">Semua Pesanan </string>
     <string name="dl_shipped">Tanggal Pesanan Sampai</string>

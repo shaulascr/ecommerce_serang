@@ -15,7 +15,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.alya.ecommerce_serang.data.api.dto.CategoryItem
 import com.alya.ecommerce_serang.data.api.dto.ProductsItem
 import com.alya.ecommerce_serang.data.api.response.customer.product.StoreItem
@@ -83,20 +83,15 @@ class HomeFragment : Fragment() {
 
         binding.newProducts.apply {
             adapter = productAdapter
-            layoutManager = GridLayoutManager(
-                context,
-                2,
-                LinearLayoutManager.HORIZONTAL,
-                false
-            )
+            layoutManager = GridLayoutManager(requireContext(), 2)
         }
 
         binding.categories.apply {
             adapter = categoryAdapter
             layoutManager = GridLayoutManager(
                 context,
-                3,
-                LinearLayoutManager.HORIZONTAL,
+                3, // 3 columns
+                RecyclerView.VERTICAL, // vertical layout
                 false
             )
         }
