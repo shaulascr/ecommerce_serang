@@ -360,6 +360,8 @@ class DetailProductActivity : AppCompatActivity() {
         val btnClose = view.findViewById<ImageButton>(R.id.btnCloseDialog)
 
         val switchWholesale = view.findViewById<SwitchCompat>(R.id.switch_price)
+        val titleWholesale = view.findViewById<TextView>(R.id.tv_active_wholesale)
+//        val descWholesale = view.findViewById<TextView>(R.id.tv_desc_wholesale)
 
         if (!isBuyNow) {
             btnBuyNow.setText(R.string.add_to_cart)
@@ -368,9 +370,17 @@ class DetailProductActivity : AppCompatActivity() {
         switchWholesale.isEnabled = isWholesaleAvailable
         switchWholesale.isChecked = isWholesaleSelected
 
-        // Set initial quantity based on current selection
         currentQuantity = if (isWholesaleSelected) minOrder else 1
         tvQuantity.text = currentQuantity.toString()
+
+        if (isWholesaleAvailable){
+            switchWholesale.visibility = View.VISIBLE
+            Toast.makeText(this, "Minimal pembelian grosir $currentQuantity produk", Toast.LENGTH_SHORT).show()
+        } else {
+            switchWholesale.visibility = View.GONE
+        }
+        // Set initial quantity based on current selection
+
 
         switchWholesale.setOnCheckedChangeListener { _, isChecked ->
             isWholesaleSelected = isChecked

@@ -69,7 +69,7 @@ class ListProductActivity : AppCompatActivity() {
 
     private fun setupRecyclerView() {
 
-        binding.rvProducts.apply {
+        binding.rvProductsList.apply {
             adapter = productAdapter
             layoutManager = GridLayoutManager(
                 context,
@@ -112,14 +112,14 @@ class ListProductActivity : AppCompatActivity() {
     private fun updateProducts(products: List<ProductsItem>, storeMap: Map<Int, StoreItem>) {
         if (products.isEmpty()) {
             Log.d(TAG, "Product list is empty, hiding RecyclerView")
-            binding.rvProducts.visibility = View.VISIBLE
+            binding.rvProductsList.visibility = View.VISIBLE
         } else {
             Log.d(TAG, "Displaying product list in RecyclerView")
-            binding.rvProducts.visibility = View.VISIBLE  // <-- Fix here
+            binding.rvProductsList.visibility = View.VISIBLE  // <-- Fix here
             productAdapter = ListProductAdapter(products, onClick = { product ->
                 handleProductClick(product)
             }, storeMap = storeMap)
-            binding.rvProducts.adapter = productAdapter
+            binding.rvProductsList.adapter = productAdapter
             productAdapter?.updateProducts(products)
         }
     }
