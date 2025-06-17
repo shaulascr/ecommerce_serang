@@ -158,14 +158,13 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_products"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="16dp"
-        android:orientation="vertical"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
         app:layout_constraintTop_toBottomOf="@id/divider_product"
-        tools:itemCount="5"
-        tools:listitem="@layout/item_section_horizontal" />
+        app:spanCount="2"
+        tools:listitem="@layout/item_product_grid" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

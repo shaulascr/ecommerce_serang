@@ -326,10 +326,10 @@ class CheckoutActivity : AppCompatActivity() {
             }
         }
 
-        // Voucher section (if implemented)
-        binding.layoutVoucher?.setOnClickListener {
-            Toast.makeText(this, "Voucher feature not implemented", Toast.LENGTH_SHORT).show()
-        }
+//        // Voucher section (if implemented)
+//        binding.layoutVoucher?.setOnClickListener {
+//            Toast.makeText(this, "Voucher feature not implemented", Toast.LENGTH_SHORT).show()
+//        }
     }
 
     private val addressSelectionLauncher = registerForActivityResult(

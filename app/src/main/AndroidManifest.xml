@@ -30,6 +30,12 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".ui.product.listproduct.ListCategoryActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.product.listproduct.ListProductActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.profile.mystore.sells.DetailSellsActivity"
             android:exported="false" />
         <activity

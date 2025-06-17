@@ -31,7 +31,6 @@ import com.alya.ecommerce_serang.data.repository.Result
 import com.alya.ecommerce_serang.databinding.ActivityDetailProductBinding
 import com.alya.ecommerce_serang.ui.cart.CartActivity
 import com.alya.ecommerce_serang.ui.chat.ChatActivity
-import com.alya.ecommerce_serang.ui.home.HorizontalProductAdapter
 import com.alya.ecommerce_serang.ui.order.CheckoutActivity
 import com.alya.ecommerce_serang.ui.product.storeDetail.StoreDetailActivity
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
@@ -45,7 +44,7 @@ class DetailProductActivity : AppCompatActivity() {
     private lateinit var binding: ActivityDetailProductBinding
     private lateinit var apiService: ApiService
     private lateinit var sessionManager: SessionManager
-    private var productAdapter: HorizontalProductAdapter? = null
+    private var productAdapter: OtherProductAdapter? = null
     private var reviewsAdapter: ReviewsAdapter? = null
     private var currentQuantity = 1
     private var isWholesaleAvailable: Boolean = false
@@ -125,7 +124,8 @@ class DetailProductActivity : AppCompatActivity() {
         }
 
         viewModel.otherProducts.observe(this) { products ->
-            updateOtherProducts(products)
+            viewModel.loadStoresForProducts(products)
+//            updateOtherProducts(products)
         }
 
         viewModel.reviewProduct.observe(this) { reviews ->
@@ -155,6 +155,13 @@ class DetailProductActivity : AppCompatActivity() {
                 }
             }
         }
+
+        viewModel.storeMap.observe(this){ storeMap ->
+            val products = viewModel.otherProducts.value.orEmpty()
+            if (products.isNotEmpty()) {
+                updateOtherProducts(products, storeMap)
+            }
+        }
     }
 
     private fun updateStoreInfo(store: StoreItem?) {
@@ -178,13 +185,21 @@ class DetailProductActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateOtherProducts(products: List<ProductsItem>) {
+
+    private fun updateOtherProducts(products: List<ProductsItem>, storeMap: Map<Int, StoreItem>) {
         if (products.isEmpty()) {
-            binding.recyclerViewOtherProducts.visibility = View.GONE
+            Log.d("DetailProductActivity", "Product list is empty, hiding RecyclerView")
+            binding.recyclerViewOtherProducts.visibility = View.VISIBLE
             binding.tvViewAllProducts.visibility = View.GONE
         } else {
+            Log.d("DetailProductActivity", "Displaying product list in RecyclerView")
             binding.recyclerViewOtherProducts.visibility = View.VISIBLE
             binding.tvViewAllProducts.visibility = View.VISIBLE
+
+            productAdapter = OtherProductAdapter(products, onClick = { product ->
+                handleProductClick(product)
+            }, storeMap = storeMap)
+            binding.recyclerViewOtherProducts.adapter = productAdapter
             productAdapter?.updateProducts(products)
         }
     }
@@ -275,10 +290,6 @@ class DetailProductActivity : AppCompatActivity() {
     }
 
     private fun setupRecyclerViewOtherProducts(){
-        productAdapter = HorizontalProductAdapter(
-            products = emptyList(),
-            onClick = { productsItem -> handleProductClick(productsItem) }
-        )
 
         binding.recyclerViewOtherProducts.apply {
             adapter = productAdapter
@@ -349,6 +360,8 @@ class DetailProductActivity : AppCompatActivity() {
         val btnClose = view.findViewById<ImageButton>(R.id.btnCloseDialog)
 
         val switchWholesale = view.findViewById<SwitchCompat>(R.id.switch_price)
+        val titleWholesale = view.findViewById<TextView>(R.id.tv_active_wholesale)
+//        val descWholesale = view.findViewById<TextView>(R.id.tv_desc_wholesale)
 
         if (!isBuyNow) {
             btnBuyNow.setText(R.string.add_to_cart)
@@ -357,9 +370,17 @@ class DetailProductActivity : AppCompatActivity() {
         switchWholesale.isEnabled = isWholesaleAvailable
         switchWholesale.isChecked = isWholesaleSelected
 
-        // Set initial quantity based on current selection
         currentQuantity = if (isWholesaleSelected) minOrder else 1
         tvQuantity.text = currentQuantity.toString()
+
+        if (isWholesaleAvailable){
+            switchWholesale.visibility = View.VISIBLE
+            Toast.makeText(this, "Minimal pembelian grosir $currentQuantity produk", Toast.LENGTH_SHORT).show()
+        } else {
+            switchWholesale.visibility = View.GONE
+        }
+        // Set initial quantity based on current selection
+
 
         switchWholesale.setOnCheckedChangeListener { _, isChecked ->
             isWholesaleSelected = isChecked

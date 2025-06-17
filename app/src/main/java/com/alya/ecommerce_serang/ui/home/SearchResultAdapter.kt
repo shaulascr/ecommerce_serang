@@ -6,13 +6,16 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.alya.ecommerce_serang.BuildConfig.BASE_URL
 import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.dto.ProductsItem
+import com.alya.ecommerce_serang.data.api.response.customer.product.StoreItem
 import com.alya.ecommerce_serang.databinding.ItemProductGridBinding
 import com.bumptech.glide.Glide
 
 class SearchResultsAdapter(
-    private val onItemClick: (ProductsItem) -> Unit
+    private val onItemClick: (ProductsItem) -> Unit,
+    private val storeMap: Map<Int, StoreItem>
 ) : ListAdapter<ProductsItem, SearchResultsAdapter.ViewHolder>(DIFF_CALLBACK) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -43,19 +46,23 @@ class SearchResultsAdapter(
 
         fun bind(product: ProductsItem) {
             binding.tvProductName.text = product.name
-            binding.tvProductPrice.text = (product.price)
+            binding.tvProductPrice.text = product.price
 
+            val fullImageUrl = if (product.image.startsWith("/")) {
+                BASE_URL + product.image.removePrefix("/") // Append base URL if the path starts with "/"
+            } else {
+                product.image // Use as is if it's already a full URL
+            }
+            Log.d("ProductAdapter", "Loading image: $fullImageUrl")
             // Load image with Glide
             Glide.with(binding.root.context)
-                .load(product.image)
+                .load(fullImageUrl)
                 .placeholder(R.drawable.placeholder_image)
 //                .error(R.drawable.error_image)
                 .into(binding.ivProductImage)
 
-            // Set store name if available
-            product.storeId?.toString().let {
-                binding.tvStoreName.text = it
-            }
+            val storeName = product.storeId?.let { storeMap[it]?.storeName } ?: "Unknown Store"
+            binding.tvStoreName.text = storeName
         }
     }
 

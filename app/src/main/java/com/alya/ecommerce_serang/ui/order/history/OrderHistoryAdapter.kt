@@ -4,7 +4,6 @@ import android.app.Activity
 import android.app.Dialog
 import android.content.ContextWrapper
 import android.content.Intent
-import android.graphics.Color
 import android.net.Uri
 import android.provider.MediaStore
 import android.util.Log
@@ -15,10 +14,10 @@ import android.view.Window
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.ImageView
-import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.Observer
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -40,8 +39,15 @@ import java.util.TimeZone
 
 class OrderHistoryAdapter(
     private val onOrderClickListener: (OrdersItem) -> Unit,
-    private val viewModel: HistoryViewModel // Add this parameter
+    private val viewModel: HistoryViewModel,
+    private val callbacks: OrderActionCallbacks
 ) : RecyclerView.Adapter<OrderHistoryAdapter.OrderViewHolder>() {
+
+    interface OrderActionCallbacks {
+        fun onOrderCancelled(orderId: String, success: Boolean, message: String)
+        fun onOrderCompleted(orderId: Int, success: Boolean, message: String)
+        fun onShowLoading(show: Boolean)
+    }
 
     private val orders = mutableListOf<OrdersItem>()
 
@@ -140,28 +146,6 @@ class OrderHistoryAdapter(
             deadlineLabel.visibility = View.GONE
 
             when (status) {
-                "pending" -> {
-                    statusOrder.apply {
-                        visibility = View.VISIBLE
-                        text = itemView.context.getString(R.string.pending_orders)
-                    }
-                    deadlineLabel.apply {
-                        visibility = View.VISIBLE
-                        text = itemView.context.getString(R.string.dl_pending)
-                    }
-                    btnLeft.apply {
-                        visibility = View.VISIBLE
-                        text = itemView.context.getString(R.string.canceled_order_btn)
-                        setOnClickListener {
-                            showCancelOrderBottomSheet(order.orderId)
-                            viewModel.refreshOrders()
-                        }
-                    }
-                    deadlineDate.apply {
-                        visibility = View.VISIBLE
-                        text = formatDate(order.createdAt)
-                    }
-                }
                 "unpaid" -> {
                     statusOrder.apply {
                         visibility = View.VISIBLE
@@ -176,7 +160,6 @@ class OrderHistoryAdapter(
                         text = itemView.context.getString(R.string.canceled_order_btn)
                         setOnClickListener {
                             showCancelOrderBottomSheet(order.orderId)
-                            viewModel.refreshOrders()
                         }
                     }
 
@@ -197,6 +180,28 @@ class OrderHistoryAdapter(
                         visibility = View.VISIBLE
                         text = formatDatePay(order.updatedAt)
                     }
+                }
+                "paid" -> {
+                    statusOrder.apply {
+                        visibility = View.VISIBLE
+                        text = itemView.context.getString(R.string.paid_orders)
+                    }
+                    deadlineLabel.apply {
+                        visibility = View.VISIBLE
+                        text = itemView.context.getString(R.string.dl_paid)
+                    }
+                    btnLeft.apply {
+                        visibility = View.VISIBLE
+                        text = itemView.context.getString(R.string.canceled_order_btn)
+                        setOnClickListener {
+                            showCancelOrderDialog(order.orderId.toString())
+                            viewModel.refreshOrders()
+                        }
+                    }
+//                    deadlineDate.apply {
+//                        visibility = View.VISIBLE
+//                        text = formatDatePay(order.updatedAt)
+//                    }
                 }
                 "processed" -> {
                     // Untuk status processed, tampilkan "Hubungi Penjual"
@@ -239,11 +244,14 @@ class OrderHistoryAdapter(
                         visibility = View.VISIBLE
                         text = itemView.context.getString(R.string.claim_order)
                         setOnClickListener {
-                            // Handle click event
+                            callbacks.onShowLoading(true)
+
+                            // Call ViewModel
                             viewModel.confirmOrderCompleted(order.orderId, "completed")
                             viewModel.refreshOrders()
 
                         }
+
                     }
                     deadlineDate.apply {
                         visibility = View.VISIBLE
@@ -454,52 +462,32 @@ class OrderHistoryAdapter(
                     }
                 }
 
-                // Show loading indicator
-                val loadingView = View(context).apply {
-                    layoutParams = ViewGroup.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.MATCH_PARENT
-                    )
-                    setBackgroundColor(Color.parseColor("#80000000"))
+                callbacks.onShowLoading(true)
 
-                    val progressBar = ProgressBar(context).apply {
-                        layoutParams = ViewGroup.LayoutParams(
-                            ViewGroup.LayoutParams.WRAP_CONTENT,
-                            ViewGroup.LayoutParams.WRAP_CONTENT
-                        )
-                    }
-
-//                    addView(progressBar)
-//                    (progressBar.layoutParams as? ViewGroup.MarginLayoutParams)?.apply {
-//                        gravity = Gravity.CENTER
-//                    }
-                }
-
-                dialog.addContentView(loadingView, loadingView.layoutParams)
-
-                // Call the ViewModel to cancel the order with image
+                // Call ViewModel method but don't observe here
                 viewModel.cancelOrderWithImage(orderId, reason, imageFile)
 
-                // Observe for success/failure
-                viewModel.isSuccess.observe(itemView.findViewTreeLifecycleOwner()!!) { isSuccess ->
-                    // Remove loading indicator
-                    (loadingView.parent as? ViewGroup)?.removeView(loadingView)
+                // Create a one-time observer that will be removed automatically
+                val observer = object : Observer<Boolean> {
+                    override fun onChanged(isSuccess: Boolean) {
+                        callbacks.onShowLoading(false)
 
-                    if (isSuccess) {
-                        Toast.makeText(context, context.getString(R.string.order_canceled_successfully), Toast.LENGTH_SHORT).show()
-                        dialog.dismiss()
-
-                        // Find the order in the list and remove it or update its status
-                        val position = orders.indexOfFirst { it.orderId.toString() == orderId }
-                        if (position != -1) {
-                            orders.removeAt(position)
-                            notifyItemRemoved(position)
-                            notifyItemRangeChanged(position, orders.size)
+                        if (isSuccess) {
+                            val message = viewModel.message.value ?: context.getString(R.string.order_canceled_successfully)
+                            callbacks.onOrderCancelled(orderId, true, message)
+                            dialog.dismiss()
+                        } else {
+                            val message = viewModel.message.value ?: context.getString(R.string.failed_to_cancel_order)
+                            callbacks.onOrderCancelled(orderId, false, message)
                         }
-                    } else {
-                        Toast.makeText(context, viewModel.message.value ?: context.getString(R.string.failed_to_cancel_order), Toast.LENGTH_SHORT).show()
+
+                        // Remove this observer after first use
+                        viewModel.isSuccess.removeObserver(this)
                     }
                 }
+
+                // Add observer only once
+                viewModel.isSuccess.observe(itemView.findViewTreeLifecycleOwner()!!, observer)
             }
             dialog.show()
         }
@@ -534,10 +522,7 @@ class OrderHistoryAdapter(
             val bottomSheet = CancelOrderBottomSheet(
                 orderId = orderId,
                 onOrderCancelled = {
-                    // Handle the successful cancellation
-                    // Refresh the data
-                    viewModel.refreshOrders() // Assuming there's a method to refresh orders
-
+                    callbacks.onOrderCancelled(orderId.toString(), true, "Order cancelled successfully")
                     // Show a success message
                     Toast.makeText(context, "Order cancelled successfully", Toast.LENGTH_SHORT).show()
                 }

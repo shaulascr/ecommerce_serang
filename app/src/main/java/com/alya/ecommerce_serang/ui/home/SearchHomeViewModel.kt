@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.alya.ecommerce_serang.data.api.dto.ProductsItem
+import com.alya.ecommerce_serang.data.api.response.customer.product.StoreItem
 import com.alya.ecommerce_serang.data.repository.ProductRepository
 import com.alya.ecommerce_serang.data.repository.Result
 import kotlinx.coroutines.launch
@@ -14,6 +15,9 @@ class SearchHomeViewModel (private val productRepository: ProductRepository) : V
 
     private val _searchResults = MutableLiveData<List<ProductsItem>>(emptyList())
     val searchResults: LiveData<List<ProductsItem>> = _searchResults
+
+    private val _storeDetail =  MutableLiveData<Map<Int, StoreItem>>()
+    val storeDetail : LiveData<Map<Int, StoreItem>> get() = _storeDetail
 
     private val _searchHistory = MutableLiveData<List<String>>(emptyList())
     val searchHistory: LiveData<List<String>> = _searchHistory
@@ -25,10 +29,10 @@ class SearchHomeViewModel (private val productRepository: ProductRepository) : V
     val isSearchActive: LiveData<Boolean> = _isSearchActive
 
     fun searchProducts(query: String) {
-        Log.d("HomeViewModel", "searchProducts called with query: '$query'")
+        Log.d("SearchHomeViewModel", "searchProducts called with query: '$query'")
 
         if (query.isBlank()) {
-            Log.d("HomeViewModel", "Query is blank, clearing results")
+            Log.d("SearchHomeViewModel", "Query is blank, clearing results")
             _searchResults.value = emptyList()
             _isSearchActive.value = false
             return
@@ -38,24 +42,48 @@ class SearchHomeViewModel (private val productRepository: ProductRepository) : V
         _isSearchActive.value = true
 
         viewModelScope.launch {
-            Log.d("HomeViewModel", "Starting search coroutine")
+            Log.d("SearchHomeViewModeldel", "Starting search coroutine")
 
             when (val result = productRepository.searchProducts(query)) {
                 is Result.Success -> {
-                    Log.d("HomeViewModel", "Search successful, found ${result.data.size} products")
+                    Log.d("SearchHomeViewModel", "Search successful, found ${result.data.size} products")
                     _searchResults.postValue(result.data)
 
                     // Double check the state after assignment
-                    Log.d("HomeViewModel", "Updated searchResults value has ${result.data.size} items")
+                    Log.d("SearchHomeViewModel", "Updated searchResults value has ${result.data.size} items")
                 }
                 is Result.Error -> {
-                    Log.e("HomeViewModel", "Search failed", result.exception)
+                    Log.e("SearchHomeViewModel", "Search failed", result.exception)
                     _searchResults.postValue(emptyList())
                 }
                 else -> {}
             }
             _isSearching.postValue(false)
         }
+    }
+
+    fun storeDetail(products: List<ProductsItem>){
+        viewModelScope.launch {
+            val map = mutableMapOf<Int, StoreItem>()
+
+            val storeIds = products.mapNotNull { it.storeId }.toSet()
+            for (storeId in storeIds){
+                try {
+                    when (val result = productRepository.fetchStoreDetail(storeId)){
+                        is Result.Success -> map[storeId] = result.data
+                        is Result.Error -> Log.e("SearchHomeViewModel", "Error Loading Store")
+                        else -> {}
+                    }
+                } catch (e: Exception){
+                    Log.e("SearchHomeViewModel", "Exception error for storeId: $storeId", e)
+                }
+            }
+            _storeDetail.value = map
+        }
+    }
+
+    fun loadStoreDetail(storeId: Int) {
+
     }
 
     fun clearSearch() {
@@ -68,7 +96,7 @@ class SearchHomeViewModel (private val productRepository: ProductRepository) : V
         viewModelScope.launch {
             when (val result = productRepository.getSearchHistory()) {
                 is Result.Success -> _searchHistory.value = result.data
-                is Result.Error -> Log.e("HomeViewModel", "Failed to load search history", result.exception)
+                is Result.Error -> Log.e("SearchHomeViewModel", "Failed to load search history", result.exception)
                 else -> {}
             }
         }

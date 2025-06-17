@@ -11,7 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.GridLayoutManager
 import com.alya.ecommerce_serang.BuildConfig.BASE_URL
 import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.dto.ProductsItem
@@ -101,7 +101,15 @@ class StoreDetailActivity : AppCompatActivity() {
             }
         }
         viewModel.otherProducts.observe(this) { products ->
-            updateOtherProducts(products)
+            viewModel.loadStoresForProducts(products)
+//            updateOtherProducts(products)
+        }
+
+        viewModel.storeMap.observe(this){ storeMap ->
+            val products = viewModel.otherProducts.value.orEmpty()
+            if (products.isNotEmpty()) {
+                updateProducts(products, storeMap)
+            }
         }
     }
 
@@ -140,28 +148,28 @@ class StoreDetailActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateOtherProducts(products: List<ProductsItem>) {
+    private fun updateProducts(products: List<ProductsItem>, storeMap: Map<Int, StoreItem>) {
         if (products.isEmpty()) {
             binding.rvProducts.visibility = View.GONE
+            Log.d("StoreDetailActivity", "Product list is empty, hiding RecyclerView")
         } else {
+            Log.d("StoreDetailActivity", "Displaying product list in RecyclerView")
+
             binding.rvProducts.visibility = View.VISIBLE
+            productAdapter = HorizontalProductAdapter(products, onClick = { product ->
+                handleProductClick(product)
+            }, storeMap = storeMap)
+            binding.rvProducts.adapter = productAdapter
             productAdapter?.updateProducts(products)
         }
     }
 
+
     private fun setupRecyclerViewOtherProducts(){
-        productAdapter = HorizontalProductAdapter(
-            products = emptyList(),
-            onClick = { productsItem -> handleProductClick(productsItem) }
-        )
 
         binding.rvProducts.apply {
             adapter = productAdapter
-            layoutManager = LinearLayoutManager(
-                context,
-                LinearLayoutManager.HORIZONTAL,
-                false
-            )
+            layoutManager = GridLayoutManager(context, 2)
         }
     }
 

@@ -1,4 +1,4 @@
-package com.alya.ecommerce_serang.ui.home
+package com.alya.ecommerce_serang.ui.product.listproduct
 
 import android.util.Log
 import android.view.LayoutInflater
@@ -10,10 +10,10 @@ import com.alya.ecommerce_serang.data.api.dto.CategoryItem
 import com.alya.ecommerce_serang.databinding.ItemCategoryHomeBinding
 import com.bumptech.glide.Glide
 
-class HomeCategoryAdapter(
+class ListCategoryAdapter(
     private var categories:List<CategoryItem>,
-    private val onClick:(category:CategoryItem) -> Unit
-): RecyclerView.Adapter<HomeCategoryAdapter.ViewHolder>() {
+    private val onClick:(category: CategoryItem) -> Unit
+): RecyclerView.Adapter<ListCategoryAdapter.ViewHolder>() {
 
     inner class ViewHolder(private val binding: ItemCategoryHomeBinding): RecyclerView.ViewHolder(binding.root){
         fun bind(category: CategoryItem) = with(binding) {
@@ -44,17 +44,12 @@ class HomeCategoryAdapter(
 
     override fun getItemCount() = categories.size
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: ListCategoryAdapter.ViewHolder, position: Int) {
         holder.bind(categories[position])
     }
 
     fun updateData(newCategories: List<CategoryItem>) {
         categories = newCategories.toList()
         notifyDataSetChanged()
-    }
-
-    fun updateLimitedCategory(newCategories: List<CategoryItem>){
-        val limitedCategories = newCategories.take(9)
-        updateData(limitedCategories)
     }
 }

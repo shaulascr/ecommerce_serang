@@ -91,7 +91,7 @@ class HistoryViewModel(private val repository: OrderRepository) : ViewModel()  {
 
     private suspend fun getAllOrdersCombined() {
         try {
-            val allStatuses = listOf("pending", "unpaid", "processed", "shipped", "completed", "canceled")
+            val allStatuses = listOf("unpaid", "paid", "processed", "shipped", "completed", "canceled")
             val allOrders = mutableListOf<OrdersItem>()
 
             // Use coroutineScope to allow launching async blocks
@@ -211,10 +211,7 @@ class HistoryViewModel(private val repository: OrderRepository) : ViewModel()  {
 
     fun refreshOrders(status: String = "all") {
         Log.d(TAG, "Refreshing orders with status: $status")
-        // Clear current orders before fetching new ones
-        _orders.value = ViewState.Loading
-
-        // Re-fetch the orders with the current status
+        // Don't set Loading here if you want to show current data while refreshing
         getOrderList(status)
     }
 }

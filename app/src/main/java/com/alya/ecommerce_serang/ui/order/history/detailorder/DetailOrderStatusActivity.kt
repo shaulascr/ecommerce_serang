@@ -234,8 +234,8 @@ class DetailOrderStatusActivity : AppCompatActivity() {
 
         // Set status header
         val statusText = when(status) {
-            "pending" -> "Belum Bayar"
             "unpaid" -> "Belum Bayar"
+            "paid" -> "Sudah Dibayar"
             "processed" -> "Diproses"
             "shipped" -> "Dikirim"
             "delivered" -> "Diterima"
@@ -248,22 +248,6 @@ class DetailOrderStatusActivity : AppCompatActivity() {
         Log.d(TAG, "adjustButtonsBasedOnStatus: Status header set to '$statusText'")
 
         when (status) {
-            "pending"->{
-                binding.tvStatusHeader.text = "Menunggu Tagihan"
-                binding.tvStatusNote.visibility = View.VISIBLE
-                binding.tvStatusNote.text = "Pesanan ini harus dibayar sebelum ${formatDatePay(orders.updatedAt)}"
-
-                // Set buttons
-                binding.btnSecondary.apply {
-                    visibility = View.VISIBLE
-                    text = "Batalkan Pesanan"
-                    setOnClickListener {
-                        Log.d(TAG, "Cancel Order button clicked")
-                        showCancelOrderBottomSheet(orders.orderId)
-                        viewModel.getOrderDetails(orders.orderId)
-                    }
-                }
-            }
             "unpaid" -> {
                 Log.d(TAG, "adjustButtonsBasedOnStatus: Setting up UI for pending/unpaid order")
 
@@ -295,7 +279,25 @@ class DetailOrderStatusActivity : AppCompatActivity() {
                     }
                 }
             }
+            "paid" -> {
+                Log.d(TAG, "adjustButtonsBasedOnStatus: Setting up UI for pending/unpaid order")
 
+                // Show status note
+                binding.tvStatusHeader.text = "Sudah Dibayar"
+                binding.tvStatusNote.visibility = View.VISIBLE
+                binding.tvStatusNote.text = "Menunggu pesanan dikonfirmasi penjual ${formatDatePay(orders.updatedAt)}"
+
+                // Set buttons
+                binding.btnSecondary.apply {
+                    visibility = View.VISIBLE
+                    text = "Batalkan Pesanan"
+                    setOnClickListener {
+                        Log.d(TAG, "Cancel Order button clicked")
+                        showCancelOrderDialog(orders.orderId.toString())
+                        viewModel.getOrderDetails(orders.orderId)
+                    }
+                }
+            }
             "processed" -> {
                 Log.d(TAG, "adjustButtonsBasedOnStatus: Setting up UI for processed order")
 
