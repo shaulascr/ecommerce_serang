@@ -2,6 +2,7 @@ package com.alya.ecommerce_serang.ui.home
 
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -11,6 +12,8 @@ import com.alya.ecommerce_serang.data.api.dto.ProductsItem
 import com.alya.ecommerce_serang.data.api.response.customer.product.StoreItem
 import com.alya.ecommerce_serang.databinding.ItemProductGridBinding
 import com.bumptech.glide.Glide
+import java.text.NumberFormat
+import java.util.Locale
 
 class HorizontalProductAdapter(
     private var products: List<ProductsItem>,
@@ -32,8 +35,17 @@ class HorizontalProductAdapter(
             Log.d("ProductAdapter", "Loading image: $fullImageUrl")
 
             tvProductName.text = product.name
-            tvProductPrice.text = product.price
-            rating.text = product.rating
+            tvProductPrice.text = formatCurrency(product.price.toDouble())
+            val ratingStr = product.rating
+            val ratingValue = ratingStr?.toFloatOrNull()
+
+            if (ratingValue != null && ratingValue > 0f) {
+                binding.rating.text = String.format("%.1f", ratingValue)
+                binding.rating.visibility = View.VISIBLE
+            } else {
+                binding.rating.text = "Belum ada rating"
+                binding.rating.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null)
+            }
 
             // Load image using Glide
             Glide.with(itemView)
@@ -75,6 +87,11 @@ class HorizontalProductAdapter(
         val diffResult = DiffUtil.calculateDiff(diffCallback)
         products = limitedProducts
         diffResult.dispatchUpdatesTo(this)
+    }
+
+    private fun formatCurrency(amount: Double): String {
+        val formatter = NumberFormat.getCurrencyInstance(Locale("in", "ID"))
+        return formatter.format(amount).replace(",00", "")
     }
 
     class ProductDiffCallback(

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="8dp">
+    android:paddingHorizontal="8dp">
 
     <TextView
         android:id="@+id/tvStoreName"
@@ -68,6 +68,7 @@
         android:textColor="@color/blue_500"
         android:textSize="14sp"
         android:textStyle="bold"
+        android:paddingBottom="4dp"
         app:layout_constraintStart_toEndOf="@+id/ivProduct"
         app:layout_constraintTop_toBottomOf="@+id/tvQuantity" />
 

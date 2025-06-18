@@ -16,6 +16,9 @@ import com.alya.ecommerce_serang.utils.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 import javax.inject.Inject
@@ -737,7 +740,8 @@ class ChatViewModel @Inject constructor(
             attachment = chatLine.attachment ?: "",
             status = chatLine.status,
             time = formattedTime,
-            isSentByMe = chatLine.senderId == currentUserId
+            isSentByMe = chatLine.senderId == currentUserId,
+            createdAt = chatLine.createdAt
         )
     }
 
@@ -781,7 +785,8 @@ class ChatViewModel @Inject constructor(
             time = formattedTime,
             isSentByMe = chatItem.senderId == currentUserId,
             messageType = messageType,
-            productInfo = productInfo
+            productInfo = productInfo,
+            createdAt = chatItem.createdAt
         )
 
         // Fetch product info for non-current-user products
@@ -923,6 +928,85 @@ class ChatViewModel @Inject constructor(
         Log.d(TAG, "ChatViewModel cleared - Disconnecting socket")
         socketService.disconnect()
     }
+
+    fun getDisplayItems(): List<ChatDisplayItem> {
+        return transformMessagesToDisplayItems(state.value?.messages ?: emptyList())
+    }
+
+    private fun transformMessagesToDisplayItems(messages: List<ChatUiMessage>): List<ChatDisplayItem> {
+        if (messages.isEmpty()) return emptyList()
+
+        val displayItems = mutableListOf<ChatDisplayItem>()
+        var lastDate: String? = null
+
+        for (message in messages) {
+            // Extract date from message timestamp
+            val messageDate = extractDateFromTimestamp(message.createdAt) // You need to implement this
+
+            // Add date header if this is a new day
+            if (messageDate != lastDate) {
+                val formattedDate = formatDateHeader(messageDate) // You need to implement this
+                displayItems.add(ChatDisplayItem.DateHeaderItem(messageDate, formattedDate))
+                lastDate = messageDate
+            }
+
+            // Add the message
+            displayItems.add(ChatDisplayItem.MessageItem(message))
+        }
+
+        return displayItems
+    }
+
+    private fun extractDateFromTimestamp(timestamp: String): String {
+        return try {
+            // Parse ISO 8601 format: "2025-05-27T08:36:53.946Z"
+            val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
+            inputFormat.timeZone = TimeZone.getTimeZone("UTC")
+
+            val date = inputFormat.parse(timestamp)
+            val outputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            outputFormat.format(date ?: Date())
+        } catch (e: Exception) {
+            Log.e(TAG, "Error parsing timestamp: $timestamp", e)
+            return timestamp.take(10)
+        }
+    }
+
+    private fun formatDateHeader(dateString: String): String {
+        return try {
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            val messageDate = dateFormat.parse(dateString) ?: return dateString
+
+            val today = Calendar.getInstance()
+            val yesterday = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -1) }
+            val messageCalendar = Calendar.getInstance().apply { time = messageDate }
+
+            when {
+                isSameDay(messageCalendar, today) -> "Today"
+                isSameDay(messageCalendar, yesterday) -> "Yesterday"
+                isThisYear(messageCalendar, today) -> {
+                    // Show "Mon, Dec 15" format for this year
+                    SimpleDateFormat("EEE, MMM dd", Locale.getDefault()).format(messageDate)
+                }
+                else -> {
+                    // Show "Dec 15, 2024" format for other years
+                    SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(messageDate)
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error formatting date: $dateString", e)
+            dateString // Fallback to raw date
+        }
+    }
+
+    private fun isSameDay(cal1: Calendar, cal2: Calendar): Boolean {
+        return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
+                cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)
+    }
+
+    private fun isThisYear(messageCalendar: Calendar, today: Calendar): Boolean {
+        return messageCalendar.get(Calendar.YEAR) == today.get(Calendar.YEAR)
+    }
 }
 
 enum class MessageType {
@@ -949,8 +1033,11 @@ data class ChatUiMessage(
     val time: String,
     val isSentByMe: Boolean,
     val messageType: MessageType = MessageType.TEXT,
-    val productInfo: ProductInfo? = null
+    val productInfo: ProductInfo? = null,
+    val createdAt: String
 )
+
+
 
 // representing UI state to screen
 data class ChatUiState(

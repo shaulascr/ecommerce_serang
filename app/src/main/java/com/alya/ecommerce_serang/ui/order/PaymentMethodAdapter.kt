@@ -48,6 +48,12 @@ class PaymentMethodAdapter(
 
             // Load payment icon if available
             if (!payment.qrisImage.isNullOrEmpty()) {
+//                val fullImageUrl = if (payment.qrisImage.startsWith("/")) {
+//                    BASE_URL + payment.qrisImage.removePrefix("/") // Append base URL if the path starts with "/"
+//                } else {
+//                    payment.qrisImage// Use as is if it's already a full URL
+//                }
+
                 Glide.with(ivPaymentMethod.context)
                     .load(payment.qrisImage)
                     .apply(

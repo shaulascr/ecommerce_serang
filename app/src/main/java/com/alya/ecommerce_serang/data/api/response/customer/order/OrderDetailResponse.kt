@@ -80,7 +80,7 @@ data class Orders(
 	val cancelReason: String? = null,
 
 	@field:SerializedName("total_amount")
-	val totalAmount: String? = null,
+	val totalAmount: Int? = null,
 
 	@field:SerializedName("user_id")
 	val userId: Int,
