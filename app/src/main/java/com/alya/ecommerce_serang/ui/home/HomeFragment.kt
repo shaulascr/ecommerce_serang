@@ -6,7 +6,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.EditorInfo
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -110,25 +109,15 @@ class HomeFragment : Fragment() {
 
     private fun setupSearchView() {
         binding.searchContainer.search.apply {
-            // When user clicks the search box, navigate to search fragment
+            // Make it non-editable so it acts like a button
+            isFocusable = false
+            isFocusableInTouchMode = false
+            isClickable = true
+
             setOnClickListener {
                 findNavController().navigate(
                     HomeFragmentDirections.actionHomeFragmentToSearchHomeFragment(null)
                 )
-            }
-
-// Handle search action if user presses search on keyboard
-            setOnEditorActionListener { _, actionId, _ ->
-                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                    val query = text.toString().trim()
-                    if (query.isNotEmpty()) {
-                        findNavController().navigate(
-                            HomeFragmentDirections.actionHomeFragmentToSearchHomeFragment(query)
-                        )
-                    }
-                    return@setOnEditorActionListener true
-                }
-                false
             }
         }
 

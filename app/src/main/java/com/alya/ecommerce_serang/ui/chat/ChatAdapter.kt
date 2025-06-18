@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.alya.ecommerce_serang.BuildConfig.BASE_URL
 import com.alya.ecommerce_serang.R
+import com.alya.ecommerce_serang.databinding.ItemDateHeaderBinding
 import com.alya.ecommerce_serang.databinding.ItemMessageProductReceivedBinding
 import com.alya.ecommerce_serang.databinding.ItemMessageProductSentBinding
 import com.alya.ecommerce_serang.databinding.ItemMessageReceivedBinding
@@ -17,22 +18,29 @@ import com.bumptech.glide.Glide
 
 class ChatAdapter(
     private val onProductClick: ((ProductInfo) -> Unit)? = null
-) : ListAdapter<ChatUiMessage, RecyclerView.ViewHolder>(ChatMessageDiffCallback()) {
+) : ListAdapter<ChatDisplayItem, RecyclerView.ViewHolder>(ChatMessageDiffCallback()) {
 
     companion object {
         private const val VIEW_TYPE_MESSAGE_SENT = 1
         private const val VIEW_TYPE_MESSAGE_RECEIVED = 2
         private const val VIEW_TYPE_PRODUCT_SENT = 3
         private const val VIEW_TYPE_PRODUCT_RECEIVED = 4
+        private const val VIEW_TYPE_DATE_HEADER = 5
     }
 
     override fun getItemViewType(position: Int): Int {
-        val message = getItem(position)
-        return when {
-            message.messageType == MessageType.PRODUCT && message.isSentByMe -> VIEW_TYPE_PRODUCT_SENT
-            message.messageType == MessageType.PRODUCT && !message.isSentByMe -> VIEW_TYPE_PRODUCT_RECEIVED
-            message.isSentByMe -> VIEW_TYPE_MESSAGE_SENT
-            else -> VIEW_TYPE_MESSAGE_RECEIVED
+        val item = getItem(position)
+        return when (item) {
+            is ChatDisplayItem.DateHeaderItem -> VIEW_TYPE_DATE_HEADER
+            is ChatDisplayItem.MessageItem -> {
+                val message = item.chatUiMessage
+                when {
+                    message.messageType == MessageType.PRODUCT && message.isSentByMe -> VIEW_TYPE_PRODUCT_SENT
+                    message.messageType == MessageType.PRODUCT && !message.isSentByMe -> VIEW_TYPE_PRODUCT_RECEIVED
+                    message.isSentByMe -> VIEW_TYPE_MESSAGE_SENT
+                    else -> VIEW_TYPE_MESSAGE_RECEIVED
+                }
+            }
         }
     }
 
@@ -40,6 +48,10 @@ class ChatAdapter(
         val inflater = LayoutInflater.from(parent.context)
 
         return when (viewType) {
+            VIEW_TYPE_DATE_HEADER -> {
+                val binding = ItemDateHeaderBinding.inflate(inflater, parent, false)
+                DateHeaderViewHolder(binding)
+            }
             VIEW_TYPE_MESSAGE_SENT -> {
                 val binding = ItemMessageSentBinding.inflate(inflater, parent, false)
                 SentMessageViewHolder(binding)
@@ -61,13 +73,34 @@ class ChatAdapter(
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        val message = getItem(position)
+        val item = getItem(position)
 
         when (holder) {
-            is SentMessageViewHolder -> holder.bind(message)
-            is ReceivedMessageViewHolder -> holder.bind(message)
-            is SentProductViewHolder -> holder.bind(message)
-            is ReceivedProductViewHolder -> holder.bind(message)
+            is DateHeaderViewHolder -> {
+                if (item is ChatDisplayItem.DateHeaderItem) {
+                    holder.bind(item)
+                }
+            }
+            is SentMessageViewHolder -> {
+                if (item is ChatDisplayItem.MessageItem) {
+                    holder.bind(item.chatUiMessage)
+                }
+            }
+            is ReceivedMessageViewHolder -> {
+                if (item is ChatDisplayItem.MessageItem) {
+                    holder.bind(item.chatUiMessage)
+                }
+            }
+            is SentProductViewHolder -> {
+                if (item is ChatDisplayItem.MessageItem) {
+                    holder.bind(item.chatUiMessage)
+                }
+            }
+            is ReceivedProductViewHolder -> {
+                if (item is ChatDisplayItem.MessageItem) {
+                    holder.bind(item.chatUiMessage)
+                }
+            }
         }
     }
 
@@ -233,17 +266,36 @@ class ChatAdapter(
             }
         }
     }
+
+    inner class DateHeaderViewHolder(private val binding: ItemDateHeaderBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+
+        fun bind(item: ChatDisplayItem.DateHeaderItem) {
+            binding.tvDate.text = item.formattedDate
+        }
+    }
 }
 
 /**
  * DiffUtil callback for optimizing RecyclerView updates
  */
-class ChatMessageDiffCallback : DiffUtil.ItemCallback<ChatUiMessage>() {
-    override fun areItemsTheSame(oldItem: ChatUiMessage, newItem: ChatUiMessage): Boolean {
-        return oldItem.id == newItem.id
+class ChatMessageDiffCallback : DiffUtil.ItemCallback<ChatDisplayItem>() {
+    override fun areItemsTheSame(oldItem: ChatDisplayItem, newItem: ChatDisplayItem): Boolean {
+        return when {
+            oldItem is ChatDisplayItem.MessageItem && newItem is ChatDisplayItem.MessageItem ->
+                oldItem.chatUiMessage.id == newItem.chatUiMessage.id
+            oldItem is ChatDisplayItem.DateHeaderItem && newItem is ChatDisplayItem.DateHeaderItem ->
+                oldItem.date == newItem.date
+            else -> false
+        }
     }
 
-    override fun areContentsTheSame(oldItem: ChatUiMessage, newItem: ChatUiMessage): Boolean {
+    override fun areContentsTheSame(oldItem: ChatDisplayItem, newItem: ChatDisplayItem): Boolean {
         return oldItem == newItem
     }
+}
+
+sealed class ChatDisplayItem {
+    data class MessageItem(val chatUiMessage: ChatUiMessage) : ChatDisplayItem()
+    data class DateHeaderItem(val date: String, val formattedDate: String) : ChatDisplayItem()
 }

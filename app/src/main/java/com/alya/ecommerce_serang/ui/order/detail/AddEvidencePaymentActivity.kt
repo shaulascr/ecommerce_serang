@@ -1,8 +1,8 @@
 package com.alya.ecommerce_serang.ui.order.detail
 
 import android.Manifest
-import android.R
 import android.app.Activity
+import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -12,6 +12,7 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
 import android.view.View
+import android.view.ViewGroup
 import android.webkit.MimeTypeMap
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
@@ -25,6 +26,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.dto.AddEvidenceMultipartRequest
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.repository.OrderRepository
@@ -37,6 +39,7 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
+import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -59,11 +62,9 @@ class AddEvidencePaymentActivity : AppCompatActivity() {
     }
 
     private val paymentMethods = arrayOf(
-        "Pilih metode pembayaran",
         "Transfer Bank",
         "E-Wallet",
-        "Virtual Account",
-        "Cash on Delivery"
+        "QRIS",
     )
 
 //    private val getContent = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
@@ -128,11 +129,8 @@ class AddEvidencePaymentActivity : AppCompatActivity() {
     }
 
     private fun setupUI() {
-        // Set product details\
-
-        // Setup payment methods spinner
-        val adapter = ArrayAdapter(this, R.layout.simple_spinner_item, paymentMethods)
-        adapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item)
+        val paymentMethods = listOf("Transfer Bank", "COD", "QRIS")
+        val adapter = SpinnerCardAdapter(this, paymentMethods)
         binding.spinnerPaymentMethod.adapter = adapter
     }
 
@@ -219,15 +217,23 @@ class AddEvidencePaymentActivity : AppCompatActivity() {
     private fun showImagePickerOptions() {
         val options = arrayOf(
             "Pilih dari Galeri",
-            "Batal"
+            "Kembali"
         )
 
-        androidx.appcompat.app.AlertDialog.Builder(this)
-            .setTitle("Pilih Bukti Pembayaran")
-            .setItems(options) { dialog, which ->
+        val adapter = object : ArrayAdapter<String>(this, R.layout.item_dialog_add_evidence, R.id.tvOption, options) {
+            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                val view = super.getView(position, convertView, parent)
+                val divider = view.findViewById<View>(R.id.divider)
+                divider.visibility = if (position == count - 1) View.GONE else View.VISIBLE
+                return view
+            }
+        }
+
+        AlertDialog.Builder(this)
+            .setAdapter(adapter) { dialog, which ->
                 when (which) {
-                    0 -> openGallery() // Gallery
-                    1 -> dialog.dismiss() // Cancel
+                    0 -> openGallery()
+                    1 -> dialog.dismiss()
                 }
             }
             .show()
@@ -438,6 +444,8 @@ class AddEvidencePaymentActivity : AppCompatActivity() {
             year, month, day
         ).show()
     }
+
+
 
 
     companion object {

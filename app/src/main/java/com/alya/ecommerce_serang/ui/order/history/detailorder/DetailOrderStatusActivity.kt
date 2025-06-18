@@ -42,6 +42,7 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputLayout
 import com.google.gson.Gson
 import java.io.File
+import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -172,7 +173,6 @@ class DetailOrderStatusActivity : AppCompatActivity() {
         try {
             // Set order date and payment deadline
             binding.tvOrderDate.text = formatDate(orders.createdAt)
-            binding.tvPaymentDeadline.text = formatDatePay(orders.updatedAt)
 
             Log.d(TAG, "populateOrderDetails: Order created at ${orders.createdAt}, formatted as ${binding.tvOrderDate.text}")
 
@@ -197,10 +197,10 @@ class DetailOrderStatusActivity : AppCompatActivity() {
             Log.d(TAG, "populateOrderDetails: Payment method=${orders.payInfoName ?: "Tidak tersedia"}")
 
             // Set subtotal, shipping cost, and total
-            val subtotal = orders.totalAmount?.toIntOrNull()?.minus(orders.shipmentPrice.toIntOrNull() ?: 0) ?: 0
-            binding.tvSubtotal.text = "Rp$subtotal"
-            binding.tvShippingCost.text = "Rp${orders.shipmentPrice}"
-            binding.tvTotal.text = "Rp${orders.totalAmount}"
+            val subtotal = orders.totalAmount?.minus(orders.shipmentPrice.toIntOrNull() ?: 0) ?: 0
+            binding.tvSubtotal.text = formatCurrency(subtotal.toDouble())
+            binding.tvShippingCost.text = formatCurrency(orders.shipmentPrice.toDouble())
+            binding.tvTotal.text = formatCurrency(orders.totalAmount?.toDouble() ?: 0.00)
 
             Log.d(TAG, "populateOrderDetails: Subtotal=$subtotal, Shipping=${orders.shipmentPrice}, Total=${orders.totalAmount}")
 
@@ -255,6 +255,8 @@ class DetailOrderStatusActivity : AppCompatActivity() {
                 binding.tvStatusHeader.text = "Belum Dibayar"
                 binding.tvStatusNote.visibility = View.VISIBLE
                 binding.tvStatusNote.text = "Pesanan ini harus dibayar sebelum ${formatDatePay(orders.updatedAt)}"
+                binding.tvPaymentDeadlineLabel.text = "Batas Bayar:"
+                binding.tvPaymentDeadline.text = formatDatePay(orders.updatedAt)
 
                 // Set buttons
                 binding.btnSecondary.apply {
@@ -286,6 +288,8 @@ class DetailOrderStatusActivity : AppCompatActivity() {
                 binding.tvStatusHeader.text = "Sudah Dibayar"
                 binding.tvStatusNote.visibility = View.VISIBLE
                 binding.tvStatusNote.text = "Menunggu pesanan dikonfirmasi penjual ${formatDatePay(orders.updatedAt)}"
+                binding.tvPaymentDeadlineLabel.text = "Batas konfirmasi penjual:"
+                binding.tvPaymentDeadline.text = formatDatePay(orders.updatedAt)
 
                 // Set buttons
                 binding.btnSecondary.apply {
@@ -304,6 +308,8 @@ class DetailOrderStatusActivity : AppCompatActivity() {
                 binding.tvStatusHeader.text = "Sedang Diproses"
                 binding.tvStatusNote.visibility = View.VISIBLE
                 binding.tvStatusNote.text = "Penjual sedang memproses pesanan Anda"
+                binding.tvPaymentDeadlineLabel.text = "Batas diproses penjual:"
+                binding.tvPaymentDeadline.text = formatDatePay(orders.updatedAt)
 
                 binding.btnSecondary.apply {
                     visibility = View.VISIBLE
@@ -326,6 +332,8 @@ class DetailOrderStatusActivity : AppCompatActivity() {
                 binding.tvStatusHeader.text = "Sudah Dikirim"
                 binding.tvStatusNote.visibility = View.VISIBLE
                 binding.tvStatusNote.text = "Pesanan Anda sedang dalam perjalanan. Akan sampai sekitar ${formatShipmentDate(orders.updatedAt, orders.etd ?: "0")}"
+                binding.tvPaymentDeadlineLabel.text = "Estimasi pesanan sampai:"
+                binding.tvPaymentDeadline.text = formatShipmentDate(orders.updatedAt, orders.etd ?: "0")
 
                 binding.btnSecondary.apply {
                     visibility = View.VISIBLE
@@ -358,6 +366,8 @@ class DetailOrderStatusActivity : AppCompatActivity() {
 
                 binding.tvStatusHeader.text = "Pesanan Selesai"
                 binding.tvStatusNote.visibility = View.GONE
+                binding.tvPaymentDeadlineLabel.text = "Pesanan selesai:"
+                binding.tvPaymentDeadline.text = formatDate(orders.autoCompletedAt.toString())
 
                 binding.btnPrimary.apply {
                     visibility = View.VISIBLE
@@ -379,6 +389,8 @@ class DetailOrderStatusActivity : AppCompatActivity() {
                 binding.tvStatusHeader.text = "Pesanan Selesai"
                 binding.tvStatusNote.visibility = View.VISIBLE
                 binding.tvStatusNote.text = "Pesanan dibatalkan: ${orders.cancelReason ?: "Alasan tidak diberikan"}"
+                binding.tvPaymentDeadlineLabel.text = "Tanggal dibatalkan: "
+                binding.tvPaymentDeadline.text = formatDate(orders.cancelDate.toString())
 
                 binding.btnSecondary.apply {
                     visibility = View.GONE
@@ -604,7 +616,8 @@ class DetailOrderStatusActivity : AppCompatActivity() {
             val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
             inputFormat.timeZone = TimeZone.getTimeZone("UTC")
 
-            val outputFormat = SimpleDateFormat("HH:mm dd MMMM yyyy", Locale("id", "ID"))
+            val timeFormat = SimpleDateFormat("HH:mm", Locale("id", "ID"))
+            val dateFormat = SimpleDateFormat("dd MMMM yyyy", Locale("id", "ID"))
 
             val date = inputFormat.parse(dateString)
 
@@ -614,7 +627,10 @@ class DetailOrderStatusActivity : AppCompatActivity() {
                 calendar.set(Calendar.HOUR_OF_DAY, 23)
                 calendar.set(Calendar.MINUTE, 59)
 
-                val formatted = outputFormat.format(calendar.time)
+                val timePart = timeFormat.format(calendar.time)
+                val datePart = dateFormat.format(calendar.time)
+
+                val formatted = "$timePart\n$datePart"
                 Log.d(TAG, "formatDate: Formatted date: $formatted")
                 formatted
             } ?: dateString
@@ -640,9 +656,13 @@ class DetailOrderStatusActivity : AppCompatActivity() {
             calendar.add(Calendar.HOUR, 24)
             val dueDate = calendar.time
 
-            // Format due date for display
-            val dueDateFormat = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
-            val formatted = dueDateFormat.format(calendar.time)
+            val timeFormat = SimpleDateFormat("HH:mm", Locale("id", "ID"))
+            val dateFormat = SimpleDateFormat("dd MMM yyyy", Locale("id", "ID"))
+
+            val timePart = timeFormat.format(dueDate)
+            val datePart = dateFormat.format(dueDate)
+
+            val formatted = "$timePart\n$datePart"
 
             Log.d(TAG, "formatDatePay: Formatted payment date: $formatted")
             formatted
@@ -727,6 +747,11 @@ class DetailOrderStatusActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun formatCurrency(amount: Double): String {
+        val formatter = NumberFormat.getCurrencyInstance(Locale("in", "ID"))
+        return formatter.format(amount).replace(",00", "")
     }
 
     override fun onDestroy() {

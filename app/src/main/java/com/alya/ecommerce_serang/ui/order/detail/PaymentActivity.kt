@@ -17,6 +17,7 @@ import com.alya.ecommerce_serang.data.repository.OrderRepository
 import com.alya.ecommerce_serang.databinding.ActivityPaymentBinding
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
+import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -100,6 +101,7 @@ class PaymentActivity : AppCompatActivity() {
 //            Log.d(TAG, "Button clicked - showing toast")
 //            Toast.makeText(this@PaymentActivity, "Button works! OrderID: $orderId", Toast.LENGTH_LONG).show()
 //        }
+
         binding.btnUploadPaymentProof.apply {
             isEnabled = true
             isClickable = true
@@ -134,7 +136,7 @@ class PaymentActivity : AppCompatActivity() {
             Log.d(TAG, "Order details received: $order")
 
             // Set total amount
-            binding.tvTotalAmount.text = order.totalAmount ?: "Rp0"
+            binding.tvTotalAmount.text = formatCurrency(order.totalAmount?.toDouble() ?: 0.00)
             Log.d(TAG, "Total Amount: ${order.totalAmount}")
 
 
@@ -200,6 +202,11 @@ class PaymentActivity : AppCompatActivity() {
             binding.tvDueDate.text = "Jatuh tempo: -"
             binding.tvRemainingTime.text = "-"
         }
+    }
+
+    private fun formatCurrency(amount: Double): String {
+        val formatter = NumberFormat.getCurrencyInstance(Locale("in", "ID"))
+        return formatter.format(amount).replace(",00", "")
     }
 
     private fun showInstructions(type: String) {

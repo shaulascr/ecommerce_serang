@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.alya.ecommerce_serang.BuildConfig.BASE_URL
 import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.response.customer.order.OrderListItemsItem
 import com.bumptech.glide.Glide
@@ -39,11 +40,18 @@ class DetailOrderItemsAdapter : RecyclerView.Adapter<DetailOrderItemsAdapter.Det
         private val tvProductName: TextView = itemView.findViewById(R.id.tvProductName)
         private val tvQuantity: TextView = itemView.findViewById(R.id.tvQuantity)
         private val tvPrice: TextView = itemView.findViewById(R.id.tvPrice)
+        private val tvStoreName: TextView = itemView.findViewById(R.id.tvStoreName)
 
         fun bind(item: OrderListItemsItem) {
+
+            val fullImageUrl = if (item.productImage.startsWith("/")) {
+                BASE_URL + item.productImage.removePrefix("/") // Append base URL if the path starts with "/"
+            } else {
+                item.productImage // Use as is if it's already a full URL
+            }
             // Load product image
             Glide.with(itemView.context)
-                .load(item.productImage)
+                .load(fullImageUrl)
                 .placeholder(R.drawable.placeholder_image)
                 .error(R.drawable.placeholder_image)
                 .into(ivProduct)
@@ -52,7 +60,8 @@ class DetailOrderItemsAdapter : RecyclerView.Adapter<DetailOrderItemsAdapter.Det
 
             tvProductName.text = item.productName
             tvQuantity.text = "${item.quantity} buah"
-            tvPrice.text = "Rp${newPrice}"
+            tvPrice.text = newPrice
+            tvStoreName.text = item.storeName
         }
     }
 

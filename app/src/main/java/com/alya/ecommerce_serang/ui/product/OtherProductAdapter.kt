@@ -11,6 +11,8 @@ import com.alya.ecommerce_serang.data.api.dto.ProductsItem
 import com.alya.ecommerce_serang.data.api.response.customer.product.StoreItem
 import com.alya.ecommerce_serang.databinding.ItemProductHorizontalBinding
 import com.bumptech.glide.Glide
+import java.text.NumberFormat
+import java.util.Locale
 
 class OtherProductAdapter (
     private var products: List<ProductsItem>,
@@ -32,7 +34,7 @@ class OtherProductAdapter (
                 Log.d("ProductAdapter", "Loading image: $fullImageUrl")
 
                 tvProductName.text = product.name
-                tvProductPrice.text = product.price
+                tvProductPrice.text = formatCurrency(product.price.toDouble())
                 rating.text = product.rating
 
                 // Load image using Glide
@@ -76,6 +78,11 @@ class OtherProductAdapter (
             products = limitedProducts
             diffResult.dispatchUpdatesTo(this)
         }
+
+    private fun formatCurrency(amount: Double): String {
+        val formatter = NumberFormat.getCurrencyInstance(Locale("in", "ID"))
+        return formatter.format(amount).replace(",00", "")
+    }
 
         class ProductDiffCallback(
             private val oldList: List<ProductsItem>,
