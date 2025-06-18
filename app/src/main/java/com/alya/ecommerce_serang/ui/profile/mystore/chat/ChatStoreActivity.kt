@@ -378,7 +378,9 @@ class ChatStoreActivity : AppCompatActivity() {
 
             // Update messages
             val previousCount = chatAdapter.itemCount
-            chatAdapter.submitList(state.messages) {
+            val displayItems = viewModel.getDisplayItems()
+
+            chatAdapter.submitList(displayItems) {
                 Log.d(TAG, "Messages submitted to adapter")
                 // Only auto-scroll for new messages or initial load
                 if (previousCount == 0 || state.messages.size > previousCount) {

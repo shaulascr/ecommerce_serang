@@ -394,7 +394,10 @@ class ChatActivity : AppCompatActivity() {
 
             // Update messages
             val previousCount = chatAdapter.itemCount
-            chatAdapter.submitList(state.messages) {
+
+            val displayItems = viewModel.getDisplayItems()
+
+            chatAdapter.submitList(displayItems) {
                 Log.d(TAG, "Messages submitted to adapter")
                 // Only auto-scroll for new messages or initial load
                 if (previousCount == 0 || state.messages.size > previousCount) {
@@ -426,16 +429,14 @@ class ChatActivity : AppCompatActivity() {
                         .error(R.drawable.placeholder_image)
                         .into(binding.imgProduct)
                 }
+                updateProductCardUI(state.hasProductAttachment)
 
-                binding.productContainer.visibility = View.VISIBLE
+                binding.productContainer.visibility = View.GONE
             } else {
                 binding.productContainer.visibility = View.GONE
             }
 
             updateInputHint(state)
-
-            // Update product card visual feedback
-            updateProductCardUI(state.hasProductAttachment)
 
             // Update attachment hint
             if (state.hasAttachment) {

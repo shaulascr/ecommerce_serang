@@ -6,6 +6,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.alya.ecommerce_serang.data.api.response.customer.order.CourierCostsItem
 import com.alya.ecommerce_serang.data.api.response.customer.order.ServicesItem
 import com.alya.ecommerce_serang.databinding.ItemShippingOrderBinding
+import java.text.NumberFormat
+import java.util.Locale
 
 class ShippingAdapter(
     private val onItemSelected: (CourierCostsItem, ServicesItem) -> Unit
@@ -30,7 +32,7 @@ class ShippingAdapter(
                 // Combine courier name and service
                 courierNameCost.text = "${courierCostsItem.courier} - ${service.service}"
                 estDate.text = "Estimasi ${service.etd} hari"
-                costPrice.text = "Rp${service.cost}"
+                costPrice.text = formatCurrency(service.cost.toDouble())
 
                 // Single click handler for both item and radio button
                 val onClickAction = {
@@ -88,6 +90,11 @@ class ShippingAdapter(
                 currentPosition++
             }
         }
+    }
+
+    private fun formatCurrency(amount: Double): String {
+        val formatter = NumberFormat.getCurrencyInstance(Locale("in", "ID"))
+        return formatter.format(amount).replace(",00", "")
     }
 
     override fun getItemCount(): Int {

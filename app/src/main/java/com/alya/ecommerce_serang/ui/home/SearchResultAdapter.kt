@@ -12,6 +12,8 @@ import com.alya.ecommerce_serang.data.api.dto.ProductsItem
 import com.alya.ecommerce_serang.data.api.response.customer.product.StoreItem
 import com.alya.ecommerce_serang.databinding.ItemProductGridBinding
 import com.bumptech.glide.Glide
+import java.text.NumberFormat
+import java.util.Locale
 
 class SearchResultsAdapter(
     private val onItemClick: (ProductsItem) -> Unit,
@@ -46,7 +48,7 @@ class SearchResultsAdapter(
 
         fun bind(product: ProductsItem) {
             binding.tvProductName.text = product.name
-            binding.tvProductPrice.text = product.price
+            binding.tvProductPrice.text = formatCurrency(product.price.toDouble())
 
             val fullImageUrl = if (product.image.startsWith("/")) {
                 BASE_URL + product.image.removePrefix("/") // Append base URL if the path starts with "/"
@@ -69,6 +71,11 @@ class SearchResultsAdapter(
     override fun submitList(list: List<ProductsItem>?) {
         Log.d("SearchResultsAdapter", "Submitting list with ${list?.size ?: 0} items")
         super.submitList(list)
+    }
+
+    private fun formatCurrency(amount: Double): String {
+        val formatter = NumberFormat.getCurrencyInstance(Locale("in", "ID"))
+        return formatter.format(amount).replace(",00", "")
     }
 
     companion object {
