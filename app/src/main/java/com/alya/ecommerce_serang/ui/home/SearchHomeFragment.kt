@@ -76,6 +76,7 @@ class SearchHomeFragment : Fragment() {
 
         // Setup search view
         binding.searchView.apply {
+            clearFocus()
             setOnQueryTextListener(object : androidx.appcompat.widget.SearchView.OnQueryTextListener {
                 override fun onQueryTextSubmit(query: String?): Boolean {
                     query?.let {
@@ -105,13 +106,12 @@ class SearchHomeFragment : Fragment() {
                 }
             })
 
-            // Request focus and show keyboard
             if (args.query.isNullOrEmpty()) {
                 requestFocus()
-                postDelayed({
+                post {
                     val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                    imm.showSoftInput(findFocus(), InputMethodManager.SHOW_IMPLICIT)
-                }, 200)
+                    imm.showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
+                }
             }
         }
     }
