@@ -30,7 +30,9 @@
             android:layout_weight="1"
             android:background="@drawable/search_background"
             android:iconifiedByDefault="false"
-            android:queryHint="Search products..." />
+            android:queryHint="Search products..."
+            app:iconifiedByDefault="false"
+            app:queryHint="Search products..." />
 
     </LinearLayout>
 

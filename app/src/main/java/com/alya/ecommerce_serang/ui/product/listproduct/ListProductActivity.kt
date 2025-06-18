@@ -18,6 +18,7 @@ import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.repository.ProductRepository
 import com.alya.ecommerce_serang.data.repository.Result
 import com.alya.ecommerce_serang.databinding.ActivityListProductBinding
+import com.alya.ecommerce_serang.ui.cart.CartActivity
 import com.alya.ecommerce_serang.ui.product.DetailProductActivity
 import com.alya.ecommerce_serang.ui.product.ProductUserViewModel
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
@@ -60,11 +61,21 @@ class ListProductActivity : AppCompatActivity() {
             windowInsets
         }
 
-
+        setupToolbar()
         setupObserver()
         setupRecyclerView()
         viewModel.loadProductsList()
 
+    }
+
+    private fun setupToolbar(){
+        binding.searchContainerList.btnBack.setOnClickListener{
+            finish()
+        }
+        binding.searchContainerList.btnCart.setOnClickListener{
+            val intent = Intent(this, CartActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     private fun setupRecyclerView() {
