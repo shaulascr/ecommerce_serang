@@ -86,7 +86,7 @@ class SellsAdapter(
             Log.d("SellsAdapter", "=== ViewHolder.bind() called ===")
             Log.d("SellsAdapter", "Binding order: ${order.orderId} with status: ${order.status}")
 
-            val actualStatus = if (fragmentStatus == "all") order.status ?: "" else fragmentStatus
+            val actualStatus = if (fragmentStatus == "all") order.displayStatus ?: "" else fragmentStatus
             adjustDisplay(actualStatus, order)
 
             tvSellsNumber.text = "No. Pesanan: ${order.orderId}"
