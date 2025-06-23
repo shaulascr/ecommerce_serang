@@ -75,6 +75,7 @@ import com.alya.ecommerce_serang.data.api.response.store.product.UpdateProductRe
 import com.alya.ecommerce_serang.data.api.response.store.product.ViewStoreProductsResponse
 import com.alya.ecommerce_serang.data.api.response.store.GenericResponse
 import com.alya.ecommerce_serang.data.api.response.store.profile.StoreDataResponse
+import com.alya.ecommerce_serang.data.api.response.store.review.ProductReviewResponse
 import com.alya.ecommerce_serang.data.api.response.store.topup.BalanceTopUpResponse
 import com.alya.ecommerce_serang.data.api.response.store.topup.TopUpResponse
 import okhttp3.MultipartBody
@@ -507,4 +508,8 @@ interface ApiService {
     @GET("mystore/notification")
     suspend fun getNotifStore(
     ): Response<ListStoreNotifResponse>
+
+    @GET("store/reviews")
+    suspend fun getStoreProductReview(
+    ): Response<ProductReviewResponse>
 }
