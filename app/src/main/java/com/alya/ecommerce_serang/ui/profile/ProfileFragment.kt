@@ -16,15 +16,18 @@ import com.alya.ecommerce_serang.BuildConfig.BASE_URL
 import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.dto.UserProfile
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
+import com.alya.ecommerce_serang.data.repository.MyStoreRepository
 import com.alya.ecommerce_serang.data.repository.UserRepository
 import com.alya.ecommerce_serang.databinding.FragmentProfileBinding
 import com.alya.ecommerce_serang.ui.auth.LoginActivity
-import com.alya.ecommerce_serang.ui.auth.RegisterStoreActivity
+import com.alya.ecommerce_serang.ui.profile.mystore.RegisterStoreActivity
 import com.alya.ecommerce_serang.ui.order.address.AddressActivity
 import com.alya.ecommerce_serang.ui.order.history.HistoryActivity
 import com.alya.ecommerce_serang.ui.profile.mystore.MyStoreActivity
+import com.alya.ecommerce_serang.ui.profile.mystore.StoreOnReviewActivity
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
+import com.alya.ecommerce_serang.utils.viewmodel.MyStoreViewModel
 import com.alya.ecommerce_serang.utils.viewmodel.ProfileViewModel
 import com.bumptech.glide.Glide
 import kotlinx.coroutines.delay
@@ -44,6 +47,14 @@ class ProfileFragment : Fragment() {
         }
     }
 
+    private val myStoreViewModel: MyStoreViewModel by viewModels {
+        BaseViewModelFactory {
+            val apiService = ApiConfig.getApiService(sessionManager)
+            val myStoreRepository = MyStoreRepository(apiService)
+            MyStoreViewModel(myStoreRepository)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         sessionManager = SessionManager(requireContext())
@@ -59,26 +70,32 @@ class ProfileFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         observeUserProfile()
+
         viewModel.loadUserProfile()
         viewModel.checkStoreUser()
 
-
+        val hasStore = viewModel.checkStore.value
+        Log.d("Profile Fragment", "Check store $hasStore")
+        binding.tvBukaToko.text = if (hasStore == true) "Toko Saya" else "Buka Toko"
 
         binding.cardBukaToko.setOnClickListener{
-            val hasStore = viewModel.checkStore.value
-
-            Log.d("Profile Fragment", "Check store $hasStore")
-
-            if (hasStore == true){
-                binding.tvBukaToko.text = "Lihat Toko Saya"
-                val intentBuka = Intent(requireContext(), MyStoreActivity::class.java)
-                startActivity(intentBuka)
-            } else {
-                binding.tvBukaToko.text = "Buka Toko"
-                val intentBuka = Intent(requireContext(), RegisterStoreActivity::class.java)
-                startActivity(intentBuka)
-            }
+//            if (hasStore == true) startActivity(Intent(requireContext(), MyStoreActivity::class.java))
+//            else startActivity(Intent(requireContext(), RegisterStoreActivity::class.java))
+            if (viewModel.checkStore.value == true) {
+                myStoreViewModel.loadMyStore()
+                myStoreViewModel.myStoreProfile.observe(viewLifecycleOwner) { store ->
+                    store?.let {
+                        when (store.storeStatus) {
+                            "active" -> startActivity(Intent(requireContext(), MyStoreActivity::class.java))
+                            else -> startActivity(Intent(requireContext(), StoreOnReviewActivity::class.java))
+                        }
+                    } ?: run {
+                        Toast.makeText(requireContext(), "Gagal memuat data toko", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } else startActivity(Intent(requireContext(), RegisterStoreActivity::class.java))
         }
 
         binding.btnDetailProfile.setOnClickListener{
@@ -96,15 +113,14 @@ class ProfileFragment : Fragment() {
             startActivity(intent)
         }
 
-        binding.cardLogout.setOnClickListener({
+        binding.cardLogout.setOnClickListener{
             logout()
+        }
 
-        })
-
-        binding.cardAddress.setOnClickListener({
+        binding.cardAddress.setOnClickListener{
             val intent = Intent(requireContext(), AddressActivity::class.java)
             startActivity(intent)
-        })
+        }
     }
 
     private fun observeUserProfile() {

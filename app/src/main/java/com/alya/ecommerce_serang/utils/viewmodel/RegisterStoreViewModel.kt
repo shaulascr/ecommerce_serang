@@ -1,4 +1,4 @@
-package com.alya.ecommerce_serang.ui.auth
+package com.alya.ecommerce_serang.utils.viewmodel
 
 import android.content.Context
 import android.net.Uri
@@ -21,8 +21,8 @@ class RegisterStoreViewModel(
 ) : ViewModel() {
 
     // LiveData for UI state
-    private val _registerState = MutableLiveData<com.alya.ecommerce_serang.data.repository.Result<RegisterStoreResponse>>()
-    val registerState: LiveData<com.alya.ecommerce_serang.data.repository.Result<RegisterStoreResponse>> = _registerState
+    private val _registerState = MutableLiveData<Result<RegisterStoreResponse>>()
+    val registerState: LiveData<Result<RegisterStoreResponse>> = _registerState
 
     private val _storeTypes = MutableLiveData<List<StoreTypesItem>>()
     val storeTypes: LiveData<List<StoreTypesItem>> = _storeTypes
@@ -141,7 +141,7 @@ class RegisterStoreViewModel(
 
                 _registerState.value = result
             } catch (e: Exception) {
-                _registerState.value = com.alya.ecommerce_serang.data.repository.Result.Error(e)
+                _registerState.value = Result.Error(e)
             }
         }
     }
