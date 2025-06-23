@@ -30,6 +30,9 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".ui.profile.mystore.StoreOnReviewActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.profile.mystore.review.ReviewActivity"
             android:exported="false" />
         <activity
@@ -51,7 +54,7 @@
             android:name=".ui.product.storeDetail.StoreDetailActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.auth.RegisterStoreActivity"
+            android:name=".ui.profile.mystore.RegisterStoreActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
