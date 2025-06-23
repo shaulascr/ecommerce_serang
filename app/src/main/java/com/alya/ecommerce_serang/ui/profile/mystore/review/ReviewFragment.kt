@@ -1,32 +1,56 @@
 package com.alya.ecommerce_serang.ui.profile.mystore.review
 
-import androidx.fragment.app.viewModels
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.alya.ecommerce_serang.R
-import com.alya.ecommerce_serang.utils.viewmodel.ReviewViewModel
+import com.alya.ecommerce_serang.databinding.FragmentReviewBinding
+import com.alya.ecommerce_serang.utils.SessionManager
+import com.google.android.material.tabs.TabLayoutMediator
 
 class ReviewFragment : Fragment() {
 
-    companion object {
-        fun newInstance() = ReviewFragment()
-    }
+    private var _binding: FragmentReviewBinding? = null
+    private val binding get() = _binding!!
+    private lateinit var sessionManager: SessionManager
 
-    private val viewModel: ReviewViewModel by viewModels()
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        // TODO: Use the ViewModel
-    }
+    private lateinit var viewPagerAdapter: ReviewViewPagerAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        return inflater.inflate(R.layout.fragment_review, container, false)
+        _binding = FragmentReviewBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        sessionManager = SessionManager(requireContext())
+
+        setupViewPager()
+    }
+
+    private fun setupViewPager() {
+        viewPagerAdapter = ReviewViewPagerAdapter(requireActivity())
+        binding.viewPagerReview.adapter = viewPagerAdapter
+
+        TabLayoutMediator(binding.tabLayoutReview, binding.viewPagerReview) { tab, position ->
+            tab.text = when (position) {
+                0 -> "Semua"
+                1 -> "5 Bintang"
+                2 -> "4 Bintang"
+                3 -> "3 Bintang"
+                4 -> "2 Bintang"
+                5 -> "1 Bintang"
+                else -> "Tab $position"
+            }
+        }.attach()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

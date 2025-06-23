@@ -18,6 +18,7 @@ import com.alya.ecommerce_serang.ui.profile.mystore.balance.BalanceActivity
 import com.alya.ecommerce_serang.ui.profile.mystore.chat.ChatListStoreActivity
 import com.alya.ecommerce_serang.ui.profile.mystore.product.ProductActivity
 import com.alya.ecommerce_serang.ui.profile.mystore.profile.DetailStoreProfileActivity
+import com.alya.ecommerce_serang.ui.profile.mystore.review.ReviewActivity
 import com.alya.ecommerce_serang.ui.profile.mystore.review.ReviewFragment
 import com.alya.ecommerce_serang.ui.profile.mystore.sells.SellsActivity
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
@@ -99,25 +100,21 @@ class MyStoreActivity : AppCompatActivity() {
         }
 
         binding.tvHistory.setOnClickListener {
-            val intent = Intent(this, SellsActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(this, SellsActivity::class.java))
         }
 
         binding.layoutPerluTagihan.setOnClickListener {
-            val intent = Intent(this, SellsActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(this, SellsActivity::class.java))
             //navigateToSellsFragment("pending")
         }
 
         binding.layoutPembayaran.setOnClickListener {
-            val intent = Intent(this, SellsActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(this, SellsActivity::class.java))
             //navigateToSellsFragment("paid")
         }
 
         binding.layoutPerluDikirim.setOnClickListener {
-            val intent = Intent(this, SellsActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(this, SellsActivity::class.java))
             //navigateToSellsFragment("processed")
         }
 
@@ -126,15 +123,11 @@ class MyStoreActivity : AppCompatActivity() {
         }
 
         binding.layoutReview.setOnClickListener {
-            supportFragmentManager.beginTransaction()
-                .replace(android.R.id.content, ReviewFragment())
-                .addToBackStack(null)
-                .commit()
+            startActivity(Intent(this, ReviewActivity::class.java))
         }
 
         binding.layoutInbox.setOnClickListener {
-            val intent = Intent(this, ChatListStoreActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(this, ChatListStoreActivity::class.java))
         }
     }
 

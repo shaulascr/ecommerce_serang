@@ -9,7 +9,7 @@
     tools:context=".ui.profile.mystore.sells.SellsFragment">
 
     <com.google.android.material.tabs.TabLayout
-        android:id="@+id/tabLayoutSells"
+        android:id="@+id/tab_layout_sells"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:tabMode="scrollable"
@@ -23,10 +23,10 @@
         app:layout_constraintTop_toTopOf="parent"/>
 
     <androidx.viewpager2.widget.ViewPager2
-        android:id="@+id/viewPagerSells"
+        android:id="@+id/view_pager_sells"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tabLayoutSells"  />
+        app:layout_constraintTop_toBottomOf="@+id/tab_layout_sells"  />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
