@@ -63,6 +63,8 @@ class ChatActivity : AppCompatActivity() {
     // For image attachment
     private var tempImageUri: Uri? = null
 
+    private var imageAttach = false
+
     // Typing indicator handler
     private val typingHandler = android.os.Handler(android.os.Looper.getMainLooper())
     private val stopTypingRunnable = Runnable {
@@ -269,6 +271,7 @@ class ChatActivity : AppCompatActivity() {
         }
 
         // Options button
+        binding.btnOptions.visibility = View.GONE
         binding.btnOptions.setOnClickListener {
             showOptionsMenu()
         }
@@ -281,6 +284,7 @@ class ChatActivity : AppCompatActivity() {
                 // This will automatically handle product attachment if enabled
                 viewModel.sendMessage(message)
                 binding.editTextMessage.text.clear()
+                binding.layoutAttachImage.visibility = View.GONE
 
                 // Instantly scroll to show new message
                 binding.recyclerChat.postDelayed({
@@ -291,7 +295,17 @@ class ChatActivity : AppCompatActivity() {
 
         // Attachment button
         binding.btnAttachment.setOnClickListener {
+            this.currentFocus?.let { view ->
+                val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+                imm?.hideSoftInputFromWindow(view.windowToken, 0)
+            }
             checkPermissionsAndShowImagePicker()
+        }
+
+        binding.btnCloseChat.setOnClickListener{
+            binding.layoutAttachImage.visibility = View.GONE
+            imageAttach = false
+            viewModel.clearSelectedImage()
         }
 
         // Product card click to enable/disable product attachment
@@ -300,15 +314,14 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
+
     private fun toggleProductAttachment() {
         val currentState = viewModel.state.value
         if (currentState?.hasProductAttachment == true) {
-            // Disable product attachment
             viewModel.disableProductAttachment()
             updateProductAttachmentUI(false)
             Toast.makeText(this, "Product attachment disabled", Toast.LENGTH_SHORT).show()
         } else {
-            // Enable product attachment
             viewModel.enableProductAttachment()
             updateProductAttachmentUI(true)
             Toast.makeText(this, "Product will be attached to your next message", Toast.LENGTH_SHORT).show()
@@ -405,7 +418,7 @@ class ChatActivity : AppCompatActivity() {
                 }
             }
 
-            // Update product info
+            // layout attach product
             if (!state.productName.isNullOrEmpty()) {
                 binding.tvProductName.text = state.productName
                 binding.tvProductPrice.text = state.productPrice
@@ -440,14 +453,10 @@ class ChatActivity : AppCompatActivity() {
 
             // Update attachment hint
             if (state.hasAttachment) {
-                binding.editTextMessage.hint = getString(R.string.image_attached)
+                binding.layoutAttachImage.visibility = View.VISIBLE
             } else {
                 binding.editTextMessage.hint = getString(R.string.write_message)
             }
-
-            // Show typing indicator
-            binding.tvTypingIndicator.visibility =
-                if (state.isOtherUserTyping) View.VISIBLE else View.GONE
 
             // Show error if any
             state.error?.let { error ->
@@ -459,7 +468,7 @@ class ChatActivity : AppCompatActivity() {
 
     private fun updateInputHint(state: ChatUiState) {
         binding.editTextMessage.hint = when {
-            state.hasAttachment -> getString(R.string.image_attached)
+            state.hasAttachment -> getString(R.string.write_message)
             state.hasProductAttachment -> "Type your message (product will be attached)"
             else -> getString(R.string.write_message)
         }
@@ -503,6 +512,7 @@ class ChatActivity : AppCompatActivity() {
             getString(R.string.clear_chat),
             getString(R.string.cancel)
         )
+
 
         AlertDialog.Builder(this)
             .setTitle(getString(R.string.options))
@@ -578,7 +588,21 @@ class ChatActivity : AppCompatActivity() {
 
     private fun handleSelectedImage(uri: Uri) {
         try {
-            Log.d(TAG, "Processing selected image: $uri")
+            Log.d(TAG, "Processing selected image: ${uri.toString()}")
+            imageAttach = true
+            binding.layoutAttachImage.visibility = View.VISIBLE
+            val fullImageUrl = when (val img = uri.toString()) {
+                is String -> {
+                    if (img.startsWith("/")) BASE_URL + img.substring(1) else img
+                }
+                else -> R.drawable.placeholder_image
+            }
+
+            Glide.with(this)
+                .load(fullImageUrl)
+                .placeholder(R.drawable.placeholder_image)
+                .into(binding.ivAttach)
+            Log.d(TAG, "Display attach image: $uri")
 
             // Always use the copy-to-cache approach for reliability
             contentResolver.openInputStream(uri)?.use { inputStream ->
@@ -598,6 +622,7 @@ class ChatActivity : AppCompatActivity() {
 
                     Log.d(TAG, "Image processed successfully: ${outputFile.absolutePath}, size: ${outputFile.length()}")
                     viewModel.setSelectedImageFile(outputFile)
+
                     Toast.makeText(this, "Image selected", Toast.LENGTH_SHORT).show()
                 } else {
                     Log.e(TAG, "Failed to create image file")
@@ -682,24 +707,3 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 }
-
-//if implement typing status
-//    private fun handleConnectionState(state: ConnectionState) {
-//        when (state) {
-//            is ConnectionState.Connected -> {
-//                binding.tvConnectionStatus.visibility = View.GONE
-//            }
-//            is ConnectionState.Connecting -> {
-//                binding.tvConnectionStatus.visibility = View.VISIBLE
-//                binding.tvConnectionStatus.text = getString(R.string.connecting)
-//            }
-//            is ConnectionState.Disconnected -> {
-//                binding.tvConnectionStatus.visibility = View.VISIBLE
-//                binding.tvConnectionStatus.text = getString(R.string.disconnected_reconnecting)
-//            }
-//            is ConnectionState.Error -> {
-//                binding.tvConnectionStatus.visibility = View.VISIBLE
-//                binding.tvConnectionStatus.text = getString(R.string.connection_error, state.message)
-//            }
-//        }
-//    }

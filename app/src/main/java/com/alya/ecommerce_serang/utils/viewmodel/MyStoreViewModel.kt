@@ -1,11 +1,14 @@
 package com.alya.ecommerce_serang.utils.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import com.alya.ecommerce_serang.data.api.dto.Store
 import com.alya.ecommerce_serang.data.api.response.auth.StoreTypesItem
+import com.alya.ecommerce_serang.data.api.response.store.StoreResponse
 import com.alya.ecommerce_serang.data.api.response.store.profile.StoreDataResponse
 import com.alya.ecommerce_serang.data.repository.MyStoreRepository
 import com.alya.ecommerce_serang.data.repository.Result
@@ -13,6 +16,8 @@ import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import java.text.NumberFormat
+import java.util.Locale
 
 class MyStoreViewModel(private val repository: MyStoreRepository): ViewModel() {
     private val _myStoreProfile = MutableLiveData<Store?>()
@@ -29,6 +34,9 @@ class MyStoreViewModel(private val repository: MyStoreRepository): ViewModel() {
 
     private val _errorMessage = MutableLiveData<String>()
     val errorMessage : LiveData<String> = _errorMessage
+
+    private val _balanceResult = MutableLiveData<Result<StoreResponse>>()
+    val balanceResult: LiveData<Result<StoreResponse>> get() = _balanceResult
 
     fun loadMyStore(){
         viewModelScope.launch {
@@ -97,6 +105,56 @@ class MyStoreViewModel(private val repository: MyStoreRepository): ViewModel() {
             } catch (e: Exception) {
                 _errorMessage.postValue(e.message ?: "Unexpected error")
             }
+        }
+    }
+
+    suspend fun getTotalOrdersByStatus(status: String): Int {
+        return try {
+            when (val result = repository.getSellList(status)) {
+                is Result.Success -> {
+                    // Access the orders list from the response
+                    result.data.orders.size ?: 0
+                }
+                is Result.Error -> {
+                    Log.e("SellsViewModel", "Error getting orders count: ${result.exception.message}")
+                    0
+                }
+                is Result.Loading -> 0
+            }
+        } catch (e: Exception) {
+            Log.e("SellsViewModel", "Exception getting orders count", e)
+            0
+        }
+    }
+
+    //count the order
+    suspend fun getAllStatusCounts(): Map<String, Int> {
+        val statuses = listOf( "unpaid", "paid", "processed")
+        val counts = mutableMapOf<String, Int>()
+
+        statuses.forEach { status ->
+            counts[status] = getTotalOrdersByStatus(status)
+            Log.d("SellsViewModel", "Status: $status, countOrder=${counts[status]}")
+        }
+
+        return counts
+    }
+
+    val formattedBalance: LiveData<String> = balanceResult.map { result ->
+        when (result) {
+            is Result.Success -> {
+                val raw = result.data.store.balance.toDouble()
+                NumberFormat.getCurrencyInstance(Locale("in", "ID")).format(raw)
+            }
+            else -> ""
+        }
+    }
+
+    /** Trigger the network call */
+    fun fetchBalance() {
+        viewModelScope.launch {
+            _balanceResult.value = Result.Loading
+            _balanceResult.value = repository.getBalance()
         }
     }
 

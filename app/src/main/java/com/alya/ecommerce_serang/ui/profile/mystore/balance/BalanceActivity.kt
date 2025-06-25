@@ -408,6 +408,10 @@ class BalanceActivity : AppCompatActivity() {
         }
     }
 
+    private fun navigateTotalBalance(){
+
+    }
+
     companion object {
         private const val TOP_UP_REQUEST_CODE = 101
     }

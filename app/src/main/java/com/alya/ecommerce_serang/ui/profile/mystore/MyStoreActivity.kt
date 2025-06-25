@@ -7,12 +7,14 @@ import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.alya.ecommerce_serang.BuildConfig.BASE_URL
 import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.dto.Store
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
 import com.alya.ecommerce_serang.data.repository.MyStoreRepository
+import com.alya.ecommerce_serang.data.repository.Result
 import com.alya.ecommerce_serang.databinding.ActivityMyStoreBinding
 import com.alya.ecommerce_serang.ui.profile.mystore.balance.BalanceActivity
 import com.alya.ecommerce_serang.ui.profile.mystore.chat.ChatListStoreActivity
@@ -24,6 +26,7 @@ import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
 import com.alya.ecommerce_serang.utils.viewmodel.MyStoreViewModel
 import com.bumptech.glide.Glide
+import kotlinx.coroutines.launch
 
 class MyStoreActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMyStoreBinding
@@ -66,6 +69,9 @@ class MyStoreActivity : AppCompatActivity() {
         }
 
         setUpClickListeners()
+        getCountOrder()
+        viewModel.fetchBalance()
+        fetchBalance()
     }
 
     private fun myStoreProfileOverview(store: Store){
@@ -144,6 +150,46 @@ class MyStoreActivity : AppCompatActivity() {
             // Refresh store data
             viewModel.loadMyStore()
             Toast.makeText(this, "Profil toko berhasil diperbarui", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun getCountOrder(){
+        lifecycleScope.launch {
+            try {
+                val allCounts = viewModel.getAllStatusCounts()
+                val totalUnpaid    = allCounts["unpaid"]
+                val totalPaid      = allCounts["paid"]
+                val totalProcessed = allCounts["processed"]
+                Log.d("MyStoreActivity",
+                    "Total orders: unpaid=$totalUnpaid, processed=$totalProcessed, paid=$totalPaid")
+
+                binding.tvNumPesananMasuk.text = totalUnpaid.toString()
+                binding.tvNumPembayaran.text   = totalPaid.toString()
+                binding.tvNumPerluDikirim.text = totalProcessed.toString()
+            } catch (e:Exception){
+                Log.e("MyStoreActivity", "Error getting order counts: ${e.message}")
+            }
+        }
+    }
+
+    private fun fetchBalance(){
+        viewModel.balanceResult.observe(this){result ->
+            when (result) {
+                is com.alya.ecommerce_serang.data.repository.Result.Loading ->
+                    null
+//                    binding.progressBar.isVisible = true
+                is com.alya.ecommerce_serang.data.repository.Result.Success ->
+                    viewModel.formattedBalance.observe(this) {
+                        binding.tvBalance.text = it
+                    }
+                is Result.Error   -> {
+//                    binding.progressBar.isVisible = false
+                    Log.e(
+                        "MyStoreActivity",
+                        "Gagal memuat saldo: ${result.exception.localizedMessage}"
+                    )
+                }
+            }
         }
     }
 

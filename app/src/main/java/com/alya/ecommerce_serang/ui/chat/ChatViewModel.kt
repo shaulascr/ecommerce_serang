@@ -23,6 +23,28 @@ import java.util.Locale
 import java.util.TimeZone
 import javax.inject.Inject
 
+/**
+ * ChatViewModel - Manages chat functionality for both buyers and store owners
+ *
+ * ARCHITECTURE OVERVIEW:
+ * - Handles real-time messaging via Socket.IO
+ * - Manages chat state using LiveData/MutableLiveData pattern
+ * - Supports multiple message types: TEXT, IMAGE, PRODUCT
+ * - Maintains separate flows for buyer and store owner chat
+ *
+ * KEY RESPONSIBILITIES:
+ * 1. Socket connection management and real-time message handling
+ * 2. Message sending/receiving with different attachment types
+ * 3. Chat history loading and message status updates
+ * 4. Product attachment functionality for commerce integration
+ * 5. User session management and authentication
+ *
+ * STATE MANAGEMENT PATTERN:
+ * - All UI state updates go through updateState() helper function
+ * - State updates are atomic and follow immutable pattern
+ * - Error states are cleared explicitly via clearError()
+ */
+
 @HiltViewModel
 class ChatViewModel @Inject constructor(
     private val chatRepository: ChatRepository,
@@ -728,6 +750,19 @@ class ChatViewModel @Inject constructor(
         selectedImageFile = file
         updateState { it.copy(hasAttachment = file != null) }
         Log.d(TAG, "Image attachment ${if (file != null) "selected: ${file.name}" else "cleared"}")
+    }
+
+    fun clearSelectedImage() {
+        Log.d(TAG, "Clearing selected image attachment")
+
+        selectedImageFile?.let { file ->
+            Log.d(TAG, "Clearing image file: ${file.name}")
+        }
+
+        selectedImageFile = null
+        updateState { it.copy(hasAttachment = false) }
+
+        Log.d(TAG, "Image attachment cleared successfully")
     }
 
     // convert form chatLine api to UI chat messages

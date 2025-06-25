@@ -146,6 +146,38 @@ class SellsViewModel(private val repository: SellsRepository) : ViewModel() {
 
         Log.d(TAG, "========== getSellList method completed ==========")
     }
+    //get total order each status
+    suspend fun getTotalOrdersByStatus(status: String): Int {
+        return try {
+            when (val result = repository.getSellList(status)) {
+                is Result.Success -> {
+                    // Access the orders list from the response
+                    result.data.orders.size ?: 0
+                }
+                is Result.Error -> {
+                    Log.e("SellsViewModel", "Error getting orders count: ${result.exception.message}")
+                    0
+                }
+                is Result.Loading -> 0
+            }
+        } catch (e: Exception) {
+            Log.e("SellsViewModel", "Exception getting orders count", e)
+            0
+        }
+    }
+
+    //count the order
+    suspend fun getAllStatusCounts(): Map<String, Int> {
+        val statuses = listOf( "unpaid", "paid", "processed")
+        val counts = mutableMapOf<String, Int>()
+
+        statuses.forEach { status ->
+            counts[status] = getTotalOrdersByStatus(status)
+            Log.d("SellsViewModel", "Status: $status, countOrder=${counts[status]}")
+        }
+
+        return counts
+    }
 
     fun getSellDetails(orderId: Int) {
         Log.d(TAG, "========== Starting getSellDetails ==========")
