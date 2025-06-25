@@ -1,7 +1,6 @@
-package com.alya.ecommerce_serang.ui.auth
+package com.alya.ecommerce_serang.ui.profile.mystore
 
 import android.Manifest
-import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -26,6 +25,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.response.auth.StoreTypesItem
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.repository.Result
@@ -35,6 +35,9 @@ import com.alya.ecommerce_serang.ui.order.address.CityAdapter
 import com.alya.ecommerce_serang.ui.order.address.ProvinceAdapter
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
+import com.alya.ecommerce_serang.utils.viewmodel.RegisterStoreViewModel
+import androidx.core.graphics.drawable.toDrawable
+import androidx.core.widget.ImageViewCompat
 
 class RegisterStoreActivity : AppCompatActivity() {
 
@@ -48,15 +51,13 @@ class RegisterStoreActivity : AppCompatActivity() {
     private val PICK_KTP_REQUEST = 1002
     private val PICK_NPWP_REQUEST = 1003
     private val PICK_NIB_REQUEST = 1004
-    private val PICK_PERSETUJUAN_REQUEST = 1005
-    private val PICK_QRIS_REQUEST = 1006
 
     // Location request code
     private val LOCATION_PERMISSION_REQUEST = 2001
 
     private val viewModel: RegisterStoreViewModel by viewModels {
         BaseViewModelFactory {
-            val apiService = ApiConfig.getApiService(sessionManager)
+            val apiService = ApiConfig.Companion.getApiService(sessionManager)
             val orderRepository = UserRepository(apiService)
             RegisterStoreViewModel(orderRepository)
         }
@@ -83,6 +84,8 @@ class RegisterStoreActivity : AppCompatActivity() {
             )
             windowInsets
         }
+
+        setupHeader()
 
         provinceAdapter = ProvinceAdapter(this)
         cityAdapter = CityAdapter(this)
@@ -114,6 +117,9 @@ class RegisterStoreActivity : AppCompatActivity() {
         Log.d(TAG, "onCreate: Fetching provinces from API")
         viewModel.getProvinces()
 
+        viewModel.provinceId.observe(this) { validateRequiredFields() }
+        viewModel.cityId.observe(this) { validateRequiredFields() }
+        viewModel.storeTypeId.observe(this) { validateRequiredFields() }
 
         // Setup register button
         binding.btnRegister.setOnClickListener {
@@ -130,6 +136,45 @@ class RegisterStoreActivity : AppCompatActivity() {
         Log.d(TAG, "onCreate: RegisterStoreActivity setup completed")
     }
 
+    private fun setupHeader() {
+        binding.header.main.background = ContextCompat.getColor(this, R.color.blue_500).toDrawable()
+        binding.header.headerTitle.visibility = View.GONE
+        binding.header.headerLeftIcon.setColorFilter(
+            ContextCompat.getColor(this, R.color.white),
+            android.graphics.PorterDuff.Mode.SRC_IN
+        )
+        binding.header.headerLeftIcon.setOnClickListener {
+            onBackPressedDispatcher.onBackPressed()
+            finish()
+        }
+    }
+
+    private fun validateRequiredFields() {
+        val isFormValid = !viewModel.storeName.value.isNullOrBlank() &&
+                !viewModel.street.value.isNullOrBlank() &&
+                (viewModel.postalCode.value ?: 0) > 0 &&
+                !viewModel.subdistrict.value.isNullOrBlank() &&
+                !viewModel.bankName.value.isNullOrBlank() &&
+                (viewModel.bankNumber.value ?: 0) > 0 &&
+                (viewModel.provinceId.value ?: 0) > 0 &&
+                (viewModel.cityId.value ?: 0) > 0 &&
+                (viewModel.storeTypeId.value ?: 0) > 0 &&
+                viewModel.ktpUri != null &&
+                viewModel.nibUri != null &&
+                viewModel.npwpUri != null &&
+                viewModel.selectedCouriers.isNotEmpty()
+
+        binding.btnRegister.isEnabled = isFormValid
+
+        if (isFormValid) {
+            binding.btnRegister.setBackgroundResource(R.drawable.bg_button_active)
+            binding.btnRegister.setTextColor(ContextCompat.getColor(this, R.color.white))
+        } else {
+            binding.btnRegister.setBackgroundResource(R.drawable.bg_button_disabled)
+            binding.btnRegister.setTextColor(ContextCompat.getColor(this, R.color.black_300))
+        }
+    }
+
     private fun setupObservers() {
         Log.d(TAG, "setupObservers: Setting up LiveData observers")
 
@@ -138,12 +183,12 @@ class RegisterStoreActivity : AppCompatActivity() {
             when (state) {
                 is Result.Loading -> {
                     Log.d(TAG, "setupObservers: Loading provinces...")
-                    binding.provinceProgressBar?.visibility = View.VISIBLE
+                    binding.provinceProgressBar.visibility = View.VISIBLE
                     binding.spinnerProvince.isEnabled = false
                 }
                 is Result.Success -> {
                     Log.d(TAG, "setupObservers: Provinces loaded successfully: ${state.data.size} provinces")
-                    binding.provinceProgressBar?.visibility = View.GONE
+                    binding.provinceProgressBar.visibility = View.GONE
                     binding.spinnerProvince.isEnabled = true
 
                     // Update adapter with data
@@ -151,7 +196,7 @@ class RegisterStoreActivity : AppCompatActivity() {
                 }
                 is Result.Error -> {
                     Log.e(TAG, "setupObservers: Error loading provinces: ${state.exception.message}")
-                    binding.provinceProgressBar?.visibility = View.GONE
+                    binding.provinceProgressBar.visibility = View.GONE
                     binding.spinnerProvince.isEnabled = true
                 }
             }
@@ -162,12 +207,12 @@ class RegisterStoreActivity : AppCompatActivity() {
             when (state) {
                 is Result.Loading -> {
                     Log.d(TAG, "setupObservers: Loading cities...")
-                    binding.cityProgressBar?.visibility = View.VISIBLE
+                    binding.cityProgressBar.visibility = View.VISIBLE
                     binding.spinnerCity.isEnabled = false
                 }
                 is Result.Success -> {
                     Log.d(TAG, "setupObservers: Cities loaded successfully: ${state.data.size} cities")
-                    binding.cityProgressBar?.visibility = View.GONE
+                    binding.cityProgressBar.visibility = View.GONE
                     binding.spinnerCity.isEnabled = true
 
                     // Update adapter with data
@@ -175,7 +220,7 @@ class RegisterStoreActivity : AppCompatActivity() {
                 }
                 is Result.Error -> {
                     Log.e(TAG, "setupObservers: Error loading cities: ${state.exception.message}")
-                    binding.cityProgressBar?.visibility = View.GONE
+                    binding.cityProgressBar.visibility = View.GONE
                     binding.spinnerCity.isEnabled = true
                 }
             }
@@ -214,11 +259,11 @@ class RegisterStoreActivity : AppCompatActivity() {
                 Log.d(TAG, "setupStoreTypesObserver: Loading store types...")
                 // Show loading indicator for store types spinner
                 binding.spinnerStoreType.isEnabled = false
-                binding.storeTypeProgressBar?.visibility = View.VISIBLE
+                binding.storeTypeProgressBar.visibility = View.VISIBLE
             } else {
                 Log.d(TAG, "setupStoreTypesObserver: Store types loading completed")
                 binding.spinnerStoreType.isEnabled = true
-                binding.storeTypeProgressBar?.visibility = View.GONE
+                binding.storeTypeProgressBar.visibility = View.GONE
             }
         }
 
@@ -309,7 +354,7 @@ class RegisterStoreActivity : AppCompatActivity() {
         }
 
         // Hide progress bar after setup
-        binding.storeTypeProgressBar?.visibility = View.GONE
+        binding.storeTypeProgressBar.visibility = View.GONE
         Log.d(TAG, "setupStoreTypeSpinner: Store type spinner setup completed")
     }
 
@@ -398,21 +443,9 @@ class RegisterStoreActivity : AppCompatActivity() {
         }
 
         // NPWP
-        binding.containerNpwp?.setOnClickListener {
+        binding.containerNpwp.setOnClickListener {
             Log.d(TAG, "NPWP container clicked, picking image")
             pickImage(PICK_NPWP_REQUEST)
-        }
-
-        // SPPIRT
-        binding.containerSppirt.setOnClickListener {
-            Log.d(TAG, "SPPIRT container clicked, picking document")
-            pickDocument(PICK_PERSETUJUAN_REQUEST)
-        }
-
-        // Halal
-        binding.containerHalal.setOnClickListener {
-            Log.d(TAG, "Halal container clicked, picking document")
-            pickDocument(PICK_QRIS_REQUEST)
         }
 
         Log.d(TAG, "setupDocumentUploads: Document upload buttons setup completed")
@@ -442,14 +475,14 @@ class RegisterStoreActivity : AppCompatActivity() {
             handleCourierSelection("jne", isChecked)
         }
 
-        binding.checkboxJnt.setOnCheckedChangeListener { _, isChecked ->
-            Log.d(TAG, "JNT checkbox ${if (isChecked) "checked" else "unchecked"}")
-            handleCourierSelection("tiki", isChecked)
-        }
-
         binding.checkboxPos.setOnCheckedChangeListener { _, isChecked ->
             Log.d(TAG, "POS checkbox ${if (isChecked) "checked" else "unchecked"}")
             handleCourierSelection("pos", isChecked)
+        }
+
+        binding.checkboxTiki.setOnCheckedChangeListener { _, isChecked ->
+            Log.d(TAG, "TIKI checkbox ${if (isChecked) "checked" else "unchecked"}")
+            handleCourierSelection("tiki", isChecked)
         }
 
         Log.d(TAG, "setupCourierSelection: Courier checkboxes setup completed")
@@ -465,6 +498,7 @@ class RegisterStoreActivity : AppCompatActivity() {
             viewModel.selectedCouriers.remove(courier)
             Log.d(TAG, "handleCourierSelection: Removed courier: $courier. Current couriers: ${viewModel.selectedCouriers}")
         }
+        validateRequiredFields()
     }
 
     private fun setupMap() {
@@ -516,6 +550,7 @@ class RegisterStoreActivity : AppCompatActivity() {
             override fun afterTextChanged(s: Editable?) {
                 viewModel.storeName.value = s.toString()
                 Log.d(TAG, "Store name updated: ${s.toString()}")
+                validateRequiredFields()
             }
         })
 
@@ -534,6 +569,7 @@ class RegisterStoreActivity : AppCompatActivity() {
             override fun afterTextChanged(s: Editable?) {
                 viewModel.street.value = s.toString()
                 Log.d(TAG, "Street address updated: ${s.toString()}")
+                validateRequiredFields()
             }
         })
 
@@ -547,6 +583,7 @@ class RegisterStoreActivity : AppCompatActivity() {
                 } catch (e: NumberFormatException) {
                     // Handle invalid input
                     Log.e(TAG, "Invalid postal code input: ${s.toString()}, error: $e")
+                    validateRequiredFields()
                 }
             }
         })
@@ -578,6 +615,7 @@ class RegisterStoreActivity : AppCompatActivity() {
                     viewModel.bankNumber.value = 0 // or 0
                     Log.d(TAG, "Bank number set to default: 0")
                 }
+                validateRequiredFields()
             }
         })
 
@@ -587,6 +625,7 @@ class RegisterStoreActivity : AppCompatActivity() {
             override fun afterTextChanged(s: Editable?) {
                 viewModel.subdistrict.value = s.toString()
                 Log.d(TAG, "Subdistrict updated: ${s.toString()}")
+                validateRequiredFields()
             }
         })
 
@@ -596,6 +635,7 @@ class RegisterStoreActivity : AppCompatActivity() {
             override fun afterTextChanged(s: Editable?) {
                 viewModel.bankName.value = s.toString()
                 Log.d(TAG, "Bank name updated: ${s.toString()}")
+                validateRequiredFields()
             }
         })
 
@@ -605,7 +645,7 @@ class RegisterStoreActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         Log.d(TAG, "onActivityResult: Request code: $requestCode, Result code: $resultCode")
-        if (resultCode == Activity.RESULT_OK && data != null) {
+        if (resultCode == RESULT_OK && data != null) {
             val uri = data.data
             Log.d(TAG, "onActivityResult: URI received: $uri")
             when (requestCode) {
@@ -618,26 +658,19 @@ class RegisterStoreActivity : AppCompatActivity() {
                     Log.d(TAG, "KTP image selected")
                     viewModel.ktpUri = uri
                     updateImagePreview(uri, binding.imgKtp, binding.layoutUploadKtp)
+                    validateRequiredFields()
                 }
                 PICK_NPWP_REQUEST -> {
                     Log.d(TAG, "NPWP document selected")
                     viewModel.npwpUri = uri
                     updateDocumentPreview(binding.layoutUploadNpwp)
+                    validateRequiredFields()
                 }
                 PICK_NIB_REQUEST -> {
                     Log.d(TAG, "NIB document selected")
                     viewModel.nibUri = uri
                     updateDocumentPreview(binding.layoutUploadNib)
-                }
-                PICK_PERSETUJUAN_REQUEST -> {
-                    Log.d(TAG, "SPPIRT document selected")
-                    viewModel.persetujuanUri = uri
-                    updateDocumentPreview(binding.layoutUploadSppirt)
-                }
-                PICK_QRIS_REQUEST -> {
-                    Log.d(TAG, "Halal document selected")
-                    viewModel.qrisUri = uri
-                    updateDocumentPreview(binding.layoutUploadHalal)
+                    validateRequiredFields()
                 }
                 else -> {
                     Log.w(TAG, "Unknown request code: $requestCode")

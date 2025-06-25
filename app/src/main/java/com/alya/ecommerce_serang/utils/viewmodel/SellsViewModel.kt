@@ -14,7 +14,12 @@ import com.alya.ecommerce_serang.data.api.response.store.sells.PaymentConfirmati
 import com.alya.ecommerce_serang.data.repository.Result
 import com.alya.ecommerce_serang.data.repository.SellsRepository
 import com.alya.ecommerce_serang.ui.order.address.ViewState
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class SellsViewModel(private val repository: SellsRepository) : ViewModel() {
 
@@ -59,79 +64,128 @@ class SellsViewModel(private val repository: SellsRepository) : ViewModel() {
             Log.d(TAG, "Coroutine launched successfully")
 
             try {
-                Log.d(TAG, "Calling repository.getSellList(status='$status')")
-                val startTime = System.currentTimeMillis()
+                if(status == "all") {
+                    Log.d(TAG, "Status is 'all', calling repository.getSellList()")
+                    val allStatuses = listOf("pending", "unpaid", "processed", "shipped")
+                    val allSells = mutableListOf<OrdersItem>()
 
-                when (val result = repository.getSellList(status)) {
-                    is Result.Success -> {
-                        val endTime = System.currentTimeMillis()
-                        Log.d(TAG, "Repository call completed in ${endTime - startTime}ms")
-                        Log.d(TAG, "Result.Success received from repository")
-
-                        // Log the entire result data structure
-                        Log.d(TAG, "Raw result data: ${result.data}")
-                        Log.d(TAG, "Result data class: ${result.data.javaClass.simpleName}")
-
-                        val orders = result.data.orders
-                        Log.d(TAG, "Extracted orders list: $orders")
-                        Log.d(TAG, "Orders list class: ${orders.javaClass.simpleName}")
-                        Log.d(TAG, "Orders count: ${orders.size}")
-
-                        // Check if orders list is null or empty
-                        if (false) {
-                            Log.w(TAG, "⚠️ Orders list is NULL")
-                        } else if (orders.isEmpty()) {
-                            Log.w(TAG, "⚠️ Orders list is EMPTY")
-                        } else {
-                            Log.d(TAG, "✅ Orders list contains ${orders.size} items")
-
-                            // Log individual order details with more comprehensive info
-                            orders.forEachIndexed { index, order ->
-                                Log.d(TAG, "--- Order ${index + 1}/${orders.size} ---")
-                                Log.d(TAG, "  Order object: $order")
-                                Log.d(TAG, "  Order class: ${order.javaClass.simpleName}")
-                                Log.d(TAG, "  - ID: ${order.orderId}")
-                                Log.d(TAG, "  - Status: '${order.status}'")
-                                Log.d(TAG, "  - Customer: '${order.username}'")
-                                Log.d(TAG, "  - Total: ${order.totalAmount}")
-                                Log.d(TAG, "  - Items count: ${order.orderItems?.size ?: 0}")
-                                Log.d(TAG, "  - Created at: ${order.createdAt}")
-                                Log.d(TAG, "  - Updated at: ${order.updatedAt}")
-
-                                // Log order items if available
-                                order.orderItems?.let { items ->
-                                    Log.d(TAG, "  Order items:")
-                                    items.forEachIndexed { itemIndex, item ->
-                                        Log.d(TAG, "    Item ${itemIndex + 1}: ${item?.productName} (Qty: ${item?.quantity})")
+                    coroutineScope {
+                        val deferreds = allStatuses.map { status ->
+                            async {
+                                when (val result = repository.getSellList(status)) {
+                                    is Result.Success -> {
+                                        result.data.orders.onEach { it.displayStatus = status }
                                     }
+
+                                    is Result.Error -> {
+                                        Log.e(
+                                            TAG,
+                                            "Error loading orders for status $status",
+                                            result.exception
+                                        )
+                                        emptyList<OrdersItem>()
+                                    }
+
+                                    is Result.Loading -> emptyList<OrdersItem>()
                                 }
                             }
                         }
 
-                        // Set the ViewState to Success
-                        _sells.value = ViewState.Success(orders)
-                        Log.d(TAG, "✅ ViewState.Success set with ${orders.size} orders")
+                        deferreds.awaitAll().forEach { orders ->
+                            allSells.addAll(orders)
+                        }
                     }
 
-                    is Result.Error -> {
-                        val endTime = System.currentTimeMillis()
-                        Log.e(TAG, "Repository call failed in ${endTime - startTime}ms")
-                        Log.e(TAG, "❌ Result.Error received from repository")
-                        Log.e(TAG, "Error message: ${result.exception.message}")
-                        Log.e(TAG, "Exception type: ${result.exception.javaClass.simpleName}")
-                        Log.e(TAG, "Exception stack trace:", result.exception)
-
-                        val errorMessage = result.exception.message ?: "Unknown error occurred"
-                        _sells.value = ViewState.Error(errorMessage)
-                        Log.d(TAG, "ViewState.Error set with message: '$errorMessage'")
+                    val sortedSells = allSells.sortedByDescending { order ->
+                        try {
+                            SimpleDateFormat(
+                                "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+                                Locale.getDefault()
+                            ).parse(order.createdAt)
+                        } catch (e: Exception) {
+                            null
+                        }
                     }
 
-                    is Result.Loading -> {
-                        Log.d(TAG, "Result.Loading received from repository (this is unusual)")
-                        // Keep the current loading state
+                    _sells.value = ViewState.Success(sortedSells)
+                    Log.d(TAG, "All orders loaded successfully: ${sortedSells.size} items")
+                } else {
+                    Log.d(TAG, "Calling repository.getSellList(status='$status')")
+                    val startTime = System.currentTimeMillis()
+
+                    when (val result = repository.getSellList(status)) {
+                        is Result.Success -> {
+                            val endTime = System.currentTimeMillis()
+                            Log.d(TAG, "Repository call completed in ${endTime - startTime}ms")
+                            Log.d(TAG, "Result.Success received from repository")
+
+                            // Log the entire result data structure
+                            Log.d(TAG, "Raw result data: ${result.data}")
+                            Log.d(TAG, "Result data class: ${result.data.javaClass.simpleName}")
+
+                            val orders = result.data.orders
+                            Log.d(TAG, "Extracted orders list: $orders")
+                            Log.d(TAG, "Orders list class: ${orders.javaClass.simpleName}")
+                            Log.d(TAG, "Orders count: ${orders.size}")
+
+                            // Check if orders list is null or empty
+                            if (false) {
+                                Log.w(TAG, "⚠️ Orders list is NULL")
+                            } else if (orders.isEmpty()) {
+                                Log.w(TAG, "⚠️ Orders list is EMPTY")
+                            } else {
+                                Log.d(TAG, "✅ Orders list contains ${orders.size} items")
+
+                                // Log individual order details with more comprehensive info
+                                orders.forEachIndexed { index, order ->
+                                    Log.d(TAG, "--- Order ${index + 1}/${orders.size} ---")
+                                    Log.d(TAG, "  Order object: $order")
+                                    Log.d(TAG, "  Order class: ${order.javaClass.simpleName}")
+                                    Log.d(TAG, "  - ID: ${order.orderId}")
+                                    Log.d(TAG, "  - Status: '${order.status}'")
+                                    Log.d(TAG, "  - Customer: '${order.username}'")
+                                    Log.d(TAG, "  - Total: ${order.totalAmount}")
+                                    Log.d(TAG, "  - Items count: ${order.orderItems?.size ?: 0}")
+                                    Log.d(TAG, "  - Created at: ${order.createdAt}")
+                                    Log.d(TAG, "  - Updated at: ${order.updatedAt}")
+
+                                    // Log order items if available
+                                    order.orderItems?.let { items ->
+                                        Log.d(TAG, "  Order items:")
+                                        items.forEachIndexed { itemIndex, item ->
+                                            Log.d(
+                                                TAG,
+                                                "    Item ${itemIndex + 1}: ${item?.productName} (Qty: ${item?.quantity})"
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Set the ViewState to Success
+                            _sells.value = ViewState.Success(orders)
+                            Log.d(TAG, "✅ ViewState.Success set with ${orders.size} orders")
+                        }
+
+                        is Result.Error -> {
+                            val endTime = System.currentTimeMillis()
+                            Log.e(TAG, "Repository call failed in ${endTime - startTime}ms")
+                            Log.e(TAG, "❌ Result.Error received from repository")
+                            Log.e(TAG, "Error message: ${result.exception.message}")
+                            Log.e(TAG, "Exception type: ${result.exception.javaClass.simpleName}")
+                            Log.e(TAG, "Exception stack trace:", result.exception)
+
+                            val errorMessage = result.exception.message ?: "Unknown error occurred"
+                            _sells.value = ViewState.Error(errorMessage)
+                            Log.d(TAG, "ViewState.Error set with message: '$errorMessage'")
+                        }
+
+                        is Result.Loading -> {
+                            Log.d(TAG, "Result.Loading received from repository (this is unusual)")
+                            // Keep the current loading state
+                        }
                     }
                 }
-
             } catch (e: Exception) {
                 Log.e(TAG, "❌ Exception caught in getSellList")
                 Log.e(TAG, "Exception type: ${e.javaClass.simpleName}")

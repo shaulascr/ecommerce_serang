@@ -6,6 +6,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.alya.ecommerce_serang.data.api.response.store.sells.Orders
 import com.alya.ecommerce_serang.data.api.response.store.sells.OrdersItem
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
@@ -13,6 +14,7 @@ import com.alya.ecommerce_serang.data.repository.AddressRepository
 import com.alya.ecommerce_serang.data.repository.SellsRepository
 import com.alya.ecommerce_serang.databinding.ActivityDetailShipmentBinding
 import com.alya.ecommerce_serang.ui.profile.mystore.sells.SellsProductAdapter
+import com.alya.ecommerce_serang.ui.profile.mystore.sells.payment.DetailPaymentActivity
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
 import com.alya.ecommerce_serang.utils.viewmodel.AddressViewModel
@@ -49,6 +51,12 @@ class DetailShipmentActivity : AppCompatActivity() {
         binding.header.headerLeftIcon.setOnClickListener {
             onBackPressed()
             finish()
+        }
+
+        productAdapter = SellsProductAdapter()
+        binding.rvProductItems.apply {
+            adapter = productAdapter
+            layoutManager = LinearLayoutManager(this@DetailShipmentActivity)
         }
 
         val sellsJson = intent.getStringExtra("sells_data")

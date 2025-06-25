@@ -145,6 +145,7 @@
     <string name="disconnected_reconnecting">Disconnected. Reconnecting...</string>
     <string name="connection_error">Connection error: %1$s</string>
     <string name="typing">User is typing...</string>
+    <string name="buka_toko_desc">Mohon untuk melengkapi formulir pendaftaran ini agar dapat mengakses fitur penjual pada aplikasi.</string>
 
 
 </resources>

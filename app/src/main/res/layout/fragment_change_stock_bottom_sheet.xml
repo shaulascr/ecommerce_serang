@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.profile.mystore.product.ChangePriceBottomSheetFragment"
+    tools:context=".ui.profile.mystore.product.ChangeStockBottomSheetFragment"
     android:orientation="vertical">
 
     <include
@@ -17,25 +17,37 @@
         android:orientation="horizontal"
         android:background="@drawable/bg_text_field"
         android:layout_marginTop="10dp"
-        android:layout_marginHorizontal="16dp">
+        android:layout_marginHorizontal="16dp"
+        android:gravity="center">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Rp"
-            style="@style/label_medium_prominent"
-            android:textColor="@color/black_300"
-            android:padding="8dp" />
+        <ImageView
+            android:id="@+id/btn_minus"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_margin="5dp"
+            android:src="@drawable/ic_minus"
+            android:clickable="true"
+            android:focusable="true"/>
 
         <EditText
-            android:id="@+id/edt_price"
-            android:layout_width="match_parent"
+            android:id="@+id/edt_stock"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:background="@null"
-            android:hint="Isi harga produk di sini"
+            android:hint="Isi stok produk di sini"
             android:inputType="number"
             android:padding="8dp"
             style="@style/body_small" />
+
+        <ImageView
+            android:id="@+id/btn_plus"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_margin="5dp"
+            android:src="@drawable/ic_add"
+            android:clickable="true"
+            android:focusable="true"/>
 
     </LinearLayout>
 

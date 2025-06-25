@@ -3,6 +3,7 @@ package com.alya.ecommerce_serang.ui.profile.mystore.product
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.PopupMenu
 import android.widget.TextView
@@ -15,10 +16,14 @@ import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.dto.Product
 import com.alya.ecommerce_serang.data.api.dto.ProductsItem
 import com.bumptech.glide.Glide
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 
 class ProductAdapter(
     private val products: List<ProductsItem>,
-    private val onItemClick: (ProductsItem) -> Unit
+    private val onItemClick: (ProductsItem) -> Unit,
+    private val onUpdateProduct: (productId: Int, updatedFields: Map<String, RequestBody>) -> Unit
 ) : RecyclerView.Adapter<ProductAdapter.ProductViewHolder>() {
 
     inner class ProductViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -28,6 +33,8 @@ class ProductAdapter(
         private val tvProductStock: TextView = itemView.findViewById(R.id.tv_product_stock)
         private val tvProductStatus: TextView = itemView.findViewById(R.id.tv_product_status)
         private val ivMenu: ImageView = itemView.findViewById(R.id.iv_menu)
+        private val btnChangePrice: Button = itemView.findViewById(R.id.btn_change_price)
+        private val btnChangeStock: Button = itemView.findViewById(R.id.btn_change_stock)
 
         fun bind(product: ProductsItem) {
             tvProductName.text = product.name
@@ -55,8 +62,37 @@ class ProductAdapter(
                 .into(ivProduct)
 
             ivMenu.setOnClickListener {
-                // Show Bottom Sheet when menu is clicked
                 val bottomSheetFragment = ProductOptionsBottomSheetFragment(product)
+                bottomSheetFragment.show(
+                    (itemView.context as FragmentActivity).supportFragmentManager,
+                    bottomSheetFragment.tag
+                )
+            }
+
+            btnChangePrice.setOnClickListener {
+                val bottomSheetFragment = ChangePriceBottomSheetFragment(product) { id, newPrice ->
+                    val body = mapOf(
+                        "product_id" to id.toString().toRequestBody("text/plain".toMediaTypeOrNull()),
+                        "price" to newPrice.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+                    )
+                    onUpdateProduct(id, body)
+                    Toast.makeText(itemView.context, "Harga berhasil diubah", Toast.LENGTH_SHORT).show()
+                }
+                bottomSheetFragment.show(
+                    (itemView.context as FragmentActivity).supportFragmentManager,
+                    bottomSheetFragment.tag
+                )
+            }
+
+            btnChangeStock.setOnClickListener {
+                val bottomSheetFragment = ChangeStockBottomSheetFragment(product) { id, newStock ->
+                    val body = mapOf(
+                        "product_id" to id.toString().toRequestBody("text/plain".toMediaTypeOrNull()),
+                        "stock" to newStock.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+                    )
+                    onUpdateProduct(id, body)
+                    Toast.makeText(itemView.context, "Stok berhasil diubah", Toast.LENGTH_SHORT).show()
+                }
                 bottomSheetFragment.show(
                     (itemView.context as FragmentActivity).supportFragmentManager,
                     bottomSheetFragment.tag

@@ -20,9 +20,10 @@ class ProductActivity : AppCompatActivity() {
     private lateinit var binding: ActivityProductBinding
     private lateinit var sessionManager: SessionManager
 
+    private lateinit var productAdapter: ProductAdapter
+
     private val viewModel: ProductViewModel by viewModels {
         BaseViewModelFactory {
-            sessionManager = SessionManager(this)
             val apiService = ApiConfig.getApiService(sessionManager)
             val productRepository = ProductRepository(apiService)
             ProductViewModel(productRepository)
@@ -30,6 +31,8 @@ class ProductActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        sessionManager = SessionManager(this)
+
         super.onCreate(savedInstanceState)
         binding = ActivityProductBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -56,14 +59,36 @@ class ProductActivity : AppCompatActivity() {
                 is Result.Success -> {
                     binding.progressBar.visibility = View.GONE
                     val products = result.data
-                    binding.rvStoreProduct.adapter = ProductAdapter(products) {
-                        Toast.makeText(this, "Produk: ${it.name}", Toast.LENGTH_SHORT).show()
-                    }
+
+                    productAdapter = ProductAdapter(
+                        products,
+                        onItemClick = { products ->
+                            Toast.makeText(this, "Produk ${products.name} diklik", Toast.LENGTH_SHORT).show()
+                        },
+                        onUpdateProduct = { productId, updatedFields ->
+                            viewModel.updateProduct(productId, updatedFields)
+                        }
+                    )
+
+                    binding.rvStoreProduct.adapter = productAdapter
                 }
                 is Result.Error -> {
                     binding.progressBar.visibility = View.GONE
                     Toast.makeText(this, "Gagal memuat produk: ${result.exception.message}", Toast.LENGTH_SHORT).show()
                 }
+            }
+        }
+
+        viewModel.productUpdateResult.observe(this) { result ->
+            when (result) {
+                is Result.Success -> {
+                    Toast.makeText(this, "Produk berhasil diperbarui", Toast.LENGTH_SHORT).show()
+                    viewModel.loadMyStoreProducts()
+                }
+                is Result.Error -> {
+                    Toast.makeText(this, "Gagal memperbarui produk", Toast.LENGTH_SHORT).show()
+                }
+                else -> {}
             }
         }
     }

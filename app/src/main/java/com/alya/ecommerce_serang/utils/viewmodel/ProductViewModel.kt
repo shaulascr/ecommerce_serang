@@ -111,9 +111,9 @@ class ProductViewModel(private val repository: ProductRepository) : ViewModel() 
     fun updateProduct(
         productId: Int?,
         data: Map<String, RequestBody>,
-        image: MultipartBody.Part?,
-        halal: MultipartBody.Part?,
-        sppirt: MultipartBody.Part?
+        image: MultipartBody.Part? = null,
+        halal: MultipartBody.Part? = null,
+        sppirt: MultipartBody.Part? = null
     ) {
         viewModelScope.launch {
             _productUpdateResult.postValue(Result.Loading)
