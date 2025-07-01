@@ -16,12 +16,12 @@ data class CreateAddressRequest (
     val subDistrict: String,
 
     @SerializedName("city_id")
-    val cityId: Int,
+    val cityId: String,
 
     @SerializedName("province_id")
     val provId: Int,
     @SerializedName("postal_code")
-    val postCode: String? = null,
+    val postCode: String,
 
     @SerializedName("detail")
     val detailAddress: String? = null,

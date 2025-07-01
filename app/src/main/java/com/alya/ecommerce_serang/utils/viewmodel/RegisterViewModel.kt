@@ -16,6 +16,8 @@ import com.alya.ecommerce_serang.data.api.response.auth.User
 import com.alya.ecommerce_serang.data.api.response.auth.VerifRegisterResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.CitiesItem
 import com.alya.ecommerce_serang.data.api.response.customer.order.ProvincesItem
+import com.alya.ecommerce_serang.data.api.response.customer.order.SubdistrictsItem
+import com.alya.ecommerce_serang.data.api.response.customer.order.VillagesItem
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
 import com.alya.ecommerce_serang.data.repository.OrderRepository
@@ -64,14 +66,23 @@ class RegisterViewModel(private val repository: UserRepository, private val orde
 
     // For address data
     var selectedProvinceId: Int? = null
-    var selectedCityId: Int? = null
+    var selectedCityId: String? = null
+    var selectedSubdistrict: String? = null
+    var selectedVillages: String? = null
+    var selectedPostalCode: String? = null
 
-    // For provinces and cities
+    // For provinces and cities using raja ongkir
     private val _provincesState = MutableLiveData<ViewState<List<ProvincesItem>>>()
     val provincesState: LiveData<ViewState<List<ProvincesItem>>> = _provincesState
 
     private val _citiesState = MutableLiveData<ViewState<List<CitiesItem>>>()
     val citiesState: LiveData<ViewState<List<CitiesItem>>> = _citiesState
+
+    private val _subdistrictState = MutableLiveData<ViewState<List<SubdistrictsItem>>>()
+    val subdistrictState: LiveData<ViewState<List<SubdistrictsItem>>> = _subdistrictState
+
+    private val _villagesState = MutableLiveData<ViewState<List<VillagesItem>>>()
+    val villagesState: LiveData<ViewState<List<VillagesItem>>> = _villagesState
 
     // For address submission
     private val _addressSubmissionState = MutableLiveData<ViewState<String>>()
@@ -222,7 +233,7 @@ class RegisterViewModel(private val repository: UserRepository, private val orde
             }
         }
     }
-
+//using raja ongkir
     fun getProvinces() {
         _provincesState.value = ViewState.Loading
         viewModelScope.launch {
@@ -242,6 +253,7 @@ class RegisterViewModel(private val repository: UserRepository, private val orde
         }
     }
 
+    //kota pake raja ongkir
     fun getCities(provinceId: Int) {
         _citiesState.value = ViewState.Loading
         viewModelScope.launch {
@@ -263,12 +275,62 @@ class RegisterViewModel(private val repository: UserRepository, private val orde
         }
     }
 
+    fun getSubdistrict(cityId: String) {
+        _subdistrictState.value = ViewState.Loading
+        viewModelScope.launch {
+            try {
+
+                selectedSubdistrict = cityId
+                val result = repository.getListSubdistrict(cityId)
+                result?.let {
+                    _subdistrictState.postValue(ViewState.Success(it.subdistricts))
+                    Log.d(TAG, "Cities loaded for province $cityId: ${it.subdistricts.size}")
+                } ?: run {
+                    _subdistrictState.postValue(ViewState.Error("Failed to load cities"))
+                    Log.e(TAG, "City result was null for province $cityId")
+                }
+            } catch (e: Exception) {
+                _subdistrictState.postValue(ViewState.Error(e.message ?: "Error loading cities"))
+                Log.e(TAG, "Error fetching cities for province $cityId", e)
+            }
+        }
+    }
+
+    fun getVillages(subdistrictId: String) {
+        _villagesState.value = ViewState.Loading
+        viewModelScope.launch {
+            try {
+
+                selectedVillages = subdistrictId
+                val result = repository.getListVillages(subdistrictId)
+                result?.let {
+                    _villagesState.postValue(ViewState.Success(it.villages))
+                    Log.d(TAG, "Cities loaded for province $subdistrictId: ${it.villages.size}")
+                } ?: run {
+                    _villagesState.postValue(ViewState.Error("Failed to load cities"))
+                    Log.e(TAG, "City result was null for province $subdistrictId")
+                }
+            } catch (e: Exception) {
+                _villagesState.postValue(ViewState.Error(e.message ?: "Error loading cities"))
+                Log.e(TAG, "Error fetching cities for province $subdistrictId", e)
+            }
+        }
+    }
+
     fun setSelectedProvinceId(id: Int) {
         selectedProvinceId = id
     }
 
-    fun setSelectedCityId(id: Int) {
+    fun updateSelectedCityId(id: String) {
         selectedCityId = id
+    }
+
+    fun updateSelectedSubdistrict(id: String){
+        selectedSubdistrict = id
+    }
+
+    fun updateSelectedVillages(id: String){
+        selectedVillages = id
     }
 
     fun addAddress(request: CreateAddressRequest) {
@@ -313,6 +375,4 @@ class RegisterViewModel(private val repository: UserRepository, private val orde
     companion object {
         private const val TAG = "RegisterViewModel"
     }
-
-    //require auth
 }

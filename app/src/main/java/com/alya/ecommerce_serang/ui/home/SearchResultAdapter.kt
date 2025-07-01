@@ -2,6 +2,7 @@ package com.alya.ecommerce_serang.ui.home
 
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -65,6 +66,16 @@ class SearchResultsAdapter(
 
             val storeName = product.storeId?.let { storeMap[it]?.storeName } ?: "Unknown Store"
             binding.tvStoreName.text = storeName
+            val ratingStr = product.rating
+            val ratingValue = ratingStr?.toFloatOrNull()
+
+            if (ratingValue != null && ratingValue > 0f) {
+                binding.rating.text = String.format("%.1f", ratingValue)
+                binding.rating.visibility = View.VISIBLE
+            } else {
+                binding.rating.text = "Belum ada rating"
+                binding.rating.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null)
+            }
         }
     }
 

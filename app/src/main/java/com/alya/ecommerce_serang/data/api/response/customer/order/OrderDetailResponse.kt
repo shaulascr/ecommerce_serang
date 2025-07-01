@@ -56,7 +56,7 @@ data class Orders(
 	val orderItems: List<OrderListItemsItem>,
 
 	@field:SerializedName("auto_completed_at")
-	val autoCompletedAt: String? = null,
+	val autoCompletedAt: String,
 
 	@field:SerializedName("is_store_location")
 	val isStoreLocation: Boolean? = null,

@@ -133,6 +133,7 @@
                 android:layout_marginTop="16dp"
                 android:text="Nomor Rekening / Nomor HP *"
                 android:fontFamily="@font/dmsans_semibold"
+                android:visibility="gone"
                 android:textSize="16sp" />
 
             <EditText
@@ -145,6 +146,7 @@
                 android:inputType="text"
                 android:minHeight="50dp"
                 android:textSize="14sp"
+                android:visibility="gone"
                 android:padding="12dp" />
 
             <TextView
@@ -152,6 +154,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:text="Tanggal Pembayaran *"
+                android:visibility="gone"
                 android:fontFamily="@font/dmsans_semibold"
                 android:textSize="16sp" />
 
@@ -164,6 +167,7 @@
                 android:drawableEnd="@drawable/ic_calendar"
                 android:drawablePadding="8dp"
                 android:hint="Pilih tanggal"
+                android:visibility="gone"
                 android:minHeight="50dp"
                 android:padding="12dp" />
 

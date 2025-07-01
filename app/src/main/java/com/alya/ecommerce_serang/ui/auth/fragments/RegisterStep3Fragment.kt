@@ -23,7 +23,9 @@ import com.alya.ecommerce_serang.ui.auth.LoginActivity
 import com.alya.ecommerce_serang.ui.auth.RegisterActivity
 import com.alya.ecommerce_serang.ui.order.address.CityAdapter
 import com.alya.ecommerce_serang.ui.order.address.ProvinceAdapter
+import com.alya.ecommerce_serang.ui.order.address.SubdsitrictAdapter
 import com.alya.ecommerce_serang.ui.order.address.ViewState
+import com.alya.ecommerce_serang.ui.order.address.VillagesAdapter
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
 import com.alya.ecommerce_serang.utils.viewmodel.RegisterViewModel
@@ -49,6 +51,8 @@ class RegisterStep3Fragment : Fragment() {
     // For province and city selection
     private val provinceAdapter by lazy { ProvinceAdapter(requireContext()) }
     private val cityAdapter by lazy { CityAdapter(requireContext()) }
+    private val subdistrictAdapter by lazy { SubdsitrictAdapter(requireContext()) }
+    private val villagesAdapter by lazy { VillagesAdapter(requireContext()) }
 
     companion object {
         private const val TAG = "RegisterStep3Fragment"
@@ -114,7 +118,7 @@ class RegisterStep3Fragment : Fragment() {
         // Observe address submission state
         observeAddressSubmissionState()
 
-        // Load provinces
+        // Load provinces from raja ongkir
         Log.d(TAG, "Requesting provinces data")
         registerViewModel.getProvinces()
         setupProvinceObserver()
@@ -171,9 +175,10 @@ class RegisterStep3Fragment : Fragment() {
     }
 
     private fun setupAutoComplete() {
-        // Same implementation as before
         binding.autoCompleteProvinsi.setAdapter(provinceAdapter)
         binding.autoCompleteKabupaten.setAdapter(cityAdapter)
+        binding.autoCompleteKecamatan.setAdapter(subdistrictAdapter)
+        binding.autoCompleteDesa.setAdapter(villagesAdapter)
 
         binding.autoCompleteProvinsi.setOnClickListener {
             binding.autoCompleteProvinsi.showDropDown()
@@ -185,6 +190,24 @@ class RegisterStep3Fragment : Fragment() {
                 binding.autoCompleteKabupaten.showDropDown()
             } else {
                 Toast.makeText(requireContext(), "Pilih provinsi terlebih dahulu", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        binding.autoCompleteKecamatan.setOnClickListener {
+            if (subdistrictAdapter.count > 0) {
+                Log.d(TAG, "Subdistrict dropdown clicked, showing ${subdistrictAdapter.count} cities")
+                binding.autoCompleteKecamatan.showDropDown()
+            } else {
+                Toast.makeText(requireContext(), "Pilih kabupaten / kota terlebih dahulu", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        binding.autoCompleteDesa.setOnClickListener {
+            if (villagesAdapter.count > 0) {
+                Log.d(TAG, "Village dropdown clicked, showing ${villagesAdapter.count} cities")
+                binding.autoCompleteDesa.showDropDown()
+            } else {
+                Toast.makeText(requireContext(), "Pilih kecamatan terlebih dahulu", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -206,13 +229,44 @@ class RegisterStep3Fragment : Fragment() {
 
             cityId?.let { id ->
                 Log.d(TAG, "Selected city ID set to: $id")
-                registerViewModel.selectedCityId = id
+                registerViewModel.updateSelectedCityId(id)
+                registerViewModel.getSubdistrict(id)
+                binding.autoCompleteKecamatan.text.clear()
             }
+        }
+
+        binding.autoCompleteKecamatan.setOnItemClickListener{ _, _, position, _ ->
+            val subdistrictId = subdistrictAdapter.getSubdistrictId(position)
+            Log.d(TAG, "Subdistrict selected at position $position, ID: $subdistrictId")
+
+            subdistrictId?.let { id ->
+                Log.d(TAG, "Selected subdistrict ID set to: $id")
+                registerViewModel.selectedSubdistrict = id
+                registerViewModel.getVillages(id)
+                binding.autoCompleteDesa.text.clear()
+            }
+        }
+
+        binding.autoCompleteDesa.setOnItemClickListener{ _, _, position, _ ->
+            val villageId = villagesAdapter.getVillageId(position)
+            val postalCode = villagesAdapter.getPostalCode(position)
+            Log.d(TAG, "Village selected at position $position, ID: $villageId")
+
+            villageId?.let { id ->
+                Log.d(TAG, "Selected village ID set to: $id")
+                registerViewModel.selectedVillages = id
+            }
+
+            postalCode?.let { postCode ->
+                registerViewModel.selectedPostalCode = postCode
+            }
+
+            binding.etKodePos.setText(registerViewModel.selectedPostalCode ?: "")
         }
     }
 
     private fun setupProvinceObserver() {
-        // Same implementation as before
+        // pake raja ongkir
         registerViewModel.provincesState.observe(viewLifecycleOwner) { state ->
             when (state) {
                 is ViewState.Loading -> {
@@ -256,7 +310,45 @@ class RegisterStep3Fragment : Fragment() {
                 }
             }
         }
+        registerViewModel.subdistrictState.observe(viewLifecycleOwner) { state ->
+            when (state) {
+                is ViewState.Loading -> {
+                    binding.progressBarKecamatan.visibility = View.VISIBLE
+                }
+                is ViewState.Success -> {
+                    Log.d(TAG, "Subdistrict: Success - received ${state.data.size} kecamatan")
+                    binding.progressBarKecamatan.visibility = View.GONE
+                    subdistrictAdapter.updateData(state.data)
+                    Log.d(TAG, "Updated subdistrict adapter with ${state.data.size} items")
+                }
+                is ViewState.Error -> {
+                    Log.e(TAG, "Subdistrict: Error - ${state.message}")
+                    binding.progressBarKecamatan.visibility = View.GONE
+                    showError("Failed to load kecamatan: ${state.message}")
+                }
+            }
+        }
+
+        registerViewModel.villagesState.observe(viewLifecycleOwner) { state ->
+            when (state) {
+                is ViewState.Loading -> {
+                    binding.progressBarDesa.visibility = View.VISIBLE
+                }
+                is ViewState.Success -> {
+                    Log.d(TAG, "Village: Success - received ${state.data.size} desa")
+                    binding.progressBarDesa.visibility = View.GONE
+                    villagesAdapter.updateData(state.data)
+                    Log.d(TAG, "Updated village adapter with ${state.data.size} items")
+                }
+                is ViewState.Error -> {
+                    Log.e(TAG, "Village: Error - ${state.message}")
+                    binding.progressBarDesa.visibility = View.GONE
+                    showError("Failed to load desa: ${state.message}")
+                }
+            }
+        }
     }
+
 
     private fun submitAddress() {
         Log.d(TAG, "submitAddress called")
@@ -276,13 +368,13 @@ class RegisterStep3Fragment : Fragment() {
         Log.d(TAG, "Using user ID: $userId")
 
         val street = binding.etDetailAlamat.text.toString().trim()
-        val subDistrict = binding.etKecamatan.text.toString().trim()
-        val postalCode = binding.etKodePos.text.toString().trim()
         val recipient = binding.etNamaPenerima.text.toString().trim()
         val phone = binding.etNomorHp.text.toString().trim()
 
         val provinceId = registerViewModel.selectedProvinceId?.toInt() ?: 0
-        val cityId = registerViewModel.selectedCityId?.toInt() ?: 0
+        val cityId = registerViewModel.selectedCityId.toString()
+        val subDistrict = registerViewModel.selectedSubdistrict.toString()
+        val postalCode = registerViewModel.selectedPostalCode.toString()
 
         Log.d(TAG, "Address data - Street: $street, SubDistrict: $subDistrict, PostalCode: $postalCode")
         Log.d(TAG, "Address data - Recipient: $recipient, Phone: $phone")
@@ -318,13 +410,13 @@ class RegisterStep3Fragment : Fragment() {
 
     private fun validateAddressForm(): Boolean {
         val street = binding.etDetailAlamat.text.toString().trim()
-        val subDistrict = binding.etKecamatan.text.toString().trim()
-        val postalCode = binding.etKodePos.text.toString().trim()
         val recipient = binding.etNamaPenerima.text.toString().trim()
         val phone = binding.etNomorHp.text.toString().trim()
 
         val provinceId = registerViewModel.selectedProvinceId
         val cityId = registerViewModel.selectedCityId
+        val subDistrict = registerViewModel.selectedSubdistrict.toString()
+        val postalCode = registerViewModel.selectedPostalCode
 
         Log.d(TAG, "Validating - Street: $street, SubDistrict: $subDistrict, PostalCode: $postalCode")
         Log.d(TAG, "Validating - Recipient: $recipient, Phone: $phone")
@@ -409,8 +501,4 @@ class RegisterStep3Fragment : Fragment() {
         ViewCompat.setWindowInsetsAnimationCallback(binding.root, null)
         _binding = null
     }
-//
-//    // Data classes for province and city
-//    data class Province(val id: String, val name: String)
-//    data class City(val id: String, val name: String)
 }

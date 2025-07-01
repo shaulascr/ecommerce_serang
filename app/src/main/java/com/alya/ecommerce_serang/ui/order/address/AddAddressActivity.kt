@@ -289,7 +289,7 @@ class AddAddressActivity : AppCompatActivity() {
         val isStoreLocation = false
 
         val provinceId = viewModel.selectedProvinceId
-        val cityId = viewModel.selectedCityId
+        val cityId = viewModel.selectedCityId.toString()
 
         Log.d(TAG, "Form data: street=$street, subDistrict=$subDistrict, postalCode=$postalCode, " +
                 "recipient=$recipient, phone=$phone, userId=$userId, provinceId=$provinceId, cityId=$cityId, " +

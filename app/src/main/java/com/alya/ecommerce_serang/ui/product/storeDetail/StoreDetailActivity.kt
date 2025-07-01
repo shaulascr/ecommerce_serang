@@ -128,7 +128,6 @@ class StoreDetailActivity : AppCompatActivity() {
     private fun updateStoreInfo(store: StoreItem?) {
         store?.let {
             binding.tvStoreName.text = it.storeName
-            binding.tvStoreRating.text = it.storeRating
             binding.tvStoreLocation.text = it.storeLocation
             binding.tvStoreType.text = it.storeType
             binding.tvActiveStatus.text = it.status
@@ -145,6 +144,17 @@ class StoreDetailActivity : AppCompatActivity() {
                 .load(fullImageUrl)
                 .placeholder(R.drawable.placeholder_image)
                 .into(binding.ivStoreImage)
+
+            val ratingStr = it.storeRating
+            val ratingValue = ratingStr?.toFloatOrNull()
+
+            if (ratingValue != null && ratingValue > 0f) {
+                binding.tvStoreRating.text = String.format("%.1f", ratingValue)
+                binding.tvStoreRating.visibility = View.VISIBLE
+            } else {
+                binding.tvStoreRating.text = "Belum ada rating"
+                binding.tvStoreRating.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null)
+            }
         }
     }
 

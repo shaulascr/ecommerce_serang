@@ -55,7 +55,7 @@ class CancelOrderBottomSheet(
         val btnConfirm = view.findViewById<Button>(R.id.btn_confirm)
 
         // Set the title
-        tvTitle.text = "Cancel Order #$orderId"
+        tvTitle.text = "Batalkan Pesanan #$orderId"
 
         // Set up the spinner with cancellation reasons
         setupReasonSpinner(spinnerReason)
@@ -94,11 +94,11 @@ class CancelOrderBottomSheet(
     private fun getCancellationReasons(): List<CancelOrderReq> {
         // These should ideally come from the server or a configuration
         return listOf(
-            CancelOrderReq(1, "Changed my mind"),
-            CancelOrderReq(2, "Found a better option"),
-            CancelOrderReq(3, "Ordered by mistake"),
-            CancelOrderReq(4, "Delivery time too long"),
-            CancelOrderReq(5, "Other reason")
+            CancelOrderReq(1, "Berubah pikiran"),
+            CancelOrderReq(2, "Menemukan pilihan yang lebih baik"),
+            CancelOrderReq(3, "Kesalahan pemesanan"),
+            CancelOrderReq(4, "Waktu pengiriman lama"),
+            CancelOrderReq(5, "Lainnya")
         )
     }
 

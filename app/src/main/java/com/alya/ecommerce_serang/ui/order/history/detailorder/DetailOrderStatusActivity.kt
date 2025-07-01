@@ -289,18 +289,18 @@ class DetailOrderStatusActivity : AppCompatActivity() {
                 binding.tvStatusNote.visibility = View.VISIBLE
                 binding.tvStatusNote.text = "Menunggu pesanan dikonfirmasi penjual ${formatDatePay(orders.updatedAt)}"
                 binding.tvPaymentDeadlineLabel.text = "Batas konfirmasi penjual:"
-                binding.tvPaymentDeadline.text = formatDatePay(orders.updatedAt)
+                binding.tvPaymentDeadline.text = formatDatePaid(orders.updatedAt)
 
-                // Set buttons
-                binding.btnSecondary.apply {
-                    visibility = View.VISIBLE
-                    text = "Batalkan Pesanan"
-                    setOnClickListener {
-                        Log.d(TAG, "Cancel Order button clicked")
-                        showCancelOrderDialog(orders.orderId.toString())
-                        viewModel.getOrderDetails(orders.orderId)
-                    }
-                }
+                // cancel pesanan
+//                binding.btnSecondary.apply {
+//                    visibility = View.VISIBLE
+//                    text = "Batalkan Pesanan"
+//                    setOnClickListener {
+//                        Log.d(TAG, "Cancel Order button clicked")
+//                        showCancelOrderDialog(orders.orderId.toString())
+//                        viewModel.getOrderDetails(orders.orderId)
+//                    }
+//                }
             }
             "processed" -> {
                 Log.d(TAG, "adjustButtonsBasedOnStatus: Setting up UI for processed order")
@@ -309,7 +309,7 @@ class DetailOrderStatusActivity : AppCompatActivity() {
                 binding.tvStatusNote.visibility = View.VISIBLE
                 binding.tvStatusNote.text = "Penjual sedang memproses pesanan Anda"
                 binding.tvPaymentDeadlineLabel.text = "Batas diproses penjual:"
-                binding.tvPaymentDeadline.text = formatDatePay(orders.updatedAt)
+                binding.tvPaymentDeadline.text = formatDateProcessed(orders.updatedAt)
 
                 binding.btnSecondary.apply {
                     visibility = View.VISIBLE
@@ -333,7 +333,7 @@ class DetailOrderStatusActivity : AppCompatActivity() {
                 binding.tvStatusNote.visibility = View.VISIBLE
                 binding.tvStatusNote.text = "Pesanan Anda sedang dalam perjalanan. Akan sampai sekitar ${formatShipmentDate(orders.updatedAt, orders.etd ?: "0")}"
                 binding.tvPaymentDeadlineLabel.text = "Estimasi pesanan sampai:"
-                binding.tvPaymentDeadline.text = formatShipmentDate(orders.updatedAt, orders.etd ?: "0")
+                binding.tvPaymentDeadline.text = formatShipmentDate(orders.autoCompletedAt, orders.etd ?: "0")
 
                 binding.btnSecondary.apply {
                     visibility = View.VISIBLE
@@ -367,7 +367,7 @@ class DetailOrderStatusActivity : AppCompatActivity() {
                 binding.tvStatusHeader.text = "Pesanan Selesai"
                 binding.tvStatusNote.visibility = View.GONE
                 binding.tvPaymentDeadlineLabel.text = "Pesanan selesai:"
-                binding.tvPaymentDeadline.text = formatDate(orders.autoCompletedAt.toString())
+                binding.tvPaymentDeadline.text = formatDate(orders.updatedAt.toString())
 
                 binding.btnPrimary.apply {
                     visibility = View.VISIBLE
@@ -386,7 +386,7 @@ class DetailOrderStatusActivity : AppCompatActivity() {
             "canceled" -> {
                 Log.d(TAG, "adjustButtonsBasedOnStatus: Setting up UI for canceled order")
 
-                binding.tvStatusHeader.text = "Pesanan Selesai"
+                binding.tvStatusHeader.text = "Pesanan Dibatalkan"
                 binding.tvStatusNote.visibility = View.VISIBLE
                 binding.tvStatusNote.text = "Pesanan dibatalkan: ${orders.cancelReason ?: "Alasan tidak diberikan"}"
                 binding.tvPaymentDeadlineLabel.text = "Tanggal dibatalkan: "
@@ -598,10 +598,6 @@ class DetailOrderStatusActivity : AppCompatActivity() {
         val bottomSheet = CancelOrderBottomSheet(
             orderId = orderId,
             onOrderCancelled = {
-                // Handle the successful cancellation
-                // Refresh the data
-
-                // Show a success message
                 Toast.makeText(this, "Order cancelled successfully", Toast.LENGTH_SHORT).show()
             }
         )
@@ -673,6 +669,73 @@ class DetailOrderStatusActivity : AppCompatActivity() {
         }
     }
 
+    private fun formatDatePaid(dateString: String): String {
+        Log.d(TAG, "formatDatePay: Formatting payment date: $dateString")
+
+        return try {
+            // Parse the ISO 8601 date
+            val isoDateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
+            isoDateFormat.timeZone = TimeZone.getTimeZone("UTC")
+
+            val createdDate = isoDateFormat.parse(dateString)
+
+            // Add 24 hours to get due date
+            val calendar = Calendar.getInstance()
+            calendar.time = createdDate
+            calendar.add(Calendar.HOUR, 120)
+            val dueDate = calendar.time
+
+            val timeFormat = SimpleDateFormat("HH:mm", Locale("id", "ID"))
+            val dateFormat = SimpleDateFormat("dd MMM yyyy", Locale("id", "ID"))
+
+            val timePart = timeFormat.format(dueDate)
+            val datePart = dateFormat.format(dueDate)
+
+            val formatted = "$timePart\n$datePart"
+
+            Log.d(TAG, "formatDatePay: Formatted payment date: $formatted")
+            formatted
+
+        } catch (e: Exception) {
+            Log.e(TAG, "formatDatePay: Error formatting date: ${e.message}", e)
+            dateString
+        }
+    }
+
+    //format batas tgl diproses
+    private fun formatDateProcessed(dateString: String): String {
+        Log.d(TAG, "formatDatePay: Formatting payment date: $dateString")
+
+        return try {
+            // Parse the ISO 8601 date
+            val isoDateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
+            isoDateFormat.timeZone = TimeZone.getTimeZone("UTC")
+
+            val createdDate = isoDateFormat.parse(dateString)
+
+            // Add 24 hours to get due date
+            val calendar = Calendar.getInstance()
+            calendar.time = createdDate
+            calendar.add(Calendar.HOUR, 72)
+            val dueDate = calendar.time
+
+            val timeFormat = SimpleDateFormat("HH:mm", Locale("id", "ID"))
+            val dateFormat = SimpleDateFormat("dd MMM yyyy", Locale("id", "ID"))
+
+            val timePart = timeFormat.format(dueDate)
+            val datePart = dateFormat.format(dueDate)
+
+            val formatted = "$timePart\n$datePart"
+
+            Log.d(TAG, "formatDatePay: Formatted payment date: $formatted")
+            formatted
+
+        } catch (e: Exception) {
+            Log.e(TAG, "formatDatePay: Error formatting date: ${e.message}", e)
+            dateString
+        }
+    }
+
     private fun formatShipmentDate(dateString: String, estimateString: String): String {
         Log.d(TAG, "formatShipmentDate: Formatting shipment date: $dateString with ETD: $estimateString")
 
@@ -696,7 +759,6 @@ class DetailOrderStatusActivity : AppCompatActivity() {
                 calendar.time = it
 
                 // Add estimated days
-                calendar.add(Calendar.DAY_OF_MONTH, estimate)
                 val formatted = outputFormat.format(calendar.time)
 
                 Log.d(TAG, "formatShipmentDate: Estimated arrival date: $formatted")

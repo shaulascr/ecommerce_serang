@@ -88,7 +88,7 @@ class RegisterStep2Fragment : Fragment() {
 
         // Update the email sent message
         userData?.let {
-            binding.tvEmailSent.text = "We've sent a verification code to ${it.email}"
+            binding.tvEmailSent.text = "Kami telah mengirimkan kode OTP ke alamat email ${it.email}. Silahkan periksa email anda."
         }
 
         // Start the resend cooldown timer
@@ -119,7 +119,7 @@ class RegisterStep2Fragment : Fragment() {
         Log.d(TAG, "verifyOtp called with OTP: $otp")
 
         if (otp.isEmpty()) {
-            Toast.makeText(requireContext(), "Please enter the verification code", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Masukkan kode OTP anda", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -153,13 +153,13 @@ class RegisterStep2Fragment : Fragment() {
                     }
                     is com.alya.ecommerce_serang.data.repository.Result.Success -> {
                         binding.progressBar.visibility = View.GONE
-                        Toast.makeText(requireContext(), "Verification code resent", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), "Kode OTP sudah dikirim", Toast.LENGTH_SHORT).show()
                         startResendCooldown()
                     }
                     is Result.Error -> {
                         Log.e(TAG, "OTP request: Error - ${result.exception.message}")
                         binding.progressBar.visibility = View.GONE
-                        Toast.makeText(requireContext(), "Failed to resend code: ${result.exception.message}", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), "Gagal mengirim kode OTP", Toast.LENGTH_SHORT).show()
                     }
                     else -> {
                         Log.d(TAG, "OTP request: Unknown state")
@@ -180,7 +180,7 @@ class RegisterStep2Fragment : Fragment() {
         countDownTimer = object : CountDownTimer(30000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 timeRemaining = (millisUntilFinished / 1000).toInt()
-                binding.tvTimer.text = "Resend available in 00:${String.format("%02d", timeRemaining)}"
+                binding.tvTimer.text = "Kirim ulang OTP dalam waktu 00:${String.format("%02d", timeRemaining)}"
                 if (timeRemaining % 5 == 0) {
                     Log.d(TAG, "Cooldown remaining: $timeRemaining seconds")
                 }
@@ -188,7 +188,7 @@ class RegisterStep2Fragment : Fragment() {
 
             override fun onFinish() {
                 Log.d(TAG, "Cooldown finished, enabling resend button")
-                binding.tvTimer.text = "You can now resend the code"
+                binding.tvTimer.text = "Dapat mengirim ulang kode OTP"
                 binding.tvResendOtp.isEnabled = true
                 binding.tvResendOtp.setTextColor(ContextCompat.getColor(requireContext(), R.color.blue1))
                 timeRemaining = 0
@@ -222,7 +222,8 @@ class RegisterStep2Fragment : Fragment() {
                     binding.btnVerify.isEnabled = true
 
                     // Show error message
-                    Toast.makeText(requireContext(), "Registration Failed: ${result.exception.message}", Toast.LENGTH_SHORT).show()
+                    Log.e(TAG, "Registration Failed: ${result.exception.message}")
+                    Toast.makeText(requireContext(), "Gagal melakukan regsitrasi", Toast.LENGTH_SHORT).show()
                 }
                 else -> {
                     Log.d(TAG, "Registration: Unknown state")
@@ -269,7 +270,7 @@ class RegisterStep2Fragment : Fragment() {
 
                     // Show error message but continue to Step 3 anyway
                     Log.e(TAG, "Login failed but proceeding to Step 3", result.exception)
-                    Toast.makeText(requireContext(), "Note: Auto-login failed, but registration was successful", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Gagal login, namun berhasil membuat akun", Toast.LENGTH_SHORT).show()
 
                     // Proceed to Step 3
                     (activity as? RegisterActivity)?.navigateToStep(3, null)

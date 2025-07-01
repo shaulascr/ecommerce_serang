@@ -15,7 +15,7 @@ data class OrderListResponse(
 data class OrderItemsItem(
 
 	@field:SerializedName("review_id")
-	val reviewId: Int? = null,
+	val reviewId: Int,
 
 	@field:SerializedName("quantity")
 	val quantity: Int,

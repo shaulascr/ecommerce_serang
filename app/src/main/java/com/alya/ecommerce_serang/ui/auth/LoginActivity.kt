@@ -105,6 +105,7 @@ class LoginActivity : AppCompatActivity() {
                     finish()
                 }
                 is com.alya.ecommerce_serang.data.repository.Result.Error -> {
+                    Log.e("LoginActivity", "Login Failed: ${result.exception.message}")
                     Toast.makeText(this, "Login Failed: ${result.exception.message}", Toast.LENGTH_LONG).show()
                 }
                 is Result.Loading -> {

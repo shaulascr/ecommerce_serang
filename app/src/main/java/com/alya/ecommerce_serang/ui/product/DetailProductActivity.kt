@@ -164,6 +164,7 @@ class DetailProductActivity : AppCompatActivity() {
         }
     }
 
+    //info toko
     private fun updateStoreInfo(store: StoreItem?) {
         store?.let {
             binding.tvSellerName.text = it.storeName
@@ -230,9 +231,8 @@ class DetailProductActivity : AppCompatActivity() {
 
     private fun updateUI(product: Product){
         binding.tvProductName.text = product.productName
-        binding.tvPrice.text = "Rp${formatCurrency(product.price.toDouble())}"
+        binding.tvPrice.text = formatCurrency(product.price.toDouble())
         binding.tvSold.text = "Terjual ${product.totalSold} buah"
-        binding.tvRating.text = product.rating
         binding.tvWeight.text = "${product.weight} gram"
         binding.tvStock.text = "${product.stock} buah"
         binding.tvCategory.text = product.productCategory
@@ -243,7 +243,7 @@ class DetailProductActivity : AppCompatActivity() {
         isWholesaleSelected = false // Default to regular pricing
         if (isWholesaleAvailable) {
             binding.containerWholesale.visibility = View.VISIBLE
-            binding.tvPriceWholesale.text = "Rp${formatCurrency(product.wholesalePrice!!.toDouble())}"
+            binding.tvPriceWholesale.text = formatCurrency(product.wholesalePrice!!.toDouble())
             binding.descMinOrder.text = "Minimal pembelian ${minOrder}"
         } else {
             binding.containerWholesale.visibility = View.GONE
@@ -281,6 +281,17 @@ class DetailProductActivity : AppCompatActivity() {
             .load(fullImageUrl)
             .placeholder(R.drawable.placeholder_image)
             .into(binding.ivProductImage)
+
+        val ratingStr = product.rating
+        val ratingValue = ratingStr?.toFloatOrNull()
+
+        if (ratingValue != null && ratingValue > 0f) {
+            binding.tvRating.text = String.format("%.1f", ratingValue)
+            binding.tvRating.visibility = View.VISIBLE
+        } else {
+            binding.tvRating.text = "Belum ada rating"
+            binding.tvRating.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null)
+        }
     }
 
     private fun handleAllReviewsClick(productId: Int) {
@@ -347,6 +358,7 @@ class DetailProductActivity : AppCompatActivity() {
 
     }
 
+    //dialog tambah quantity dan harga grosir
     private fun showQuantityDialog(productId: Int, isBuyNow: Boolean) {
         val bottomSheetDialog = BottomSheetDialog(this)
         val view = layoutInflater.inflate(R.layout.dialog_count_buy, null)
@@ -377,10 +389,9 @@ class DetailProductActivity : AppCompatActivity() {
             switchWholesale.visibility = View.VISIBLE
             Toast.makeText(this, "Minimal pembelian grosir $currentQuantity produk", Toast.LENGTH_SHORT).show()
         } else {
+            titleWholesale.visibility = View.GONE
             switchWholesale.visibility = View.GONE
         }
-        // Set initial quantity based on current selection
-
 
         switchWholesale.setOnCheckedChangeListener { _, isChecked ->
             isWholesaleSelected = isChecked
