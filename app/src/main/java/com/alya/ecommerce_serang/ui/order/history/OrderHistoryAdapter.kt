@@ -195,7 +195,7 @@ class OrderHistoryAdapter(
                         text = itemView.context.getString(R.string.canceled_order_btn)
                         setOnClickListener {
                             showCancelOrderDialog(order.orderId.toString())
-                            viewModel.refreshOrders()
+//                            viewModel.refreshOrders()
                         }
                     }
 //                    deadlineDate.apply {
@@ -238,7 +238,7 @@ class OrderHistoryAdapter(
                         text = itemView.context.getString(R.string.claim_complaint)
                         setOnClickListener {
                             showCancelOrderDialog(order.orderId.toString())
-                            viewModel.refreshOrders()
+//                            viewModel.refreshOrders()
                         }
                     }
                     btnRight.apply {
@@ -249,7 +249,7 @@ class OrderHistoryAdapter(
 
                             // Call ViewModel
                             viewModel.confirmOrderCompleted(order.orderId, "completed")
-                            viewModel.refreshOrders()
+//                            viewModel.refreshOrders()
 
                         }
 
