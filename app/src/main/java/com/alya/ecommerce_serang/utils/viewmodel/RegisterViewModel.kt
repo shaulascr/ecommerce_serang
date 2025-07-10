@@ -64,6 +64,9 @@ class RegisterViewModel(private val repository: UserRepository, private val orde
     private val _registeredUser = MutableLiveData<User>()
     val registeredUser: LiveData<User> = _registeredUser
 
+    private val _toastMessage = MutableLiveData<com.alya.ecommerce_serang.utils.viewmodel.Event<String>>()
+    val toastMessage: LiveData<com.alya.ecommerce_serang.utils.viewmodel.Event<String>> = _toastMessage
+
     // For address data
     var selectedProvinceId: Int? = null
     var selectedCityId: String? = null
@@ -224,9 +227,16 @@ class RegisterViewModel(private val repository: UserRepository, private val orde
                 Log.d("RegisterViewModel", "OTP Response: ${response.available}")
                 _checkValue.value = Result.Success(response.available)// Store the message for UI feedback
 
+                val msg = if (response.available)
+                    "${request.fieldRegis.capitalize()} dapat digunakan"
+                else
+                    "${request.fieldRegis.capitalize()} sudah terdaftar"
+                _toastMessage.value = Event(msg)
+
             } catch (exception: Exception) {
                 // Handle any errors and update state
                 _checkValue.value = Result.Error(exception)
+                _toastMessage.value = Event("Gagal memeriksa ${request.fieldRegis}")
 
                 // Log the error for debugging
                 Log.e("RegisterViewModel", "Error:", exception)
@@ -375,4 +385,10 @@ class RegisterViewModel(private val repository: UserRepository, private val orde
     companion object {
         private const val TAG = "RegisterViewModel"
     }
+
+}
+
+class Event<out T>(private val data: T) {
+    private var handled = false
+    fun getContentIfNotHandled(): T? = if (handled) null else { handled = true; data }
 }

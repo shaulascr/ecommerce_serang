@@ -75,7 +75,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Didn't receive the code? " />
+                android:text="Belum menerima kode? " />
 
             <TextView
                 android:id="@+id/tv_resend_otp"

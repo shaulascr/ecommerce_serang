@@ -252,15 +252,10 @@ class RegisterStep2Fragment : Fragment() {
                     sessionManager.saveToken(accessToken)
                     Log.d(TAG, "Token saved to SessionManager: $accessToken")
 
-                    // Also save user ID if available in the login response
-//                    result.data.?.let { userId ->
-//                        sessionManager.saveUserId(userId)
-//                    }
-
-                    Log.d(TAG, "Login successful, token saved: $accessToken")
-
                     // Proceed to Step 3
                     Log.d(TAG, "Proceeding to Step 3 after successful login")
+
+                    // call navigate register step from activity
                     (activity as? RegisterActivity)?.navigateToStep(3, null )
                 }
                 is Result.Error -> {
@@ -270,7 +265,7 @@ class RegisterStep2Fragment : Fragment() {
 
                     // Show error message but continue to Step 3 anyway
                     Log.e(TAG, "Login failed but proceeding to Step 3", result.exception)
-                    Toast.makeText(requireContext(), "Gagal login, namun berhasil membuat akun", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Berhasil membuat akun, namun belum login", Toast.LENGTH_SHORT).show()
 
                     // Proceed to Step 3
                     (activity as? RegisterActivity)?.navigateToStep(3, null)

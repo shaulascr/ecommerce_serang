@@ -44,6 +44,9 @@ import com.google.gson.Gson
 import java.io.File
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Locale
 import java.util.TimeZone
@@ -197,12 +200,12 @@ class DetailOrderStatusActivity : AppCompatActivity() {
             Log.d(TAG, "populateOrderDetails: Payment method=${orders.payInfoName ?: "Tidak tersedia"}")
 
             // Set subtotal, shipping cost, and total
-            val subtotal = orders.totalAmount?.minus(orders.shipmentPrice.toIntOrNull() ?: 0) ?: 0
-            binding.tvSubtotal.text = formatCurrency(subtotal.toDouble())
+//            val subtotal = orders.totalAmount?.minus(orders.shipmentPrice.toDouble() ?: 0) ?: 0
+//            binding.tvSubtotal.text = formatCurrency(subtotal.toDouble())
             binding.tvShippingCost.text = formatCurrency(orders.shipmentPrice.toDouble())
             binding.tvTotal.text = formatCurrency(orders.totalAmount?.toDouble() ?: 0.00)
 
-            Log.d(TAG, "populateOrderDetails: Subtotal=$subtotal, Shipping=${orders.shipmentPrice}, Total=${orders.totalAmount}")
+            Log.d(TAG, "populateOrderDetails: Subtotal=, Shipping=${orders.shipmentPrice}, Total=${orders.totalAmount}")
 
             // Adjust buttons based on order status
             Log.d(TAG, "populateOrderDetails: Adjusting buttons for status=$orderStatus")
@@ -223,6 +226,11 @@ class DetailOrderStatusActivity : AppCompatActivity() {
             this.adapter = adapter
         }
         adapter.submitList(orderItems)
+
+        // get data from ordetlistitemsitem untuk ambil subtotal nya dan dijumlahkan
+        val subtotalSum = orderItems.sumOf { it.subtotal }
+        binding.tvSubtotal.text = formatCurrency(subtotalSum.toDouble())
+
     }
 
     private fun adjustButtonsBasedOnStatus(orders: Orders, status: String) {
@@ -287,7 +295,7 @@ class DetailOrderStatusActivity : AppCompatActivity() {
                 // Show status note
                 binding.tvStatusHeader.text = "Sudah Dibayar"
                 binding.tvStatusNote.visibility = View.VISIBLE
-                binding.tvStatusNote.text = "Menunggu pesanan dikonfirmasi penjual ${formatDatePay(orders.updatedAt)}"
+                binding.tvStatusNote.text = "Menunggu pesanan dikonfirmasi penjual ${formatDatePaid(orders.updatedAt)}"
                 binding.tvPaymentDeadlineLabel.text = "Batas konfirmasi penjual:"
                 binding.tvPaymentDeadline.text = formatDatePaid(orders.updatedAt)
 
@@ -606,32 +614,17 @@ class DetailOrderStatusActivity : AppCompatActivity() {
     }
 
     private fun formatDate(dateString: String): String {
-        Log.d(TAG, "formatDate: Formatting date: $dateString")
-
         return try {
-            val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
-            inputFormat.timeZone = TimeZone.getTimeZone("UTC")
+            val jakarta = ZoneId.of("Asia/Jakarta")
+            val instant = Instant.parse(dateString)          // parses ISO‑8601 with ‘Z’
+            val zoned   = instant.atZone(jakarta)
 
-            val timeFormat = SimpleDateFormat("HH:mm", Locale("id", "ID"))
-            val dateFormat = SimpleDateFormat("dd MMMM yyyy", Locale("id", "ID"))
+            val time    = DateTimeFormatter.ofPattern("HH:mm",       Locale("id", "ID")).format(zoned)
+            val date    = DateTimeFormatter.ofPattern("dd MMMM yyyy",Locale("id", "ID")).format(zoned)
 
-            val date = inputFormat.parse(dateString)
-
-            date?.let {
-                val calendar = Calendar.getInstance()
-                calendar.time = it
-                calendar.set(Calendar.HOUR_OF_DAY, 23)
-                calendar.set(Calendar.MINUTE, 59)
-
-                val timePart = timeFormat.format(calendar.time)
-                val datePart = dateFormat.format(calendar.time)
-
-                val formatted = "$timePart\n$datePart"
-                Log.d(TAG, "formatDate: Formatted date: $formatted")
-                formatted
-            } ?: dateString
+            "$time\n$date"
         } catch (e: Exception) {
-            Log.e(TAG, "formatDate: Error formatting date: ${e.message}", e)
+            Log.e(TAG, "formatDate: $e")
             dateString
         }
     }

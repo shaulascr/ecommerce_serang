@@ -43,24 +43,6 @@ class RegisterActivity : AppCompatActivity() {
         setContentView(binding.root)
         sessionManager = SessionManager(this)
 
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-
-        enableEdgeToEdge()
-
-        // Apply insets to your root layout
-        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, windowInsets ->
-            val systemBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-            view.setPadding(
-                systemBars.left,
-                systemBars.top,
-                systemBars.right,
-                systemBars.bottom
-            )
-            windowInsets
-        }
-
-
-
         Log.d("RegisterActivity", "Token in storage: '${sessionManager.getToken()}'")
         Log.d("RegisterActivity", "User ID in storage: '${sessionManager.getUserId()}'")
 
@@ -104,7 +86,7 @@ class RegisterActivity : AppCompatActivity() {
         }
     }
 
-    // Function to navigate to the next fragment
+    // navigate step register in fragment
     fun navigateToStep(step: Int, userData: RegisterRequest?) {
         val fragment = when (step) {
             1 -> RegisterStep1Fragment.newInstance()

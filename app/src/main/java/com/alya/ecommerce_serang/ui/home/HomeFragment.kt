@@ -208,25 +208,6 @@ class HomeFragment : Fragment() {
     private fun initUi() {
         // For LightStatusBar
         setLightStatusBar()
-//        val banners = binding.banners
-//        banners.offscreenPageLimit = 1
-//
-//        val nextItemVisiblePx = resources.getDimension(R.dimen.viewpager_next_item_visible)
-//        val currentItemHorizontalMarginPx =
-//            resources.getDimension(R.dimen.viewpager_current_item_horizontal_margin)
-//        val pageTranslationX = nextItemVisiblePx + currentItemHorizontalMarginPx
-//
-//        banners.setPageTransformer { page, position ->
-//            page.translationX = -pageTranslationX * position
-//            page.scaleY = 1 - (0.25f * kotlin.math.abs(position))
-//        }
-//
-//        banners.addItemDecoration(
-//            HorizontalMarginItemDecoration(
-//                requireContext(),
-//                R.dimen.viewpager_current_item_horizontal_margin
-//            )
-//        )
     }
 
     private fun handleProductClick(product: ProductsItem) {
@@ -248,8 +229,4 @@ class HomeFragment : Fragment() {
         categoryAdapter = null
         _binding = null
     }
-
-//    private fun showLoading(isLoading: Boolean) {
-//        binding.progressBar.isVisible = isLoading
-//    }
 }

@@ -60,6 +60,9 @@ class ChatViewModel @Inject constructor(
     private val _state = MutableLiveData(ChatUiState())
     val state: LiveData<ChatUiState> = _state
 
+    private val _isLoading = MutableLiveData<Boolean>()
+    val isLoading: LiveData<Boolean> = _isLoading
+
     val _chatRoomId = MutableLiveData<Int>(0)
     val chatRoomId: LiveData<Int> = _chatRoomId
 
@@ -94,12 +97,15 @@ class ChatViewModel @Inject constructor(
     }
 
     private fun initializeUser() {
+        _isLoading.value = true
         viewModelScope.launch {
             Log.d(TAG, "Initializing user session...")
 
             when (val result = chatRepository.fetchUserProfile()) {
                 is Result.Success -> {
                     currentUserId = result.data?.userId
+                    _isLoading.value = false
+
                     Log.d(TAG, "User session initialized - User ID: $currentUserId")
 
                     if (currentUserId == null || currentUserId == 0) {
@@ -111,10 +117,12 @@ class ChatViewModel @Inject constructor(
                     }
                 }
                 is Result.Error -> {
+                    _isLoading.value = false
                     Log.e(TAG, "Failed to fetch user profile: ${result.exception.message}")
                     updateState { it.copy(error = "User authentication error. Please login again.") }
                 }
                 is Result.Loading -> {
+                    _isLoading.value = true
                     Log.d(TAG, "Loading user profile...")
                 }
             }
@@ -335,10 +343,13 @@ class ChatViewModel @Inject constructor(
     }
 
     fun getChatList() {
+        _isLoading.value = true
         Log.d(TAG, "Getting chat list...")
         viewModelScope.launch {
-            _chatList.value = Result.Loading
+//            _chatList.value = Result.Loading
             _chatList.value = chatRepository.getListChat()
+            _isLoading.value = false
+
         }
     }
 

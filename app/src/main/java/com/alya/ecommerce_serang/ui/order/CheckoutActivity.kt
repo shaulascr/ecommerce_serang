@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
@@ -110,11 +111,6 @@ class CheckoutActivity : AppCompatActivity() {
                 finish()
             }
         }
-
-//        viewModel.getPaymentMethods { paymentMethods ->
-//            // Logging is just for debugging
-//            Log.d("CheckoutActivity", "Loaded ${paymentMethods.size} payment methods")
-//        }
     }
 
     private fun setupToolbar() {
@@ -165,7 +161,7 @@ class CheckoutActivity : AppCompatActivity() {
         // Observe loading state
         viewModel.isLoading.observe(this) { isLoading ->
             binding.btnPay.isEnabled = !isLoading
-            // Show/hide loading indicator if you have one
+
         }
 
         // Observe error messages
@@ -273,10 +269,14 @@ class CheckoutActivity : AppCompatActivity() {
     private fun updateShippingUI(shipName: String, shipService: String, shipEtd: String, shipPrice: Int) {
         if (shipName.isNotEmpty() && shipService.isNotEmpty()) {
             // Display shipping name and service in one line
+            binding.cardShipment.visibility = View.VISIBLE
+
             binding.tvCourierName.text = "$shipName $shipService"
             binding.tvDeliveryEstimate.text = "$shipEtd hari kerja"
             binding.tvShippingPrice.text = formatCurrency(shipPrice.toDouble())
             binding.rbJne.isChecked = true
+        } else {
+            binding.cardShipment.visibility = View.GONE
         }
     }
 

@@ -204,6 +204,13 @@ class RegisterStep1Fragment : Fragment() {
                 }
             }
         }
+
+        registerViewModel.toastMessage.observe(viewLifecycleOwner){ event ->
+            //memanggil toast check value email dan phone
+            event.getContentIfNotHandled()?.let { msg ->
+                Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun validateAndProceed() {

@@ -1,6 +1,7 @@
 package com.alya.ecommerce_serang.ui.chat
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -55,30 +56,43 @@ class ChatListFragment : Fragment() {
         viewModel.chatList.observe(viewLifecycleOwner) { result ->
             when (result) {
                 is Result.Success -> {
-                    val adapter = ChatListAdapter(result.data) { chatItem ->
-                        // Use the ChatActivity.createIntent factory method for proper navigation
-                        ChatActivity.createIntent(
-                            context = requireActivity(),
-                            storeId = chatItem.storeId,
-                            productId = 0, // Default value since we don't have it in ChatListItem
-                            productName = null, // Null is acceptable as per ChatActivity
-                            productPrice = "",
-                            productImage = null,
-                            productRating = null,
-                            storeName = chatItem.storeName,
-                            chatRoomId = chatItem.chatRoomId,
-                            storeImage = chatItem.storeImage
-                        )
+                    val data = result.data
+
+                    binding.tvEmptyChat.visibility = View.GONE
+                    if (data.isNotEmpty()) {
+                        val adapter = ChatListAdapter(data) { chatItem ->
+                            ChatActivity.createIntent(
+                                context       = requireActivity(),
+                                storeId       = chatItem.storeId,
+                                productId     = 0,
+                                productName   = null,
+                                productPrice  = "",
+                                productImage  = null,
+                                productRating = null,
+                                storeName     = chatItem.storeName,
+                                chatRoomId    = chatItem.chatRoomId,
+                                storeImage    = chatItem.storeImage
+                            )
+                        }
+                        binding.chatListRecyclerView.adapter = adapter
+                    } else {
+                        binding.tvEmptyChat.visibility = View.VISIBLE
                     }
-                    binding.chatListRecyclerView.adapter = adapter
                 }
                 is Result.Error -> {
+                    binding.tvEmptyChat.visibility = View.VISIBLE
                     Toast.makeText(requireContext(), "Failed to load chats", Toast.LENGTH_SHORT).show()
                 }
                 Result.Loading -> {
+                    binding.progressBarChat.visibility = View.VISIBLE
                     // Optional: show progress bar
                 }
             }
+        }
+        //loading chat list
+        viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
+            binding.progressBarChat?.visibility = if (isLoading) View.VISIBLE else View.GONE
+            Log.d(TAG, "Loading state: $isLoading")
         }
     }
 
@@ -89,6 +103,6 @@ class ChatListFragment : Fragment() {
     }
 
     companion object{
-
+        private var TAG = "ChatListFragment"
     }
 }

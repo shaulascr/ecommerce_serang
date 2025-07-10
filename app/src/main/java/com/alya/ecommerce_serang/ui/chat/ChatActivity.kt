@@ -129,6 +129,7 @@ class ChatActivity : AppCompatActivity() {
             return
         }
 
+        // set up data toko
         binding.tvStoreName.text = storeName
         val fullImageUrl = when (val img = storeImg) {
             is String -> {
@@ -142,7 +143,7 @@ class ChatActivity : AppCompatActivity() {
             .placeholder(R.drawable.placeholder_image)
             .into(binding.imgProfile)
 
-                // Set chat parameters to ViewModel
+        // Set chat parameter to send to ViewModel with product
         viewModel.setChatParameters(
             storeId = storeId,
             productId = productId,
@@ -159,10 +160,12 @@ class ChatActivity : AppCompatActivity() {
         }
 
         // Setup UI components
+        // rv isi chat
         setupRecyclerView()
         setupWindowInsets()
         setupListeners()
         setupTypingIndicator()
+        // observe listener from viewmodel
         observeViewModel()
 
         // If opened from ChatListFragment with a valid chatRoomId
