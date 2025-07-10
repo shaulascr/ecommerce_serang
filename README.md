@@ -22,37 +22,30 @@ This Android app includes:
 
 The app communicates with a custom backend server via REST API and WebSocket. The backend service is currently private and tailored for this project.
 
----
 
 ## Project Structure
-app/
-├── src/
-│   └── main/
-│       ├── java/com/yourappname/
-│       │   ├── api/
-│       │   │   └── retrofit/           # ApiService.kt, Retrofit client setup
-│       │   ├── data/
-│       │   │   ├── dto/               
-│       │   │   ├── response/           
-│       │   │   └── repository/         
-│       │   ├── di/                     # Hilt dependency injection modules
-│       │   ├── ui/
-│       │   │   ├── auth/               # Login, register, OTP verification
-│       │   │   ├── home/               
-│       │   │   ├── cart/               
-│       │   │   ├── order/              # Order history, detail, and status
-│       │   │   ├── chat/               
-│       │   │   ├── profile/            
-│       │   │   └── product/            
-|       |   |   └── notif/              # Socket.IO client setup and event handling
-│       │   ├── utils/                  
-│       │   └── App.kt                 
-│       └── res/
-│           ├── layout/                
-│           ├── drawable/               
-│           ├── values/                 
-│           └── navigation/             
-├── google-services.json                # Firebase config for push notifications
+├── api/retrofit/                          # API service and Retrofit client setup
+├── data/                                  # Data layer (DTOs, responses, repositories)
+├── di/                                    # Dependency injection modules (Hilt)
+├── ui/                                    # User interface components
+│   ├── auth/                              # Authentication screens
+│   ├── home/                              # Home screen components
+│   ├── cart/                              # Shopping cart functionality
+│   ├── order/                             # Order management
+│   ├── chat/                              # Chat features
+│   ├── profile/                           # User profile
+│   ├── product/                           # Product catalog
+│   └── notif/                             # Push notifications handling
+├── utils/                                 # Utility classes and helper functions
+
+app/src/main/res/                          # Android resources
+
+├── layout/                                # XML layout files
+├── drawable/                              # Images and drawable resources
+├── values/                                # Strings, colors, dimensions
+└── navigation/                            # Navigation graph files
+
+google-services.json                       # Firebase configuration for push notifications
 
 ## How to Run
 
@@ -62,5 +55,4 @@ app/
 5. Settings BASE_URL in your local.properties
 4. Build and run on an emulator or physical device
 
----
 
