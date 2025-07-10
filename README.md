@@ -22,29 +22,40 @@ This Android app includes:
 
 The app communicates with a custom backend server via REST API and WebSocket.
 
+## Tech Stack
+- MVVM architecture
+- Retrofit for API communication
+- Hilt for dependency injection
+- Socket.IO client for real-time chat
+- Firebase Cloud Messaging (FCM) for notifications
+- Coroutines for async operations
+- Glide for image loading
+- ViewBinding for UI access
+- LiveData and StateFlow for reactive UI
+- RajaOngkir API integration for shipping cost
 
 ## Project Structure
-  - api/retrofit/   # API service and Retrofit client setup
-  - data/   # Data layer (DTOs, responses, repositories)
-  - di/   # Dependency injection modules (Hilt)
-  - ui/   # User interface components
-    - auth/    # Authentication
+  - api/retrofit/  
+  - data/   
+  - di/   
+  - ui/  
+    - auth/  
     - home/ 
     - cart/ 
-    - order/    # Order management
+    - order/  
       - history/
       - review/
-    - chat/   # Chat features
+    - chat/ 
     - profile/
-      - store/    # Store management
+      - store/
         - addProduct/
         - sells/
         - balance/
         - review/
     - product/ 
-    - notif/     # Push notifications handling
+    - notif/  
   - utils/ 
-  - google-services.json    # Firebase configuration for push notifications
+  - google-services.json 
 
 ## How to Run
 
