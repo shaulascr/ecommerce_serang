@@ -20,32 +20,31 @@ This Android app includes:
 - Write rating and feedback for purchased products
 - Push notifications for user activity
 
-The app communicates with a custom backend server via REST API and WebSocket. The backend service is currently private and tailored for this project.
+The app communicates with a custom backend server via REST API and WebSocket.
 
 
 ## Project Structure
-├── api/retrofit/                          # API service and Retrofit client setup
-├── data/                                  # Data layer (DTOs, responses, repositories)
-├── di/                                    # Dependency injection modules (Hilt)
-├── ui/                                    # User interface components
-│   ├── auth/                              # Authentication screens
-│   ├── home/                              # Home screen components
-│   ├── cart/                              # Shopping cart functionality
-│   ├── order/                             # Order management
-│   ├── chat/                              # Chat features
-│   ├── profile/                           # User profile
-│   ├── product/                           # Product catalog
-│   └── notif/                             # Push notifications handling
-├── utils/                                 # Utility classes and helper functions
-
-app/src/main/res/                          # Android resources
-
-├── layout/                                # XML layout files
-├── drawable/                              # Images and drawable resources
-├── values/                                # Strings, colors, dimensions
-└── navigation/                            # Navigation graph files
-
-google-services.json                       # Firebase configuration for push notifications
+  - api/retrofit/   # API service and Retrofit client setup
+  - data/   # Data layer (DTOs, responses, repositories)
+  - di/   # Dependency injection modules (Hilt)
+  - ui/   # User interface components
+    - auth/    # Authentication
+    - home/ 
+    - cart/ 
+    - order/    # Order management
+      - history/
+      - review/
+    - chat/   # Chat features
+    - profile/
+      - store/    # Store management
+        - addProduct/
+        - sells/
+        - balance/
+        - review/
+    - product/ 
+    - notif/     # Push notifications handling
+  - utils/ 
+  - google-services.json    # Firebase configuration for push notifications
 
 ## How to Run
 
