@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
+import com.alya.ecommerce_serang.data.api.dto.ProductsItem
 import com.alya.ecommerce_serang.data.api.dto.Store
 import com.alya.ecommerce_serang.data.api.response.auth.StoreTypesItem
 import com.alya.ecommerce_serang.data.api.response.store.StoreResponse
@@ -37,6 +38,9 @@ class MyStoreViewModel(private val repository: MyStoreRepository): ViewModel() {
 
     private val _balanceResult = MutableLiveData<Result<StoreResponse>>()
     val balanceResult: LiveData<Result<StoreResponse>> get() = _balanceResult
+
+    private val _productList = MutableLiveData<Result<List<ProductsItem>>>()
+    val productList: LiveData<Result<List<ProductsItem>>> get() = _productList
 
     fun loadMyStore(){
         viewModelScope.launch {
@@ -155,6 +159,18 @@ class MyStoreViewModel(private val repository: MyStoreRepository): ViewModel() {
         viewModelScope.launch {
             _balanceResult.value = Result.Loading
             _balanceResult.value = repository.getBalance()
+        }
+    }
+
+    fun loadMyStoreProducts() {
+        viewModelScope.launch {
+            _productList.value = Result.Loading
+            try {
+                val result = repository.fetchMyStoreProducts()
+                _productList.value = Result.Success(result)
+            } catch (e: Exception) {
+                _productList.value = Result.Error(e)
+            }
         }
     }
 

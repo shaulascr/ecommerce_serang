@@ -209,7 +209,7 @@ class ChatAdapter(
                 binding.tvProductPrice.text = product.productPrice
 
                 // Load product image
-                val fullImageUrl = if (product.productImage.startsWith("/")) {
+                val fullImageUrl = if (product.productImage!!.startsWith("/")) {
                     BASE_URL + product.productImage.substring(1)
                 } else {
                     product.productImage
@@ -246,7 +246,7 @@ class ChatAdapter(
                 binding.tvProductPrice.text = product.productPrice
 
                 // Load product image
-                val fullImageUrl = if (product.productImage.startsWith("/")) {
+                val fullImageUrl = if (product.productImage!!.startsWith("/")) {
                     BASE_URL + product.productImage.substring(1)
                 } else {
                     product.productImage

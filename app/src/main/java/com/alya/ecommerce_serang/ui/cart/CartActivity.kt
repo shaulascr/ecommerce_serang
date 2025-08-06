@@ -146,7 +146,9 @@ class CartActivity : AppCompatActivity() {
     private fun observeViewModel() {
         viewModel.cartItems.observe(this) { cartItems ->
             if (cartItems.isNullOrEmpty()) {
+                binding.emptyCart.visibility = View.VISIBLE
                 showEmptyState(true)
+
             } else {
                 showEmptyState(false)
                 storeAdapter.submitList(cartItems)

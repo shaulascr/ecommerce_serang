@@ -30,6 +30,7 @@ import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
 import com.alya.ecommerce_serang.utils.viewmodel.RegisterViewModel
 import com.google.android.material.progressindicator.LinearProgressIndicator
+import com.google.gson.Gson
 
 class RegisterStep3Fragment : Fragment() {
     private var _binding: FragmentRegisterStep3Binding? = null
@@ -376,6 +377,8 @@ class RegisterStep3Fragment : Fragment() {
         val subDistrict = registerViewModel.selectedSubdistrict.toString()
         val postalCode = registerViewModel.selectedPostalCode.toString()
 
+        val villageId = registerViewModel.selectedVillages ?: ""
+
         Log.d(TAG, "Address data - Street: $street, SubDistrict: $subDistrict, PostalCode: $postalCode")
         Log.d(TAG, "Address data - Recipient: $recipient, Phone: $phone")
         Log.d(TAG, "Address data - ProvinceId: $provinceId, CityId: $cityId")
@@ -383,21 +386,25 @@ class RegisterStep3Fragment : Fragment() {
 
         // Create address request
         val addressRequest = CreateAddressRequest(
+            userId = user.id, // must match the type expected in the DB
             lat = defaultLatitude,
             long = defaultLongitude,
             street = street,
             subDistrict = subDistrict,
-            cityId = cityId,
+            cityId = cityId, // ⚠️ Make sure this is Int
             provId = provinceId,
             postCode = postalCode,
+            idVillage = villageId, // Or provide a real ID if needed
             detailAddress = street,
-            userId = userId,
+            isStoreLocation = false,
             recipient = recipient,
-            phone = phone,
-            isStoreLocation = false
+            phone = phone
         )
 
         Log.d(TAG, "Address request created: $addressRequest")
+        val gson = Gson()
+        val jsonString = gson.toJson(addressRequest)
+        Log.d(TAG, "Request JSON: $jsonString")
 
         // Show loading
         binding.progressBar.visibility = View.VISIBLE

@@ -1,6 +1,7 @@
 package com.alya.ecommerce_serang.data.repository
 
 import android.util.Log
+import com.alya.ecommerce_serang.data.api.dto.ProductsItem
 import com.alya.ecommerce_serang.data.api.dto.Store
 import com.alya.ecommerce_serang.data.api.response.auth.ListStoreTypeResponse
 import com.alya.ecommerce_serang.data.api.response.customer.product.StoreResponse
@@ -120,6 +121,20 @@ class MyStoreRepository(private val apiService: ApiService) {
         } catch (e: Exception) {
             Log.e("MyStoreRepository", "Error fetching balance", e)
             Result.Error(e)
+        }
+    }
+
+    suspend fun fetchMyStoreProducts(): List<ProductsItem> {
+        return try {
+            val response = apiService.getStoreProduct()
+            if (response.isSuccessful) {
+                response.body()?.products?.filterNotNull() ?: emptyList()
+            } else {
+                throw Exception("Failed to fetch store products: ${response.message()}")
+            }
+        } catch (e: Exception) {
+            Log.e("ProductRepository", "Error fetching store products", e)
+            throw e
         }
     }
 

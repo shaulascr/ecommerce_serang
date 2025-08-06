@@ -25,6 +25,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsAnimationCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.alya.ecommerce_serang.BuildConfig.BASE_URL
 import com.alya.ecommerce_serang.R
@@ -373,7 +374,8 @@ class ChatStoreActivity : AppCompatActivity() {
             }
         })
 
-        viewModel.state.observe(this, Observer { state ->
+        lifecycleScope.launchWhenStarted {
+        viewModel.state.collect { state ->
             Log.d(TAG, "State updated - Messages: ${state.messages.size}")
 
             // Update messages
@@ -434,7 +436,8 @@ class ChatStoreActivity : AppCompatActivity() {
                 Toast.makeText(this@ChatStoreActivity, error, Toast.LENGTH_SHORT).show()
                 viewModel.clearError()
             }
-        })
+        }
+        }
     }
 
     private fun showOptionsMenu() {

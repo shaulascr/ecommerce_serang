@@ -12,30 +12,29 @@ import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import com.alya.ecommerce_serang.R
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
+import androidx.core.widget.doAfterTextChanged
+import com.alya.ecommerce_serang.BuildConfig.BASE_URL
+import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.dto.CategoryItem
 import com.alya.ecommerce_serang.data.api.dto.Preorder
+import com.alya.ecommerce_serang.data.api.dto.Wholesale
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.repository.ProductRepository
 import com.alya.ecommerce_serang.data.repository.Result
 import com.alya.ecommerce_serang.databinding.ActivityDetailStoreProductBinding
-import com.alya.ecommerce_serang.utils.viewmodel.ProductViewModel
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
+import com.alya.ecommerce_serang.utils.viewmodel.ProductViewModel
 import com.bumptech.glide.Glide
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import java.io.File
 import java.io.FileOutputStream
-import kotlin.getValue
-import androidx.core.net.toUri
-import androidx.core.widget.doAfterTextChanged
-import com.alya.ecommerce_serang.BuildConfig.BASE_URL
-import com.alya.ecommerce_serang.data.api.dto.Wholesale
 
 class DetailStoreProductActivity : AppCompatActivity() {
 
@@ -93,7 +92,7 @@ class DetailStoreProductActivity : AppCompatActivity() {
         val isEditing = intent.getBooleanExtra("is_editing", false)
         productId = intent.getIntExtra("product_id", -1)
 
-        binding.header.headerTitle.text = if (isEditing) "Ubah Produk" else "Tambah Produk"
+        binding.headerStoreProduct.headerTitle.text = if (isEditing) "Ubah Produk" else "Tambah Produk"
 
         if (isEditing && productId != null && productId != -1) {
             viewModel.loadProductDetail(productId!!)
@@ -140,7 +139,7 @@ class DetailStoreProductActivity : AppCompatActivity() {
             }
         }
 
-        binding.header.headerLeftIcon.setOnClickListener {
+        binding.headerStoreProduct.headerLeftIcon.setOnClickListener {
             onBackPressedDispatcher.onBackPressed()
         }
     }

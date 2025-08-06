@@ -122,12 +122,14 @@
             android:src="@drawable/outline_shopping_cart_24" />
 
         <TextView
+            android:id="@+id/emptyCart"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Keranjang Anda kosong"
+            android:visibility="gone"
+            android:text="Keranjang anda kosong"
             android:textColor="@android:color/black"
-            android:textSize="18sp" />
+            android:textSize="16sp" />
 
         <TextView
             android:layout_width="wrap_content"

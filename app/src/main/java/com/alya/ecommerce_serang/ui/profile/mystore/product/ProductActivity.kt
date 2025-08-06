@@ -11,9 +11,9 @@ import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.repository.ProductRepository
 import com.alya.ecommerce_serang.data.repository.Result
 import com.alya.ecommerce_serang.databinding.ActivityProductBinding
-import com.alya.ecommerce_serang.utils.viewmodel.ProductViewModel
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
+import com.alya.ecommerce_serang.utils.viewmodel.ProductViewModel
 
 class ProductActivity : AppCompatActivity() {
 
@@ -94,14 +94,14 @@ class ProductActivity : AppCompatActivity() {
     }
 
     private fun setupHeader() {
-        binding.header.headerTitle.text = "Produk Saya"
-        binding.header.headerRightText.visibility = View.VISIBLE
+        binding.headerListProduct.headerTitle.text = "Produk Saya"
+        binding.headerListProduct.headerRightText.visibility = View.VISIBLE
 
-        binding.header.headerLeftIcon.setOnClickListener {
+        binding.headerListProduct.headerLeftIcon.setOnClickListener {
             onBackPressedDispatcher.onBackPressed()
         }
 
-        binding.header.headerRightText.setOnClickListener {
+        binding.headerListProduct.headerRightText.setOnClickListener {
             val intent = Intent(this, DetailStoreProductActivity::class.java)
             intent.putExtra("is_editing", false)
             startActivity(intent)
@@ -111,4 +111,6 @@ class ProductActivity : AppCompatActivity() {
     private fun setupRecyclerView() {
         binding.rvStoreProduct.layoutManager = LinearLayoutManager(this)
     }
+
+
 }

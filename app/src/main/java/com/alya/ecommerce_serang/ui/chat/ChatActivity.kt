@@ -27,6 +27,7 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsAnimationCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.alya.ecommerce_serang.BuildConfig.BASE_URL
 import com.alya.ecommerce_serang.R
@@ -170,8 +171,7 @@ class ChatActivity : AppCompatActivity() {
 
         // If opened from ChatListFragment with a valid chatRoomId
         if (chatRoomId > 0) {
-            // Directly set the chatRoomId and load chat history
-            viewModel._chatRoomId.value = chatRoomId
+            viewModel.setChatRoomId(chatRoomId)
         }
     }
 
@@ -405,68 +405,71 @@ class ChatActivity : AppCompatActivity() {
             }
         })
 
-        viewModel.state.observe(this, Observer { state ->
-            Log.d(TAG, "State updated - Messages: ${state.messages.size}")
+        lifecycleScope.launchWhenStarted {
+            viewModel.state.collect() { state ->
+                Log.d(TAG, "State updated - Messages: ${state.messages.size}")
 
-            // Update messages
-            val previousCount = chatAdapter.itemCount
+                // Update messages
+                val previousCount = chatAdapter.itemCount
 
-            val displayItems = viewModel.getDisplayItems()
+                val displayItems = viewModel.getDisplayItems()
 
-            chatAdapter.submitList(displayItems) {
-                Log.d(TAG, "Messages submitted to adapter")
-                // Only auto-scroll for new messages or initial load
-                if (previousCount == 0 || state.messages.size > previousCount) {
-                    scrollToBottomInstant()
-                }
-            }
-
-            // layout attach product
-            if (!state.productName.isNullOrEmpty()) {
-                binding.tvProductName.text = state.productName
-                binding.tvProductPrice.text = state.productPrice
-                binding.ratingBar.rating = state.productRating
-                binding.tvRating.text = state.productRating.toString()
-                binding.tvSellerName.text = state.storeName
-                binding.tvStoreName.text = state.storeName
-
-                val fullImageUrl = when (val img = state.productImageUrl) {
-                    is String -> {
-                        if (img.startsWith("/")) BASE_URL + img.substring(1) else img
+                chatAdapter.submitList(displayItems) {
+                    Log.d(TAG, "Messages submitted to adapter")
+                    // Only auto-scroll for new messages or initial load
+                    if (previousCount == 0 || state.messages.size > previousCount) {
+                        scrollToBottomInstant()
                     }
-                    else -> R.drawable.placeholder_image
                 }
 
-                if (!state.productImageUrl.isNullOrEmpty()) {
-                    Glide.with(this@ChatActivity)
-                        .load(fullImageUrl)
-                        .centerCrop()
-                        .placeholder(R.drawable.placeholder_image)
-                        .error(R.drawable.placeholder_image)
-                        .into(binding.imgProduct)
+                // layout attach product
+                if (!state.productName.isNullOrEmpty()) {
+                    binding.tvProductName.text = state.productName
+                    binding.tvProductPrice.text = state.productPrice
+                    binding.ratingBar.rating = state.productRating
+                    binding.tvRating.text = state.productRating.toString()
+                    binding.tvSellerName.text = state.storeName
+                    binding.tvStoreName.text = state.storeName
+
+                    val fullImageUrl = when (val img = state.productImageUrl) {
+                        is String -> {
+                            if (img.startsWith("/")) BASE_URL + img.substring(1) else img
+                        }
+
+                        else -> R.drawable.placeholder_image
+                    }
+
+                    if (!state.productImageUrl.isNullOrEmpty()) {
+                        Glide.with(this@ChatActivity)
+                            .load(fullImageUrl)
+                            .centerCrop()
+                            .placeholder(R.drawable.placeholder_image)
+                            .error(R.drawable.placeholder_image)
+                            .into(binding.imgProduct)
+                    }
+                    updateProductCardUI(state.hasProductAttachment)
+
+                    binding.productContainer.visibility = View.GONE
+                } else {
+                    binding.productContainer.visibility = View.GONE
                 }
-                updateProductCardUI(state.hasProductAttachment)
 
-                binding.productContainer.visibility = View.GONE
-            } else {
-                binding.productContainer.visibility = View.GONE
+                updateInputHint(state)
+
+                // Update attachment hint
+                if (state.hasAttachment) {
+                    binding.layoutAttachImage.visibility = View.VISIBLE
+                } else {
+                    binding.editTextMessage.hint = getString(R.string.write_message)
+                }
+
+                // Show error if any
+                state.error?.let { error ->
+                    Toast.makeText(this@ChatActivity, error, Toast.LENGTH_SHORT).show()
+                    viewModel.clearError()
+                }
             }
-
-            updateInputHint(state)
-
-            // Update attachment hint
-            if (state.hasAttachment) {
-                binding.layoutAttachImage.visibility = View.VISIBLE
-            } else {
-                binding.editTextMessage.hint = getString(R.string.write_message)
-            }
-
-            // Show error if any
-            state.error?.let { error ->
-                Toast.makeText(this@ChatActivity, error, Toast.LENGTH_SHORT).show()
-                viewModel.clearError()
-            }
-        })
+        }
     }
 
     private fun updateInputHint(state: ChatUiState) {
@@ -492,7 +495,7 @@ class ChatActivity : AppCompatActivity() {
         Toast.makeText(this, "Opening: ${productInfo.productName}", Toast.LENGTH_SHORT).show()
 
         // You can navigate to product detail here
-         navigateToProductDetail(productInfo.productId)
+        navigateToProductDetail(productInfo.productId)
     }
 
     private fun navigateToProductDetail(productId: Int) {
