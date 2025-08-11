@@ -1,6 +1,5 @@
 package com.alya.ecommerce_serang.ui.profile.mystore
 
-import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -20,7 +19,6 @@ import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.ViewCompat
@@ -101,8 +99,12 @@ class RegisterStoreActivity : AppCompatActivity() {
         setupObservers()
         Log.d(TAG, "onCreate: Observers setup completed")
 
-        setupMap()
-        Log.d(TAG, "onCreate: Map setup completed")
+        viewModel.latitude.value = "-6.2088"
+        viewModel.longitude.value = "106.8456"
+        Log.d(TAG, "Location permission granted, setting default location")
+//        Toast.makeText(this, "Lokasi dipilih", Toast.LENGTH_SHORT).show()
+        Log.d(TAG, "Default location set - Lat: ${viewModel.latitude.value}, Long: ${viewModel.longitude.value}")
+//        Toast.makeText(this, "Lokasi dipilih", Toast.LENGTH_SHORT).show()
 
         setupDocumentUploads()
         Log.d(TAG, "onCreate: Document uploads setup completed")
@@ -161,16 +163,17 @@ class RegisterStoreActivity : AppCompatActivity() {
                 viewModel.ktpUri != null &&
                 viewModel.nibUri != null &&
                 viewModel.npwpUri != null &&
-                viewModel.selectedCouriers.isNotEmpty()
+                viewModel.selectedCouriers.isNotEmpty() &&
+                !viewModel.accountName.value.isNullOrBlank()
 
-        binding.btnRegister.isEnabled = isFormValid
-
+        binding.btnRegister.isEnabled = true
         if (isFormValid) {
             binding.btnRegister.setBackgroundResource(R.drawable.bg_button_active)
             binding.btnRegister.setTextColor(ContextCompat.getColor(this, R.color.white))
         } else {
             binding.btnRegister.setBackgroundResource(R.drawable.bg_button_disabled)
             binding.btnRegister.setTextColor(ContextCompat.getColor(this, R.color.black_300))
+
         }
     }
 
@@ -500,44 +503,44 @@ class RegisterStoreActivity : AppCompatActivity() {
         validateRequiredFields()
     }
 
-    private fun setupMap() {
-        Log.d(TAG, "setupMap: Setting up map container")
-        // This would typically integrate with Google Maps SDK
-        // For simplicity, we're just using a placeholder
-        binding.mapContainer.setOnClickListener {
-            Log.d(TAG, "Map container clicked, checking location permission")
-            // Request location permission if not granted
-            if (ContextCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                Log.d(TAG, "Location permission not granted, requesting permission")
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                    LOCATION_PERMISSION_REQUEST
-                )
-                viewModel.latitude.value = "-6.2088"
-                viewModel.longitude.value = "106.8456"
-                Log.d(TAG, "Location permission granted, setting default location")
-                Toast.makeText(this, "Lokasi dipilih", Toast.LENGTH_SHORT).show()
-                Log.d(TAG, "Default location set - Lat: ${viewModel.latitude.value}, Long: ${viewModel.longitude.value}")
-                Toast.makeText(this, "Lokasi dipilih", Toast.LENGTH_SHORT).show()
-            } else {
-                Log.d(TAG, "Location permission already granted, setting location")
-                // Show map selection UI
-                // This would typically launch Maps UI for location selection
-                // For now, we'll just set some dummy coordinates
-                viewModel.latitude.value = "-6.2088"
-                viewModel.longitude.value = "106.8456"
-                Log.d(TAG, "Location set - Lat: ${viewModel.latitude.value}, Long: ${viewModel.longitude.value}")
-                Toast.makeText(this, "Lokasi dipilih", Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        Log.d(TAG, "setupMap: Map container setup completed")
-    }
+//    private fun setupMap() {
+//        Log.d(TAG, "setupMap: Setting up map container")
+//        // This would typically integrate with Google Maps SDK
+//        // For simplicity, we're just using a placeholder
+//        binding.mapContainer.setOnClickListener {
+//            Log.d(TAG, "Map container clicked, checking location permission")
+//            // Request location permission if not granted
+//            if (ContextCompat.checkSelfPermission(
+//                    this,
+//                    Manifest.permission.ACCESS_FINE_LOCATION
+//                ) != PackageManager.PERMISSION_GRANTED
+//            ) {
+//                Log.d(TAG, "Location permission not granted, requesting permission")
+//                ActivityCompat.requestPermissions(
+//                    this,
+//                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+//                    LOCATION_PERMISSION_REQUEST
+//                )
+//                viewModel.latitude.value = "-6.2088"
+//                viewModel.longitude.value = "106.8456"
+//                Log.d(TAG, "Location permission granted, setting default location")
+//                Toast.makeText(this, "Lokasi dipilih", Toast.LENGTH_SHORT).show()
+//                Log.d(TAG, "Default location set - Lat: ${viewModel.latitude.value}, Long: ${viewModel.longitude.value}")
+//                Toast.makeText(this, "Lokasi dipilih", Toast.LENGTH_SHORT).show()
+//            } else {
+//                Log.d(TAG, "Location permission already granted, setting location")
+//                // Show map selection UI
+//                // This would typically launch Maps UI for location selection
+//                // For now, we'll just set some dummy coordinates
+//                viewModel.latitude.value = "-6.2088"
+//                viewModel.longitude.value = "106.8456"
+//                Log.d(TAG, "Location set - Lat: ${viewModel.latitude.value}, Long: ${viewModel.longitude.value}")
+//                Toast.makeText(this, "Lokasi dipilih", Toast.LENGTH_SHORT).show()
+//            }
+//        }
+//
+//        Log.d(TAG, "setupMap: Map container setup completed")
+//    }
 
     private fun setupDataBinding() {
         Log.d(TAG, "setupDataBinding: Setting up two-way data binding for text fields")
@@ -636,6 +639,17 @@ class RegisterStoreActivity : AppCompatActivity() {
                 Log.d(TAG, "Bank name updated: ${s.toString()}")
                 validateRequiredFields()
             }
+        })
+
+        binding.etAccountName.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                viewModel.accountName.value = s.toString()
+                Log.d(TAG, "Account Name updated: ${s.toString()}")
+                validateRequiredFields()
+            }
+
         })
 
         Log.d(TAG, "setupDataBinding: Text field data binding setup completed")

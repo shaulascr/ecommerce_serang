@@ -583,6 +583,48 @@
 
             </LinearLayout>
 
+            <!-- Nama Pemilik Rekening -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginBottom="24dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="12. Nama Pemilik Rekening"
+                        style="@style/body_medium"
+                        android:layout_marginEnd="4dp"/>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="*"
+                        style="@style/body_medium"
+                        android:textColor="@color/red_required"
+                        android:layout_gravity="end"/>
+
+                </LinearLayout>
+
+                <EditText
+                    android:id="@+id/et_account_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_text_field"
+                    android:hint="Isi nama pemilik rekening"
+                    android:padding="8dp"
+                    style="@style/body_small"
+                    android:layout_marginTop="10dp"/>
+
+            </LinearLayout>
+
             <!-- Kurir -->
             <LinearLayout
                 android:layout_width="match_parent"
@@ -598,7 +640,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="12. Pilih Kurir Pengiriman"
+                        android:text="13. Pilih Kurir Pengiriman"
                         style="@style/body_medium"
                         android:layout_marginEnd="4dp"/>
 
@@ -651,7 +693,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="13. Foto Profil Toko"
+                    android:text="14. Foto Profil Toko"
                     style="@style/body_medium"
                     android:layout_marginEnd="4dp"/>
 
@@ -707,7 +749,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="14. Dokumen KTP"
+                        android:text="15. Dokumen KTP"
                         style="@style/body_medium"
                         android:layout_marginEnd="4dp"/>
 
@@ -774,7 +816,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="15. Dokumen NIB"
+                        android:text="16. Dokumen NIB"
                         style="@style/body_medium"
                         android:layout_marginEnd="4dp"/>
 
@@ -841,7 +883,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="16. Dokumen NPWP"
+                        android:text="17. Dokumen NPWP"
                         style="@style/body_medium"
                         android:layout_marginEnd="4dp"/>
 
@@ -896,7 +938,8 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:visibility="gone">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -916,12 +959,14 @@
 
             </LinearLayout>
 
+
             <FrameLayout
                 android:id="@+id/map_container"
                 android:layout_width="match_parent"
                 android:layout_height="200dp"
                 android:layout_marginTop="8dp"
-                android:background="@android:color/darker_gray">
+                android:background="@android:color/darker_gray"
+                android:visibility="gone">
 
                 <ImageView
                     android:layout_width="match_parent"
@@ -933,7 +978,7 @@
             <Button
                 android:id="@+id/btn_register"
                 style="@style/button.large.disabled.long"
-                android:enabled="false"
+                android:enabled="true"
                 android:layout_marginTop="24dp"
                 android:layout_marginBottom="16dp"
                 android:text="Daftar" />
