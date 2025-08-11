@@ -278,6 +278,11 @@ class UserRepository(private val apiService: ApiService) {
                     val requestFile = compressedFile.asRequestBody(mimeType.toMediaTypeOrNull())
                     Log.d(TAG, "$formName compressed size: ${compressedFile.length() / 1024} KB")
 
+                    val compressedSizeMB = compressedFile.length().toDouble() / (1024 * 1024)
+                    if (compressedSizeMB > 1) {
+                        throw IllegalArgumentException("$formName lebih dari 1 MB setelah kompresi")
+                    }
+
                     MultipartBody.Part.createFormData(formName, compressedFile.name, requestFile)
                 } else {
                     throw IllegalArgumentException("$formName harus berupa file gambar (JPEG, JPG, atau PNG)")

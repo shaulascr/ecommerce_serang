@@ -72,47 +72,89 @@ class RegisterStoreViewModel(
     val selectedCouriers = mutableListOf<String>()
 
     fun registerStore(context: Context) {
+        Log.d(TAG, "Starting registerStore()")
+
         val allowedFileTypes = Regex("^(jpeg|jpg|png|pdf)$", RegexOption.IGNORE_CASE)
 
-        // Check each file if present
+        fun logFileInfo(label: String, uri: Uri?) {
+            if (uri == null) {
+                Log.d(TAG, "$label URI: null")
+                return
+            }
+            Log.d(TAG, "$label URI: $uri")
+            try {
+                val fileSizeBytes = context.contentResolver.openFileDescriptor(uri, "r")?.use {
+                    it.statSize
+                } ?: -1
+                Log.d(TAG, "$label original size: ${fileSizeBytes / 1024} KB")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error getting size for $label", e)
+            }
+        }
+
+        // Log all file info before validation
+        logFileInfo("Store Image", storeImageUri)
+        logFileInfo("KTP", ktpUri)
+        logFileInfo("NPWP", npwpUri)
+        logFileInfo("NIB", nibUri)
+        logFileInfo("Persetujuan", persetujuanUri)
+        logFileInfo("QRIS", qrisUri)
+
+        // Check file types
         if (storeImageUri != null && !ImageUtils.isAllowedFileType(context, storeImageUri, allowedFileTypes)) {
             _errorMessage.value = "Foto toko harus berupa file JPEG, JPG, atau PNG"
+            Log.e(TAG, _errorMessage.value ?: "Invalid file type for store image")
             _registerState.value = Result.Error(Exception(_errorMessage.value ?: "Invalid file type"))
             return
         }
 
         if (ktpUri != null && !ImageUtils.isAllowedFileType(context, ktpUri, allowedFileTypes)) {
             _errorMessage.value = "KTP harus berupa file JPEG, JPG, atau PNG"
+            Log.e(TAG, _errorMessage.value ?: "Invalid file type for KTP")
             _registerState.value = Result.Error(Exception(_errorMessage.value ?: "Invalid file type"))
             return
         }
 
         if (npwpUri != null && !ImageUtils.isAllowedFileType(context, npwpUri, allowedFileTypes)) {
             _errorMessage.value = "NPWP harus berupa file JPEG, JPG, PNG, atau PDF"
+            Log.e(TAG, _errorMessage.value ?: "Invalid file type for NPWP")
             _registerState.value = Result.Error(Exception(_errorMessage.value ?: "Invalid file type"))
             return
         }
 
         if (nibUri != null && !ImageUtils.isAllowedFileType(context, nibUri, allowedFileTypes)) {
             _errorMessage.value = "NIB harus berupa file JPEG, JPG, PNG, atau PDF"
+            Log.e(TAG, _errorMessage.value ?: "Invalid file type for NIB")
             _registerState.value = Result.Error(Exception(_errorMessage.value ?: "Invalid file type"))
             return
         }
 
         if (persetujuanUri != null && !ImageUtils.isAllowedFileType(context, persetujuanUri, allowedFileTypes)) {
             _errorMessage.value = "Persetujuan harus berupa file JPEG, JPG, PNG, atau PDF"
+            Log.e(TAG, _errorMessage.value ?: "Invalid file type for Persetujuan")
             _registerState.value = Result.Error(Exception(_errorMessage.value ?: "Invalid file type"))
             return
         }
 
         if (qrisUri != null && !ImageUtils.isAllowedFileType(context, qrisUri, allowedFileTypes)) {
             _errorMessage.value = "QRIS harus berupa file JPEG, JPG, PNG, atau PDF"
+            Log.e(TAG, _errorMessage.value ?: "Invalid file type for QRIS")
             _registerState.value = Result.Error(Exception(_errorMessage.value ?: "Invalid file type"))
             return
         }
+
+        Log.d(TAG, "File type checks passed. Starting repository.registerStoreUser() call.")
+
         viewModelScope.launch {
             try {
                 _registerState.value = Result.Loading
+                Log.d(TAG, "Register store request payload: " +
+                        "storeName=${storeName.value}, storeTypeId=${storeTypeId.value}, " +
+                        "lat=${latitude.value}, long=${longitude.value}, " +
+                        "street=${street.value}, subdistrict=${subdistrict.value}, " +
+                        "cityId=${cityId.value}, provinceId=${provinceId.value}, postalCode=${postalCode.value}, " +
+                        "bankName=${bankName.value}, bankNum=${bankNumber.value}, accountName=${accountName.value}, " +
+                        "selectedCouriers=$selectedCouriers")
 
                 val result = repository.registerStoreUser(
                     context = context,
@@ -139,24 +181,14 @@ class RegisterStoreViewModel(
                     accountName = accountName.value ?: ""
                 )
 
+                Log.d(TAG, "Repository returned result: $result")
                 _registerState.value = result
             } catch (e: Exception) {
+                Log.e(TAG, "Exception during registerStore", e)
                 _registerState.value = Result.Error(e)
             }
         }
     }
-
-//    // Helper function to convert Uri to File
-//    private fun getFileFromUri(context: Context, uri: Uri): File {
-//        val inputStream = context.contentResolver.openInputStream(uri)
-//        val tempFile = File(context.cacheDir, "temp_file_${System.currentTimeMillis()}")
-//        inputStream?.use { input ->
-//            tempFile.outputStream().use { output ->
-//                input.copyTo(output)
-//            }
-//        }
-//        return tempFile
-//    }
 
     fun validateForm(): Boolean {
         // Implement form validation logic
@@ -173,8 +205,6 @@ class RegisterStoreViewModel(
                 ktpUri == null ||
                 nibUri == null)
     }
-
-
 
     // Function to fetch store types
     fun fetchStoreTypes() {
