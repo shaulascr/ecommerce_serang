@@ -27,6 +27,8 @@ import com.alya.ecommerce_serang.data.repository.ProductRepository
 import com.alya.ecommerce_serang.data.repository.Result
 import com.alya.ecommerce_serang.databinding.ActivityDetailStoreProductBinding
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
+import com.alya.ecommerce_serang.utils.FileUtils.compressFile
+import com.alya.ecommerce_serang.utils.ImageUtils.compressImage
 import com.alya.ecommerce_serang.utils.SessionManager
 import com.alya.ecommerce_serang.utils.viewmodel.ProductViewModel
 import com.bumptech.glide.Glide
@@ -40,7 +42,7 @@ class DetailStoreProductActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityDetailStoreProductBinding
     private lateinit var sessionManager: SessionManager
-    private lateinit var categoryList: List<CategoryItem>
+    private var categoryList: List<CategoryItem> = emptyList()
     private var imageUri: Uri? = null
     private var sppirtUri: Uri? = null
     private var halalUri: Uri? = null
@@ -60,7 +62,10 @@ class DetailStoreProductActivity : AppCompatActivity() {
         if (result.resultCode == Activity.RESULT_OK) {
             imageUri = result.data?.data
             imageUri?.let {
-                binding.ivPreviewFoto.setImageURI(it)
+                compressImage(this, it, "productimg").let { compressedImageFile ->
+                    binding.ivPreviewFoto.setImageURI(Uri.fromFile(compressedImageFile))
+                    imageUri = Uri.fromFile(compressedImageFile)
+                }
                 binding.switcherFotoProduk.showNext()
                 hasImage = true
             }
@@ -70,17 +75,21 @@ class DetailStoreProductActivity : AppCompatActivity() {
 
     private val sppirtLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         if (uri != null && isValidFile(uri)) {
-            sppirtUri = uri
-            binding.tvSppirtName.text = getFileName(uri)
-            binding.switcherSppirt.showNext()
+            compressFile(this, uri).let { compressedFile ->
+                sppirtUri = compressedFile?.toUri()
+                binding.tvSppirtName.text = getFileName(sppirtUri!!)
+                binding.switcherSppirt.showNext()
+            }
         }
     }
 
     private val halalLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         if (uri != null && isValidFile(uri)) {
-            halalUri = uri
-            binding.tvHalalName.text = getFileName(uri)
-            binding.switcherHalal.showNext()
+            compressFile(this, uri).let { compressedFile ->
+                halalUri = compressedFile?.toUri()
+                binding.tvHalalName.text = getFileName(halalUri!!)
+                binding.switcherHalal.showNext()
+            }
         }
     }
 

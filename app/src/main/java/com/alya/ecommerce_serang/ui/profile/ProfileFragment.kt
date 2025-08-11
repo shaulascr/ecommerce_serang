@@ -25,6 +25,7 @@ import com.alya.ecommerce_serang.ui.order.address.AddressActivity
 import com.alya.ecommerce_serang.ui.order.history.HistoryActivity
 import com.alya.ecommerce_serang.ui.profile.mystore.MyStoreActivity
 import com.alya.ecommerce_serang.ui.profile.mystore.StoreOnReviewActivity
+import com.alya.ecommerce_serang.ui.profile.mystore.StoreSuspendedActivity
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
 import com.alya.ecommerce_serang.utils.viewmodel.MyStoreViewModel
@@ -73,12 +74,10 @@ class ProfileFragment : Fragment() {
 
         observeUserProfile()
 
+        observeStoreStatus()
+
         viewModel.loadUserProfile()
         viewModel.checkStoreUser()
-
-        val hasStore = viewModel.checkStore.value
-        Log.d("Profile Fragment", "Check store $hasStore")
-        binding.tvBukaToko.text = if (hasStore == true) "Toko Saya" else "Buka Toko"
 
         binding.cardBukaToko.setOnClickListener{
 //            if (hasStore == true) startActivity(Intent(requireContext(), MyStoreActivity::class.java))
@@ -88,8 +87,11 @@ class ProfileFragment : Fragment() {
                 myStoreViewModel.myStoreProfile.observe(viewLifecycleOwner) { store ->
                     store?.let {
                         when (store.storeStatus) {
+                            "process" -> startActivity(Intent(requireContext(), StoreOnReviewActivity::class.java))
                             "active" -> startActivity(Intent(requireContext(), MyStoreActivity::class.java))
-                            else -> startActivity(Intent(requireContext(), StoreOnReviewActivity::class.java))
+                            "inactive" -> startActivity(Intent(requireContext(), MyStoreActivity::class.java))
+                            "suspended" -> startActivity(Intent(requireContext(), StoreSuspendedActivity::class.java))
+                            else -> startActivity(Intent(requireContext(), RegisterStoreActivity::class.java))
                         }
                     } ?: run {
                         Toast.makeText(requireContext(), "Gagal memuat data toko", Toast.LENGTH_SHORT).show()
@@ -129,6 +131,12 @@ class ProfileFragment : Fragment() {
         }
         viewModel.errorMessage.observe(viewLifecycleOwner) { errorMessage ->
             Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun observeStoreStatus() {
+        viewModel.checkStore.observe(viewLifecycleOwner) { hasStore ->
+            binding.tvBukaToko.text = if (hasStore) "Toko Saya" else "Buka Toko"
         }
     }
 

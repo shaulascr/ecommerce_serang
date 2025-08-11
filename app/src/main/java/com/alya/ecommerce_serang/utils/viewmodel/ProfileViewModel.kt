@@ -47,15 +47,15 @@ class ProfileViewModel(private val userRepository: UserRepository) : ViewModel()
                 val response: HasStoreResponse = userRepository.checkStore()
 
                 // Log and store success message
-                Log.d("RegisterViewModel", "OTP Response: ${response.hasStore}")
-                _checkStore.value = response.hasStore // Store the message for UI feedback
+                Log.d("ProfileViewModel", "Has store: ${response.hasStore}")
+                _checkStore.postValue(response.hasStore) // Store the message for UI feedback
 
             } catch (exception: Exception) {
                 // Handle any errors and update state
-                _checkStore.value = false
+                _checkStore.postValue(false)
 
                 // Log the error for debugging
-                Log.e("RegisterViewModel", "Error:", exception)
+                Log.e(":ProfileViewModel", "Error:", exception)
             }
         }
     }
