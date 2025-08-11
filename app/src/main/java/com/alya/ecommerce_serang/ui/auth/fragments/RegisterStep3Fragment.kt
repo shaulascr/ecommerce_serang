@@ -250,7 +250,7 @@ class RegisterStep3Fragment : Fragment() {
 
         binding.autoCompleteDesa.setOnItemClickListener{ _, _, position, _ ->
             val villageId = villagesAdapter.getVillageId(position)
-            val postalCode = villagesAdapter.getPostalCode(position)
+//            val postalCode = villagesAdapter.getPostalCode(position)
             Log.d(TAG, "Village selected at position $position, ID: $villageId")
 
             villageId?.let { id ->
@@ -258,11 +258,11 @@ class RegisterStep3Fragment : Fragment() {
                 registerViewModel.selectedVillages = id
             }
 
-            postalCode?.let { postCode ->
-                registerViewModel.selectedPostalCode = postCode
-            }
+//            postalCode?.let { postCode ->
+//                registerViewModel.selectedPostalCode = postCode
+//            }
 
-            binding.etKodePos.setText(registerViewModel.selectedPostalCode ?: "")
+//            binding.etKodePos.setText(registerViewModel.selectedPostalCode ?: "")
         }
     }
 
@@ -371,11 +371,12 @@ class RegisterStep3Fragment : Fragment() {
         val street = binding.etDetailAlamat.text.toString().trim()
         val recipient = binding.etNamaPenerima.text.toString().trim()
         val phone = binding.etNomorHp.text.toString().trim()
+        val postalCode = binding.etKodePos.text.toString().trim()
 
         val provinceId = registerViewModel.selectedProvinceId?.toInt() ?: 0
         val cityId = registerViewModel.selectedCityId.toString()
         val subDistrict = registerViewModel.selectedSubdistrict.toString()
-        val postalCode = registerViewModel.selectedPostalCode.toString()
+//        val postalCode = registerViewModel.selectedPostalCode.toString()
 
         val villageId = registerViewModel.selectedVillages ?: ""
 
