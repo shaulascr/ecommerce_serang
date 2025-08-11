@@ -75,6 +75,7 @@ class DetailOrderViewModel(private val orderRepository: OrderRepository): ViewMo
                 orderRepository.submitComplaint(orderId.toString(), reason, imageFile)
                 _isSuccess.value = true
                 _message.value = "Order canceled successfully"
+                Log.d("DetailOrderViewModel", "Complaint order success")
 
             } catch (e: Exception) {
                 _isSuccess.value = false

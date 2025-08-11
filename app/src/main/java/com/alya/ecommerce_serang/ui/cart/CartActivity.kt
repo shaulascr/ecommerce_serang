@@ -1,6 +1,7 @@
 package com.alya.ecommerce_serang.ui.cart
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -145,7 +146,9 @@ class CartActivity : AppCompatActivity() {
     private fun observeViewModel() {
         viewModel.cartItems.observe(this) { cartItems ->
             if (cartItems.isNullOrEmpty()) {
+                binding.emptyCart.visibility = View.VISIBLE
                 showEmptyState(true)
+
             } else {
                 showEmptyState(false)
                 storeAdapter.submitList(cartItems)
@@ -153,7 +156,8 @@ class CartActivity : AppCompatActivity() {
         }
 
         viewModel.isLoading.observe(this) { isLoading ->
-            // Show/hide loading indicator if needed
+            binding.progressBarCart?.visibility = if (isLoading) View.VISIBLE else View.GONE
+            Log.d("CartActivity", "Loading state: $isLoading")
         }
 
         viewModel.errorMessage.observe(this) { errorMessage ->

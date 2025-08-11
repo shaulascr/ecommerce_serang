@@ -5,8 +5,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.viewpager2.widget.ViewPager2
 import com.alya.ecommerce_serang.R
+import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
+import com.alya.ecommerce_serang.data.repository.OrderRepository
 import com.alya.ecommerce_serang.databinding.FragmentOrderHistoryBinding
+import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
 import com.google.android.material.tabs.TabLayoutMediator
 
@@ -16,6 +21,12 @@ class OrderHistoryFragment : Fragment() {
     private val binding get() = _binding!!
     private lateinit var sessionManager: SessionManager
 
+    private val historyVm: HistoryViewModel by activityViewModels {
+        BaseViewModelFactory {
+            val api = ApiConfig.getApiService(SessionManager(requireContext()))
+            HistoryViewModel(OrderRepository(api))
+        }
+    }
 
     private lateinit var viewPagerAdapter: OrderViewPagerAdapter
 
@@ -33,6 +44,8 @@ class OrderHistoryFragment : Fragment() {
         sessionManager = SessionManager(requireContext())
 
         setupViewPager()
+
+
     }
 
     private fun setupViewPager() {
@@ -53,6 +66,16 @@ class OrderHistoryFragment : Fragment() {
                 else -> "Tab $position"
             }
         }.attach()
+
+        binding.viewPager.registerOnPageChangeCallback(
+            object : ViewPager2.OnPageChangeCallback() {
+                override fun onPageSelected(position: Int) {
+                    val status = viewPagerAdapter.orderStatuses[position]
+                    /* setStatus() is the API we added earlier; TRUE → always re‑query */
+                    historyVm.updateStatus(status, forceRefresh = true)
+                }
+            }
+        )
     }
 
     override fun onDestroyView() {

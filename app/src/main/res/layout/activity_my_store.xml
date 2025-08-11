@@ -10,7 +10,7 @@
     tools:context=".ui.profile.mystore.MyStoreActivity">
 
     <include
-        android:id="@+id/header"
+        android:id="@+id/headerMyStore"
         layout="@layout/header" />
 
     <ScrollView
@@ -422,6 +422,7 @@
                 android:background="@color/black_50"/>
 
             <androidx.constraintlayout.widget.ConstraintLayout
+                android:visibility="gone"
                 android:id="@+id/layout_help"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

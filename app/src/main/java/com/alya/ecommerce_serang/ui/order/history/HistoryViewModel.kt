@@ -10,6 +10,7 @@ import com.alya.ecommerce_serang.data.api.dto.CompletedOrderRequest
 import com.alya.ecommerce_serang.data.api.dto.OrdersItem
 import com.alya.ecommerce_serang.data.api.response.customer.order.CancelOrderResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.OrderListItemsItem
+import com.alya.ecommerce_serang.data.api.response.customer.order.OrderListResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.Orders
 import com.alya.ecommerce_serang.data.api.response.order.CompletedOrderResponse
 import com.alya.ecommerce_serang.data.repository.OrderRepository
@@ -18,6 +19,13 @@ import com.alya.ecommerce_serang.ui.order.address.ViewState
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.io.File
 import java.text.SimpleDateFormat
@@ -29,8 +37,8 @@ class HistoryViewModel(private val repository: OrderRepository) : ViewModel()  {
         private const val TAG = "HistoryViewModel"
     }
 
-    private val _orders = MutableLiveData<ViewState<List<OrdersItem>>>()
-    val orders: LiveData<ViewState<List<OrdersItem>>> = _orders
+//    private val _orders = MutableLiveData<ViewState<List<OrdersItem>>>()
+//    val orders: LiveData<ViewState<List<OrdersItem>>> = _orders
 
     private val _orderCompletionStatus = MutableLiveData<Result<CompletedOrderResponse>>()
     val orderCompletionStatus: LiveData<Result<CompletedOrderResponse>> = _orderCompletionStatus
@@ -59,81 +67,156 @@ class HistoryViewModel(private val repository: OrderRepository) : ViewModel()  {
     private val _error = MutableLiveData<String>()
     val error: LiveData<String> get() = _error
 
-    fun getOrderList(status: String) {
-        _orders.value = ViewState.Loading
-        viewModelScope.launch {
-            try {
-                if (status == "all") {
-                    // Get all orders by combining all statuses
-                    getAllOrdersCombined()
-                } else {
-                    // Get orders for specific status
-                    when (val result = repository.getOrderList(status)) {
-                        is Result.Success -> {
-                            _orders.value = ViewState.Success(result.data.orders)
-                            Log.d(TAG, "Orders loaded successfully: ${result.data.orders.size} items")
+    private val _selectedStatus = MutableStateFlow("all")
+    val selectedStatus: StateFlow<String> = _selectedStatus.asStateFlow()
+
+    val orders: StateFlow<ViewState<List<OrdersItem>>> =
+        _selectedStatus
+            .flatMapLatest { status ->
+                flow<ViewState<List<OrdersItem>>> {
+                    Log.d(TAG, "⏳  Loading orders for status = $status")
+                    emit(ViewState.Loading)
+
+                    val viewState =
+                        if (status == "all") {
+                            getAllOrdersCombined().also {
+                                Log.d(TAG, "✅  Combined orders size = ${(it as? ViewState.Success)?.data?.size}")
+                            }
+                        } else {
+                            when (val r = repository.getOrderList(status)) {
+
+                                is Result.Loading -> {
+                                    Log.d(TAG, "   repository.getOrderList($status) → Loading")
+                                    ViewState.Loading
+                                }
+
+                                is Result.Success -> {
+                                    Log.d(TAG, "✅  repository.getOrderList($status) success, size = ${r.data.orders.size}")
+                                    // Tag each order so the fragment’s filter works
+                                    val tagged = r.data.orders.onEach { it.displayStatus = status }
+                                    ViewState.Success(tagged)
+                                }
+
+                                is Result.Error -> {
+                                    Log.e(TAG, "❌  repository.getOrderList($status) error = ${r.exception.message}")
+                                    ViewState.Error(r.exception.message ?: "Unknown error")
+                                }
+                            }
                         }
-                        is Result.Error -> {
-                            _orders.value = ViewState.Error(result.exception.message ?: "Unknown error occurred")
-                            Log.e(TAG, "Error loading orders", result.exception)
-                        }
-                        is Result.Loading -> {
-                            // Keep loading state
-                        }
-                    }
+
+                    emit(viewState)
                 }
-            } catch (e: Exception) {
-                _orders.value = ViewState.Error("An unexpected error occurred: ${e.message}")
-                Log.e(TAG, "Exception in getOrderList", e)
             }
-        }
-    }
+            .stateIn(
+                viewModelScope,
+                SharingStarted.WhileSubscribed(5_000),
+                ViewState.Loading                          // ② initial value, still fine
+            )
 
-    private suspend fun getAllOrdersCombined() {
-        try {
-            val allStatuses = listOf("unpaid", "paid", "processed", "shipped", "completed", "canceled")
-            val allOrders = mutableListOf<OrdersItem>()
 
-            // Use coroutineScope to allow launching async blocks
-            coroutineScope {
-                val deferreds = allStatuses.map { status ->
+//    fun getOrderList(status: String) {
+//        _orders.value = ViewState.Loading
+//        viewModelScope.launch {
+//            try {
+//                if (status == "all") {
+//                    // Get all orders by combining all statuses
+//                    getAllOrdersCombined()
+//                } else {
+//                    // Get orders for specific status
+//                    when (val result = repository.getOrderList(status)) {
+//                        is Result.Success -> {
+//                            _orders.value = ViewState.Success(result.data.orders)
+//                            Log.d(TAG, "Orders loaded successfully: ${result.data.orders.size} items")
+//                        }
+//                        is Result.Error -> {
+//                            _orders.value = ViewState.Error(result.exception.message ?: "Unknown error occurred")
+//                            Log.e(TAG, "Error loading orders", result.exception)
+//                        }
+//                        is Result.Loading -> {
+//                            // Keep loading state
+//                        }
+//                    }
+//                }
+//            } catch (e: Exception) {
+//                _orders.value = ViewState.Error("An unexpected error occurred: ${e.message}")
+//                Log.e(TAG, "Exception in getOrderList", e)
+//            }
+//        }
+//    }
+
+//    private suspend fun getAllOrdersCombined() {
+//        try {
+//            val allStatuses = listOf("unpaid", "paid", "processed", "shipped", "completed", "canceled")
+//            val allOrders = mutableListOf<OrdersItem>()
+//
+//            // Use coroutineScope to allow launching async blocks
+//            coroutineScope {
+//                val deferreds = allStatuses.map { status ->
+//                    async {
+//                        when (val result = repository.getOrderList(status)) {
+//                            is Result.Success -> {
+//                                // Tag each order with the status it was fetched from
+//                                result.data.orders.onEach { it.displayStatus = status }
+//                            }
+//                            is Result.Error -> {
+//                                Log.e(TAG, "Error loading orders for status $status", result.exception)
+//                                emptyList<OrdersItem>()
+//                            }
+//                            is Result.Loading -> emptyList<OrdersItem>()
+//                        }
+//                    }
+//                }
+//
+//                // Await all results and combine
+//                deferreds.awaitAll().forEach { orders ->
+//                    allOrders.addAll(orders)
+//                }
+//            }
+//
+//            // Sort orders
+//            val sortedOrders = allOrders.sortedByDescending { order ->
+//                try {
+//                    SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault()).parse(order.createdAt)
+//                } catch (e: Exception) {
+//                    null
+//                }
+//            }
+//
+//            _orders.value = ViewState.Success(sortedOrders)
+//            Log.d(TAG, "All orders loaded successfully: ${sortedOrders.size} items")
+//
+//        } catch (e: Exception) {
+//            _orders.value = ViewState.Error("An unexpected error occurred: ${e.message}")
+//            Log.e(TAG, "Exception in getAllOrdersCombined", e)
+//        }
+//    }
+    private suspend fun getAllOrdersCombined(): ViewState<List<OrdersItem>> = try {
+        val statuses = listOf("unpaid", "paid", "processed", "shipped", "completed", "canceled")
+
+        val all = coroutineScope {
+            statuses
+                .map { status ->
                     async {
-                        when (val result = repository.getOrderList(status)) {
-                            is Result.Success -> {
-                                // Tag each order with the status it was fetched from
-                                result.data.orders.onEach { it.displayStatus = status }
-                            }
-                            is Result.Error -> {
-                                Log.e(TAG, "Error loading orders for status $status", result.exception)
-                                emptyList<OrdersItem>()
-                            }
-                            is Result.Loading -> emptyList<OrdersItem>()
+                        when (val r = repository.getOrderList(status)) {
+                            is Result.Success -> r.data.orders.onEach { it.displayStatus = status }
+                            else              -> emptyList()
                         }
                     }
                 }
-
-                // Await all results and combine
-                deferreds.awaitAll().forEach { orders ->
-                    allOrders.addAll(orders)
-                }
-            }
-
-            // Sort orders
-            val sortedOrders = allOrders.sortedByDescending { order ->
-                try {
-                    SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault()).parse(order.createdAt)
-                } catch (e: Exception) {
-                    null
-                }
-            }
-
-            _orders.value = ViewState.Success(sortedOrders)
-            Log.d(TAG, "All orders loaded successfully: ${sortedOrders.size} items")
-
-        } catch (e: Exception) {
-            _orders.value = ViewState.Error("An unexpected error occurred: ${e.message}")
-            Log.e(TAG, "Exception in getAllOrdersCombined", e)
+                .awaitAll()
+                .flatten()
         }
+
+        val sorted = all.sortedByDescending { order ->
+            try {
+                SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
+                    .parse(order.createdAt)
+            } catch (_: Exception) { null }
+        }
+
+        ViewState.Success(sorted)
+    } catch (e: Exception) {
+        ViewState.Error("Failed to load orders: ${e.message}")
     }
 
     fun confirmOrderCompleted(orderId: Int, status: String) {
@@ -209,9 +292,52 @@ class HistoryViewModel(private val repository: OrderRepository) : ViewModel()  {
         }
     }
 
-    fun refreshOrders(status: String = "all") {
-        Log.d(TAG, "Refreshing orders with status: $status")
-        // Don't set Loading here if you want to show current data while refreshing
-        getOrderList(status)
+//    fun refreshOrders(status: String = "all") {
+//        Log.d(TAG, "Refreshing orders with status: $status")
+//        // Don't set Loading here if you want to show current data while refreshing
+//        getOrderList(status)
+//    }
+
+    fun updateStatus(status: String, forceRefresh: Boolean = false) {
+        Log.d(TAG, "↪️  updateStatus(status = $status, forceRefresh = $forceRefresh)")
+
+        // No‑op guard (optional): skip if user re‑selects same tab and no refresh asked
+        if (_selectedStatus.value == status && !forceRefresh) {
+            Log.d(TAG, "🔸  Status unchanged & forceRefresh = false → skip update")
+            return
+        }
+
+        _selectedStatus.value = status
+        Log.d(TAG, "✅  _selectedStatus set to \"$status\"")
+
+        if (forceRefresh) {
+            Log.d(TAG, "🔄  forceRefresh = true → launching refresh()")
+            viewModelScope.launch { refresh(status) }
+        }
     }
+
+    private suspend fun refresh(status: String) {
+        Log.d(TAG, "⏳  refresh(\"$status\") started")
+
+        try {
+            if (status == "all") {
+                Log.d(TAG, "🌐  Calling getAllOrdersCombined()")
+                getAllOrdersCombined()                      // network → cache
+            } else {
+                Log.d(TAG, "🌐  repository.getOrderList(\"$status\")")
+                repository.getOrderList(status)            // network → cache
+            }
+            Log.d(TAG, "✅  refresh(\"$status\") completed (repository updated)")
+            // Flow that watches DB/cache will emit automatically
+        } catch (e: Exception) {
+            Log.e(TAG, "❌  refresh(\"$status\") failed: ${e.message}", e)
+        }
+    }
+
+    private fun Result<OrderListResponse>.toViewState(): ViewState<List<OrdersItem>> =
+        when (this) {
+            is Result.Success -> ViewState.Success(data.orders)
+            is Result.Error   -> ViewState.Error(exception.message ?: "Unknown error")
+            is Result.Loading -> ViewState.Loading     // should rarely reach UI
+        }
 }

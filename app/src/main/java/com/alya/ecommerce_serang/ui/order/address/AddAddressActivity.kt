@@ -289,7 +289,7 @@ class AddAddressActivity : AppCompatActivity() {
         val isStoreLocation = false
 
         val provinceId = viewModel.selectedProvinceId
-        val cityId = viewModel.selectedCityId
+        val cityId = viewModel.selectedCityId.toString()
 
         Log.d(TAG, "Form data: street=$street, subDistrict=$subDistrict, postalCode=$postalCode, " +
                 "recipient=$recipient, phone=$phone, userId=$userId, provinceId=$provinceId, cityId=$cityId, " +
@@ -333,18 +333,19 @@ class AddAddressActivity : AppCompatActivity() {
 
         // Create request with all fields
         val request = CreateAddressRequest(
+            userId = userId,
             lat = latitude!!,  // Safe to use !! as we've checked above
             long = longitude!!,
             street = street,
             subDistrict = subDistrict,
-            cityId = cityId,
+            cityId = cityId, // ⚠️ Make sure this is Int
             provId = provinceId,
             postCode = postalCode,
+            idVillage = "", // Or provide a real ID if needed
             detailAddress = street,
-            userId = userId,
+            isStoreLocation = false,
             recipient = recipient,
-            phone = phone,
-            isStoreLocation = isStoreLocation
+            phone = phone
         )
 
         Log.d(TAG, "Form validation successful, submitting address: $request")

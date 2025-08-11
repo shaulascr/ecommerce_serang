@@ -4,14 +4,17 @@ import com.google.gson.annotations.SerializedName
 
 data class AddressResponse(
 
-    @field:SerializedName("addresses")
+	@field:SerializedName("addresses")
 	val addresses: List<AddressesItem>,
 
-    @field:SerializedName("message")
+	@field:SerializedName("message")
 	val message: String
 )
 
 data class AddressesItem(
+
+	@field:SerializedName("village_id")
+	val villageId: String,
 
 	@field:SerializedName("is_store_location")
 	val isStoreLocation: Boolean,
@@ -23,7 +26,7 @@ data class AddressesItem(
 	val userId: Int,
 
 	@field:SerializedName("province_id")
-	val provinceId: Int,
+	val provinceId: String,
 
 	@field:SerializedName("phone")
 	val phone: String,
@@ -50,5 +53,5 @@ data class AddressesItem(
 	val longitude: String,
 
 	@field:SerializedName("city_id")
-	val cityId: Int
+	val cityId: String
 )

@@ -12,10 +12,8 @@ data class ListProvinceResponse(
 )
 
 data class ProvincesItem(
-
-	@field:SerializedName("province")
-	val province: String,
-
 	@field:SerializedName("province_id")
-	val provinceId: String
+	val provinceId: String,
+	@field:SerializedName("province")
+	val province: String
 )

@@ -10,14 +10,24 @@ import com.alya.ecommerce_serang.utils.SessionManager
 import com.google.gson.Gson
 import io.socket.client.IO
 import io.socket.client.Socket
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import org.json.JSONObject
 import java.net.URISyntaxException
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class SocketIOService(
+@Singleton
+class SocketIOService @Inject constructor(
     private val sessionManager: SessionManager
 ) {
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val TAG = "SocketIOService"
 
     // Socket.IO client
@@ -30,8 +40,8 @@ class SocketIOService(
     private val _connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected())
     val connectionState: StateFlow<ConnectionState> = _connectionState
 
-    private val _newMessages = MutableStateFlow<ChatLine?>(null)
-    val newMessages: StateFlow<ChatLine?> = _newMessages
+    private val _newMessages = MutableSharedFlow<ChatLine>(extraBufferCapacity = 1) // Using extraBufferCapacity for a non-suspending emit
+    val newMessages: SharedFlow<ChatLine> = _newMessages
 
     private val _typingStatus = MutableStateFlow<TypingStatus?>(null)
     val typingStatus: StateFlow<TypingStatus?> = _typingStatus
@@ -85,63 +95,95 @@ class SocketIOService(
      * Sets up Socket.IO event listeners
      */
     private fun setupSocketListeners() {
-        socket?.let { socket ->
-            // Connection events
-            socket.on(Socket.EVENT_CONNECT) {
-                Log.d(TAG, "Socket.IO connected")
-                isConnected = true
-                _connectionState.value = ConnectionState.Connected
-                _connectionStateLiveData.postValue(ConnectionState.Connected)
-            }
 
-            socket.on(Socket.EVENT_DISCONNECT) {
-                Log.d(TAG, "Socket.IO disconnected")
-                isConnected = false
-                _connectionState.value = ConnectionState.Disconnected("Disconnected from server")
-                _connectionStateLiveData.postValue(ConnectionState.Disconnected("Disconnected from server"))
-            }
+        socket?.on(Constants.EVENT_NEW_MESSAGE) { args -> // Use the event name your server emits
+            Log.d(TAG, "Raw event received on ${Constants.EVENT_NEW_MESSAGE}: ${args.firstOrNull()}") // Check raw args
 
-            socket.on(Socket.EVENT_CONNECT_ERROR) { args ->
-                val error = if (args.isNotEmpty() && args[0] != null) args[0].toString() else "Unknown error"
-                Log.e(TAG, "Socket.IO connection error: $error")
-                isConnected = false
-                _connectionState.value = ConnectionState.Error("Connection error: $error")
-                _connectionStateLiveData.postValue(ConnectionState.Error("Connection error: $error"))
-            }
-
-            // Chat events
-            socket.on(Constants.EVENT_NEW_MESSAGE) { args ->
+            if (args.isNotEmpty()) {
                 try {
-                    if (args.isNotEmpty() && args[0] != null) {
-                        val messageJson = args[0].toString()
-                        Log.d(TAG, "Received new message: $messageJson")
-                        val chatLine = Gson().fromJson(messageJson, ChatLine::class.java)
-                        _newMessages.value = chatLine
-                        _newMessagesLiveData.postValue(chatLine)
+                    val messageJson = args[0].toString()
+                    val chatLine = Gson().fromJson(messageJson, ChatLine::class.java)
+                    Log.d(TAG, "Successfully parsed ChatLine: ${chatLine.message}")
+                    Log.d(TAG, "Emitting new message to _newMessages SharedFlow...") // New log
+
+                    // Use the serviceScope to launch a coroutine for emit()
+                    serviceScope.launch {
+                        _newMessages.emit(chatLine) // This ensures every message is processed
+                        Log.d(TAG, "New message emitted to SharedFlow.") // New log after emit
+
                     }
                 } catch (e: Exception) {
-                    Log.e(TAG, "Error parsing new message event", e)
+                    Log.e(TAG, "Error parsing or emitting new message: ${e.message}", e)
                 }
-            }
-
-            socket.on(Constants.EVENT_TYPING) { args ->
-                try {
-                    if (args.isNotEmpty() && args[0] != null) {
-                        val typingData = args[0] as JSONObject
-                        val userId = typingData.getInt("userId")
-                        val roomId = typingData.getInt("roomId")
-                        val isTyping = typingData.getBoolean("isTyping")
-
-                        Log.d(TAG, "Received typing status: User $userId in room $roomId is typing: $isTyping")
-                        val status = TypingStatus(userId, roomId, isTyping)
-                        _typingStatus.value = status
-                        _typingStatusLiveData.postValue(status)
-                    }
-                } catch (e: Exception) {
-                    Log.e(TAG, "Error parsing typing event", e)
-                }
+            } else {
+            Log.w(TAG, "Received empty args for ${Constants.EVENT_NEW_MESSAGE}")
             }
         }
+//        socket?.on(Constants.EVENT_NEW_MESSAGE) { args ->
+//            if (args.isNotEmpty()) {
+//                val messageJson = args[0].toString()
+//                val chatLine = Gson().fromJson(messageJson, ChatLine::class.java)
+//                Log.d("SocketIOService", "Message received: ${chatLine.message}")
+//                _newMessages.value = chatLine
+//            }
+//        }
+//        socket?.let { socket ->
+//            // Connection events
+//            socket.on(Socket.EVENT_CONNECT) {
+//                Log.d(TAG, "Socket.IO connected")
+//                isConnected = true
+//                _connectionState.value = ConnectionState.Connected
+//                _connectionStateLiveData.postValue(ConnectionState.Connected)
+//            }
+//
+//            socket.on(Socket.EVENT_DISCONNECT) {
+//                Log.d(TAG, "Socket.IO disconnected")
+//                isConnected = false
+//                _connectionState.value = ConnectionState.Disconnected("Disconnected from server")
+//                _connectionStateLiveData.postValue(ConnectionState.Disconnected("Disconnected from server"))
+//            }
+//
+//            socket.on(Socket.EVENT_CONNECT_ERROR) { args ->
+//                val error = if (args.isNotEmpty() && args[0] != null) args[0].toString() else "Unknown error"
+//                Log.e(TAG, "Socket.IO connection error: $error")
+//                isConnected = false
+//                _connectionState.value = ConnectionState.Error("Connection error: $error")
+//                _connectionStateLiveData.postValue(ConnectionState.Error("Connection error: $error"))
+//            }
+//
+//            // Chat events
+//            socket.on(Constants.EVENT_NEW_MESSAGE) { args ->
+//                try {
+//                    if (args.isNotEmpty() && args[0] != null) {
+//                        val messageJson = args[0].toString()
+//                        Log.d(TAG, "Received new message: $messageJson")
+//                        val chatLine = Gson().fromJson(messageJson, ChatLine::class.java)
+//                        _newMessages.value = chatLine
+//                        _newMessagesLiveData.postValue(chatLine)
+//                    }
+//                } catch (e: Exception) {
+//                    Log.e(TAG, "Error parsing new message event", e)
+//                }
+//            }
+//
+//            socket.on(Constants.EVENT_TYPING) { args ->
+//                try {
+//                    if (args.isNotEmpty() && args[0] != null) {
+//                        val typingData = args[0] as JSONObject
+//                        val userId = typingData.getInt("userId")
+//                        val roomId = typingData.getInt("roomId")
+//                        val isTyping = typingData.getBoolean("isTyping")
+//
+//                        Log.d(TAG, "Received typing status: User $userId in room $roomId is typing: $isTyping")
+//                        val status = TypingStatus(userId, roomId, isTyping)
+//                        _typingStatus.value = status
+//                        _typingStatusLiveData.postValue(status)
+//                    }
+//                } catch (e: Exception) {
+//                    Log.e(TAG, "Error parsing typing event", e)
+//                }
+//            }
+//        }
     }
 
     /**
@@ -159,22 +201,29 @@ class SocketIOService(
     /**
      * Joins a specific chat room
      */
-    fun joinRoom() {
+    fun joinRoom(roomId: Int) {
+//        if (!isConnected) {
+//            connect()
+//            return
+//        }
+//
+//        // Get user ID from SessionManager
+//        val userId = sessionManager.getUserId()
+//        if (userId.isNullOrEmpty()) {
+//            Log.e(TAG, "Cannot join room: User ID is null or empty")
+//            return
+//        }
+//
+//        // Join the room using the current user's ID
+//        socket?.emit("joinRoom", roomId) // ✅
+//        Log.d(TAG, "Joined room ID: $roomId")
+//        Log.d(TAG, "Joined room for user: $userId")
         if (!isConnected) {
             connect()
-            return
         }
 
-        // Get user ID from SessionManager
-        val userId = sessionManager.getUserId()
-        if (userId.isNullOrEmpty()) {
-            Log.e(TAG, "Cannot join room: User ID is null or empty")
-            return
-        }
-
-        // Join the room using the current user's ID
-        socket?.emit("joinRoom", userId)
-        Log.d(TAG, "Joined room for user: $userId")
+        socket?.emit("joinRoom", roomId)
+        Log.d(TAG, "Joined room ID: $roomId")
     }
 
     /**

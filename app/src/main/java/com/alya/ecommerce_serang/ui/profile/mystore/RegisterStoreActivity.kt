@@ -22,6 +22,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -36,8 +37,6 @@ import com.alya.ecommerce_serang.ui.order.address.ProvinceAdapter
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
 import com.alya.ecommerce_serang.utils.viewmodel.RegisterStoreViewModel
-import androidx.core.graphics.drawable.toDrawable
-import androidx.core.widget.ImageViewCompat
 
 class RegisterStoreActivity : AppCompatActivity() {
 
@@ -157,7 +156,7 @@ class RegisterStoreActivity : AppCompatActivity() {
                 !viewModel.bankName.value.isNullOrBlank() &&
                 (viewModel.bankNumber.value ?: 0) > 0 &&
                 (viewModel.provinceId.value ?: 0) > 0 &&
-                (viewModel.cityId.value ?: 0) > 0 &&
+                !viewModel.cityId.value.isNullOrBlank() &&
                 (viewModel.storeTypeId.value ?: 0) > 0 &&
                 viewModel.ktpUri != null &&
                 viewModel.nibUri != null &&

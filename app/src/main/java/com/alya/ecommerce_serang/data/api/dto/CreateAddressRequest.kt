@@ -2,12 +2,15 @@ package com.alya.ecommerce_serang.data.api.dto
 
 import com.google.gson.annotations.SerializedName
 
-data class CreateAddressRequest (
+data class CreateAddressRequest(
+    @SerializedName("userId")
+    val userId: Int,
+
     @SerializedName("latitude")
-    val lat: Double? = null,
+    val lat: Double,
 
     @SerializedName("longitude")
-    val long: Double? = null,
+    val long: Double,
 
     @SerializedName("street")
     val street: String,
@@ -16,26 +19,26 @@ data class CreateAddressRequest (
     val subDistrict: String,
 
     @SerializedName("city_id")
-    val cityId: Int,
+    val cityId: String,
 
     @SerializedName("province_id")
     val provId: Int,
+
     @SerializedName("postal_code")
-    val postCode: String? = null,
+    val postCode: String,
+
+    @SerializedName("village_id")
+    val idVillage: String?, // nullable for now
 
     @SerializedName("detail")
-    val detailAddress: String? = null,
+    val detailAddress: String,
 
-    @SerializedName("user_id")
-    val userId: Int,
+    @SerializedName("is_store_location")
+    val isStoreLocation: Boolean,
 
     @SerializedName("recipient")
     val recipient: String,
 
     @SerializedName("phone")
-    val phone: String,
-
-    @SerializedName("is_store_location")
-    val isStoreLocation: Boolean
-
+    val phone: String
 )

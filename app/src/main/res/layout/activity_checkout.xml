@@ -6,7 +6,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/black_800"
+    android:background="@color/white"
     android:theme="@style/Theme.Ecommerce_serang"
     tools:context=".ui.order.CheckoutActivity">
 
@@ -75,7 +75,7 @@
                         android:id="@+id/tv_places_address"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Rumah"
+                        android:text="-"
                         android:textColor="#5A5A5A"
                         android:paddingHorizontal="8dp"
                         android:paddingVertical="2dp"
@@ -94,7 +94,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Jl. Pegangasan Timur"
+                            android:text="-"
                             android:textSize="14sp"
                             android:layout_marginStart="32dp" />
 
@@ -179,9 +179,11 @@
                 </LinearLayout>
 
                 <androidx.cardview.widget.CardView
+                    android:id="@+id/card_shipment"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
+                    android:visibility="gone"
                     app:cardCornerRadius="8dp"
                     app:cardElevation="0dp"
                     app:cardBackgroundColor="#F5F5F5">

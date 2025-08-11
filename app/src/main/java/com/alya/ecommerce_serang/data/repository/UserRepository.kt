@@ -21,6 +21,8 @@ import com.alya.ecommerce_serang.data.api.response.auth.RegisterStoreResponse
 import com.alya.ecommerce_serang.data.api.response.auth.VerifRegisterResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.ListCityResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.ListProvinceResponse
+import com.alya.ecommerce_serang.data.api.response.customer.order.SubdistrictResponse
+import com.alya.ecommerce_serang.data.api.response.customer.order.VillagesResponse
 import com.alya.ecommerce_serang.data.api.response.customer.profile.EditProfileResponse
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
 import com.alya.ecommerce_serang.utils.FileUtils
@@ -68,6 +70,16 @@ class UserRepository(private val apiService: ApiService) {
         return if (response.isSuccessful) response.body() else null
     }
 
+    suspend fun getListSubdistrict(cityId : String): SubdistrictResponse? {
+        val response = apiService.getSubdistrict(cityId)
+        return if (response.isSuccessful) response.body() else null
+    }
+
+    suspend fun getListVillages(subId: String): VillagesResponse? {
+        val response = apiService.getVillages(subId)
+        return if (response.isSuccessful) response.body() else null
+    }
+
     suspend fun registerUser(request: RegisterRequest): RegisterResponse {
         val response = apiService.register(request) // API call
 
@@ -87,7 +99,7 @@ class UserRepository(private val apiService: ApiService) {
         longitude: String,
         street: String,
         subdistrict: String,
-        cityId: Int,
+        cityId: String,
         provinceId: Int,
         postalCode: Int,
         detail: String,

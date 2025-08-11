@@ -8,9 +8,7 @@ import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
 import com.alya.ecommerce_serang.data.api.dto.FcmReq
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.repository.Result
@@ -43,20 +41,18 @@ class LoginActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
-
         enableEdgeToEdge()
 
-        // Apply insets to your root layout
-        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, windowInsets ->
-            val systemBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-            view.setPadding(
-                systemBars.left,
-                systemBars.top,
-                systemBars.right,
-                systemBars.bottom
-            )
-            windowInsets
-        }
+//        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, windowInsets ->
+//            val systemBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+//            view.setPadding(
+//                systemBars.left,
+//                systemBars.top,
+//                systemBars.right,
+//                systemBars.bottom
+//            )
+//            windowInsets
+//        }
 
 //        onBackPressedDispatcher.addCallback(this) {
 //            // Handle the back button event
@@ -105,6 +101,7 @@ class LoginActivity : AppCompatActivity() {
                     finish()
                 }
                 is com.alya.ecommerce_serang.data.repository.Result.Error -> {
+                    Log.e("LoginActivity", "Login Failed: ${result.exception.message}")
                     Toast.makeText(this, "Login Failed: ${result.exception.message}", Toast.LENGTH_LONG).show()
                 }
                 is Result.Loading -> {

@@ -82,11 +82,11 @@
         <!-- android:name="androidx.startup.InitializationProvider" -->
         <!-- android:authorities="${applicationId}.androidx-startup" -->
         <!-- tools:node="remove" /> -->
-        <service
-            android:name=".ui.notif.SimpleWebSocketService"
-            android:enabled="true"
-            android:exported="false"
-            android:foregroundServiceType="dataSync" />
+<!--        <service-->
+<!--            android:name=".ui.notif.SimpleWebSocketService"-->
+<!--            android:enabled="true"-->
+<!--            android:exported="false"-->
+<!--            android:foregroundServiceType="dataSync" />-->
 
         <activity
             android:name=".ui.profile.mystore.chat.ChatStoreActivity"

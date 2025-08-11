@@ -39,7 +39,6 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
-import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -63,7 +62,6 @@ class AddEvidencePaymentActivity : AppCompatActivity() {
 
     private val paymentMethods = arrayOf(
         "Transfer Bank",
-        "E-Wallet",
         "QRIS",
     )
 
@@ -129,7 +127,7 @@ class AddEvidencePaymentActivity : AppCompatActivity() {
     }
 
     private fun setupUI() {
-        val paymentMethods = listOf("Transfer Bank", "COD", "QRIS")
+        val paymentMethods = listOf("Transfer Bank", "QRIS")
         val adapter = SpinnerCardAdapter(this, paymentMethods)
         binding.spinnerPaymentMethod.adapter = adapter
     }
@@ -320,11 +318,12 @@ class AddEvidencePaymentActivity : AppCompatActivity() {
             Toast.makeText(this, "Silahkan pilih metode pembayaran", Toast.LENGTH_SHORT).show()
             return
         }
+        binding.etAccountNumber.visibility = View.GONE
 
-        if (binding.etAccountNumber.text.toString().trim().isEmpty()) {
-            Toast.makeText(this, "Silahkan isi nomor rekening/HP", Toast.LENGTH_SHORT).show()
-            return
-        }
+//        if (binding.etAccountNumber.text.toString().trim().isEmpty()) {
+//            Toast.makeText(this, "Silahkan isi nomor rekening/HP", Toast.LENGTH_SHORT).show()
+//            return
+//        }
 
         if (binding.tvPaymentDate.text.toString() == "Pilih tanggal") {
             Toast.makeText(this, "Silahkan pilih tanggal pembayaran", Toast.LENGTH_SHORT).show()

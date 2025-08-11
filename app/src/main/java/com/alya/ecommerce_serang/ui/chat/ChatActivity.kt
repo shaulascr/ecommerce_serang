@@ -27,6 +27,7 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsAnimationCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.alya.ecommerce_serang.BuildConfig.BASE_URL
 import com.alya.ecommerce_serang.R
@@ -62,6 +63,8 @@ class ChatActivity : AppCompatActivity() {
 
     // For image attachment
     private var tempImageUri: Uri? = null
+
+    private var imageAttach = false
 
     // Typing indicator handler
     private val typingHandler = android.os.Handler(android.os.Looper.getMainLooper())
@@ -127,6 +130,7 @@ class ChatActivity : AppCompatActivity() {
             return
         }
 
+        // set up data toko
         binding.tvStoreName.text = storeName
         val fullImageUrl = when (val img = storeImg) {
             is String -> {
@@ -140,7 +144,7 @@ class ChatActivity : AppCompatActivity() {
             .placeholder(R.drawable.placeholder_image)
             .into(binding.imgProfile)
 
-                // Set chat parameters to ViewModel
+        // Set chat parameter to send to ViewModel with product
         viewModel.setChatParameters(
             storeId = storeId,
             productId = productId,
@@ -157,16 +161,17 @@ class ChatActivity : AppCompatActivity() {
         }
 
         // Setup UI components
+        // rv isi chat
         setupRecyclerView()
         setupWindowInsets()
         setupListeners()
         setupTypingIndicator()
+        // observe listener from viewmodel
         observeViewModel()
 
         // If opened from ChatListFragment with a valid chatRoomId
         if (chatRoomId > 0) {
-            // Directly set the chatRoomId and load chat history
-            viewModel._chatRoomId.value = chatRoomId
+            viewModel.setChatRoomId(chatRoomId)
         }
     }
 
@@ -269,6 +274,7 @@ class ChatActivity : AppCompatActivity() {
         }
 
         // Options button
+        binding.btnOptions.visibility = View.GONE
         binding.btnOptions.setOnClickListener {
             showOptionsMenu()
         }
@@ -281,6 +287,7 @@ class ChatActivity : AppCompatActivity() {
                 // This will automatically handle product attachment if enabled
                 viewModel.sendMessage(message)
                 binding.editTextMessage.text.clear()
+                binding.layoutAttachImage.visibility = View.GONE
 
                 // Instantly scroll to show new message
                 binding.recyclerChat.postDelayed({
@@ -291,7 +298,17 @@ class ChatActivity : AppCompatActivity() {
 
         // Attachment button
         binding.btnAttachment.setOnClickListener {
+            this.currentFocus?.let { view ->
+                val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+                imm?.hideSoftInputFromWindow(view.windowToken, 0)
+            }
             checkPermissionsAndShowImagePicker()
+        }
+
+        binding.btnCloseChat.setOnClickListener{
+            binding.layoutAttachImage.visibility = View.GONE
+            imageAttach = false
+            viewModel.clearSelectedImage()
         }
 
         // Product card click to enable/disable product attachment
@@ -300,15 +317,14 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
+
     private fun toggleProductAttachment() {
         val currentState = viewModel.state.value
         if (currentState?.hasProductAttachment == true) {
-            // Disable product attachment
             viewModel.disableProductAttachment()
             updateProductAttachmentUI(false)
             Toast.makeText(this, "Product attachment disabled", Toast.LENGTH_SHORT).show()
         } else {
-            // Enable product attachment
             viewModel.enableProductAttachment()
             updateProductAttachmentUI(true)
             Toast.makeText(this, "Product will be attached to your next message", Toast.LENGTH_SHORT).show()
@@ -389,77 +405,76 @@ class ChatActivity : AppCompatActivity() {
             }
         })
 
-        viewModel.state.observe(this, Observer { state ->
-            Log.d(TAG, "State updated - Messages: ${state.messages.size}")
+        lifecycleScope.launchWhenStarted {
+            viewModel.state.collect() { state ->
+                Log.d(TAG, "State updated - Messages: ${state.messages.size}")
 
-            // Update messages
-            val previousCount = chatAdapter.itemCount
+                // Update messages
+                val previousCount = chatAdapter.itemCount
 
-            val displayItems = viewModel.getDisplayItems()
+                val displayItems = viewModel.getDisplayItems()
 
-            chatAdapter.submitList(displayItems) {
-                Log.d(TAG, "Messages submitted to adapter")
-                // Only auto-scroll for new messages or initial load
-                if (previousCount == 0 || state.messages.size > previousCount) {
-                    scrollToBottomInstant()
-                }
-            }
-
-            // Update product info
-            if (!state.productName.isNullOrEmpty()) {
-                binding.tvProductName.text = state.productName
-                binding.tvProductPrice.text = state.productPrice
-                binding.ratingBar.rating = state.productRating
-                binding.tvRating.text = state.productRating.toString()
-                binding.tvSellerName.text = state.storeName
-                binding.tvStoreName.text = state.storeName
-
-                val fullImageUrl = when (val img = state.productImageUrl) {
-                    is String -> {
-                        if (img.startsWith("/")) BASE_URL + img.substring(1) else img
+                chatAdapter.submitList(displayItems) {
+                    Log.d(TAG, "Messages submitted to adapter")
+                    // Only auto-scroll for new messages or initial load
+                    if (previousCount == 0 || state.messages.size > previousCount) {
+                        scrollToBottomInstant()
                     }
-                    else -> R.drawable.placeholder_image
                 }
 
-                if (!state.productImageUrl.isNullOrEmpty()) {
-                    Glide.with(this@ChatActivity)
-                        .load(fullImageUrl)
-                        .centerCrop()
-                        .placeholder(R.drawable.placeholder_image)
-                        .error(R.drawable.placeholder_image)
-                        .into(binding.imgProduct)
+                // layout attach product
+                if (!state.productName.isNullOrEmpty()) {
+                    binding.tvProductName.text = state.productName
+                    binding.tvProductPrice.text = state.productPrice
+                    binding.ratingBar.rating = state.productRating
+                    binding.tvRating.text = state.productRating.toString()
+                    binding.tvSellerName.text = state.storeName
+                    binding.tvStoreName.text = state.storeName
+
+                    val fullImageUrl = when (val img = state.productImageUrl) {
+                        is String -> {
+                            if (img.startsWith("/")) BASE_URL + img.substring(1) else img
+                        }
+
+                        else -> R.drawable.placeholder_image
+                    }
+
+                    if (!state.productImageUrl.isNullOrEmpty()) {
+                        Glide.with(this@ChatActivity)
+                            .load(fullImageUrl)
+                            .centerCrop()
+                            .placeholder(R.drawable.placeholder_image)
+                            .error(R.drawable.placeholder_image)
+                            .into(binding.imgProduct)
+                    }
+                    updateProductCardUI(state.hasProductAttachment)
+
+                    binding.productContainer.visibility = View.GONE
+                } else {
+                    binding.productContainer.visibility = View.GONE
                 }
-                updateProductCardUI(state.hasProductAttachment)
 
-                binding.productContainer.visibility = View.GONE
-            } else {
-                binding.productContainer.visibility = View.GONE
+                updateInputHint(state)
+
+                // Update attachment hint
+                if (state.hasAttachment) {
+                    binding.layoutAttachImage.visibility = View.VISIBLE
+                } else {
+                    binding.editTextMessage.hint = getString(R.string.write_message)
+                }
+
+                // Show error if any
+                state.error?.let { error ->
+                    Toast.makeText(this@ChatActivity, error, Toast.LENGTH_SHORT).show()
+                    viewModel.clearError()
+                }
             }
-
-            updateInputHint(state)
-
-            // Update attachment hint
-            if (state.hasAttachment) {
-                binding.editTextMessage.hint = getString(R.string.image_attached)
-            } else {
-                binding.editTextMessage.hint = getString(R.string.write_message)
-            }
-
-            // Show typing indicator
-            binding.tvTypingIndicator.visibility =
-                if (state.isOtherUserTyping) View.VISIBLE else View.GONE
-
-            // Show error if any
-            state.error?.let { error ->
-                Toast.makeText(this@ChatActivity, error, Toast.LENGTH_SHORT).show()
-                viewModel.clearError()
-            }
-        })
+        }
     }
 
     private fun updateInputHint(state: ChatUiState) {
         binding.editTextMessage.hint = when {
-            state.hasAttachment -> getString(R.string.image_attached)
+            state.hasAttachment -> getString(R.string.write_message)
             state.hasProductAttachment -> "Type your message (product will be attached)"
             else -> getString(R.string.write_message)
         }
@@ -480,7 +495,7 @@ class ChatActivity : AppCompatActivity() {
         Toast.makeText(this, "Opening: ${productInfo.productName}", Toast.LENGTH_SHORT).show()
 
         // You can navigate to product detail here
-         navigateToProductDetail(productInfo.productId)
+        navigateToProductDetail(productInfo.productId)
     }
 
     private fun navigateToProductDetail(productId: Int) {
@@ -503,6 +518,7 @@ class ChatActivity : AppCompatActivity() {
             getString(R.string.clear_chat),
             getString(R.string.cancel)
         )
+
 
         AlertDialog.Builder(this)
             .setTitle(getString(R.string.options))
@@ -578,7 +594,21 @@ class ChatActivity : AppCompatActivity() {
 
     private fun handleSelectedImage(uri: Uri) {
         try {
-            Log.d(TAG, "Processing selected image: $uri")
+            Log.d(TAG, "Processing selected image: ${uri.toString()}")
+            imageAttach = true
+            binding.layoutAttachImage.visibility = View.VISIBLE
+            val fullImageUrl = when (val img = uri.toString()) {
+                is String -> {
+                    if (img.startsWith("/")) BASE_URL + img.substring(1) else img
+                }
+                else -> R.drawable.placeholder_image
+            }
+
+            Glide.with(this)
+                .load(fullImageUrl)
+                .placeholder(R.drawable.placeholder_image)
+                .into(binding.ivAttach)
+            Log.d(TAG, "Display attach image: $uri")
 
             // Always use the copy-to-cache approach for reliability
             contentResolver.openInputStream(uri)?.use { inputStream ->
@@ -598,6 +628,7 @@ class ChatActivity : AppCompatActivity() {
 
                     Log.d(TAG, "Image processed successfully: ${outputFile.absolutePath}, size: ${outputFile.length()}")
                     viewModel.setSelectedImageFile(outputFile)
+
                     Toast.makeText(this, "Image selected", Toast.LENGTH_SHORT).show()
                 } else {
                     Log.e(TAG, "Failed to create image file")
@@ -682,24 +713,3 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 }
-
-//if implement typing status
-//    private fun handleConnectionState(state: ConnectionState) {
-//        when (state) {
-//            is ConnectionState.Connected -> {
-//                binding.tvConnectionStatus.visibility = View.GONE
-//            }
-//            is ConnectionState.Connecting -> {
-//                binding.tvConnectionStatus.visibility = View.VISIBLE
-//                binding.tvConnectionStatus.text = getString(R.string.connecting)
-//            }
-//            is ConnectionState.Disconnected -> {
-//                binding.tvConnectionStatus.visibility = View.VISIBLE
-//                binding.tvConnectionStatus.text = getString(R.string.disconnected_reconnecting)
-//            }
-//            is ConnectionState.Error -> {
-//                binding.tvConnectionStatus.visibility = View.VISIBLE
-//                binding.tvConnectionStatus.text = getString(R.string.connection_error, state.message)
-//            }
-//        }
-//    }

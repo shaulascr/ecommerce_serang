@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">ecommerce_serang</string>
+    <string name="app_name">Bisa UMKM</string>
 
 
     <!--Placeholder-->
@@ -118,12 +118,11 @@
 
     <!-- Cancellation Reasons -->
     <string-array name="cancellation_reasons">
-        <item>Found a better price elsewhere</item>
-        <item>Changed my mind about the product</item>
-        <item>Ordered the wrong item</item>
-        <item>Shipping time is too long</item>
-        <item>Financial reasons</item>
-        <item>Other reason</item>
+        <item>Menemukan harga yang lebih baik</item>
+        <item>Berubah pikiran dengan pilihan produk</item>
+        <item>Kesalahan membeli produk</item>
+        <item>Alasan keuangan</item>
+        <item>Lainnya</item>
     </string-array>
 
     <!-- Chat Activity -->

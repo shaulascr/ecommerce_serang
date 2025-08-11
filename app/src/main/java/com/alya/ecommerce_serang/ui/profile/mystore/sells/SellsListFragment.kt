@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.alya.ecommerce_serang.data.api.response.store.sells.OrdersItem
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
@@ -16,12 +17,14 @@ import com.alya.ecommerce_serang.data.repository.Result
 import com.alya.ecommerce_serang.data.repository.SellsRepository
 import com.alya.ecommerce_serang.databinding.FragmentSellsListBinding
 import com.alya.ecommerce_serang.ui.order.address.ViewState
+import com.alya.ecommerce_serang.ui.profile.mystore.MyStoreActivity
 import com.alya.ecommerce_serang.ui.profile.mystore.sells.payment.DetailPaymentActivity
 import com.alya.ecommerce_serang.ui.profile.mystore.sells.shipment.DetailShipmentActivity
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
 import com.alya.ecommerce_serang.utils.viewmodel.SellsViewModel
 import com.google.gson.Gson
+import kotlinx.coroutines.launch
 
 class SellsListFragment : Fragment() {
 
@@ -84,6 +87,7 @@ class SellsListFragment : Fragment() {
         observeSellsList()
         observePaymentConfirmation()
         loadSells()
+//        getAllOrderCountsAndNavigate()
     }
 
     private fun setupRecyclerView() {
@@ -181,6 +185,30 @@ class SellsListFragment : Fragment() {
         }
         intent.putExtra("sells_data", Gson().toJson(order))
         context.startActivity(intent)
+    }
+
+    private fun getAllOrderCountsAndNavigate() {
+        lifecycleScope.launch {
+            try {
+                // Show loading if needed
+                binding.progressBar.visibility = View.VISIBLE
+
+                val allCounts = viewModel.getAllStatusCounts()
+
+                binding.progressBar.visibility = View.GONE
+
+                val intent = Intent(requireContext(), MyStoreActivity::class.java)
+                intent.putExtra("total_unpaid", allCounts["unpaid"])
+                intent.putExtra("total_paid", allCounts["paid"])
+                intent.putExtra("total_processed", allCounts["processed"])
+                Log.d("SellsListFragment", "Total orders: unpaid=${allCounts["unpaid"]}, processed=${allCounts["processed"]}, Paid=${allCounts["paid"]}")
+
+
+            } catch (e: Exception) {
+                binding.progressBar.visibility = View.GONE
+                Log.e(TAG, "Error getting order counts: ${e.message}")
+            }
+        }
     }
 
     override fun onDestroyView() {

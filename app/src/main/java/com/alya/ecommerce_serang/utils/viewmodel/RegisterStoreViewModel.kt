@@ -42,7 +42,7 @@ class RegisterStoreViewModel(
     val citiesState: LiveData<Result<List<CitiesItem>>> = _citiesState
 
     var selectedProvinceId: Int? = null
-    var selectedCityId: Int? = null
+    var selectedCityId: String? = null
 
     // Form fields
     val storeName = MutableLiveData<String>()
@@ -52,7 +52,7 @@ class RegisterStoreViewModel(
     val longitude = MutableLiveData<String>()
     val street = MutableLiveData<String>()
     val subdistrict = MutableLiveData<String>()
-    val cityId = MutableLiveData<Int>()
+    val cityId = MutableLiveData<String>()
     val provinceId = MutableLiveData<Int>()
     val postalCode = MutableLiveData<Int>()
     val addressDetail = MutableLiveData<String>()
@@ -122,7 +122,7 @@ class RegisterStoreViewModel(
                     longitude = longitude.value ?: "",
                     street = street.value ?: "",
                     subdistrict = subdistrict.value ?: "",
-                    cityId = cityId.value ?: 0,
+                    cityId = cityId.value ?: "",
                     provinceId = provinceId.value ?: 0,
                     postalCode = postalCode.value ?: 0,
                     detail = addressDetail.value ?: "",

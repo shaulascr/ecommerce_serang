@@ -53,6 +53,8 @@ import com.alya.ecommerce_serang.data.api.response.customer.order.ListCityRespon
 import com.alya.ecommerce_serang.data.api.response.customer.order.ListProvinceResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.OrderDetailResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.OrderListResponse
+import com.alya.ecommerce_serang.data.api.response.customer.order.SubdistrictResponse
+import com.alya.ecommerce_serang.data.api.response.customer.order.VillagesResponse
 import com.alya.ecommerce_serang.data.api.response.customer.product.AllProductResponse
 import com.alya.ecommerce_serang.data.api.response.customer.product.CategoryResponse
 import com.alya.ecommerce_serang.data.api.response.customer.product.DetailStoreProductResponse
@@ -68,14 +70,14 @@ import com.alya.ecommerce_serang.data.api.response.order.ComplaintResponse
 import com.alya.ecommerce_serang.data.api.response.order.CompletedOrderResponse
 import com.alya.ecommerce_serang.data.api.response.product.CreateSearchResponse
 import com.alya.ecommerce_serang.data.api.response.product.SearchHistoryResponse
-import com.alya.ecommerce_serang.data.api.response.store.sells.PaymentConfirmationResponse
+import com.alya.ecommerce_serang.data.api.response.store.GenericResponse
 import com.alya.ecommerce_serang.data.api.response.store.product.CreateProductResponse
 import com.alya.ecommerce_serang.data.api.response.store.product.DeleteProductResponse
 import com.alya.ecommerce_serang.data.api.response.store.product.UpdateProductResponse
 import com.alya.ecommerce_serang.data.api.response.store.product.ViewStoreProductsResponse
-import com.alya.ecommerce_serang.data.api.response.store.GenericResponse
 import com.alya.ecommerce_serang.data.api.response.store.profile.StoreDataResponse
 import com.alya.ecommerce_serang.data.api.response.store.review.ProductReviewResponse
+import com.alya.ecommerce_serang.data.api.response.store.sells.PaymentConfirmationResponse
 import com.alya.ecommerce_serang.data.api.response.store.topup.BalanceTopUpResponse
 import com.alya.ecommerce_serang.data.api.response.store.topup.TopUpResponse
 import okhttp3.MultipartBody
@@ -512,4 +514,14 @@ interface ApiService {
     @GET("store/reviews")
     suspend fun getStoreProductReview(
     ): Response<ProductReviewResponse>
+
+    @GET("subdistrict/{cityId}")
+    suspend fun getSubdistrict(
+        @Path("cityId") cityId: String
+    ): Response<SubdistrictResponse>
+
+    @GET("villages/{subdistrictId}")
+    suspend fun getVillages(
+        @Path("subdistrictId") subdistrictId: String
+    ): Response<VillagesResponse>
 }

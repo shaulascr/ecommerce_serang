@@ -36,8 +36,8 @@ class AddAddressViewModel(private val repository: OrderRepository, private val u
         get() = savedStateHandle.get<Int>("selectedProvinceId")
         set(value) { savedStateHandle["selectedProvinceId"] = value }
 
-    var selectedCityId: Int?
-        get() = savedStateHandle.get<Int>("selectedCityId")
+    var selectedCityId: String?
+        get() = savedStateHandle.get<String>("selectedCityId")
         set(value) { savedStateHandle["selectedCityId"] = value }
 
     init {
@@ -129,7 +129,7 @@ class AddAddressViewModel(private val repository: OrderRepository, private val u
         selectedProvinceId = id
     }
 
-    fun setSelectedCityId(id: Int) {
+    fun updateSelectedCityId(id: String) {
         selectedCityId = id
     }
 

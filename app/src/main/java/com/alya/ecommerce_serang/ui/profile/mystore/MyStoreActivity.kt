@@ -7,24 +7,26 @@ import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.alya.ecommerce_serang.BuildConfig.BASE_URL
 import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.dto.Store
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
 import com.alya.ecommerce_serang.data.repository.MyStoreRepository
+import com.alya.ecommerce_serang.data.repository.Result
 import com.alya.ecommerce_serang.databinding.ActivityMyStoreBinding
 import com.alya.ecommerce_serang.ui.profile.mystore.balance.BalanceActivity
 import com.alya.ecommerce_serang.ui.profile.mystore.chat.ChatListStoreActivity
 import com.alya.ecommerce_serang.ui.profile.mystore.product.ProductActivity
 import com.alya.ecommerce_serang.ui.profile.mystore.profile.DetailStoreProfileActivity
 import com.alya.ecommerce_serang.ui.profile.mystore.review.ReviewActivity
-import com.alya.ecommerce_serang.ui.profile.mystore.review.ReviewFragment
 import com.alya.ecommerce_serang.ui.profile.mystore.sells.SellsActivity
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
 import com.alya.ecommerce_serang.utils.viewmodel.MyStoreViewModel
 import com.bumptech.glide.Glide
+import kotlinx.coroutines.launch
 
 class MyStoreActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMyStoreBinding
@@ -49,14 +51,16 @@ class MyStoreActivity : AppCompatActivity() {
 
         enableEdgeToEdge()
 
-        binding.header.headerTitle.text = "Toko Saya"
 
-        binding.header.headerLeftIcon.setOnClickListener {
+        binding.headerMyStore.headerTitle.text = "Toko Saya"
+
+        binding.headerMyStore.headerLeftIcon.setOnClickListener {
             onBackPressed()
             finish()
         }
 
         viewModel.loadMyStore()
+        viewModel.loadMyStoreProducts()
 
         viewModel.myStoreProfile.observe(this){ user ->
             user?.let { myStoreProfileOverview(it) }
@@ -65,8 +69,11 @@ class MyStoreActivity : AppCompatActivity() {
         viewModel.errorMessage.observe(this) { error ->
             Toast.makeText(this, error, Toast.LENGTH_SHORT).show()
         }
-
         setUpClickListeners()
+        getCountOrder()
+        observeViewModel()
+        viewModel.fetchBalance()
+        fetchBalance()
     }
 
     private fun myStoreProfileOverview(store: Store){
@@ -140,15 +147,67 @@ class MyStoreActivity : AppCompatActivity() {
         }
     }
 
+    private fun getCountOrder(){
+        lifecycleScope.launch {
+            try {
+                val allCounts = viewModel.getAllStatusCounts()
+                val totalUnpaid    = allCounts["unpaid"]
+                val totalPaid      = allCounts["paid"]
+                val totalProcessed = allCounts["processed"]
+                Log.d("MyStoreActivity",
+                    "Total orders: unpaid=$totalUnpaid, processed=$totalProcessed, paid=$totalPaid")
+
+                binding.tvNumPesananMasuk.text = totalUnpaid.toString()
+                binding.tvNumPembayaran.text   = totalPaid.toString()
+                binding.tvNumPerluDikirim.text = totalProcessed.toString()
+            } catch (e:Exception){
+                Log.e("MyStoreActivity", "Error getting order counts: ${e.message}")
+            }
+        }
+    }
+
+    private fun fetchBalance(){
+        viewModel.balanceResult.observe(this){result ->
+            when (result) {
+                is com.alya.ecommerce_serang.data.repository.Result.Loading ->
+                    null
+                is com.alya.ecommerce_serang.data.repository.Result.Success ->
+                    viewModel.formattedBalance.observe(this) {
+                        binding.tvBalance.text = it
+                    }
+                is Result.Error   -> {
+                    Log.e(
+                        "MyStoreActivity",
+                        "Gagal memuat saldo: ${result.exception.localizedMessage}"
+                    )
+                }
+            }
+        }
+    }
+
+    private fun observeViewModel() {
+        viewModel.productList.observe(this) { result ->
+            when (result) {
+                is Result.Loading -> {
+                    null
+                }
+                is Result.Success -> {
+                    val productList = result.data
+                    val count = productList.size
+                    Log.d("MyStoreActivty", "You have $count products")
+
+                    // Example: update UI
+                    binding.tvNumProduct.text = "$count produk"
+                }
+                is Result.Error -> {
+                    Log.e("MyStoreActivity", "Failed load product : ${result.exception.message}" )
+                }
+            }
+        }
+    }
+
     companion object {
         private const val PROFILE_REQUEST_CODE = 100
     }
 
-//    private fun navigateToSellsFragment(status: String) {
-//        val sellsFragment = SellsListFragment.newInstance(status)
-//        supportFragmentManager.beginTransaction()
-//            .replace(android.R.id.content, sellsFragment)
-//            .addToBackStack(null)
-//            .commit()
-//    }
 }

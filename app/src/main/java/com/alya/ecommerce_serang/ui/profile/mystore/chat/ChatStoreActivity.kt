@@ -25,6 +25,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsAnimationCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.alya.ecommerce_serang.BuildConfig.BASE_URL
 import com.alya.ecommerce_serang.R
@@ -373,7 +374,8 @@ class ChatStoreActivity : AppCompatActivity() {
             }
         })
 
-        viewModel.state.observe(this, Observer { state ->
+        lifecycleScope.launchWhenStarted {
+        viewModel.state.collect { state ->
             Log.d(TAG, "State updated - Messages: ${state.messages.size}")
 
             // Update messages
@@ -426,15 +428,16 @@ class ChatStoreActivity : AppCompatActivity() {
             }
 
             // Show typing indicator
-            binding.tvTypingIndicator.visibility =
-                if (state.isOtherUserTyping) View.VISIBLE else View.GONE
+//            binding.tvTypingIndicator.visibility =
+//                if (state.isOtherUserTyping) View.VISIBLE else View.GONE
 
             // Show error if any
             state.error?.let { error ->
                 Toast.makeText(this@ChatStoreActivity, error, Toast.LENGTH_SHORT).show()
                 viewModel.clearError()
             }
-        })
+        }
+        }
     }
 
     private fun showOptionsMenu() {
@@ -520,6 +523,19 @@ class ChatStoreActivity : AppCompatActivity() {
     private fun handleSelectedImage(uri: Uri) {
         try {
             Log.d(TAG, "Processing selected image: $uri")
+            binding.layoutAttachImage.visibility = View.VISIBLE
+            val fullImageUrl = when (val img = uri.toString()) {
+                is String -> {
+                    if (img.startsWith("/")) BASE_URL + img.substring(1) else img
+                }
+                else -> R.drawable.placeholder_image
+            }
+
+            Glide.with(this)
+                .load(fullImageUrl)
+                .placeholder(R.drawable.placeholder_image)
+                .into(binding.ivAttach)
+            Log.d(TAG, "Display attach image: $uri")
 
             // Always use the copy-to-cache approach for reliability
             contentResolver.openInputStream(uri)?.use { inputStream ->

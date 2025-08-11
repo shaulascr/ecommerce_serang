@@ -14,6 +14,9 @@ import com.alya.ecommerce_serang.data.repository.Result
 import com.alya.ecommerce_serang.utils.Constants
 import com.alya.ecommerce_serang.utils.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.File
 import java.text.SimpleDateFormat
@@ -22,6 +25,28 @@ import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 import javax.inject.Inject
+
+/**
+ * ChatViewModel - Manages chat functionality for both buyers and store owners
+ *
+ * ARCHITECTURE OVERVIEW:
+ * - Handles real-time messaging via Socket.IO
+ * - Manages chat state using LiveData/MutableLiveData pattern
+ * - Supports multiple message types: TEXT, IMAGE, PRODUCT
+ * - Maintains separate flows for buyer and store owner chat
+ *
+ * KEY RESPONSIBILITIES:
+ * 1. Socket connection management and real-time message handling
+ * 2. Message sending/receiving with different attachment types
+ * 3. Chat history loading and message status updates
+ * 4. Product attachment functionality for commerce integration
+ * 5. User session management and authentication
+ *
+ * STATE MANAGEMENT PATTERN:
+ * - All UI state updates go through updateState() helper function
+ * - State updates are atomic and follow immutable pattern
+ * - Error states are cleared explicitly via clearError()
+ */
 
 @HiltViewModel
 class ChatViewModel @Inject constructor(
@@ -34,9 +59,12 @@ class ChatViewModel @Inject constructor(
     // Product attachment flag
     private var shouldAttachProduct = false
 
-    // UI state using LiveData
-    private val _state = MutableLiveData(ChatUiState())
-    val state: LiveData<ChatUiState> = _state
+    // use state for more seamless responsive
+    private val _state = MutableStateFlow(ChatUiState())
+    val state: StateFlow<ChatUiState> = _state
+
+    private val _isLoading = MutableLiveData<Boolean>()
+    val isLoading: LiveData<Boolean> = _isLoading
 
     val _chatRoomId = MutableLiveData<Int>(0)
     val chatRoomId: LiveData<Int> = _chatRoomId
@@ -68,16 +96,21 @@ class ChatViewModel @Inject constructor(
 
     init {
         Log.d(TAG, "ChatViewModel initialized")
+        socketService.connect()          // 🛠 force connection
+        setupSocketListeners()           // 🛠 always listen, even before user data
         initializeUser()
     }
 
     private fun initializeUser() {
+        _isLoading.value = true
         viewModelScope.launch {
             Log.d(TAG, "Initializing user session...")
 
             when (val result = chatRepository.fetchUserProfile()) {
                 is Result.Success -> {
                     currentUserId = result.data?.userId
+                    _isLoading.value = false
+
                     Log.d(TAG, "User session initialized - User ID: $currentUserId")
 
                     if (currentUserId == null || currentUserId == 0) {
@@ -85,14 +118,17 @@ class ChatViewModel @Inject constructor(
                         updateState { it.copy(error = "User authentication error. Please login again.") }
                     } else {
                         Log.d(TAG, "Setting up socket listeners...")
+                        socketService.connect()
                         setupSocketListeners()
                     }
                 }
                 is Result.Error -> {
+                    _isLoading.value = false
                     Log.e(TAG, "Failed to fetch user profile: ${result.exception.message}")
                     updateState { it.copy(error = "User authentication error. Please login again.") }
                 }
                 is Result.Loading -> {
+                    _isLoading.value = true
                     Log.d(TAG, "Loading user profile...")
                 }
             }
@@ -201,26 +237,116 @@ class ChatViewModel @Inject constructor(
 
                 if (connectionState is ConnectionState.Connected) {
                     Log.d(TAG, "Socket connected, joining room...")
-                    socketService.joinRoom()
+                    val roomId = _chatRoomId.value
+                    if (roomId != null && roomId > 0) {
+                        socketService.joinRoom(roomId)
+                    }
                 }
             }
         }
 
+//        viewModelScope.launch {
+//            socketService.newMessages.collect { chatLine ->
+//                chatLine?.let {
+//                    Log.d(TAG, "NEW message received in ViewModel: ${it.message}")
+//                    val updatedMessages = _state.value.messages.toMutableList()
+//                    updatedMessages.add(convertChatLineToUiMessage(it))
+//                    updateState { it.copy(messages = updatedMessages) }
+//
+//                    if (it.senderId != currentUserId) {
+//                        updateMessageStatus(it.id, Constants.STATUS_READ)
+//                    }
+//                }
+//            }
+//        }
         viewModelScope.launch {
             socketService.newMessages.collect { chatLine ->
-                chatLine?.let {
-                    Log.d(TAG, "New message received via socket - ID: ${it.id}, SenderID: ${it.senderId}")
-                    val currentMessages = _state.value?.messages ?: listOf()
-                    val updatedMessages = currentMessages.toMutableList().apply {
-                        add(convertChatLineToUiMessage(it))
+                Log.d("ChatViewModel", "Collected new message from SocketIOService: ${chatLine.message}")
+                chatLine?.let { incomingChatLine ->
+                    // 1. First update: Add the message to the list (potentially without full product info)
+                    _state.update { currentState ->
+                        val existingMessageIndex =
+                            currentState.messages.indexOfFirst { it.id == incomingChatLine.id }
+                        val messagesAfterInitialUpdate = if (existingMessageIndex != -1) {
+                            // If message exists (e.g., status update), just update it
+                            val updatedList = currentState.messages.toMutableList()
+                            updatedList[existingMessageIndex] = mapChatLineToUiMessage(
+                                incomingChatLine,
+                                updatedList[existingMessageIndex].productInfo
+                            ) // Preserve existing productInfo if any
+                            updatedList
+                        } else {
+                            // New message, add it
+                            (currentState.messages + mapChatLineToUiMessage(incomingChatLine)).distinctBy { msg -> msg.id }
+                        }
+                        // Sort after any update/addition
+                        currentState.copy(messages = messagesAfterInitialUpdate.sortedBy { msg ->
+                            SimpleDateFormat(
+                                "yyyy-MM-dd HH:mm:ss",
+                                Locale.getDefault()
+                            ).parse(msg.createdAt)?.time
+                        })
                     }
-                    updateState { it.copy(messages = updatedMessages) }
 
-                    if (it.senderId != currentUserId) {
-                        Log.d(TAG, "Marking message as read: ${it.id}")
-                        updateMessageStatus(it.id, Constants.STATUS_READ)
+                    // 2. If it's a product message and needs details, fetch them
+                    if (incomingChatLine.productId != 0) { // Check if it's a product message
+                        viewModelScope.launch {
+                            Log.d(
+                                TAG,
+                                "Fetching product detail for ID: ${incomingChatLine.productId}"
+                            )
+
+                            // Call your repository function directly
+                            val productResponse =
+                                chatRepository.fetchProductDetail(incomingChatLine.productId)
+
+                            if (productResponse != null && productResponse.product != null) {
+                                val fetchedProduct =
+                                    productResponse.product // Access the nested product object
+                                Log.d(
+                                    TAG,
+                                    "Successfully fetched product: ${fetchedProduct.productName}"
+                                )
+
+                                // Create a complete ProductInfo object
+                                val fullProductInfo = ProductInfo(
+                                    productId = fetchedProduct.productId,
+                                    productName = fetchedProduct.productName, // Use productName from fetched data
+                                    productPrice = fetchedProduct.price, // Use productPrice from fetched data
+                                    productImage = fetchedProduct.image, // Use productImage from fetched data
+                                    productRating = fetchedProduct.rating.toFloat(),
+                                    storeName = fetchedProduct.productName // Use storeName from fetched data
+                                )
+
+                                // --- PHASE 3: Second UI update (fill in full product info) ---
+                                _state.update { currentState ->
+                                    val updatedMessages = currentState.messages.map { msg ->
+                                        if (msg.id == incomingChatLine.id) {
+                                            // Found the message, update its productInfo with full details
+                                            msg.copy(productInfo = fullProductInfo)
+                                        } else {
+                                            msg
+                                        }
+                                    }
+                                    currentState.copy(messages = updatedMessages)
+                                }
+                            } else {
+                                Log.e(
+                                    TAG,
+                                    "Failed to fetch product detail for ID ${incomingChatLine.productId} or product data is null."
+                                )
+                                // Optionally, update message status to indicate error in product loading
+                            }
+                        }
                     }
+
                 }
+
+//                    // Your existing logic for clearing typing status etc.
+//                    if (incomingChatLine.isTyping == false && incomingChatLine.from?.id != sessionManager.getUserId()?.toIntOrNull()) {
+//                        _state.update { it.copy(isOtherUserTyping = false) }
+//                    }
+
             }
         }
 
@@ -241,10 +367,10 @@ class ChatViewModel @Inject constructor(
         if (roomId <= 0) {
             Log.e(TAG, "Cannot join room: Invalid room ID")
             return
+        } else if (roomId > 0){
+            Log.d(TAG, "Joining socket room: $roomId")
+            socketService.joinRoom(roomId)
         }
-
-        Log.d(TAG, "Joining socket room: $roomId")
-        socketService.joinRoom()
     }
 
     fun sendTypingStatus(isTyping: Boolean) {
@@ -313,10 +439,13 @@ class ChatViewModel @Inject constructor(
     }
 
     fun getChatList() {
+        _isLoading.value = true
         Log.d(TAG, "Getting chat list...")
         viewModelScope.launch {
-            _chatList.value = Result.Loading
+//            _chatList.value = Result.Loading
             _chatList.value = chatRepository.getListChat()
+            _isLoading.value = false
+
         }
     }
 
@@ -695,7 +824,7 @@ class ChatViewModel @Inject constructor(
         }
     }
 
-   //update message status
+    //update message status
     fun updateMessageStatus(messageId: Int, status: String) {
         Log.d(TAG, "Updating message status - ID: $messageId, Status: $status")
 
@@ -723,11 +852,24 @@ class ChatViewModel @Inject constructor(
         }
     }
 
-   //set image attachment
+    //set image attachment
     fun setSelectedImageFile(file: File?) {
         selectedImageFile = file
         updateState { it.copy(hasAttachment = file != null) }
         Log.d(TAG, "Image attachment ${if (file != null) "selected: ${file.name}" else "cleared"}")
+    }
+
+    fun clearSelectedImage() {
+        Log.d(TAG, "Clearing selected image attachment")
+
+        selectedImageFile?.let { file ->
+            Log.d(TAG, "Clearing image file: ${file.name}")
+        }
+
+        selectedImageFile = null
+        updateState { it.copy(hasAttachment = false) }
+
+        Log.d(TAG, "Image attachment cleared successfully")
     }
 
     // convert form chatLine api to UI chat messages
@@ -745,7 +887,7 @@ class ChatViewModel @Inject constructor(
         )
     }
 
-   // convert chat history item to ui
+    // convert chat history item to ui
     private fun convertChatLineToUiMessageHistory(chatItem: ChatItem): ChatUiMessage {
         val formattedTime = formatTimestamp(chatItem.createdAt)
 
@@ -886,7 +1028,7 @@ class ChatViewModel @Inject constructor(
         }
     }
 
-   //format price
+    //format price
     private fun formatPrice(price: String): String {
         return if (price.startsWith("Rp")) price else "Rp$price"
     }
@@ -912,9 +1054,7 @@ class ChatViewModel @Inject constructor(
 
     // helper function to update live data
     private fun updateState(update: (ChatUiState) -> ChatUiState) {
-        _state.value?.let {
-            _state.value = update(it)
-        }
+        _state.value = update(_state.value)
     }
 
     //clear any error messages
@@ -1007,6 +1147,73 @@ class ChatViewModel @Inject constructor(
     private fun isThisYear(messageCalendar: Calendar, today: Calendar): Boolean {
         return messageCalendar.get(Calendar.YEAR) == today.get(Calendar.YEAR)
     }
+
+    fun setChatRoomId(roomId: Int) {
+        _chatRoomId.value = roomId
+        joinSocketRoom(roomId)
+        loadChatHistory(roomId)
+    }
+
+    private fun convertToUiMessage(chatLine: ChatLine): ChatUiMessage {
+
+        val formattedTime = formatTimestamp(chatLine.createdAt)
+        return ChatUiMessage(
+            id = chatLine.id,
+            message = chatLine.message,
+            attachment = chatLine.attachment,
+            status = chatLine.status,
+            time = formattedTime, // or format from createdAt if needed
+            isSentByMe = chatLine.senderId == currentUserId,
+            messageType = MessageType.TEXT, // or detect from chatLine if needed
+            productInfo = null, // optional, if applicable
+            createdAt = chatLine.createdAt
+        )
+    }
+
+    private fun mapChatLineToUiMessage(chatLine: ChatLine, fetchedProductInfo: ProductInfo? = null): ChatUiMessage {
+        val isSentByMe = chatLine.senderId == sessionManager.getUserId()?.toIntOrNull() // Using senderId now
+        val formattedTime = try {
+            val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault()).apply {
+                timeZone = TimeZone.getTimeZone("UTC")
+            }
+            val outputFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+            val date = inputFormat.parse(chatLine.createdAt)
+            date?.let { outputFormat.format(it) } ?: ""
+        } catch (e: Exception) {
+            Log.e("ChatViewModel", "Error parsing date: ${chatLine.createdAt}", e)
+            ""
+        }
+
+        // Determine message type based on what ChatLine provides
+        val messageType = when {
+            chatLine.attachment?.isNotEmpty() == true -> MessageType.IMAGE
+            chatLine.productId != 0 -> MessageType.PRODUCT // If productId is non-zero, it's a product message
+            else -> MessageType.TEXT
+        }
+
+        // Initialize productInfo: if fetchedProductInfo is provided, use it.
+        // Otherwise, if ChatLine has a productId, create a ProductInfo with just the ID.
+        // If no productId, it's null.
+        val productInfo = fetchedProductInfo ?: if (chatLine.productId != 0) {
+            // Create a placeholder ProductInfo with just the ID for initial display
+            // The full details will be fetched later
+            ProductInfo(productId = chatLine.productId)
+        } else {
+            null
+        }
+
+        return ChatUiMessage(
+            id = chatLine.id,
+            message = chatLine.message,
+            attachment = chatLine.attachment,
+            status = chatLine.status,
+            time = formattedTime,
+            isSentByMe = isSentByMe,
+            messageType = messageType,
+            productInfo = productInfo, // Use the determined productInfo
+            createdAt = chatLine.createdAt
+        )
+    }
 }
 
 enum class MessageType {
@@ -1016,12 +1223,12 @@ enum class MessageType {
 }
 
 data class ProductInfo(
-    val productId: Int,
-    val productName: String,
-    val productPrice: String,
-    val productImage: String,
-    val productRating: Float,
-    val storeName: String
+    val productId: Int, // Keep productId here
+    val productName: String? = null, // Make nullable
+    val productPrice: String? = null, // Make nullable
+    val productImage: String? = null, // Make nullable
+    val productRating: Float = 0f,    // Default value
+    val storeName: String? = null
 )
 
 // representing chat messages to UI
@@ -1036,8 +1243,6 @@ data class ChatUiMessage(
     val productInfo: ProductInfo? = null,
     val createdAt: String
 )
-
-
 
 // representing UI state to screen
 data class ChatUiState(
@@ -1057,3 +1262,7 @@ data class ChatUiState(
     val productRating: Float = 0f,
     val storeName: String = ""
 )
+
+//data class ChatUiState(
+//    val messages: List<ChatUiMessage> = emptyList()
+//)

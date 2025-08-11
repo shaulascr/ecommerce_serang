@@ -9,7 +9,7 @@ class OrderViewPagerAdapter(
 ) : FragmentStateAdapter(fragmentActivity) {
 
     // Define all possible order statuses
-    private val orderStatuses = listOf(
+    val orderStatuses = listOf(
         "all",        // All orders
         "unpaid",    // Menunggu Tagihan
         "paid",     // Belum Dibayar

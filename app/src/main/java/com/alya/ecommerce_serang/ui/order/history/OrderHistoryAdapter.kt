@@ -195,7 +195,7 @@ class OrderHistoryAdapter(
                         text = itemView.context.getString(R.string.canceled_order_btn)
                         setOnClickListener {
                             showCancelOrderDialog(order.orderId.toString())
-                            viewModel.refreshOrders()
+//                            viewModel.refreshOrders()
                         }
                     }
 //                    deadlineDate.apply {
@@ -213,14 +213,15 @@ class OrderHistoryAdapter(
                         visibility = View.VISIBLE
                         text = itemView.context.getString(R.string.dl_processed)
                     }
-                    btnLeft.apply {
-                        visibility = View.VISIBLE
-                        text = itemView.context.getString(R.string.canceled_order_btn)
-                        setOnClickListener {
-                            showCancelOrderDialog(order.orderId.toString())
-                            viewModel.refreshOrders()
-                        }
-                    }
+                    // gabisa complaint
+//                    btnLeft.apply {
+//                        visibility = View.VISIBLE
+//                        text = itemView.context.getString(R.string.canceled_order_btn)
+//                        setOnClickListener {
+//                            showCancelOrderDialog(order.orderId.toString())
+//                            viewModel.refreshOrders()
+//                        }
+//                    }
                 }
                 "shipped" -> {
                     // Untuk status shipped, tampilkan "Lacak Pengiriman" dan "Terima Barang"
@@ -237,7 +238,7 @@ class OrderHistoryAdapter(
                         text = itemView.context.getString(R.string.claim_complaint)
                         setOnClickListener {
                             showCancelOrderDialog(order.orderId.toString())
-                            viewModel.refreshOrders()
+//                            viewModel.refreshOrders()
                         }
                     }
                     btnRight.apply {
@@ -248,7 +249,7 @@ class OrderHistoryAdapter(
 
                             // Call ViewModel
                             viewModel.confirmOrderCompleted(order.orderId, "completed")
-                            viewModel.refreshOrders()
+//                            viewModel.refreshOrders()
 
                         }
 
@@ -268,13 +269,21 @@ class OrderHistoryAdapter(
                         text = itemView.context.getString(R.string.dl_shipped)
                     }
                     btnRight.apply {
-                        visibility = View.VISIBLE
-                        text = itemView.context.getString(R.string.add_review)
-                        setOnClickListener {
-                            addReviewProduct(order)
-                            viewModel.refreshOrders()
-                            // Handle click event
+                        val checkReview = order.orderItems[0].reviewId
+                        if (checkReview > 0){
+                            visibility = View.VISIBLE
+                            text = itemView.context.getString(R.string.add_review)
+                            setOnClickListener {
+
+                                addReviewProduct(order)
+//                            viewModel.refreshOrders()
+                                // Handle click event
+                            }
+                        } else {
+                            visibility = View.GONE
                         }
+
+
                     }
                     deadlineDate.apply {
                         visibility = View.VISIBLE
@@ -518,7 +527,7 @@ class OrderHistoryAdapter(
                 }
             }
 
-            // Create and show the bottom sheet using the obtained FragmentManager
+            // cancel sebelum bayar
             val bottomSheet = CancelOrderBottomSheet(
                 orderId = orderId,
                 onOrderCancelled = {
@@ -531,6 +540,7 @@ class OrderHistoryAdapter(
             bottomSheet.show(fragmentActivity.supportFragmentManager, CancelOrderBottomSheet.TAG)
         }
 
+        // tambah review / ulasan
         private fun addReviewProduct(order: OrdersItem) {
             // Use ViewModel to fetch order details
             viewModel.getOrderDetails(order.orderId)
@@ -550,7 +560,7 @@ class OrderHistoryAdapter(
                 }
             }
 
-            // Observe the order details result
+            // Observe order items
             viewModel.orderItems.observe(itemView.findViewTreeLifecycleOwner()!!) { orderItems ->
                 if (orderItems != null && orderItems.isNotEmpty()) {
                     // For single item review

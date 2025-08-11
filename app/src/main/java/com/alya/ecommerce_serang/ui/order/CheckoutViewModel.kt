@@ -64,7 +64,7 @@ class CheckoutViewModel(private val repository: OrderRepository) : ViewModel() {
                     shipPrice = 0, // Will be set when user selects shipping
                     shipName = "",
                     shipService = "",
-                    isNego = false, // Default value
+                    isNego = false, // Default value  
                     productId = productId,
                     quantity = quantity,
                     shipEtd = "",
