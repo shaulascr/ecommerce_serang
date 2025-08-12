@@ -146,5 +146,30 @@
     <string name="typing">User is typing...</string>
     <string name="buka_toko_desc">Mohon untuk melengkapi formulir pendaftaran ini agar dapat mengakses fitur penjual pada aplikasi.</string>
 
+    <!-- List Bank -->
+    <string-array name="bank_name_array">
+        <item>Allo Bank Indonesia</item>
+        <item>Bank Digital BCA</item>
+        <item>Bank Central Asia (BCA)</item>
+        <item>Bank BCA Syariah</item>
+        <item>Bank Jago</item>
+        <item>Bank Mandiri </item>
+        <item>Bank Kb Bukopi</item>
+        <item>Bank Jabar Banten Syariah</item>
+        <item> Bank Mandiri Taspen</item>
+        <item>Bank Maybank Indonesia </item>
+        <item>Bank Negara Indonesia (BNI)</item>
+        <item>Bank Permata</item>
+        <item>Bank Rakyat Indonesia (BRI)</item>
+        <item>Bank Saqu Indonesia</item>
+        <item>Bank Seabank Indonesia</item>
+        <item>Bank Sinarmas </item>
+        <item>Bank Syariah Indonesia (BSI)</item>
+        <item>Bank Tabungan Negara (BTN)</item>
+        <item>Bank UOB Indonesia</item>
+        <item>BPD Jawa Barat dan Banten</item>
+        <item>Super Bank Indonesia</item>
+
+    </string-array>
 
 </resources>

@@ -32,6 +32,7 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputLayout
 import com.google.gson.Gson
 import java.io.File
+import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -88,7 +89,8 @@ class OrderHistoryAdapter(
             tvStoreName.text = storeName
 
             // Set total amount
-            tvTotalAmount.text = order.totalAmount
+            tvTotalAmount.text = formatCurrency(order.totalAmount.toDouble())
+
 
             // Set item count
             val itemCount = order.orderItems.size
@@ -597,6 +599,11 @@ class OrderHistoryAdapter(
                     ).show()
                 }
             }
+        }
+
+        private fun formatCurrency(amount: Double): String {
+            val formatter = NumberFormat.getCurrencyInstance(Locale("in", "ID"))
+            return formatter.format(amount).replace(",00", "")
         }
 
     }

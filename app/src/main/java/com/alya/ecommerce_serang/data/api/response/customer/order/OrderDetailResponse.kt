@@ -119,7 +119,7 @@ data class Orders(
 	val orderId: Int,
 
 	@field:SerializedName("city_id")
-	val cityId: Int
+	val cityId: String
 )
 
 data class OrderListItemsItem(

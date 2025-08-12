@@ -90,7 +90,7 @@ data class OrdersItem(
     val orderId: Int,
 
     @field:SerializedName("city_id")
-    val cityId: Int,
+    val cityId: String,
 
     var displayStatus: String? = null
 )
