@@ -30,8 +30,10 @@ import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.repository.Result
 import com.alya.ecommerce_serang.data.repository.UserRepository
 import com.alya.ecommerce_serang.databinding.ActivityRegisterStoreBinding
+import com.alya.ecommerce_serang.ui.order.address.BankAdapter
 import com.alya.ecommerce_serang.ui.order.address.CityAdapter
 import com.alya.ecommerce_serang.ui.order.address.ProvinceAdapter
+import com.alya.ecommerce_serang.ui.order.address.SubdsitrictAdapter
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
 import com.alya.ecommerce_serang.utils.viewmodel.RegisterStoreViewModel
@@ -43,6 +45,9 @@ class RegisterStoreActivity : AppCompatActivity() {
 
     private lateinit var provinceAdapter: ProvinceAdapter
     private lateinit var cityAdapter: CityAdapter
+    private lateinit var subdistrictAdapter: SubdsitrictAdapter
+    private lateinit var bankAdapter: BankAdapter
+
     // Request codes for file picking
     private val PICK_STORE_IMAGE_REQUEST = 1001
     private val PICK_KTP_REQUEST = 1002
@@ -228,6 +233,27 @@ class RegisterStoreActivity : AppCompatActivity() {
             }
         }
 
+        viewModel.subdistrictState.observe(this) { state ->
+            when (state) {
+                is Result.Loading -> {
+                    Log.d(TAG, "setupobservers: Loading Subdistrict...")
+                    binding.subdistrictProgressBar.visibility = View.VISIBLE
+                    binding.spinnerSubdistrict.isEnabled = false
+                }
+                is Result.Success -> {
+                    Log.d(TAG, "setupobservers: Subdistrict loaded successfullti: ${state.data.size} subdistrict")
+                    binding.spinnerSubdistrict.isEnabled = true
+
+                    subdistrictAdapter.updateData(state.data)
+                }
+                is Result.Error -> {
+                    Log.e(TAG, "setupObservers: Error loading subdistrict: ${state.exception.message}")
+                    binding.subdistrictProgressBar.visibility = View.GONE
+                    binding.spinnerCity.isEnabled = true
+                }
+            }
+        }
+
         // Observe registration state
         viewModel.registerState.observe(this) { result ->
             when (result) {
@@ -398,6 +424,11 @@ class RegisterStoreActivity : AppCompatActivity() {
                 if (cityId != null) {
                     Log.d(TAG, "Setting city ID: $cityId")
                     viewModel.cityId.value = cityId
+                    Log.d(TAG, "Fetching subdistrict for city ID: $cityId")
+                    viewModel.getSubdistrict(cityId)
+
+                    subdistrictAdapter.clear()
+                    binding.spinnerSubdistrict.setSelection(0)
                     viewModel.selectedCityId = cityId
                 } else {
                     Log.e(TAG, "Invalid city ID for position: $position")
@@ -406,6 +437,62 @@ class RegisterStoreActivity : AppCompatActivity() {
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
                 Log.d(TAG, "No city selected")
+            }
+        }
+
+        //Setup Subdistrict spinner
+        binding.spinnerSubdistrict.adapter = subdistrictAdapter
+        binding.spinnerSubdistrict.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                Log.d(TAG, "Subdistrict selected at position: $position")
+                val subdistrictId = subdistrictAdapter.getSubdistrictId(position)
+                if (subdistrictId != null) {
+                    Log.d(TAG, "Setting subdistrict ID: $subdistrictId")
+                    viewModel.subdistrict.value = subdistrictId
+                    viewModel.selectedSubdistrict = subdistrictId
+                } else {
+                    Log.e(TAG, "Invalid subdistrict ID for position: $position")
+                }
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                Log.d(TAG, "No city selected")
+            }
+        }
+
+        bankAdapter = BankAdapter(this)
+        binding.spinnerBankName.adapter = bankAdapter
+        binding.spinnerBankName.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                Log.d(TAG, "Bank selected at position: $position")
+                val bankName = bankAdapter.getBankName(position)
+                if (bankName != null) {
+                    Log.d(TAG, "Setting bank name: $bankName")
+                    viewModel.bankName.value = bankName
+                    viewModel.selectedBankName = bankName
+
+                    // Optional: Log the selected bank details
+                    val selectedBank = bankAdapter.getBankItem(position)
+                    selectedBank?.let {
+                        Log.d(TAG, "Selected bank: ${it.bankName} (Code: ${it.bankCode})")
+                    }
+
+                    // Hide progress bar if it was showing
+                    binding.storeTypeProgressBar.visibility = View.GONE
+
+                } else {
+                    Log.e(TAG, "Invalid bank name for position: $position")
+                }
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                Log.d(TAG, "No bank selected")
+                viewModel.selectedBankName = null
             }
         }
 
@@ -418,6 +505,16 @@ class RegisterStoreActivity : AppCompatActivity() {
         if (cityAdapter.isEmpty) {
             Log.d(TAG, "Adding default city hint")
             cityAdapter.add("Pilih Kabupaten/Kota")
+        }
+
+        if (subdistrictAdapter.isEmpty) {
+            Log.d(TAG, "Adding default kecamatan hint")
+            subdistrictAdapter.add("Pilih Kecamatan")
+        }
+
+        if (bankAdapter.isEmpty) {
+            Log.d(TAG, "Adding default bank hint")
+            bankAdapter.add("Pilih Bank")
         }
 
         Log.d(TAG, "setupSpinners: Province and city spinners setup completed")
@@ -620,26 +717,26 @@ class RegisterStoreActivity : AppCompatActivity() {
                 validateRequiredFields()
             }
         })
+//
+//        binding.etSubdistrict.addTextChangedListener(object : TextWatcher {
+//            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+//            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+//            override fun afterTextChanged(s: Editable?) {
+//                viewModel.subdistrict.value = s.toString()
+//                Log.d(TAG, "Subdistrict updated: ${s.toString()}")
+//                validateRequiredFields()
+//            }
+//        })
 
-        binding.etSubdistrict.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-            override fun afterTextChanged(s: Editable?) {
-                viewModel.subdistrict.value = s.toString()
-                Log.d(TAG, "Subdistrict updated: ${s.toString()}")
-                validateRequiredFields()
-            }
-        })
-
-        binding.etBankName.addTextChangedListener(object: TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-            override fun afterTextChanged(s: Editable?) {
-                viewModel.bankName.value = s.toString()
-                Log.d(TAG, "Bank name updated: ${s.toString()}")
-                validateRequiredFields()
-            }
-        })
+//        binding.etBankName.addTextChangedListener(object: TextWatcher {
+//            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+//            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+//            override fun afterTextChanged(s: Editable?) {
+//                viewModel.bankName.value = s.toString()
+//                Log.d(TAG, "Bank name updated: ${s.toString()}")
+//                validateRequiredFields()
+//            }
+//        })
 
         binding.etAccountName.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}

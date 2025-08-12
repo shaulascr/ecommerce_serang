@@ -347,41 +347,34 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginBottom="24dp">
+                android:orientation="horizontal"
+                android:background="@drawable/bg_text_field"
+                android:gravity="center_vertical"
+                android:layout_marginTop="10dp">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <Spinner
+                    android:id="@+id/spinner_subdistrict"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="6. Kecamatan"
-                        style="@style/body_medium"
-                        android:layout_marginEnd="4dp"/>
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="*"
-                        style="@style/body_medium"
-                        android:textColor="@color/red_required"
-                        android:layout_gravity="end"/>
-
-                </LinearLayout>
-
-                <EditText
-                    android:id="@+id/et_subdistrict"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/bg_text_field"
-                    android:hint="Isi kecamatan tempat toko Anda di sini"
+                    android:layout_weight="1"
                     android:padding="8dp"
                     style="@style/body_small"
-                    android:layout_marginTop="10dp"/>
+                    android:background="@null"/>
+
+                <ProgressBar
+                    android:id="@+id/subdistrict_progress_bar"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:padding="4dp"
+                    android:visibility="gone"/>
+
+                <!-- Chevron Down Icon -->
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_down"
+                    android:layout_marginEnd="8dp"
+                    android:contentDescription="Chevron Down" />
 
             </LinearLayout>
 
@@ -503,7 +496,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginBottom="24dp">
+                android:layout_marginBottom="24dp"
+                android:visibility="gone">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -537,6 +531,74 @@
                     android:padding="8dp"
                     style="@style/body_small"
                     android:layout_marginTop="10dp"/>
+
+            </LinearLayout>
+
+            <!-- Nama Bank-->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginBottom="24dp">
+
+                <!-- Label Jenis UMKM -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="10. Bank"
+                        style="@style/body_medium"
+                        android:layout_marginEnd="4dp"/>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="*"
+                        style="@style/body_medium"
+                        android:textColor="@color/red_required"
+                        android:layout_gravity="end"/>
+
+                </LinearLayout>
+
+                <!-- Spinner Dropdown dengan Chevron -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:background="@drawable/bg_text_field"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="10dp">
+
+                    <Spinner
+                        android:id="@+id/spinner_bank_name"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:padding="8dp"
+                        style="@style/body_small"
+                        android:background="@null"/>
+
+                    <ProgressBar
+                        android:id="@+id/bank_name_progress_bar"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:padding="4dp"
+                        android:visibility="gone"/>
+
+                    <!-- Chevron Down Icon -->
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@drawable/ic_down"
+                        android:layout_marginEnd="8dp"
+                        android:contentDescription="Chevron Down" />
+
+                </LinearLayout>
 
             </LinearLayout>
 
@@ -959,6 +1021,18 @@
 
             </LinearLayout>
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <CheckBox
+                    android:id="@+id/checkbox_approve"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Saya telah membaca dan menyetujui Syarat dan Ketentuan aplikasi" />
+
+            </LinearLayout>
 
             <FrameLayout
                 android:id="@+id/map_container"
