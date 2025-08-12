@@ -91,6 +91,8 @@ class RegisterStoreActivity : AppCompatActivity() {
 
         provinceAdapter = ProvinceAdapter(this)
         cityAdapter = CityAdapter(this)
+        subdistrictAdapter = SubdsitrictAdapter(this)
+        bankAdapter = BankAdapter(this)
         Log.d(TAG, "onCreate: Adapters initialized")
 
         setupDataBinding()
@@ -242,6 +244,7 @@ class RegisterStoreActivity : AppCompatActivity() {
                 }
                 is Result.Success -> {
                     Log.d(TAG, "setupobservers: Subdistrict loaded successfullti: ${state.data.size} subdistrict")
+                    binding.subdistrictProgressBar.visibility = View.GONE
                     binding.spinnerSubdistrict.isEnabled = true
 
                     subdistrictAdapter.updateData(state.data)
@@ -460,7 +463,6 @@ class RegisterStoreActivity : AppCompatActivity() {
             }
         }
 
-        bankAdapter = BankAdapter(this)
         binding.spinnerBankName.adapter = bankAdapter
         binding.spinnerBankName.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(

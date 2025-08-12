@@ -347,6 +347,29 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="6. Kecamatan"
+                    style="@style/body_medium"
+                    android:layout_marginEnd="4dp"/>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="*"
+                    style="@style/body_medium"
+                    android:textColor="@color/red_required"
+                    android:layout_gravity="end"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:background="@drawable/bg_text_field"
                 android:gravity="center_vertical"

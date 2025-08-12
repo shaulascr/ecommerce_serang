@@ -132,5 +132,5 @@ data class Orders(
 	val username: String? = null,
 
 	@field:SerializedName("city_id")
-	val cityId: Int? = null
+	val cityId: String? = null
 )

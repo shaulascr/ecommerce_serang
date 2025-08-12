@@ -35,7 +35,7 @@ data class Store(
     val detail: String,
     @SerializedName("is_store_location") val isStoreLocation: Boolean,
     @SerializedName("user_id") val userId: Int,
-    @SerializedName("city_id") val cityId: Int,
+    @SerializedName("city_id") val cityId: String,
     @SerializedName("province_id") val provinceId: Int,
     val phone: String?,
     val recipient: String?,

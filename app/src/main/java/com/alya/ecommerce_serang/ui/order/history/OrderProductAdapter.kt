@@ -10,6 +10,8 @@ import com.alya.ecommerce_serang.BuildConfig.BASE_URL
 import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.response.customer.order.OrderItemsItem
 import com.bumptech.glide.Glide
+import java.text.NumberFormat
+import java.util.Locale
 
 class OrderProductAdapter : RecyclerView.Adapter<OrderProductAdapter.ProductViewHolder>() {
 
@@ -46,7 +48,7 @@ class OrderProductAdapter : RecyclerView.Adapter<OrderProductAdapter.ProductView
             tvQuantity.text = "${product.quantity} buah"
 
             // Set price with currency format
-            tvProductPrice.text = formatCurrency(product.price)
+            tvProductPrice.text = formatCurrency(product.price.toDouble())
 
             val fullImageUrl = when (val img = product.productImage) {
                 is String -> {
@@ -65,10 +67,9 @@ class OrderProductAdapter : RecyclerView.Adapter<OrderProductAdapter.ProductView
 
 
 
-        private fun formatCurrency(amount: Int): String {
-            // In a real app, you would use NumberFormat for proper currency formatting
-            // For simplicity, just return a basic formatted string
-            return "Rp${amount}"
+        private fun formatCurrency(amount: Double): String {
+            val formatter = NumberFormat.getCurrencyInstance(Locale("in", "ID"))
+            return formatter.format(amount).replace(",00", "")
         }
     }
 }

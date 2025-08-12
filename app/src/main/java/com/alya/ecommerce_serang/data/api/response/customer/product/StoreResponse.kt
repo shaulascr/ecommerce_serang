@@ -114,7 +114,7 @@ data class Store(
 	val storeDescription: String,
 
 	@field:SerializedName("city_id")
-	val cityId: Int
+	val cityId: String
 )
 
 data class ShippingItem(
