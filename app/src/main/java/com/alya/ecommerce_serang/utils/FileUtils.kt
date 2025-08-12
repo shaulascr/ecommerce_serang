@@ -8,13 +8,46 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
+import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.util.zip.GZIPOutputStream
 
 object FileUtils {
     private const val TAG = "FileUtils"
 
     /**
-     * Creates a temporary file from a URI in the app's cache directory
+     * Compress a file to GZIP format to reduce its size to below 1MB
+     * @param context The context
+     * @param uri The URI of the file to compress
+     * @param maxSize The target size limit in bytes (1MB = 1048576 bytes)
+     * @return The compressed file, or null if compression failed
+     */
+    fun compressFile(context: Context, uri: Uri, maxSize: Long = 1048576L): File? {
+        try {
+            // Create a temporary file for compressed content
+            val originalFile = createTempFileFromUri(context, uri, "compressed")
+            val compressedFile = File(context.cacheDir, "compressed_${System.currentTimeMillis()}.gz")
+
+            // Compress the original file into the GZIP file
+            compressToGZIP(originalFile, compressedFile)
+
+            // Check if the compressed file is larger than the allowed size
+            if (compressedFile.length() <= maxSize) {
+                Log.d(TAG, "Compression successful. Compressed file size: ${compressedFile.length()} bytes.")
+                return compressedFile
+            } else {
+                // If the file is still too large, you can handle it by reducing quality or adjusting compression logic
+                Log.e(TAG, "Compressed file exceeds the size limit. Size: ${compressedFile.length()} bytes.")
+                return null
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error during file compression: ${e.message}", e)
+            return null
+        }
+    }
+
+    /**
+     * Creates a temporary file from the URI in the app's cache directory.
      */
     fun createTempFileFromUri(context: Context, uri: Uri, prefix: String = "temp"): File? {
         try {
@@ -38,6 +71,23 @@ object FileUtils {
         } catch (e: Exception) {
             Log.e(TAG, "Error creating temp file: ${e.message}", e)
             return null
+        }
+    }
+
+    /**
+     * Compress the input file into a GZIP file.
+     */
+    private fun compressToGZIP(inputFile: File?, outputFile: File) {
+        FileInputStream(inputFile).use { inputStream ->
+            FileOutputStream(outputFile).use { fileOutputStream ->
+                GZIPOutputStream(fileOutputStream).use { gzipOutputStream ->
+                    val buffer = ByteArray(1024)
+                    var bytesRead: Int
+                    while (inputStream.read(buffer).also { bytesRead = it } != -1) {
+                        gzipOutputStream.write(buffer, 0, bytesRead)
+                    }
+                }
+            }
         }
     }
 

@@ -15,11 +15,15 @@ import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.lifecycleScope
 import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.response.store.profile.Payment
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
+import com.alya.ecommerce_serang.utils.ImageUtils.compressImage
 import com.alya.ecommerce_serang.utils.SessionManager
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -38,6 +42,8 @@ class BalanceTopUpActivity : AppCompatActivity() {
     private lateinit var spinnerPaymentMethod: Spinner
     private lateinit var edtTransactionDate: EditText
     private lateinit var datePickerIcon: ImageView
+    private lateinit var layoutMBankingInstructions: View
+    private lateinit var layoutATMInstructions: View
     private lateinit var btnSend: Button
     private lateinit var sessionManager: SessionManager
 
@@ -52,7 +58,22 @@ class BalanceTopUpActivity : AppCompatActivity() {
             val imageUri = result.data?.data
             imageUri?.let {
                 selectedImageUri = it
-                imgPreview.setImageURI(it)
+
+                // Compress the image before displaying it
+                val compressedFile = compressImage(
+                    context = this,
+                    uri = it,
+                    filename = "topup_img",
+                    maxWidth = 1024,
+                    maxHeight = 1024,
+                    quality = 80
+                )
+
+                // Display the compressed image
+                selectedImageUri = Uri.fromFile(compressedFile)
+                imgPreview.setImageURI(Uri.fromFile(compressedFile))
+
+                validateForm()
             }
         }
     }
@@ -71,6 +92,8 @@ class BalanceTopUpActivity : AppCompatActivity() {
         spinnerPaymentMethod = findViewById(R.id.spinner_metode_bayar)
         edtTransactionDate = findViewById(R.id.edt_tgl_transaksi)
         datePickerIcon = findViewById(R.id.img_date_picker)
+        layoutMBankingInstructions = findViewById(R.id.layout_mbanking_instructions)
+        layoutATMInstructions = findViewById(R.id.layout_atm_instructions)
         btnSend = findViewById(R.id.btn_send)
 
         // Setup header title
@@ -98,9 +121,26 @@ class BalanceTopUpActivity : AppCompatActivity() {
         // Fetch payment methods
         fetchPaymentMethods()
 
+        setupClickListeners("1234567890")
+
         // Setup submit button
         btnSend.setOnClickListener {
             submitForm()
+        }
+
+        // Validate form when any input changes
+        edtNominal.doAfterTextChanged { validateForm() }
+        edtTransactionDate.doAfterTextChanged { validateForm() }
+        spinnerPaymentMethod.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                selectedPaymentId = paymentMethods[position].id
+                validateForm()
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                selectedPaymentId = -1
+                validateForm()
+            }
         }
     }
 
@@ -198,6 +238,24 @@ class BalanceTopUpActivity : AppCompatActivity() {
                 selectedPaymentId = -1
             }
         }
+    }
+
+    private fun validateForm() {
+        val isNominalFilled = edtNominal.text.toString().trim().isNotEmpty()
+        val isPaymentMethodSelected = selectedPaymentId != -1
+        val isTransactionDateFilled = edtTransactionDate.text.toString().trim().isNotEmpty()
+        val isImageSelected = selectedImageUri != null
+
+        val valid = isNominalFilled && isPaymentMethodSelected && isTransactionDateFilled && isImageSelected
+        btnSend.isEnabled = valid
+        btnSend.setTextColor(
+            if (valid) ContextCompat.getColor(this, R.color.white)
+            else ContextCompat.getColor(this, R.color.black_300)
+        )
+        btnSend.setBackgroundResource(
+            if (valid) R.drawable.bg_button_active
+            else R.drawable.bg_button_disabled
+        )
     }
 
     private fun submitForm() {
@@ -316,7 +374,7 @@ class BalanceTopUpActivity : AppCompatActivity() {
 
                     // Show a dialog with the success message
                     runOnUiThread {
-                        androidx.appcompat.app.AlertDialog.Builder(this@BalanceTopUpActivity)
+                        AlertDialog.Builder(this@BalanceTopUpActivity)
                             .setTitle("Berhasil")
                             .setMessage(successMessage)
                             .setPositiveButton("OK") { dialog, _ ->
@@ -350,7 +408,7 @@ class BalanceTopUpActivity : AppCompatActivity() {
 
                     // Show a dialog with the error message
                     runOnUiThread {
-                        androidx.appcompat.app.AlertDialog.Builder(this@BalanceTopUpActivity)
+                        AlertDialog.Builder(this@BalanceTopUpActivity)
                             .setTitle("Error Response")
                             .setMessage(errorMessage)
                             .setPositiveButton("OK") { dialog, _ ->
@@ -391,5 +449,47 @@ class BalanceTopUpActivity : AppCompatActivity() {
         }
 
         return tempFile
+    }
+
+    private fun setupClickListeners(bankAccountNumber: String) {
+        // Instructions clicks
+        layoutMBankingInstructions.setOnClickListener {
+            showInstructions("mBanking", bankAccountNumber)
+        }
+
+        layoutATMInstructions.setOnClickListener {
+            showInstructions("ATM", bankAccountNumber)
+        }
+    }
+
+    private fun showInstructions(type: String, bankAccountNumber: String) {
+        // Implementasi tampilkan instruksi
+        val instructions = when (type) {
+            "mBanking" -> listOf(
+                "1. Login ke aplikasi mobile banking",
+                "2. Pilih menu Transfer",
+                "3. Pilih menu Antar Rekening",
+                "4. Masukkan nomor rekening tujuan: $bankAccountNumber",
+                "5. Masukkan nominal saldo yang ingin diisi",
+                "6. Konfirmasi dan selesaikan transfer"
+            )
+            "ATM" -> listOf(
+                "1. Masukkan kartu ATM dan PIN",
+                "2. Pilih menu Transfer",
+                "3. Pilih menu Antar Rekening",
+                "4. Masukkan kode bank dan nomor rekening tujuan: $bankAccountNumber",
+                "5. Masukkan nominal saldo yang ingin diisi",
+                "6. Konfirmasi dan selesaikan transfer"
+            )
+            else -> emptyList()
+        }
+
+        // Tampilkan instruksi dalam dialog
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("Petunjuk Transfer $type")
+            .setItems(instructions.toTypedArray(), null)
+            .setPositiveButton("Tutup", null)
+            .create()
+        dialog.show()
     }
 }
