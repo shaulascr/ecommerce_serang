@@ -63,6 +63,7 @@ import com.alya.ecommerce_serang.data.api.response.customer.product.DetailStoreP
 import com.alya.ecommerce_serang.data.api.response.customer.product.ProductResponse
 import com.alya.ecommerce_serang.data.api.response.customer.product.ReviewProductResponse
 import com.alya.ecommerce_serang.data.api.response.customer.product.StoreResponse
+import com.alya.ecommerce_serang.data.api.response.customer.profile.AddressDetailResponse
 import com.alya.ecommerce_serang.data.api.response.customer.profile.AddressResponse
 import com.alya.ecommerce_serang.data.api.response.customer.profile.CreateAddressResponse
 import com.alya.ecommerce_serang.data.api.response.customer.profile.EditProfileResponse
@@ -528,4 +529,9 @@ interface ApiService {
     suspend fun postResetPass(
         @Body request: ResetPassReq
     ): Response<ResetPassResponse>
+
+    @GET("address/detail/{id}")
+    suspend fun getDetailAddress(
+        @Path("id") addressId: Int
+    ): Response<AddressDetailResponse>
 }

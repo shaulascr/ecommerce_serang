@@ -82,7 +82,8 @@ data class Product(
 
 data class CartItemCheckoutInfo(
 	val cartItem: CartItemsItem,
-	val isWholesale: Boolean
+	val isWholesale: Boolean,
+	val wholesalePrice: Int? = null
 )
 
 

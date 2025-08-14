@@ -30,6 +30,8 @@ class CartActivity : AppCompatActivity() {
     private lateinit var sessionManager: SessionManager
     private lateinit var storeAdapter: StoreAdapter
 
+    private var TAG = "Cart Activity"
+
     private val viewModel: CartViewModel by viewModels {
         BaseViewModelFactory {
             val apiService = ApiConfig.getApiService(sessionManager)
@@ -135,11 +137,33 @@ class CartActivity : AppCompatActivity() {
     }
 
     private fun startCheckoutWithWholesaleInfo(checkoutItems: List<CartItemCheckoutInfo>) {
-        // Extract cart item IDs and wholesale status
-        val cartItemIds = checkoutItems.map { it.cartItem.cartItemId }
-        val wholesaleArray = checkoutItems.map { it.isWholesale }.toBooleanArray()
+        val wholesalePriceMap = viewModel.cartItemWholesalePrice.value ?: emptyMap()
 
-        // Start checkout activity with the cart items and wholesale info
+        val updatedItems = checkoutItems.map { info ->
+            val wholesalePrice = wholesalePriceMap[info.cartItem.cartItemId]
+
+            val updatedCartItem = if (info.isWholesale && wholesalePrice != null) {
+                // Replace the price with wholesale price
+                info.cartItem.copy(price = wholesalePrice.toInt())
+            } else {
+                info.cartItem
+            }
+
+            // Debug log
+            Log.d(
+                    TAG,
+                "cartItemId: ${updatedCartItem.cartItemId}, " +
+                        "isWholesale: ${info.isWholesale}, " +
+                        "wholesalePrice: $wholesalePrice, " +
+                        "finalPrice: ${updatedCartItem.price}"
+            )
+
+            info.copy(cartItem = updatedCartItem)
+        }
+
+        val cartItemIds = updatedItems.map { it.cartItem.cartItemId }
+        val wholesaleArray = updatedItems.map { it.isWholesale }.toBooleanArray()
+
         CheckoutActivity.startForCart(this, cartItemIds, wholesaleArray)
     }
 
@@ -233,7 +257,5 @@ class CartActivity : AppCompatActivity() {
         val format = NumberFormat.getCurrencyInstance(Locale("id", "ID"))
         return format.format(amount).replace("Rp", "Rp ")
     }
-
-
 }
 

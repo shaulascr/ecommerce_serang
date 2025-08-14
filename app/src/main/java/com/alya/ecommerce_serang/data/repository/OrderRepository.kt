@@ -20,12 +20,16 @@ import com.alya.ecommerce_serang.data.api.response.customer.order.ListCityRespon
 import com.alya.ecommerce_serang.data.api.response.customer.order.ListProvinceResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.OrderDetailResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.OrderListResponse
+import com.alya.ecommerce_serang.data.api.response.customer.order.SubdistrictResponse
+import com.alya.ecommerce_serang.data.api.response.customer.order.VillagesResponse
 import com.alya.ecommerce_serang.data.api.response.customer.product.DetailPaymentItem
 import com.alya.ecommerce_serang.data.api.response.customer.product.ProductResponse
 import com.alya.ecommerce_serang.data.api.response.customer.product.StoreItem
 import com.alya.ecommerce_serang.data.api.response.customer.product.StoreResponse
+import com.alya.ecommerce_serang.data.api.response.customer.profile.AddressDetailResponse
 import com.alya.ecommerce_serang.data.api.response.customer.profile.AddressResponse
 import com.alya.ecommerce_serang.data.api.response.customer.profile.CreateAddressResponse
+import com.alya.ecommerce_serang.data.api.response.customer.profile.UpdateAddressResponse
 import com.alya.ecommerce_serang.data.api.response.order.AddEvidenceResponse
 import com.alya.ecommerce_serang.data.api.response.order.ComplaintResponse
 import com.alya.ecommerce_serang.data.api.response.order.CompletedOrderResponse
@@ -294,6 +298,30 @@ class OrderRepository(private val apiService: ApiService) {
         return if (response.isSuccessful) response.body() else null
     }
 
+    suspend fun getListSubdistrict(cityId : String): SubdistrictResponse? {
+        val response = apiService.getSubdistrict(cityId)
+        return if (response.isSuccessful) response.body() else null
+    }
+
+    suspend fun getListVillages(subId: String): VillagesResponse? {
+        val response = apiService.getVillages(subId)
+        return if (response.isSuccessful) response.body() else null
+    }
+
+    suspend fun getAddressDetail(addressId: Int): AddressDetailResponse? {
+        return try {
+            val response = apiService.getDetailAddress(addressId)
+            if (response.isSuccessful) response.body() else null
+        } catch (e: Exception) {
+            Log.e("OrderRepository", "Error getting address detail $e ")
+            null
+        }
+    }
+
+    suspend fun updateAddress(addressId: Int, params: Map<String, Any>): Response<UpdateAddressResponse> {
+        return apiService.updateAddress(addressId, params)
+    }
+
     suspend fun fetchUserProfile(): Result<UserProfile?> {
         return try {
             val response = apiService.getUserProfile()
@@ -318,6 +346,7 @@ class OrderRepository(private val apiService: ApiService) {
             null
         }
     }
+
 
         suspend fun uploadPaymentProof(request: AddEvidenceMultipartRequest): Result<AddEvidenceResponse> {
         return try {

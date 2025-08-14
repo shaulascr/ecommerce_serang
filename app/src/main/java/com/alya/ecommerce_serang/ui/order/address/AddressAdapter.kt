@@ -3,6 +3,7 @@ package com.alya.ecommerce_serang.ui.order.address
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
@@ -13,7 +14,8 @@ import com.alya.ecommerce_serang.data.api.response.customer.profile.AddressesIte
 import com.google.android.material.card.MaterialCardView
 
 class AddressAdapter(
-    private val onAddressClick: (AddressesItem) -> Unit
+    private val onAddressClick: (AddressesItem) -> Unit,
+    private val onEditClick: (AddressesItem) -> Unit
 ) : ListAdapter<AddressesItem, AddressAdapter.AddressViewHolder>(DIFF_CALLBACK) {
 
     private var selectedAddressId: Int? = null
@@ -47,18 +49,21 @@ class AddressAdapter(
             // Pass the whole address object to provide more context
             onAddressClick(address)
         }
+        holder.editButton.setOnClickListener {
+            onEditClick(address)
+        }
     }
 
     class AddressViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val tvName: TextView = itemView.findViewById(R.id.tv_name_address)
         private val tvDetail: TextView = itemView.findViewById(R.id.tv_detail_address)
+        val editButton: ImageView = itemView.findViewById(R.id.iv_edit)
         private val card: MaterialCardView = itemView as MaterialCardView
 
         fun bind(address: AddressesItem, isSelected: Boolean) {
             tvName.text = address.recipient
             tvDetail.text = "${address.street}, ${address.subdistrict}, ${address.phone}"
 
-            // Make selection more visible
             card.strokeWidth = if (isSelected) 3 else 0
             card.strokeColor = if (isSelected)
                 ContextCompat.getColor(itemView.context, R.color.blue_400)

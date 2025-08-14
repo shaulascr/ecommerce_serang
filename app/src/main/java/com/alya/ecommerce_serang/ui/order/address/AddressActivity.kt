@@ -74,13 +74,17 @@ class AddressActivity : AppCompatActivity() {
     }
 
     private fun setupRecyclerView() {
-        adapter = AddressAdapter { address ->
-            // Select the address in the ViewModel
-            viewModel.selectAddress(address.id)
-
-            // Return immediately with the selected address
-            returnResultAndFinish(address.id)
-        }
+        adapter = AddressAdapter(
+            onAddressClick = { address ->
+                viewModel.selectAddress(address.id)
+                returnResultAndFinish(address.id)
+            },
+            onEditClick = { address ->
+                val intent = Intent(this, EditAddressActivity::class.java)
+                intent.putExtra(EditAddressActivity.EXTRA_ADDRESS_ID, address.id)
+                startActivity(intent)
+            }
+        )
 
         binding.rvSellerOrder.apply {
             layoutManager = LinearLayoutManager(this@AddressActivity)

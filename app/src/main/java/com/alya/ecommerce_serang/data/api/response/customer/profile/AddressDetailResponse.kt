@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName
 data class AddressDetailResponse(
 
 	@field:SerializedName("address")
-	val address: Address,
+	val address: AddressDetail,
 
 	@field:SerializedName("message")
 	val message: String
@@ -14,7 +14,7 @@ data class AddressDetailResponse(
 data class AddressDetail(
 
 	@field:SerializedName("village_id")
-	val villageId: String,
+	val villageId: String?,
 
 	@field:SerializedName("is_store_location")
 	val isStoreLocation: Boolean,
@@ -38,7 +38,7 @@ data class AddressDetail(
 	val provinceId: String,
 
 	@field:SerializedName("phone")
-	val phone: String,
+	val phone: String?,
 
 	@field:SerializedName("street")
 	val street: String,
@@ -47,7 +47,7 @@ data class AddressDetail(
 	val subdistrict: String,
 
 	@field:SerializedName("recipient")
-	val recipient: String,
+	val recipient: String?,
 
 	@field:SerializedName("id")
 	val id: Int,
