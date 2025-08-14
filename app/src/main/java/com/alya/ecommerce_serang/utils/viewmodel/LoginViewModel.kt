@@ -7,8 +7,10 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.alya.ecommerce_serang.data.api.dto.FcmReq
+import com.alya.ecommerce_serang.data.api.dto.ResetPassReq
 import com.alya.ecommerce_serang.data.api.response.auth.FcmTokenResponse
 import com.alya.ecommerce_serang.data.api.response.auth.LoginResponse
+import com.alya.ecommerce_serang.data.api.response.auth.ResetPassResponse
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
 import com.alya.ecommerce_serang.data.repository.Result
@@ -26,6 +28,10 @@ class LoginViewModel(private val repository: UserRepository, private val context
     // MutableLiveData to store messages from API responses
     private val _message = MutableLiveData<String>()
     val message: LiveData<String> = _message
+
+    private val _resetPasswordState = MutableLiveData<Result<ResetPassResponse>?>()
+    val resetPasswordState: LiveData<Result<ResetPassResponse>?> = _resetPasswordState
+
 
     private val sessionManager by lazy { SessionManager(context) }
 
@@ -67,6 +73,21 @@ class LoginViewModel(private val repository: UserRepository, private val context
                 Log.e("LoginViewModel", "OTP request failed for: $token", exception)
             }
         }
+    }
+
+    fun resetPassword(email: String) {
+        viewModelScope.launch {
+            _resetPasswordState.value = Result.Loading
+
+            val request = ResetPassReq(emailOrPhone = email)
+            val result = repository.resetPassword(request)
+
+            _resetPasswordState.value = result
+        }
+    }
+
+    fun clearState() {
+        _resetPasswordState.value = null
     }
 
 }

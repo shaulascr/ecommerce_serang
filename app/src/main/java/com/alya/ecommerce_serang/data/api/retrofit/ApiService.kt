@@ -19,6 +19,7 @@ import com.alya.ecommerce_serang.data.api.dto.OtpRequest
 import com.alya.ecommerce_serang.data.api.dto.PaymentConfirmRequest
 import com.alya.ecommerce_serang.data.api.dto.ProvinceResponse
 import com.alya.ecommerce_serang.data.api.dto.RegisterRequest
+import com.alya.ecommerce_serang.data.api.dto.ResetPassReq
 import com.alya.ecommerce_serang.data.api.dto.ReviewProductItem
 import com.alya.ecommerce_serang.data.api.dto.SearchRequest
 import com.alya.ecommerce_serang.data.api.dto.ShippingServiceRequest
@@ -36,6 +37,7 @@ import com.alya.ecommerce_serang.data.api.response.auth.LoginResponse
 import com.alya.ecommerce_serang.data.api.response.auth.OtpResponse
 import com.alya.ecommerce_serang.data.api.response.auth.RegisterResponse
 import com.alya.ecommerce_serang.data.api.response.auth.RegisterStoreResponse
+import com.alya.ecommerce_serang.data.api.response.auth.ResetPassResponse
 import com.alya.ecommerce_serang.data.api.response.auth.VerifRegisterResponse
 import com.alya.ecommerce_serang.data.api.response.chat.ChatHistoryResponse
 import com.alya.ecommerce_serang.data.api.response.chat.ChatListResponse
@@ -65,6 +67,7 @@ import com.alya.ecommerce_serang.data.api.response.customer.profile.AddressRespo
 import com.alya.ecommerce_serang.data.api.response.customer.profile.CreateAddressResponse
 import com.alya.ecommerce_serang.data.api.response.customer.profile.EditProfileResponse
 import com.alya.ecommerce_serang.data.api.response.customer.profile.ProfileResponse
+import com.alya.ecommerce_serang.data.api.response.customer.profile.UpdateAddressResponse
 import com.alya.ecommerce_serang.data.api.response.order.AddEvidenceResponse
 import com.alya.ecommerce_serang.data.api.response.order.ComplaintResponse
 import com.alya.ecommerce_serang.data.api.response.order.CompletedOrderResponse
@@ -454,6 +457,12 @@ interface ApiService {
         @Body addressData: HashMap<String, Any?>
     ): Response<StoreAddressResponse>
 
+    @PUT("profile/address/edit/{idAddress}")
+    suspend fun updateAddress(
+        @Path("id") addressId: Int,
+        @Body params: Map<String, Any>
+    ): Response<UpdateAddressResponse>
+
     @POST("search")
     suspend fun saveSearchQuery(
         @Body searchRequest: SearchRequest
@@ -524,4 +533,9 @@ interface ApiService {
     suspend fun getVillages(
         @Path("subdistrictId") subdistrictId: String
     ): Response<VillagesResponse>
+
+    @POST("resetpass")
+    suspend fun postResetPass(
+        @Body request: ResetPassReq
+    ): Response<ResetPassResponse>
 }

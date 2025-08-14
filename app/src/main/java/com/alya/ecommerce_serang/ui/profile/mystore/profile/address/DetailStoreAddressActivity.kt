@@ -1,6 +1,5 @@
 package com.alya.ecommerce_serang.ui.profile.mystore.profile.address
 
-import android.app.Activity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -14,13 +13,14 @@ import com.alya.ecommerce_serang.BuildConfig
 import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.dto.City
 import com.alya.ecommerce_serang.data.api.dto.Province
+import com.alya.ecommerce_serang.data.api.response.customer.profile.AddressesItem
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
 import com.alya.ecommerce_serang.data.repository.AddressRepository
 import com.alya.ecommerce_serang.databinding.ActivityDetailStoreAddressBinding
-import com.alya.ecommerce_serang.utils.viewmodel.AddressViewModel
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
+import com.alya.ecommerce_serang.utils.viewmodel.AddressViewModel
 import com.google.android.material.snackbar.Snackbar
 
 class DetailStoreAddressActivity : AppCompatActivity() {
@@ -32,6 +32,7 @@ class DetailStoreAddressActivity : AppCompatActivity() {
     private var selectedCityId: String? = null
     private var provinces: List<Province> = emptyList()
     private var cities: List<City> = emptyList()
+    private var currentAddress: AddressesItem? = null
 
     private val TAG = "StoreAddressActivity"
 
@@ -178,6 +179,7 @@ class DetailStoreAddressActivity : AppCompatActivity() {
 
         // Observe store address data
         viewModel.storeAddress.observe(this) { address ->
+            currentAddress = address
             Log.d(TAG, "Received store address: $address")
             address?.let {
                 // Set the fields
@@ -214,11 +216,12 @@ class DetailStoreAddressActivity : AppCompatActivity() {
         }
 
         // Observe save success
-        viewModel.saveSuccess.observe(this) {
-            if (it) {
-                Toast.makeText(this, "Alamat berhasil disimpan", Toast.LENGTH_SHORT).show()
-                setResult(Activity.RESULT_OK)
+        viewModel.saveSuccess.observe(this)  { success ->
+            if (success) {
+                Log.d(TAG, "Address updated successfully")
                 finish()
+            } else {
+                Log.e(TAG, "Failed to update address")
             }
         }
     }
@@ -229,8 +232,8 @@ class DetailStoreAddressActivity : AppCompatActivity() {
             val subdistrict = binding.edtSubdistrict.text.toString()
             val detail = binding.edtDetailAddress.text.toString()
             val postalCode = binding.edtPostalCode.text.toString()
-            val latitude = binding.edtLatitude.text.toString().toDoubleOrNull() ?: 0.0
-            val longitude = binding.edtLongitude.text.toString().toDoubleOrNull() ?: 0.0
+            val latitude = binding.edtLatitude.text.toString()
+            val longitude = binding.edtLongitude.text.toString()
 
             val city = cities.find { it.cityId == selectedCityId }
             val province = provinces.find { it.provinceId == selectedProvinceId }
@@ -241,12 +244,10 @@ class DetailStoreAddressActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // Save address
-            viewModel.saveStoreAddress(
+            val oldAddress = currentAddress ?: return@setOnClickListener
+            val newAddress = oldAddress.copy(
                 provinceId = selectedProvinceId!!,
-                provinceName = province?.provinceName ?: "",
                 cityId = city.cityId,
-                cityName = city.cityName,
                 street = street,
                 subdistrict = subdistrict,
                 detail = detail,
@@ -254,6 +255,20 @@ class DetailStoreAddressActivity : AppCompatActivity() {
                 latitude = latitude,
                 longitude = longitude
             )
+            viewModel.saveStoreAddress(oldAddress, newAddress)
+            // Save address
+//            viewModel.saveStoreAddress(
+//                provinceId = selectedProvinceId!!,
+//                provinceName = province?.provinceName ?: "",
+//                cityId = city.cityId,
+//                cityName = city.cityName,
+//                street = street,
+//                subdistrict = subdistrict,
+//                detail = detail,
+//                postalCode = postalCode,
+//                latitude = latitude,
+//                longitude = longitude
+//            )
         }
     }
 

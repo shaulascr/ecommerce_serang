@@ -245,6 +245,19 @@
                 android:textColor="@color/blue1"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
         </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <CheckBox
+                android:id="@+id/checkbox_approve"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Saya telah membaca dan menyetujui Syarat dan Ketentuan aplikasi" />
+
+        </LinearLayout>
     </ScrollView>
 
     <!-- Register Button -->

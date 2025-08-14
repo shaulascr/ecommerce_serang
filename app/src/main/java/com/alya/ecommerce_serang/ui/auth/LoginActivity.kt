@@ -82,6 +82,11 @@ class LoginActivity : AppCompatActivity() {
             startActivity(Intent(this, RegisterActivity::class.java))
             finish()
         }
+
+        binding.tvForgetPassword.setOnClickListener {
+            startActivity(Intent(this, ResetPassActivity::class.java))
+            finish()
+        }
     }
 
     private fun observeLoginState() {

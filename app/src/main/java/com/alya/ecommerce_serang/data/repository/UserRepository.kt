@@ -7,6 +7,7 @@ import com.alya.ecommerce_serang.data.api.dto.FcmReq
 import com.alya.ecommerce_serang.data.api.dto.LoginRequest
 import com.alya.ecommerce_serang.data.api.dto.OtpRequest
 import com.alya.ecommerce_serang.data.api.dto.RegisterRequest
+import com.alya.ecommerce_serang.data.api.dto.ResetPassReq
 import com.alya.ecommerce_serang.data.api.dto.UserProfile
 import com.alya.ecommerce_serang.data.api.dto.VerifRegisReq
 import com.alya.ecommerce_serang.data.api.response.auth.FcmTokenResponse
@@ -18,6 +19,7 @@ import com.alya.ecommerce_serang.data.api.response.auth.NotifstoreItem
 import com.alya.ecommerce_serang.data.api.response.auth.OtpResponse
 import com.alya.ecommerce_serang.data.api.response.auth.RegisterResponse
 import com.alya.ecommerce_serang.data.api.response.auth.RegisterStoreResponse
+import com.alya.ecommerce_serang.data.api.response.auth.ResetPassResponse
 import com.alya.ecommerce_serang.data.api.response.auth.VerifRegisterResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.ListCityResponse
 import com.alya.ecommerce_serang.data.api.response.customer.order.ListProvinceResponse
@@ -487,6 +489,30 @@ class UserRepository(private val apiService: ApiService) {
                 Result.Error(Exception("Failed to fetch list notif. Code: ${response.code()}"))
             }
         } catch (e: Exception){
+            Result.Error(e)
+        }
+    }
+
+    suspend fun resetPassword(request: ResetPassReq): Result<ResetPassResponse>{
+        return try {
+            val response = apiService.postResetPass(request)
+
+            if (response.isSuccessful){
+                val resetPassResponse = response.body()
+                if (resetPassResponse != null) {
+                        Result.Success(resetPassResponse)
+                }
+                else {
+                    Result.Error(Exception("Empty response from server"))
+                }
+            }
+            else {
+                val errorBody = response.errorBody()?.string() ?: "Unknown error"
+                Log.e(TAG, "Error RESET PASS address: $errorBody")
+                Result.Error(Exception(errorBody))
+            }
+        }
+        catch (e: Exception){
             Result.Error(e)
         }
     }

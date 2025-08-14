@@ -99,6 +99,7 @@ class AddressActivity : AppCompatActivity() {
 
         viewModel.selectedAddressId.observe(this) { selectedId ->
             adapter.setSelectedAddressId(selectedId)
+            finish()
         }
     }
 

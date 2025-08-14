@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.alya.ecommerce_serang.data.api.dto.CreateAddressRequest
 import com.alya.ecommerce_serang.data.api.dto.RegisterRequest
+import com.alya.ecommerce_serang.data.api.dto.ResetPassReq
 import com.alya.ecommerce_serang.data.api.dto.VerifRegisReq
 import com.alya.ecommerce_serang.data.api.response.auth.LoginResponse
 import com.alya.ecommerce_serang.data.api.response.auth.OtpResponse
@@ -380,6 +381,10 @@ class RegisterViewModel(private val repository: UserRepository, private val orde
                 _addressSubmissionState.postValue(ViewState.Error(errorMessage))
             }
         }
+    }
+
+    fun resetPass(request: ResetPassReq){
+
     }
 
     companion object {
