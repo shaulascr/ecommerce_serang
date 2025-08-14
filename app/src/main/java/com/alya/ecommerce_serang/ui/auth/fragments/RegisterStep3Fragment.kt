@@ -238,13 +238,19 @@ class RegisterStep3Fragment : Fragment() {
 
         binding.autoCompleteKecamatan.setOnItemClickListener{ _, _, position, _ ->
             val subdistrictId = subdistrictAdapter.getSubdistrictId(position)
-            Log.d(TAG, "Subdistrict selected at position $position, ID: $subdistrictId")
+            val subdistictName = subdistrictAdapter.getSubdistrictName(position)
+            Log.d(TAG, "Subdistrict selected at position $position, ID: $subdistrictId, name: $subdistictName")
 
             subdistrictId?.let { id ->
                 Log.d(TAG, "Selected subdistrict ID set to: $id")
                 registerViewModel.selectedSubdistrict = id
                 registerViewModel.getVillages(id)
                 binding.autoCompleteDesa.text.clear()
+            }
+
+            subdistictName?.let { name ->
+                Log.d(TAG, "Selected name subdistrict set to: $name")
+                registerViewModel.subdistrictName = name
             }
         }
 
@@ -375,7 +381,7 @@ class RegisterStep3Fragment : Fragment() {
 
         val provinceId = registerViewModel.selectedProvinceId?.toInt() ?: 0
         val cityId = registerViewModel.selectedCityId.toString()
-        val subDistrict = registerViewModel.selectedSubdistrict.toString()
+        val subDistrict = registerViewModel.subdistrictName.toString()
 //        val postalCode = registerViewModel.selectedPostalCode.toString()
 
         val villageId = registerViewModel.selectedVillages ?: ""
@@ -423,7 +429,7 @@ class RegisterStep3Fragment : Fragment() {
 
         val provinceId = registerViewModel.selectedProvinceId
         val cityId = registerViewModel.selectedCityId
-        val subDistrict = registerViewModel.selectedSubdistrict.toString()
+        val subDistrict = registerViewModel.selectedSubdistrict
         val postalCode = registerViewModel.selectedPostalCode
 
         Log.d(TAG, "Validating - Street: $street, SubDistrict: $subDistrict, PostalCode: $postalCode")
@@ -459,6 +465,12 @@ class RegisterStep3Fragment : Fragment() {
         if (cityId == null) {
             showError("Pilih kota/kabupaten terlebih dahulu")
             binding.autoCompleteKabupaten.requestFocus()
+            return false
+        }
+
+        if (subDistrict == null) {
+            showError("Pilih kota/kabupaten terlebih dahulu")
+            binding.autoCompleteKecamatan.requestFocus()
             return false
         }
 

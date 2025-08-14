@@ -485,7 +485,7 @@ class RegisterStoreActivity : AppCompatActivity() {
                     }
 
                     // Hide progress bar if it was showing
-                    binding.storeTypeProgressBar.visibility = View.GONE
+                    binding.bankNameProgressBar.visibility = View.GONE
 
                 } else {
                     Log.e(TAG, "Invalid bank name for position: $position")

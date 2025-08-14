@@ -2,25 +2,34 @@ package com.alya.ecommerce_serang.data.api.response.customer.profile
 
 import com.google.gson.annotations.SerializedName
 
-data class AddressResponse(
+data class AddressDetailResponse(
 
-	@field:SerializedName("addresses")
-	val addresses: List<AddressesItem>,
+	@field:SerializedName("address")
+	val address: Address,
 
 	@field:SerializedName("message")
 	val message: String
 )
 
-data class AddressesItem(
+data class AddressDetail(
 
 	@field:SerializedName("village_id")
-	val villageId: String?,
+	val villageId: String,
 
 	@field:SerializedName("is_store_location")
 	val isStoreLocation: Boolean,
 
 	@field:SerializedName("latitude")
 	val latitude: String,
+
+	@field:SerializedName("province_name")
+	val provinceName: String,
+
+	@field:SerializedName("subdistrict_id")
+	val subdistrictId: String,
+
+	@field:SerializedName("city_name")
+	val cityName: String,
 
 	@field:SerializedName("user_id")
 	val userId: Int,
@@ -29,7 +38,7 @@ data class AddressesItem(
 	val provinceId: String,
 
 	@field:SerializedName("phone")
-	val phone: String?,
+	val phone: String,
 
 	@field:SerializedName("street")
 	val street: String,
@@ -38,13 +47,16 @@ data class AddressesItem(
 	val subdistrict: String,
 
 	@field:SerializedName("recipient")
-	val recipient: String?,
+	val recipient: String,
 
 	@field:SerializedName("id")
 	val id: Int,
 
 	@field:SerializedName("detail")
 	val detail: String,
+
+	@field:SerializedName("village_name")
+	val villageName: String,
 
 	@field:SerializedName("postal_code")
 	val postalCode: String,

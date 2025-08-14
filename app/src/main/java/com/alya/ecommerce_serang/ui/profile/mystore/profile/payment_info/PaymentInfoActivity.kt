@@ -6,9 +6,12 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.AdapterView
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.ProgressBar
+import android.widget.Spinner
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -18,6 +21,7 @@ import com.alya.ecommerce_serang.data.api.dto.PaymentInfo
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.repository.PaymentInfoRepository
 import com.alya.ecommerce_serang.databinding.ActivityPaymentInfoBinding
+import com.alya.ecommerce_serang.ui.order.address.BankAdapter
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
 import com.alya.ecommerce_serang.utils.UriToFileConverter
@@ -32,6 +36,7 @@ class PaymentInfoActivity : AppCompatActivity() {
     private lateinit var sessionManager: SessionManager
     private var selectedQrisImageUri: Uri? = null
     private var selectedQrisImageFile: File? = null
+    private lateinit var bankAdapter: BankAdapter
 
     // Store form data between dialog reopenings
     private var savedBankName: String = ""
@@ -95,6 +100,7 @@ class PaymentInfoActivity : AppCompatActivity() {
             onBackPressedDispatcher.onBackPressed()
         }
 
+        bankAdapter = BankAdapter(this)
         setupRecyclerView()
         setupObservers()
 
@@ -173,10 +179,47 @@ class PaymentInfoActivity : AppCompatActivity() {
         builder.setView(dialogView)
 
         val dialog = builder.create()
+        val spinnerBankName = dialogView.findViewById<Spinner>(R.id.spinner_bank_name)
+        val progressBarBank = dialogView.findViewById<ProgressBar>(R.id.bank_name_progress_bar)
+
+        spinnerBankName.adapter = bankAdapter
+        spinnerBankName.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                Log.d(TAG, "Bank selected at position: $position")
+                val bankName = bankAdapter.getBankName(position)
+                if (bankName != null) {
+                    Log.d(TAG, "Setting bank name: $bankName")
+                    viewModel.bankName.value = bankName
+                    viewModel.selectedBankName = bankName
+
+                    // Optional: Log the selected bank details
+                    val selectedBank = bankAdapter.getBankItem(position)
+                    selectedBank?.let {
+                        Log.d(TAG, "Selected bank: ${it.bankName} (Code: ${it.bankCode})")
+                    }
+
+                    // Hide progress bar if it was showing
+                    progressBarBank.visibility = View.GONE
+
+                } else {
+                    Log.e(TAG, "Invalid bank name for position: $position")
+                }
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                Log.d(TAG, "No bank selected")
+                viewModel.selectedBankName = null
+            }
+        }
 
         // Get references to views in the dialog
         val btnAddQris = dialogView.findViewById<Button>(R.id.btn_add_qris)
-        val bankNameEditText = dialogView.findViewById<EditText>(R.id.edt_bank_name)
+//        val spinnerBankName = dialogView.findViewById<Spinner>(R.id.spinner_bank_name)
         val bankNumberEditText = dialogView.findViewById<EditText>(R.id.edt_bank_number)
         val accountNameEditText = dialogView.findViewById<EditText>(R.id.edt_account_name)
         val qrisPreview = dialogView.findViewById<ImageView>(R.id.iv_qris_preview)
@@ -185,7 +228,10 @@ class PaymentInfoActivity : AppCompatActivity() {
 
         // When reopening, restore the previously entered values
         if (isReopened) {
-            bankNameEditText.setText(savedBankName)
+            val savedPosition = bankAdapter.findPositionByName(savedBankName)
+            if (savedPosition >= 0) {
+                spinnerBankName.setSelection(savedPosition)
+            }
             bankNumberEditText.setText(savedBankNumber)
             accountNameEditText.setText(savedAccountName)
 
@@ -199,7 +245,7 @@ class PaymentInfoActivity : AppCompatActivity() {
 
         btnAddQris.setOnClickListener {
             // Save the current values before dismissing
-            savedBankName = bankNameEditText.text.toString().trim()
+            savedBankName = viewModel.selectedBankName ?: ""
             savedBankNumber = bankNumberEditText.text.toString().trim()
             savedAccountName = accountNameEditText.text.toString().trim()
 
@@ -212,13 +258,13 @@ class PaymentInfoActivity : AppCompatActivity() {
         }
 
         btnSave.setOnClickListener {
-            val bankName = bankNameEditText.text.toString().trim()
+            val bankName = viewModel.selectedBankName ?: ""
             val bankNumber = bankNumberEditText.text.toString().trim()
             val accountName = accountNameEditText.text.toString().trim()
 
             // Validation
             if (bankName.isEmpty()) {
-                showSnackbar("Nama bank tidak boleh kosong")
+                showSnackbar("Pilih nama bank terlebih dahulu")
                 return@setOnClickListener
             }
 

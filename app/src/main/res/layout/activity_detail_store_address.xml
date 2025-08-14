@@ -10,7 +10,7 @@
     tools:context=".ui.profile.mystore.profile.address.DetailStoreAddressActivity">
 
     <include
-        android:id="@+id/header"
+        android:id="@+id/header_address_store"
         layout="@layout/header" />
 
     <ScrollView
@@ -154,6 +154,58 @@
 
             </LinearLayout>
 
+            <!-- Kecamatan -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginBottom="24dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Kecamatan"
+                    style="@style/body_medium"
+                    android:layout_marginEnd="4dp"/>
+
+                <!-- Spinner Dropdown dengan Chevron -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:background="@drawable/bg_text_field"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="10dp">
+
+                    <Spinner
+                        android:id="@+id/spinner_subdistrict"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:padding="8dp"
+                        style="@style/body_small"
+                        android:background="@null"/>
+
+                    <ProgressBar
+                        android:id="@+id/subdistrict_progress_bar"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="center"
+                        android:visibility="gone"/>
+
+                    <!-- Chevron Down Icon -->
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@drawable/ic_down"
+                        android:layout_marginEnd="8dp"
+                        android:contentDescription="Chevron Down" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+
             <!-- Jalan -->
             <LinearLayout
                 android:layout_width="match_parent"
@@ -176,32 +228,6 @@
                     android:padding="8dp"
                     style="@style/body_small"
                     android:hint="Isi nama jalan di sini"
-                    android:layout_marginTop="10dp"/>
-
-            </LinearLayout>
-
-            <!-- Kecamatan -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginBottom="24dp">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Kecamatan"
-                    style="@style/body_medium"
-                    android:layout_marginEnd="4dp"/>
-
-                <EditText
-                    android:id="@+id/edt_subdistrict"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/bg_text_field"
-                    android:padding="8dp"
-                    style="@style/body_small"
-                    android:hint="Isi nama kecamatan di sini"
                     android:layout_marginTop="10dp"/>
 
             </LinearLayout>

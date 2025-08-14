@@ -2,19 +2,19 @@ package com.alya.ecommerce_serang.data.api.response.customer.profile
 
 import com.google.gson.annotations.SerializedName
 
-data class AddressResponse(
+data class UpdateAddressResponse(
 
-	@field:SerializedName("addresses")
-	val addresses: List<AddressesItem>,
+	@field:SerializedName("address")
+	val address: Address,
 
 	@field:SerializedName("message")
 	val message: String
 )
 
-data class AddressesItem(
+data class Address(
 
 	@field:SerializedName("village_id")
-	val villageId: String?,
+	val villageId: String,
 
 	@field:SerializedName("is_store_location")
 	val isStoreLocation: Boolean,
@@ -29,7 +29,7 @@ data class AddressesItem(
 	val provinceId: String,
 
 	@field:SerializedName("phone")
-	val phone: String?,
+	val phone: Any,
 
 	@field:SerializedName("street")
 	val street: String,
@@ -38,7 +38,7 @@ data class AddressesItem(
 	val subdistrict: String,
 
 	@field:SerializedName("recipient")
-	val recipient: String?,
+	val recipient: Any,
 
 	@field:SerializedName("id")
 	val id: Int,

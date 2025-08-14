@@ -13,10 +13,12 @@ import com.alya.ecommerce_serang.BuildConfig
 import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.dto.City
 import com.alya.ecommerce_serang.data.api.dto.Province
+import com.alya.ecommerce_serang.data.api.response.customer.order.SubdistrictsItem
 import com.alya.ecommerce_serang.data.api.response.customer.profile.AddressesItem
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
 import com.alya.ecommerce_serang.data.repository.AddressRepository
+import com.alya.ecommerce_serang.data.repository.Result
 import com.alya.ecommerce_serang.databinding.ActivityDetailStoreAddressBinding
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
@@ -30,11 +32,15 @@ class DetailStoreAddressActivity : AppCompatActivity() {
 
     private var selectedProvinceId: String? = null
     private var selectedCityId: String? = null
+    private var selectedSubdistrict: String? = null
     private var provinces: List<Province> = emptyList()
     private var cities: List<City> = emptyList()
+    private var subdistrict: List<SubdistrictsItem> = emptyList()
     private var currentAddress: AddressesItem? = null
 
-    private val TAG = "StoreAddressActivity"
+//    private lateinit var subdistrictAdapter: SubdsitrictAdapter
+
+    private val TAG = "DetailStoreAddressActivity"
 
     private val viewModel: AddressViewModel by viewModels {
         BaseViewModelFactory {
@@ -59,12 +65,14 @@ class DetailStoreAddressActivity : AppCompatActivity() {
         binding.tvError.visibility = View.GONE
 
         // Set up header title
-        binding.header.headerTitle.text = "Atur Alamat Toko"
+        binding.headerAddressStore.headerTitle.text = "Atur Alamat Toko"
 
         // Set up back button
-        binding.header.headerLeftIcon.setOnClickListener {
+        binding.headerAddressStore.headerLeftIcon.setOnClickListener {
             onBackPressedDispatcher.onBackPressed()
         }
+
+//        subdistrictAdapter = SubdsitrictAdapter(this)
 
         setupSpinners()
         setupObservers()
@@ -114,10 +122,25 @@ class DetailStoreAddressActivity : AppCompatActivity() {
         binding.spinnerCity.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 selectedCityId = if (position > 0) cities[position - 1].cityId else null
+
+                viewModel.getSubdistrict(selectedCityId.toString())
+
                 checkAllFieldsFilled()
+
             }
 
             override fun onNothingSelected(p0: AdapterView<*>?) {}
+        }
+
+        binding.spinnerSubdistrict.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                selectedSubdistrict = if (position > 0) subdistrict[position - 1].subdistrictName else null
+
+                checkAllFieldsFilled()
+
+            }
+            override fun onNothingSelected(p0: AdapterView<*>?) {}
+
         }
     }
 
@@ -177,6 +200,43 @@ class DetailStoreAddressActivity : AppCompatActivity() {
             }
         }
 
+        viewModel.subdistrictState.observe(this) { result ->
+            when (result) {
+                is com.alya.ecommerce_serang.data.repository.Result.Loading -> {
+                    showSubLoading(true)
+                }
+
+                is com.alya.ecommerce_serang.data.repository.Result.Success -> {
+                    showSubLoading(false)
+
+                    subdistrict = result.data
+                    val subdistrictNames = mutableListOf("Pilih Kecamatan")
+                    subdistrictNames.addAll(result.data.map { it.subdistrictName })
+
+                    val adapter = ArrayAdapter(
+                        this,
+                        android.R.layout.simple_spinner_item,
+                        subdistrictNames
+                    )
+                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                    binding.spinnerSubdistrict.adapter = adapter
+
+                    // Compare by name, since stored value is the subdistrict name
+                    viewModel.storeAddress.value?.let { address ->
+                        val index = subdistrict.indexOfFirst { it.subdistrictName == address.subdistrict }
+                        if (index != -1) {
+                            binding.spinnerSubdistrict.setSelection(index + 1)
+                        }
+                    }
+                }
+
+                is Result.Error -> {
+                    showSubLoading(false)
+                    Log.e(TAG, "Error: ${result.exception.message}", result.exception)
+                }
+            }
+        }
+
         // Observe store address data
         viewModel.storeAddress.observe(this) { address ->
             currentAddress = address
@@ -184,13 +244,14 @@ class DetailStoreAddressActivity : AppCompatActivity() {
             address?.let {
                 // Set the fields
                 binding.edtStreet.setText(it.street)
-                binding.edtSubdistrict.setText(it.subdistrict)
+//                binding.edtSubdistrict.setText(it.subdistrict)
                 binding.edtDetailAddress.setText(it.detail ?: "")
                 binding.edtPostalCode.setText(it.postalCode)
                 binding.edtLatitude.setText(it.latitude.toString())
                 binding.edtLongitude.setText(it.longitude.toString())
                 selectedProvinceId = it.provinceId
                 selectedCityId = it.cityId
+                selectedSubdistrict = it.subdistrict
 
                 // Find province index and select it after provinces are loaded
                 if (provinces.isNotEmpty()) {
@@ -229,7 +290,6 @@ class DetailStoreAddressActivity : AppCompatActivity() {
     private fun setupSaveButton() {
         binding.btnSaveAddress.setOnClickListener {
             val street = binding.edtStreet.text.toString()
-            val subdistrict = binding.edtSubdistrict.text.toString()
             val detail = binding.edtDetailAddress.text.toString()
             val postalCode = binding.edtPostalCode.text.toString()
             val latitude = binding.edtLatitude.text.toString()
@@ -237,6 +297,8 @@ class DetailStoreAddressActivity : AppCompatActivity() {
 
             val city = cities.find { it.cityId == selectedCityId }
             val province = provinces.find { it.provinceId == selectedProvinceId }
+            val subdistrictName = subdistrict.find { it.subdistrictName == selectedSubdistrict }?.subdistrictName.toString()
+            Log.d(TAG, "Subdistrict name: $subdistrictName")
 
             // Validate required fields
             if (selectedProvinceId.isNullOrEmpty() || city == null || street.isEmpty() || subdistrict.isEmpty() || postalCode.isEmpty()) {
@@ -249,11 +311,15 @@ class DetailStoreAddressActivity : AppCompatActivity() {
                 provinceId = selectedProvinceId!!,
                 cityId = city.cityId,
                 street = street,
-                subdistrict = subdistrict,
+                subdistrict = subdistrictName,
                 detail = detail,
                 postalCode = postalCode,
                 latitude = latitude,
-                longitude = longitude
+                longitude = longitude,
+                phone = oldAddress.phone,
+                recipient = oldAddress.recipient ?: "",
+                isStoreLocation = oldAddress.isStoreLocation,
+                villageId = oldAddress.villageId
             )
             viewModel.saveStoreAddress(oldAddress, newAddress)
             // Save address
@@ -279,15 +345,14 @@ class DetailStoreAddressActivity : AppCompatActivity() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         }
         binding.edtStreet.addTextChangedListener(watcher)
-        binding.edtSubdistrict.addTextChangedListener(watcher)
         binding.edtPostalCode.addTextChangedListener(watcher)
     }
 
     private fun checkAllFieldsFilled() {
         val allValid = !selectedProvinceId.isNullOrEmpty()
                 && !selectedCityId.isNullOrEmpty()
+                && !selectedSubdistrict.isNullOrEmpty()
                 && binding.edtStreet.text.isNotBlank()
-                && binding.edtSubdistrict.text.isNotBlank()
                 && binding.edtPostalCode.text.isNotBlank()
 
         binding.btnSaveAddress.let {
@@ -299,6 +364,7 @@ class DetailStoreAddressActivity : AppCompatActivity() {
                 it.isEnabled = false
                 it.setBackgroundResource(R.drawable.bg_button_disabled)
                 it.setTextColor(getColor(R.color.black_300))
+                Toast.makeText(this, "Periksa dan lenkapi alamat anda", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -312,6 +378,12 @@ class DetailStoreAddressActivity : AppCompatActivity() {
         binding.cityProgressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
         binding.spinnerCity.visibility = if (isLoading) View.GONE else View.VISIBLE
     }
+
+    private fun showSubLoading(isLoading: Boolean) {
+        binding.subdistrictProgressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+        binding.spinnerSubdistrict.visibility = if (isLoading) View.GONE else View.VISIBLE
+    }
+
 
     private fun showError(message: String) {
         binding.progressBar.visibility = View.GONE

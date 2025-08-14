@@ -30,6 +30,9 @@ class PaymentInfoViewModel(private val repository: PaymentInfoRepository) : View
     private val _deletePaymentSuccess = MutableLiveData<Boolean>()
     val deletePaymentSuccess: LiveData<Boolean> = _deletePaymentSuccess
 
+    var selectedBankName: String? = null
+    val bankName = MutableLiveData<String>()
+
     fun getPaymentInfo() {
         _isLoading.value = true
         viewModelScope.launch {

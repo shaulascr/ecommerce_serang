@@ -72,6 +72,7 @@ class RegisterViewModel(private val repository: UserRepository, private val orde
     var selectedProvinceId: Int? = null
     var selectedCityId: String? = null
     var selectedSubdistrict: String? = null
+    var subdistrictName: String? = null
     var selectedVillages: String? = null
     var selectedPostalCode: String? = null
 

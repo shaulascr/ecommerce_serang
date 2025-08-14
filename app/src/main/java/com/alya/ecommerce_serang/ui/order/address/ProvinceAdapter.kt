@@ -74,6 +74,10 @@ class SubdsitrictAdapter(
     fun getSubdistrictId(position: Int): String? {
         return cities.getOrNull(position)?.subdistrictId?.toString()
     }
+
+    fun getSubdistrictName(position: Int): String? {
+        return cities.getOrNull(position)?.subdistrictName?.toString()
+    }
 }
 
 class VillagesAdapter(
