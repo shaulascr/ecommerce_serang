@@ -21,6 +21,8 @@ class AddressViewModel(private val repository: OrderRepository): ViewModel() {
             val response = repository.getAddress()
             response?.let {
                 _addresses.value = it.addresses
+                    ?.filter { address -> address.isStoreLocation == false }
+                    ?: emptyList()
             }
         }
     }

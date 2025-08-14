@@ -53,48 +53,49 @@ class MyStoreRepository(private val apiService: ApiService) {
 
     suspend fun updateStoreProfile(
         storeName: RequestBody,
-        storeStatus: RequestBody,
         storeDescription: RequestBody,
         isOnLeave: RequestBody,
-        cityId: RequestBody,
-        provinceId: RequestBody,
-        street: RequestBody,
-        subdistrict: RequestBody,
-        detail: RequestBody,
-        postalCode: RequestBody,
-        latitude: RequestBody,
-        longitude: RequestBody,
-        userPhone: RequestBody,
         storeType: RequestBody,
         storeimg: MultipartBody.Part?
-    ): Response<StoreDataResponse> {
-        return apiService.updateStoreProfileMultipart(
-            storeName, storeStatus, storeDescription, isOnLeave, cityId, provinceId,
-            street, subdistrict, detail, postalCode, latitude, longitude, userPhone, storeType, storeimg
-        )
+    ): Response<StoreDataResponse>? {
+
+        return try {
+            Log.d(TAG, "storeName: $storeName")
+            Log.d(TAG, "storeDescription: $storeDescription")
+            Log.d(TAG, "isOnLeave: $isOnLeave")
+            Log.d(TAG, "storeType: $storeType")
+            Log.d(TAG, "storeimg: ${storeimg?.headers}")
+
+            apiService.updateStoreProfileMultipart(
+                storeName, storeDescription, isOnLeave, storeType, storeimg
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "Error updating store profile", e)
+            null
+        }
     }
 
     suspend fun getSellList(status: String): Result<OrderListResponse> {
         return try {
-            Log.d("SellsRepository", "Add Evidence : $status")
+            Log.d(TAG, "Add Evidence : $status")
             val response = apiService.getSellList(status)
 
             if (response.isSuccessful) {
                 val allListSell = response.body()
                 if (allListSell != null) {
-                    Log.d("SellsRepository", "Add Evidence successfully: ${allListSell.message}")
+                    Log.d(TAG, "Add Evidence successfully: ${allListSell.message}")
                     Result.Success(allListSell)
                 } else {
-                    Log.e("SellsRepository", "Response body was null")
+                    Log.e(TAG, "Response body was null")
                     Result.Error(Exception("Empty response from server"))
                 }
             } else {
                 val errorBody = response.errorBody()?.string() ?: "Unknown error"
-                Log.e("SellsRepository", "Error Add Evidence : $errorBody")
+                Log.e(TAG, "Error Add Evidence : $errorBody")
                 Result.Error(Exception(errorBody))
             }
         } catch (e: Exception) {
-            Log.e("SellsRepository", "Exception Add Evidence ", e)
+            Log.e(TAG, "Exception Add Evidence ", e)
             Result.Error(e)
         }
     }
@@ -119,7 +120,7 @@ class MyStoreRepository(private val apiService: ApiService) {
                 )
             }
         } catch (e: Exception) {
-            Log.e("MyStoreRepository", "Error fetching balance", e)
+            Log.e(TAG, "Error fetching balance", e)
             Result.Error(e)
         }
     }
@@ -133,9 +134,13 @@ class MyStoreRepository(private val apiService: ApiService) {
                 throw Exception("Failed to fetch store products: ${response.message()}")
             }
         } catch (e: Exception) {
-            Log.e("ProductRepository", "Error fetching store products", e)
+            Log.e(TAG, "Error fetching store products", e)
             throw e
         }
+    }
+
+    companion object {
+        private var TAG = "MyStoreRepository"
     }
 
 //    private fun fetchBalance() {

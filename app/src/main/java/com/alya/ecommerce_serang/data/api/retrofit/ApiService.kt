@@ -394,18 +394,8 @@ interface ApiService {
     @PUT("mystore/edit")
     suspend fun updateStoreProfileMultipart(
         @Part("store_name") storeName: RequestBody,
-        @Part("store_status") storeStatus: RequestBody,
         @Part("store_description") storeDescription: RequestBody,
         @Part("is_on_leave") isOnLeave: RequestBody,
-        @Part("city_id") cityId: RequestBody,
-        @Part("province_id") provinceId: RequestBody,
-        @Part("street") street: RequestBody,
-        @Part("subdistrict") subdistrict: RequestBody,
-        @Part("detail") detail: RequestBody,
-        @Part("postal_code") postalCode: RequestBody,
-        @Part("latitude") latitude: RequestBody,
-        @Part("longitude") longitude: RequestBody,
-        @Part("user_phone") userPhone: RequestBody,
         @Part("store_type_id") storeTypeId: RequestBody,
         @Part storeimg: MultipartBody.Part?
     ): Response<StoreDataResponse>
@@ -457,10 +447,10 @@ interface ApiService {
         @Body addressData: HashMap<String, Any?>
     ): Response<StoreAddressResponse>
 
-    @PUT("profile/address/edit/{idAddress}")
+    @PUT("profile/address/edit/{id}")
     suspend fun updateAddress(
         @Path("id") addressId: Int,
-        @Body params: Map<String, Any>
+        @Body params: Map<String, @JvmSuppressWildcards Any>
     ): Response<UpdateAddressResponse>
 
     @POST("search")

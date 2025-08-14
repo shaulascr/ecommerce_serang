@@ -99,7 +99,6 @@ class AddressActivity : AppCompatActivity() {
 
         viewModel.selectedAddressId.observe(this) { selectedId ->
             adapter.setSelectedAddressId(selectedId)
-            finish()
         }
     }
 
@@ -120,6 +119,7 @@ class AddressActivity : AppCompatActivity() {
         val intent = Intent()
         intent.putExtra(EXTRA_ADDRESS_ID, addressId)
         setResult(RESULT_OK, intent)
+        finish()
     }
 
     companion object {

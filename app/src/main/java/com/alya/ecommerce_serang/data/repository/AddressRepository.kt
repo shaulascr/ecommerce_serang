@@ -3,6 +3,7 @@ package com.alya.ecommerce_serang.data.repository
 import android.util.Log
 import com.alya.ecommerce_serang.data.api.dto.CityResponse
 import com.alya.ecommerce_serang.data.api.dto.ProvinceResponse
+import com.alya.ecommerce_serang.data.api.response.customer.order.SubdistrictResponse
 import com.alya.ecommerce_serang.data.api.response.customer.profile.AddressResponse
 import com.alya.ecommerce_serang.data.api.response.customer.profile.UpdateAddressResponse
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
@@ -186,5 +187,10 @@ class AddressRepository(private val apiService: ApiService) {
 
     suspend fun updateAddress(addressId: Int, params: Map<String, Any>): Response<UpdateAddressResponse> {
         return apiService.updateAddress(addressId, params)
+    }
+
+    suspend fun getListSubdistrict(cityId : String): SubdistrictResponse? {
+        val response = apiService.getSubdistrict(cityId)
+        return if (response.isSuccessful) response.body() else null
     }
 }

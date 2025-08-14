@@ -21,6 +21,8 @@ import java.text.NumberFormat
 import java.util.Locale
 
 class MyStoreViewModel(private val repository: MyStoreRepository): ViewModel() {
+    private var TAG = "MyStoreViewModel"
+
     private val _myStoreProfile = MutableLiveData<Store?>()
     val myStoreProfile: LiveData<Store?> = _myStoreProfile
 
@@ -84,30 +86,40 @@ class MyStoreViewModel(private val repository: MyStoreRepository): ViewModel() {
 
                 if (store == null) {
                     _errorMessage.postValue("Data toko tidak tersedia")
+                    Log.e(TAG, "Store data is null")
                     return@launch
                 }
 
+                Log.d("UpdateStoreProfileVM", "Calling repository with params:")
+                Log.d("UpdateStoreProfileVM", "storeName: $storeName")
+                Log.d("UpdateStoreProfileVM", "description: $description")
+                Log.d("UpdateStoreProfileVM", "isOnLeave: $isOnLeave")
+                Log.d("UpdateStoreProfileVM", "storeType: $storeType")
+                Log.d("UpdateStoreProfileVM", "storeImage: ${storeImage?.headers}")
+
                 val response = repository.updateStoreProfile(
                     storeName = storeName,
-                    storeStatus = "active".toRequestBody(),
                     storeDescription = description,
                     isOnLeave = isOnLeave,
-                    cityId = store.cityId.toString().toRequestBody(),
-                    provinceId = store.provinceId.toString().toRequestBody(),
-                    street = store.street.toRequestBody(),
-                    subdistrict = store.subdistrict.toRequestBody(),
-                    detail = store.detail.toRequestBody(),
-                    postalCode = store.postalCode.toRequestBody(),
-                    latitude = store.latitude.toRequestBody(),
-                    longitude = store.longitude.toRequestBody(),
-                    userPhone = store.phone.toRequestBody(),
                     storeType = storeType,
                     storeimg = storeImage
                 )
-                if (response.isSuccessful) _updateStoreProfileResult.postValue(response.body())
-                else _errorMessage.postValue("Gagal memperbarui profil")
+
+                if (response != null) {
+                    if (response.isSuccessful) {
+                        _updateStoreProfileResult.postValue(response.body())
+                        Log.d(TAG, "Update successful: ${response.body()}")
+                    } else {
+                        _errorMessage.postValue("Gagal memperbarui profil")
+                        Log.e(TAG, "Update failed: ${response.errorBody()?.string()}")
+                    }
+                } else {
+                    _errorMessage.postValue("Terjadi kesalahan jaringan atau server")
+                    Log.e(TAG, "Repository returned null response")
+                }
             } catch (e: Exception) {
                 _errorMessage.postValue(e.message ?: "Unexpected error")
+                Log.e(TAG, "Exception updating store profile", e)
             }
         }
     }
@@ -120,13 +132,13 @@ class MyStoreViewModel(private val repository: MyStoreRepository): ViewModel() {
                     result.data.orders.size ?: 0
                 }
                 is Result.Error -> {
-                    Log.e("SellsViewModel", "Error getting orders count: ${result.exception.message}")
+                    Log.e(TAG, "Error getting orders count: ${result.exception.message}")
                     0
                 }
                 is Result.Loading -> 0
             }
         } catch (e: Exception) {
-            Log.e("SellsViewModel", "Exception getting orders count", e)
+            Log.e(TAG, "Exception getting orders count", e)
             0
         }
     }
@@ -138,7 +150,7 @@ class MyStoreViewModel(private val repository: MyStoreRepository): ViewModel() {
 
         statuses.forEach { status ->
             counts[status] = getTotalOrdersByStatus(status)
-            Log.d("SellsViewModel", "Status: $status, countOrder=${counts[status]}")
+            Log.d(TAG, "Status: $status, countOrder=${counts[status]}")
         }
 
         return counts

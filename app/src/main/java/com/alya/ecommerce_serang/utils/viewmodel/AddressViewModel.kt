@@ -7,8 +7,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.alya.ecommerce_serang.data.api.dto.City
 import com.alya.ecommerce_serang.data.api.dto.Province
+import com.alya.ecommerce_serang.data.api.response.customer.order.SubdistrictsItem
 import com.alya.ecommerce_serang.data.api.response.customer.profile.AddressesItem
 import com.alya.ecommerce_serang.data.repository.AddressRepository
+import com.alya.ecommerce_serang.data.repository.Result
 import kotlinx.coroutines.launch
 
 class AddressViewModel(private val addressRepository: AddressRepository) : ViewModel() {
@@ -33,6 +35,12 @@ class AddressViewModel(private val addressRepository: AddressRepository) : ViewM
     private val _saveSuccess = MutableLiveData<Boolean>()
     val saveSuccess: LiveData<Boolean> get() = _saveSuccess
 
+    private val _subdistrictState = MutableLiveData<Result<List<SubdistrictsItem>>>()
+    val subdistrictState: LiveData<Result<List<SubdistrictsItem>>> = _subdistrictState
+
+
+    var selectedSubdistrict: String? = null
+    val subdistrict = MutableLiveData<String>()
 
     fun fetchProvinces() {
         viewModelScope.launch {
@@ -63,6 +71,29 @@ class AddressViewModel(private val addressRepository: AddressRepository) : ViewM
             }
         }
     }
+
+    fun getSubdistrict(cityId: String) {
+        _subdistrictState.value = Result.Loading
+        viewModelScope.launch {
+            try {
+
+                selectedSubdistrict = cityId
+                val result = addressRepository.getListSubdistrict(cityId)
+                result?.let {
+                    _subdistrictState.postValue(Result.Success(it.subdistricts))
+                    Log.d(TAG, "Cities loaded for province $cityId: ${it.subdistricts.size}")
+                } ?: run {
+                    _subdistrictState.postValue(Result.Error(Exception("Failed to load cities")))
+                    Log.e(TAG, "City result was null for province $cityId")
+                }
+            } catch (e: Exception) {
+                _subdistrictState.postValue(Result.Error(Exception(e.message ?: "Error loading cities")))
+                Log.e(TAG, "Error fetching cities for province $cityId", e)
+            }
+        }
+    }
+
+
 
 //    fun fetchProvinces() {
 //        Log.d(TAG, "fetchProvinces() called")
@@ -223,6 +254,7 @@ class AddressViewModel(private val addressRepository: AddressRepository) : ViewM
     }
 
     private fun buildUpdateBody(oldAddress: AddressesItem, newAddress: AddressesItem): Map<String, Any> {
+
         val params = mutableMapOf<String, Any>()
 
         fun addIfChanged(key: String, oldValue: Any?, newValue: Any?) {
