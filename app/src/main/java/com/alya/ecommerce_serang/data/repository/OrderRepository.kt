@@ -310,10 +310,23 @@ class OrderRepository(private val apiService: ApiService) {
 
     suspend fun getAddressDetail(addressId: Int): AddressDetailResponse? {
         return try {
+            Log.d("Order Repository", "Fetching address detail for ID: $addressId")
+
             val response = apiService.getDetailAddress(addressId)
-            if (response.isSuccessful) response.body() else null
+
+            Log.d("Order Repository", "Response code: ${response.code()}")
+            Log.d("Order Repository", "Response message: ${response.message()}")
+
+            if (response.isSuccessful) {
+                val body = response.body()
+                Log.d("Order Repository", "Address detail response body: $body")
+                body
+            } else {
+                Log.w("Order Repository", "Failed to get address detail. Error body: ${response.errorBody()?.string()}")
+                null
+            }
         } catch (e: Exception) {
-            Log.e("OrderRepository", "Error getting address detail $e ")
+            Log.e("Order Repository", "Error getting address detail", e)
             null
         }
     }

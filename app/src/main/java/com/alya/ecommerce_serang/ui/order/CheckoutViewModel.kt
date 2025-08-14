@@ -93,30 +93,38 @@ class CheckoutViewModel(private val repository: OrderRepository) : ViewModel() {
     }
 
     // Initialize checkout from cart
-    fun initializeFromCart(cartItemIds: List<Int>, isWholesaleMap: Map<Int, Boolean> = emptyMap()) {
+    fun initializeFromCart(
+        cartItemIds: List<Int>,
+        isWholesaleMap: Map<Int, Boolean> = emptyMap(),
+        wholesalePriceMap: Map<Int, Int> = emptyMap() // new
+    ) {
         viewModelScope.launch {
             _isLoading.value = true
 
             try {
-                // Get cart data
                 val cartResult = repository.getCart()
 
                 if (cartResult is Result.Success) {
-                    // Find matching cart items
                     val matchingItems = mutableListOf<CartItemsItem>()
                     var storeData: DataItemCart? = null
 
                     for (store in cartResult.data) {
                         val storeItems = store.cartItems.filter { it.cartItemId in cartItemIds }
                         if (storeItems.isNotEmpty()) {
-                            matchingItems.addAll(storeItems)
+                            // ✅ Override price with wholesale price if exists
+                            val updatedItems = storeItems.map { item ->
+                                val wholesalePrice = wholesalePriceMap[item.cartItemId]
+                                if (wholesalePrice != null) {
+                                    item.copy(price = wholesalePrice.toInt())
+                                } else item
+                            }
+                            matchingItems.addAll(updatedItems)
                             storeData = store
                             break
                         }
                     }
 
                     if (matchingItems.isNotEmpty() && storeData != null) {
-                        // Create initial OrderRequest object
                         val orderRequest = OrderRequest(
                             addressId = 0,
                             paymentMethodId = 0,
@@ -126,11 +134,9 @@ class CheckoutViewModel(private val repository: OrderRepository) : ViewModel() {
                             isNego = false,
                             cartItemId = cartItemIds,
                             shipEtd = "",
-                            // Add a list tracking which items are wholesale
-                            isReseller = isWholesaleMap.any { it.value } // Set true if any item is wholesale
+                            isReseller = isWholesaleMap.any { it.value }
                         )
 
-                        // Create checkout data
                         _checkoutData.value = CheckoutData(
                             orderRequest = orderRequest,
                             productName = matchingItems.first().productName,
@@ -138,8 +144,14 @@ class CheckoutViewModel(private val repository: OrderRepository) : ViewModel() {
                             sellerId = storeData.storeId,
                             isBuyNow = false,
                             cartItems = matchingItems,
-                            cartItemWholesaleMap = isWholesaleMap // Store the wholesale map
+                            cartItemWholesaleMap = isWholesaleMap
                         )
+                        Log.d(TAG, "CheckoutData initialized: ${_checkoutData.value}")
+
+                        Log.d(TAG, "Matching cart items: ${matchingItems.size}")
+                        Log.d(TAG, "Cart items: ${matchingItems.map { it.productName to it.price }}")
+                        Log.d(TAG, "IsWholesaleMap passed: $isWholesaleMap")
+                        Log.d(TAG, "WholesalePriceMap passed: $wholesalePriceMap")
 
                         calculateSubtotal()
                         calculateTotal()
@@ -155,6 +167,7 @@ class CheckoutViewModel(private val repository: OrderRepository) : ViewModel() {
                 _isLoading.value = false
             }
         }
+
     }
 
     fun getPaymentMethods() {

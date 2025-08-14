@@ -38,6 +38,7 @@
                 android:src="@drawable/baseline_edit_24"
                 android:focusable="true"
                 android:clickable="true"
+                android:visibility="gone"
                 android:layout_marginHorizontal="16dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"/>
