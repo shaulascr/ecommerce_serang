@@ -79,9 +79,6 @@ class CheckoutActivity : AppCompatActivity() {
         // Determine if this is Buy Now or Cart checkout
         val isBuyNow = intent.hasExtra(EXTRA_PRODUCT_ID) && !intent.hasExtra(EXTRA_CART_ITEM_IDS)
         val isWholesaleNow = intent.getBooleanExtra(EXTRA_ISWHOLESALE, false)
-        val wholesalePricesArray = intent.getIntArrayExtra(EXTRA_CART_ITEM_WHOLESALE_PRICES)
-
-
 
         if (isBuyNow) {
             // Process Buy Now flow
@@ -99,8 +96,7 @@ class CheckoutActivity : AppCompatActivity() {
             // Process Cart checkout flow
             val cartItemIds = intent.getIntArrayExtra(EXTRA_CART_ITEM_IDS)?.toList() ?: emptyList()
             val isWholesaleArray = intent.getBooleanArrayExtra(EXTRA_CART_ITEM_WHOLESALE)
-
-
+            val wholesalePricesArray = intent.getIntArrayExtra(EXTRA_CART_ITEM_WHOLESALE_PRICES)
 
             if (cartItemIds.isNotEmpty()) {
                 // Build map of cartItemId -> isWholesale
@@ -108,17 +104,18 @@ class CheckoutActivity : AppCompatActivity() {
                     cartItemIds.mapIndexed { index, id ->
                         id to isWholesaleArray[index]
                     }.toMap()
-
-
                 } else {
                     emptyMap()
                 }
 
-
-                // Build wholesalePriceMap
-                val wholesalePriceMap = cartItemIds.mapIndexed { index, id ->
-                    id to (wholesalePricesArray?.get(index) ?: 0)
-                }.toMap()
+                // Build wholesalePriceMap - FIX: Map cartItemId to wholesale price
+                val wholesalePriceMap = if (wholesalePricesArray != null && wholesalePricesArray.size == cartItemIds.size) {
+                    cartItemIds.mapIndexed { index, id ->
+                        id to wholesalePricesArray[index]
+                    }.toMap()
+                } else {
+                    emptyMap()
+                }
 
                 viewModel.initializeFromCart(
                     cartItemIds,

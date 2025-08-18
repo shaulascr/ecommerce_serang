@@ -34,6 +34,8 @@ class SingleCartItemAdapter(private val cartItem: CartItemsItem) :
             // Load placeholder image
             Glide.with(ivProduct.context)
                 .load(R.drawable.placeholder_image)
+                .placeholder(R.drawable.placeholder_image)
+                .error(R.drawable.placeholder_image)
                 .into(ivProduct)
         }
     }

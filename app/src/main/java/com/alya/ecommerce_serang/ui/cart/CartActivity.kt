@@ -151,7 +151,7 @@ class CartActivity : AppCompatActivity() {
 
             // Debug log
             Log.d(
-                    TAG,
+                TAG,
                 "cartItemId: ${updatedCartItem.cartItemId}, " +
                         "isWholesale: ${info.isWholesale}, " +
                         "wholesalePrice: $wholesalePrice, " +
@@ -164,7 +164,17 @@ class CartActivity : AppCompatActivity() {
         val cartItemIds = updatedItems.map { it.cartItem.cartItemId }
         val wholesaleArray = updatedItems.map { it.isWholesale }.toBooleanArray()
 
-        CheckoutActivity.startForCart(this, cartItemIds, wholesaleArray)
+        // FIX: Pass wholesale prices as IntArray
+        val wholesalePricesArray = updatedItems.map { info ->
+            if (info.isWholesale) {
+                val wholesalePrice = wholesalePriceMap[info.cartItem.cartItemId]
+                wholesalePrice?.toInt() ?: info.cartItem.price
+            } else {
+                info.cartItem.price
+            }
+        }.toIntArray()
+
+        CheckoutActivity.startForCart(this, cartItemIds, wholesaleArray, wholesalePricesArray)
     }
 
     private fun observeViewModel() {
