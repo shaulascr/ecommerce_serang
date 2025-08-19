@@ -24,9 +24,12 @@ import androidx.core.view.WindowInsetsCompat
 import com.alya.ecommerce_serang.data.api.dto.CreateAddressRequest
 import com.alya.ecommerce_serang.data.api.response.customer.order.CitiesItem
 import com.alya.ecommerce_serang.data.api.response.customer.order.ProvincesItem
+import com.alya.ecommerce_serang.data.api.response.customer.order.SubdistrictsItem
+import com.alya.ecommerce_serang.data.api.response.customer.order.VillagesItem
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
 import com.alya.ecommerce_serang.data.repository.OrderRepository
+import com.alya.ecommerce_serang.data.repository.Result
 import com.alya.ecommerce_serang.data.repository.UserRepository
 import com.alya.ecommerce_serang.databinding.ActivityAddAddressBinding
 import com.alya.ecommerce_serang.utils.SavedStateViewModelFactory
@@ -45,6 +48,8 @@ class AddAddressActivity : AppCompatActivity() {
     private var longitude: Double? = null
     private val provinceAdapter by lazy { ProvinceAdapter(this) }
     private val cityAdapter by lazy { CityAdapter(this) }
+    private val subdistrictAdapter by lazy { SubdsitrictAdapter(this)}
+    private val villageAdapter by lazy { VillagesAdapter(this)}
 
     private val viewModel: AddAddressViewModel by viewModels {
         SavedStateViewModelFactory(this) { savedStateHandle ->
@@ -113,6 +118,8 @@ class AddAddressActivity : AppCompatActivity() {
         // Set adapters
         binding.autoCompleteProvinsi.setAdapter(provinceAdapter)
         binding.autoCompleteKabupaten.setAdapter(cityAdapter)
+        binding.autoCompleteKecamatan.setAdapter(subdistrictAdapter)
+        binding.autoCompleteDesa.setAdapter(villageAdapter)
 
         // Make dropdown appear on click (not just when typing)
         binding.autoCompleteProvinsi.setOnClickListener {
@@ -128,6 +135,26 @@ class AddAddressActivity : AppCompatActivity() {
             } else {
                 Log.d(TAG, "City dropdown clicked but no cities available")
                 Toast.makeText(this, "Pilih provinsi terlebih dahulu", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        binding.autoCompleteKecamatan.setOnClickListener{
+            if (subdistrictAdapter.count > 0){
+                Log.d(TAG, "Subdistrict clicked, dropdown with ${subdistrictAdapter.count} items")
+                binding.autoCompleteKecamatan.showDropDown()
+            } else {
+                Log.d(TAG, "No kecamatan available")
+                Toast.makeText(this, "Pilih Kabupaten / Kota terlebih dahulu", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        binding.autoCompleteDesa.setOnClickListener{
+            if (villageAdapter.count > 0){
+                Log.d(TAG, "Village clicked, dropdown with ${villageAdapter.count} items")
+                binding.autoCompleteDesa.showDropDown()
+            } else {
+                Log.d(TAG, "No desa available")
+                Toast.makeText(this, "Pilih Kecamatan terlebih dahulu", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -149,8 +176,40 @@ class AddAddressActivity : AppCompatActivity() {
 
             cityId?.let { id ->
                 Log.d(TAG, "Setting selectedCityId=$id")
+                viewModel.getSubdistrict(cityId)
                 viewModel.selectedCityId = id
+                binding.autoCompleteKecamatan.text.clear()
+
             } ?: Log.e(TAG, "Could not get cityId for position $position")
+        }
+
+        binding.autoCompleteKecamatan.setOnItemClickListener { _, _, position, _ ->
+            val subdistrictId = subdistrictAdapter.getSubdistrictId(position)
+            val subdistrictName = subdistrictAdapter.getSubdistrictName(position)
+
+            Log.d(TAG, "Subdistrict selected at position $position, subsId=$subdistrictId")
+
+            subdistrictId?.let { id ->
+                Log.d(TAG, "Setting subdistrict id=$id")
+                viewModel.getVillages(subdistrictId)
+                viewModel.selectedSubdistrictId = id
+                binding.autoCompleteDesa.text.clear()
+            } ?: Log.e(TAG, "Could not get subsId for position $position")
+
+            subdistrictName?.let { name ->
+                Log.d(TAG, "Setting subdistrict=$name")
+                viewModel.selectedSubdistrict = name
+            } ?: Log.e(TAG, "COuldnt get subs name for position ${position}")
+        }
+
+        binding.autoCompleteDesa.setOnItemClickListener { _, _, position, _ ->
+            val villageId = villageAdapter.getVillageId(position)
+            Log.d(TAG, "Village selected at position $position, villageId=$villageId")
+
+            villageId?.let { id ->
+                Log.d(TAG, "Setting village=$id")
+                viewModel.selectedVillages = id
+            } ?: Log.e(TAG, "Could not get villageId for position $position")
         }
     }
 
@@ -173,6 +232,16 @@ class AddAddressActivity : AppCompatActivity() {
         viewModel.citiesState.observe(this) { state ->
             Log.d(TAG, "Received citiesState update: $state")
             handleCityState(state)
+        }
+
+        viewModel.subdistrictState.observe(this) {state ->
+            Log.d(TAG, "Received subdistrictId update: $state")
+            handleSubdistrictState(state)
+        }
+
+        viewModel.villagesState.observe(this) {state ->
+            Log.d(TAG, "Received subdistrictId update: $state")
+            handleVillageState(state)
         }
 
         // Observe address submission
@@ -199,7 +268,7 @@ class AddAddressActivity : AppCompatActivity() {
             }
             is ViewState.Error -> {
                 // Hide loading indicator
-                showError("Failed to load provinces: ${state.message}")
+//                showError("Failed to load provinces: ${state.message}")
                 Log.e("AddAddressActivity", "Province error: ${state.message}")
             }
         }
@@ -218,8 +287,46 @@ class AddAddressActivity : AppCompatActivity() {
             }
             is ViewState.Error -> {
                 binding.cityProgressBar.visibility = View.GONE
-                showError("Failed to load cities: ${state.message}")
+//                showError("Failed to load cities: ${state.message}")
                 Log.e("AddAddressActivity", "City error: ${state.message}")
+            }
+        }
+    }
+
+    private fun handleSubdistrictState(state: com.alya.ecommerce_serang.data.repository.Result<List<SubdistrictsItem>>) {
+        when (state) {
+            is Result.Loading -> {
+                Log.d(TAG, "Loading subdistrict...")
+                binding.subdistrictProgressBar.visibility = View.VISIBLE
+            }
+            is Result.Success -> {
+                Log.d(TAG, "Subdistrict loaded: ${state.data.size}")
+                binding.subdistrictProgressBar.visibility = View.GONE
+                subdistrictAdapter.updateData(state.data)
+            }
+            is Result.Error -> {
+                binding.subdistrictProgressBar.visibility = View.GONE
+//                showError("Failed to load subs: ${state.message}")
+                Log.e(TAG, "Subdistrict error: ${state}")
+            }
+        }
+    }
+
+    private fun handleVillageState(state: Result<List<VillagesItem>>) {
+        when (state) {
+            is Result.Loading -> {
+                Log.d(TAG, "Loading villages...")
+                binding.villageProgressBar.visibility = View.VISIBLE
+            }
+            is Result.Success -> {
+                Log.d(TAG, "Villages loaded: ${state.data.size}")
+                binding.villageProgressBar.visibility = View.GONE
+                villageAdapter.updateData(state.data)
+            }
+            is Result.Error -> {
+                binding.villageProgressBar.visibility = View.GONE
+//                showError("Failed to load subs: ${state.message}")
+                Log.e(TAG, "Village error: ${state}")
             }
         }
     }
@@ -273,7 +380,7 @@ class AddAddressActivity : AppCompatActivity() {
         }
 
         val street = binding.etDetailAlamat.text.toString().trim()
-        val subDistrict = binding.etKecamatan.text.toString().trim()
+//        val subDistrict = binding.etKecamatan.text.toString().trim()
         val postalCode = binding.etKodePos.text.toString().trim()
         val recipient = binding.etNamaPenerima.text.toString().trim()
         val phone = binding.etNomorHp.text.toString().trim()
@@ -282,9 +389,11 @@ class AddAddressActivity : AppCompatActivity() {
 
         val provinceId = viewModel.selectedProvinceId
         val cityId = viewModel.selectedCityId.toString()
+        val subDistrict = viewModel.selectedSubdistrict.toString()
+        val villageId = viewModel.selectedVillages.toString()
 
         Log.d(TAG, "Form data: street=$street, subDistrict=$subDistrict, postalCode=$postalCode, " +
-                "recipient=$recipient, phone=$phone, userId=$userId, provinceId=$provinceId, cityId=$cityId, " +
+                "recipient=$recipient, phone=$phone, userId=$userId, provinceId=$provinceId, cityId=$cityId, subdistrict=$subDistrict, villageId=$villageId " +
                 "lat=$latitude, long=$longitude")
 
         // Validate required fields
@@ -333,7 +442,7 @@ class AddAddressActivity : AppCompatActivity() {
             cityId = cityId, // ⚠️ Make sure this is Int
             provId = provinceId,
             postCode = postalCode,
-            idVillage = "", // Or provide a real ID if needed
+            idVillage = villageId, // Or provide a real ID if needed
             detailAddress = street,
             isStoreLocation = false,
             recipient = recipient,
@@ -381,8 +490,8 @@ class AddAddressActivity : AppCompatActivity() {
             binding.locationProgressBar.visibility = View.GONE
             binding.tvLocationStatus.text = "Provider lokasi tidak tersedia"
             isRequestingLocation = false
-            Toast.makeText(this, "Provider lokasi tidak tersedia", Toast.LENGTH_SHORT).show()
-            showEnableLocationDialog()
+//            Toast.makeText(this, "Provider lokasi tidak tersedia", Toast.LENGTH_SHORT).show()
+//            showEnableLocationDialog()
             return
         }
 
@@ -409,7 +518,7 @@ class AddAddressActivity : AppCompatActivity() {
                 latitude = -6.200000
                 longitude = 106.816666
                 isRequestingLocation = false
-                Toast.makeText(this, "Timeout lokasi, menggunakan lokasi default", Toast.LENGTH_SHORT).show()
+//                Toast.makeText(this, "Timeout lokasi, menggunakan lokasi default", Toast.LENGTH_SHORT).show()
             }
         }, 60000) // 15 seconds timeout
 
@@ -423,7 +532,7 @@ class AddAddressActivity : AppCompatActivity() {
                 binding.locationProgressBar.visibility = View.GONE
                 binding.tvLocationStatus.text = "Lokasi terdeteksi: ${lastLocation.latitude}, ${lastLocation.longitude}"
                 isRequestingLocation = false
-                Toast.makeText(this, "Lokasi terdeteksi", Toast.LENGTH_SHORT).show()
+//                Toast.makeText(this, "Lokasi terdeteksi", Toast.LENGTH_SHORT).show()
                 return
             } else {
                 Log.d(TAG, "No last known location, requesting updates")
@@ -441,7 +550,7 @@ class AddAddressActivity : AppCompatActivity() {
                 binding.locationProgressBar.visibility = View.GONE
                 binding.tvLocationStatus.text = "Lokasi terdeteksi: ${location.latitude}, ${location.longitude}"
                 isRequestingLocation = false
-                Toast.makeText(this@AddAddressActivity, "Lokasi terdeteksi", Toast.LENGTH_SHORT).show()
+//                Toast.makeText(this@AddAddressActivity, "Lokasi terdeteksi", Toast.LENGTH_SHORT).show()
 
                 // Remove location updates after receiving a location
                 try {
@@ -464,7 +573,7 @@ class AddAddressActivity : AppCompatActivity() {
                 binding.locationProgressBar.visibility = View.GONE
                 binding.tvLocationStatus.text = "Provider lokasi dimatikan"
                 isRequestingLocation = false
-                Toast.makeText(this@AddAddressActivity, "Provider $provider dimatikan", Toast.LENGTH_SHORT).show()
+//                Toast.makeText(this@AddAddressActivity, "Provider $provider dimatikan", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -483,7 +592,7 @@ class AddAddressActivity : AppCompatActivity() {
             binding.locationProgressBar.visibility = View.GONE
             binding.tvLocationStatus.text = "Error: ${e.message}"
             isRequestingLocation = false
-            Toast.makeText(this, "Error mendapatkan lokasi: ${e.message}", Toast.LENGTH_SHORT).show()
+//            Toast.makeText(this, "Error mendapatkan lokasi: ${e.message}", Toast.LENGTH_SHORT).show()
 
             // Set default location
             latitude = -6.200000
@@ -511,7 +620,7 @@ class AddAddressActivity : AppCompatActivity() {
         // Add button to reload location (add this button to your layout)
         binding.btnReloadLocation.setOnClickListener {
             Log.d(TAG, "Reload location button clicked")
-            Toast.makeText(this, "Memuat ulang lokasi...", Toast.LENGTH_SHORT).show()
+//            Toast.makeText(this, "Memuat ulang lokasi...", Toast.LENGTH_SHORT).show()
             requestLocation()
         }
     }

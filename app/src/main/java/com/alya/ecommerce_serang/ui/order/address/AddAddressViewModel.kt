@@ -56,6 +56,7 @@ class AddAddressViewModel(private val repository: OrderRepository, private val u
         set(value) { savedStateHandle["selectedCityId"] = value }
 
     var selectedSubdistrict: String? = null
+    var selectedSubdistrictId: String? = null
     var selectedVillages: String? = null
 
     init {
@@ -104,8 +105,6 @@ class AddAddressViewModel(private val repository: OrderRepository, private val u
         }
     }
 
-
-
     fun getProvinces() {
         _provincesState.value = ViewState.Loading
         viewModelScope.launch {
@@ -150,18 +149,18 @@ class AddAddressViewModel(private val repository: OrderRepository, private val u
         viewModelScope.launch {
             try {
 
-                selectedSubdistrict = cityId
+                selectedSubdistrictId = cityId
                 val result = repository.getListSubdistrict(cityId)
                 result?.let {
                     _subdistrictState.postValue(Result.Success(it.subdistricts))
-                    Log.d(TAG, "Cities loaded for province $cityId: ${it.subdistricts.size}")
+                    Log.d(TAG, "Subdistrict loaded for city $cityId: ${it.subdistricts.size}")
                 } ?: run {
                     _subdistrictState.postValue(Result.Error(Exception("Failed to load cities")))
-                    Log.e(TAG, "City result was null for province $cityId")
+                    Log.e(TAG, "Subdistrict result was null for city $cityId")
                 }
             } catch (e: Exception) {
                 _subdistrictState.postValue(Result.Error(Exception(e.message ?: "Error loading cities")))
-                Log.e(TAG, "Error fetching cities for province $cityId", e)
+                Log.e(TAG, "Error fetching subdistrict for city $cityId", e)
             }
         }
     }
@@ -175,14 +174,14 @@ class AddAddressViewModel(private val repository: OrderRepository, private val u
                 val result = repository.getListVillages(subdistrictId)
                 result?.let {
                     _villagesState.postValue(Result.Success(it.villages))
-                    Log.d(TAG, "Cities loaded for province $subdistrictId: ${it.villages.size}")
+                    Log.d(TAG, "Villages loaded for subdistrict $subdistrictId: ${it.villages.size}")
                 } ?: run {
                     _villagesState.postValue(Result.Error(Exception("Failed to load cities")))
-                    Log.e(TAG, "City result was null for province $subdistrictId")
+                    Log.e(TAG, "Village result was null for subdistrict $subdistrictId")
                 }
             } catch (e: Exception) {
                 _villagesState.postValue(Result.Error(Exception(e.message ?: "Error loading cities")))
-                Log.e(TAG, "Error fetching cities for province $subdistrictId", e)
+                Log.e(TAG, "Error fetching villages for subdistrict $subdistrictId", e)
             }
         }
     }
@@ -248,6 +247,12 @@ class AddAddressViewModel(private val repository: OrderRepository, private val u
         addIfChanged("latitude", oldAddress.latitude, newAddress.latitude)
         addIfChanged("longitude", oldAddress.longitude, newAddress.longitude)
         addIfChanged("is_store_location", oldAddress.isStoreLocation, newAddress.isStoreLocation)
+        addIfChanged("village_name", oldAddress.villageName, newAddress.villageName)
+        addIfChanged("subdsitrict_id", oldAddress.subdistrictId, newAddress.subdistrictId)
+        addIfChanged("id", oldAddress.id, newAddress.id)
+        addIfChanged("user_id", oldAddress.userId, newAddress.userId)
+        addIfChanged("city_name", oldAddress.cityName, newAddress.cityName)
+        addIfChanged("province_name", oldAddress.provinceName, newAddress.provinceName)
 
         return params
     }
