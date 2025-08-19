@@ -252,6 +252,24 @@ class AddAddressViewModel(private val repository: OrderRepository, private val u
         return params
     }
 
+    fun loadUserProfile() {
+        viewModelScope.launch {
+            when (val result = repository.fetchUserProfile()) {
+                is Result.Success -> {
+                    result.data?.let {
+                        _userProfile.postValue(it)   // send UserProfile to LiveData
+                    } ?: _errorMessageUser.postValue("User data not found")
+                }
+                is Result.Error -> {
+                    _errorMessageUser.postValue(result.exception.message ?: "Unknown error")
+                }
+                is Result.Loading -> {
+                    null
+                }
+            }
+        }
+    }
+
     companion object {
         private const val TAG = "AddAddressViewModel"
     }

@@ -22,7 +22,6 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import com.alya.ecommerce_serang.data.api.dto.CreateAddressRequest
-import com.alya.ecommerce_serang.data.api.dto.UserProfile
 import com.alya.ecommerce_serang.data.api.response.customer.order.CitiesItem
 import com.alya.ecommerce_serang.data.api.response.customer.order.ProvincesItem
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
@@ -37,8 +36,8 @@ class AddAddressActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAddAddressBinding
     private lateinit var apiService: ApiService
     private lateinit var sessionManager: SessionManager
-    private  var profileUser: Int = 1
     private lateinit var locationManager: LocationManager
+    private var profileUserId: Int? = null
 
     private var isRequestingLocation = false
 
@@ -80,11 +79,15 @@ class AddAddressActivity : AppCompatActivity() {
             )
             windowInsets
         }
+        viewModel.loadUserProfile()
 
-//         Get user profile from session manager
-//        profileUser =UserProfile.
-        viewModel.userProfile.observe(this){ user ->
-            user?.let { updateProfile(it) }
+        viewModel.userProfile.observe(this) { user ->
+            if (user != null) {
+                profileUserId = user.userId
+                Log.d(TAG, "Fetched userId = $profileUserId") // ✅ debug log
+            } else {
+                Log.e(TAG, "Error get profile")
+            }
         }
 
         setupToolbar()
@@ -94,14 +97,8 @@ class AddAddressActivity : AppCompatActivity() {
         setupButtonListeners()
         setupObservers()
 
-
-
         // Force trigger province loading to ensure it happens
         viewModel.getProvinces()
-    }
-
-    private fun updateProfile(userProfile: UserProfile){
-        profileUser = userProfile.userId
     }
 
     // UI setup methods
@@ -280,12 +277,7 @@ class AddAddressActivity : AppCompatActivity() {
         val postalCode = binding.etKodePos.text.toString().trim()
         val recipient = binding.etNamaPenerima.text.toString().trim()
         val phone = binding.etNomorHp.text.toString().trim()
-        val userId = try {
-            profileUser
-        } catch (e: Exception) {
-            Log.w(TAG, "Error getting userId, using default", e)
-            1 // Default userId for testing
-        }
+        val userId = profileUserId
         val isStoreLocation = false
 
         val provinceId = viewModel.selectedProvinceId
@@ -333,7 +325,7 @@ class AddAddressActivity : AppCompatActivity() {
 
         // Create request with all fields
         val request = CreateAddressRequest(
-            userId = userId,
+            userId = userId!!,
             lat = latitude!!,  // Safe to use !! as we've checked above
             long = longitude!!,
             street = street,
@@ -525,6 +517,6 @@ class AddAddressActivity : AppCompatActivity() {
     }
 
     companion object {
-        private const val TAG = "AddAddressViewModel"
+        private const val TAG = "AddAddressActivity"
     }
 }
