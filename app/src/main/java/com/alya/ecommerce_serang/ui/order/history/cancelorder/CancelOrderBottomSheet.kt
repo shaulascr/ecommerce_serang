@@ -67,7 +67,7 @@ class CancelOrderBottomSheet(
 
         btnConfirm.setOnClickListener {
             if (selectedReason == null) {
-                Toast.makeText(context, "Please select a reason", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Pilih alasan pembatalan", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 

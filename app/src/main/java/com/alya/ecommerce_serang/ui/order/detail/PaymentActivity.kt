@@ -160,7 +160,8 @@ class PaymentActivity : AppCompatActivity() {
 
         viewModel.error.observe(this) { error ->
             if (error.isNotEmpty()) {
-                Toast.makeText(this, error, Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Gagal melakukan pembayaran", Toast.LENGTH_SHORT).show()
+                Log.e(TAG, "Failed payment: $error")
             }
         }
     }

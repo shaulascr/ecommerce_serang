@@ -124,7 +124,7 @@ class ChatActivity : AppCompatActivity() {
 
         if (token.isEmpty()) {
             // User not logged in, redirect to login
-            Toast.makeText(this, "Please login first", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Silahkan masuk terlebih dahulu", Toast.LENGTH_SHORT).show()
             startActivity(Intent(this, LoginActivity::class.java))
             finish()
             return
@@ -506,7 +506,7 @@ class ChatActivity : AppCompatActivity() {
             }
             startActivity(intent)
         } catch (e: Exception) {
-            Toast.makeText(this, "Cannot open product details", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Gagal memuat produk", Toast.LENGTH_SHORT).show()
             Log.e(TAG, "Error navigating to product detail", e)
         }
     }
@@ -622,7 +622,7 @@ class ChatActivity : AppCompatActivity() {
                 if (outputFile.exists() && outputFile.length() > 0) {
                     if (outputFile.length() > 5 * 1024 * 1024) {
                         Log.e(TAG, "File too large: ${outputFile.length()} bytes")
-                        Toast.makeText(this, "Image too large (max 5MB)", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "Gambar terlalu besar. Maksimal 1MB", Toast.LENGTH_SHORT).show()
                         return
                     }
 

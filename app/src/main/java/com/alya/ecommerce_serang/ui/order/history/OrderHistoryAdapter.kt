@@ -517,14 +517,14 @@ class OrderHistoryAdapter(
                     } else {
                         // Log error and show a Toast instead if we can't get a FragmentManager
                         Log.e("OrderHistoryAdapter", "Cannot show bottom sheet: Context is not a FragmentActivity")
-                        Toast.makeText(context, "Cannot show cancel order dialog", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Terjadi kendala", Toast.LENGTH_SHORT).show()
                         return
                     }
                 }
                 else -> {
                     // Log error and show a Toast instead if we can't get a FragmentManager
                     Log.e("OrderHistoryAdapter", "Cannot show bottom sheet: Context is not a FragmentActivity")
-                    Toast.makeText(context, "Cannot show cancel order dialog", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Terjadi kendala", Toast.LENGTH_SHORT).show()
                     return
                 }
             }
@@ -535,7 +535,7 @@ class OrderHistoryAdapter(
                 onOrderCancelled = {
                     callbacks.onOrderCancelled(orderId.toString(), true, "Order cancelled successfully")
                     // Show a success message
-                    Toast.makeText(context, "Order cancelled successfully", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Pesanan berhasil dibatalkan", Toast.LENGTH_SHORT).show()
                 }
             )
 

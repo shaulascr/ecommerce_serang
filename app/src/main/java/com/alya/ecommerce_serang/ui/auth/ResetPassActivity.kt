@@ -111,7 +111,7 @@ class ResetPassActivity : AppCompatActivity() {
     }
 
     private fun handleError(errorMessage: String) {
-        Toast.makeText(this, "Error: $errorMessage", Toast.LENGTH_LONG).show()
+        Log.e(TAG, "Error: $errorMessage")
 
         // Optionally show error dialog
         AlertDialog.Builder(this)

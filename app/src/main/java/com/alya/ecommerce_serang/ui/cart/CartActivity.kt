@@ -41,11 +41,16 @@ class CartActivity : AppCompatActivity() {
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        sessionManager = SessionManager(this)
+        apiService = ApiConfig.getApiService(sessionManager)
+
+
         binding = ActivityCartBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        sessionManager = SessionManager(this)
-        apiService = ApiConfig.getApiService(sessionManager)
+        if (!sessionManager.isLoggedIn()){
+            binding.emptyCart.text = "Silahkan masuk terlebih dahulu"
+        }
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
@@ -118,7 +123,7 @@ class CartActivity : AppCompatActivity() {
                             // Start checkout with the prepared items
                             startCheckoutWithWholesaleInfo(selectedItems)
                         } else {
-                            Toast.makeText(this, "Please select items from a single store only", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this, "Pilih produk yang sama dengan toko", Toast.LENGTH_SHORT).show()
                         }
                     }
                 } else {

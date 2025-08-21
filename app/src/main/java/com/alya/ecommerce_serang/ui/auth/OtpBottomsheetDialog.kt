@@ -29,7 +29,7 @@ class OtpBottomSheetDialog(
                 onRegister(updatedUserData) // Send full data to ViewModel
                 dismiss() // Close dialog
             } else {
-                Toast.makeText(requireContext(), "Please enter OTP", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Silahkan masukkan kode OTP", Toast.LENGTH_SHORT).show()
             }
         }
         return view

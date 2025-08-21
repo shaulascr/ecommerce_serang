@@ -86,7 +86,6 @@ class RegisterActivity : AppCompatActivity() {
         }
     }
 
-    // navigate step register in fragment
     fun navigateToStep(step: Int, userData: RegisterRequest?) {
         val fragment = when (step) {
             1 -> RegisterStep1Fragment.newInstance()

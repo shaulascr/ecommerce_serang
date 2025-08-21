@@ -67,7 +67,7 @@ class ShippingActivity : AppCompatActivity() {
         // Validate required information
         if (addressId <= 0 || productId <= 0) {
             Log.e(TAG, "Missing required shipping information: addressId=$addressId, productId=$productId")
-            Toast.makeText(this, "Missing required shipping information", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Gagal memuat pengiriman", Toast.LENGTH_SHORT).show()
             finish()
             return
         }
