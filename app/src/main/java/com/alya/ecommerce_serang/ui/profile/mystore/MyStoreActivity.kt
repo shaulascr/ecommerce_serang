@@ -63,7 +63,7 @@ class MyStoreActivity : AppCompatActivity() {
         viewModel.loadMyStoreProducts()
 
         viewModel.myStoreProfile.observe(this){ user ->
-            user?.let { myStoreProfileOverview(it) }
+            user?.let { myStoreProfileOverview(it.store) }
         }
 
         viewModel.errorMessage.observe(this) { error ->

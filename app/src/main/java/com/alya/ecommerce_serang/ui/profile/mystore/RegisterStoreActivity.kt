@@ -27,6 +27,7 @@ import androidx.core.view.WindowInsetsCompat
 import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.response.auth.StoreTypesItem
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
+import com.alya.ecommerce_serang.data.repository.MyStoreRepository
 import com.alya.ecommerce_serang.data.repository.Result
 import com.alya.ecommerce_serang.data.repository.UserRepository
 import com.alya.ecommerce_serang.databinding.ActivityRegisterStoreBinding
@@ -35,8 +36,17 @@ import com.alya.ecommerce_serang.ui.order.address.CityAdapter
 import com.alya.ecommerce_serang.ui.order.address.ProvinceAdapter
 import com.alya.ecommerce_serang.ui.order.address.SubdsitrictAdapter
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
+import com.alya.ecommerce_serang.utils.FileUtils
+import com.alya.ecommerce_serang.utils.ImageUtils
 import com.alya.ecommerce_serang.utils.SessionManager
+import com.alya.ecommerce_serang.utils.viewmodel.MyStoreViewModel
 import com.alya.ecommerce_serang.utils.viewmodel.RegisterStoreViewModel
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.File
+import androidx.core.net.toUri
 
 class RegisterStoreActivity : AppCompatActivity() {
 
@@ -53,6 +63,7 @@ class RegisterStoreActivity : AppCompatActivity() {
     private val PICK_KTP_REQUEST = 1002
     private val PICK_NPWP_REQUEST = 1003
     private val PICK_NIB_REQUEST = 1004
+    private var isReapply: Boolean = false
 
     // Location request code
     private val LOCATION_PERMISSION_REQUEST = 2001
@@ -64,6 +75,15 @@ class RegisterStoreActivity : AppCompatActivity() {
             RegisterStoreViewModel(orderRepository)
         }
     }
+
+    private val myStoreViewModel: MyStoreViewModel by viewModels {
+        BaseViewModelFactory {
+            val apiService = ApiConfig.getApiService(sessionManager)
+            val myStoreRepository = MyStoreRepository(apiService)
+            MyStoreViewModel(myStoreRepository)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityRegisterStoreBinding.inflate(layoutInflater)
@@ -88,6 +108,8 @@ class RegisterStoreActivity : AppCompatActivity() {
         }
 
         setupHeader()
+
+        isReapply = intent.getBooleanExtra("REAPPLY", false)
 
         provinceAdapter = ProvinceAdapter(this)
         cityAdapter = CityAdapter(this)
@@ -129,19 +151,140 @@ class RegisterStoreActivity : AppCompatActivity() {
         viewModel.cityId.observe(this) { validateRequiredFields() }
         viewModel.storeTypeId.observe(this) { validateRequiredFields() }
 
-        // Setup register button
-        binding.btnRegister.setOnClickListener {
-            Log.d(TAG, "Register button clicked")
-            if (viewModel.validateForm()) {
-                Log.d(TAG, "Form validation successful, proceeding with registration")
-                viewModel.registerStore(this)
-            } else {
-                Log.e(TAG, "Form validation failed")
-                Toast.makeText(this, "Harap lengkapi semua field yang wajib diisi", Toast.LENGTH_SHORT).show()
+        if (isReapply) {
+            binding.btnRegister.text = "Ajukan Kembali"
+            binding.layoutRejected.visibility = View.VISIBLE
+
+            myStoreViewModel.loadMyStore()
+
+            myStoreViewModel.myStoreProfile.observe(this) { storeDataResponse ->
+                storeDataResponse?.let { storeResponse ->
+                    val store = storeResponse.store
+                    binding.tvRejectedReason.text = store.approvalReason
+
+                    // Prefill basic fields
+                    binding.etStoreName.setText(store.storeName)
+                    binding.etStoreDescription.setText(store.storeDescription)
+                    binding.etStreet.setText(store.street)
+                    binding.etPostalCode.setText(store.postalCode)
+                    binding.etAddressDetail.setText(store.detail)
+
+                    viewModel.storeName.value = store.storeName
+                    viewModel.storeDescription.value = store.storeDescription
+                    viewModel.street.value = store.street
+                    viewModel.postalCode.value = store.postalCode.toIntOrNull() ?: 0
+                    viewModel.addressDetail.value = store.detail
+
+                    // Prefill bank info
+                    storeResponse.payment.firstOrNull()?.let { payment ->
+                        viewModel.bankName.value = payment.bankName
+                        viewModel.bankNumber.value = payment.bankNum.toIntOrNull() ?: 0
+                        val bankPosition = bankAdapter.findPositionByName(payment.bankName)
+                        binding.spinnerBankName.setSelection(bankPosition, false)
+                    }
+
+                    // Prefill couriers
+                    storeResponse.shipping.forEach { courier ->
+                        when (courier.courier) {
+                            "jne" -> binding.checkboxJne.isChecked = true
+                            "pos" -> binding.checkboxPos.isChecked = true
+                            "tiki" -> binding.checkboxTiki.isChecked = true
+                        }
+                    }
+
+                    // Prefill document URIs
+                    store.ktp.let { ktpUri ->
+                        viewModel.ktpUri = ktpUri.toUri()
+                        updateImagePreview(viewModel.ktpUri, binding.imgKtp, binding.layoutUploadKtp)
+                    }
+                    store.npwp.let { npwpUri ->
+                        viewModel.npwpUri = npwpUri.toUri()
+                        updateDocumentPreview(binding.layoutUploadNpwp)
+                    }
+                    store.nib.let { nibUri ->
+                        viewModel.nibUri = nibUri.toUri()
+                        updateDocumentPreview(binding.layoutUploadNib)
+                    }
+
+                    // Prefill spinner for store types
+                    preselectStoreType(store.storeTypeId)
+
+                    // Prefill province, city, and subdistrict
+                    preselectProvinceCitySubdistrict(
+                        provinceId = store.provinceId,
+                        cityId = store.cityId,
+                        subdistrictId = store.subdistrict
+                    )
+
+                    validateRequiredFields()
+                }
+            }
+
+            binding.btnRegister.setOnClickListener {
+                doUpdateStoreProfile()
+            }
+        } else {
+            binding.btnRegister.setOnClickListener {
+                if (viewModel.validateForm()) viewModel.registerStore(this)
+                else Toast.makeText(this, "Harap lengkapi semua field yang wajib diisi", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun preselectStoreType(storeTypeId: Int) {
+        // The adapter is created in setupStoreTypeSpinner(...)
+        val adapter = binding.spinnerStoreType.adapter
+        if (adapter != null) {
+            val count = adapter.count
+            for (i in 0 until count) {
+                val item = adapter.getItem(i) as? StoreTypesItem
+                if (item?.id == storeTypeId) {
+                    binding.spinnerStoreType.setSelection(i, false)
+                    break
+                }
+            }
+        }
+    }
+
+    private fun preselectProvinceCitySubdistrict(
+        provinceId: Int,
+        cityId: String,
+        subdistrictId: String
+    ) {
+        // Province first (this will trigger cities fetch)
+        val provCount = provinceAdapter.count
+        for (i in 0 until provCount) {
+            if (provinceAdapter.getProvinceId(i) == provinceId) {
+                binding.spinnerProvince.setSelection(i, false)
+                break
             }
         }
 
-        Log.d(TAG, "onCreate: RegisterStoreActivity setup completed")
+        // When cities arrive, select the city, then load subdistricts
+        viewModel.citiesState.observe(this) { state ->
+            if (state is Result.Success) {
+                val cityCount = cityAdapter.count
+                for (i in 0 until cityCount) {
+                    if (cityAdapter.getCityId(i) == cityId) {
+                        binding.spinnerCity.setSelection(i, false)
+                        break
+                    }
+                }
+            }
+        }
+
+        // When subdistricts arrive, select the subdistrict
+        viewModel.subdistrictState.observe(this) { state ->
+            if (state is Result.Success) {
+                val subCount = subdistrictAdapter.count
+                for (i in 0 until subCount) {
+                    if (subdistrictAdapter.getSubdistrictId(i) == subdistrictId) {
+                        binding.spinnerSubdistrict.setSelection(i, false)
+                        break
+                    }
+                }
+            }
+        }
     }
 
     private fun setupHeader() {
@@ -177,10 +320,11 @@ class RegisterStoreActivity : AppCompatActivity() {
         if (isFormValid) {
             binding.btnRegister.setBackgroundResource(R.drawable.bg_button_active)
             binding.btnRegister.setTextColor(ContextCompat.getColor(this, R.color.white))
+            binding.btnRegister.isEnabled = true
         } else {
             binding.btnRegister.setBackgroundResource(R.drawable.bg_button_disabled)
             binding.btnRegister.setTextColor(ContextCompat.getColor(this, R.color.black_300))
-
+            binding.btnRegister.isEnabled = false
         }
     }
 
@@ -845,6 +989,63 @@ class RegisterStoreActivity : AppCompatActivity() {
             // Hide loading indicator
             binding.btnRegister.isEnabled = true
             binding.btnRegister.text = "Daftar"
+        }
+    }
+
+    private fun doUpdateStoreProfile() {
+        val nameBody: RequestBody    = (viewModel.storeName.value ?: "")
+            .toRequestBody("text/plain".toMediaTypeOrNull())
+        val typeBody: RequestBody    = ((viewModel.storeTypeId.value ?: 0).toString())
+            .toRequestBody("text/plain".toMediaTypeOrNull())
+        val descBody: RequestBody    = (viewModel.storeDescription.value ?: "")
+            .toRequestBody("text/plain".toMediaTypeOrNull())
+        val onLeaveBody: RequestBody = "false"
+            .toRequestBody("text/plain".toMediaTypeOrNull())
+
+        // --- Build Multipart for store image (optional) ---
+        // Prefer compressing images to keep payload small; fall back to raw copy if needed.
+        val storeImgPart: MultipartBody.Part? = viewModel.storeImageUri?.let { uri ->
+            try {
+                // (A) Optional safety check: only allow jpg/png/webp
+                val allowed = Regex("^(jpg|jpeg|png|webp)$", RegexOption.IGNORE_CASE)
+                if (!ImageUtils.isAllowedFileType(this, uri, allowed)) {
+                    Toast.makeText(this, "Format gambar tidak didukung", Toast.LENGTH_SHORT).show()
+                    null
+                } else {
+                    // (B) Compress for upload (ke cacheDir), then build multipart
+                    val compressed: File = ImageUtils.compressImage(
+                        context = this,
+                        uri = uri,
+                        filename = "storeimg",  // prefix
+                        maxWidth = 1024,
+                        maxHeight = 1024,
+                        quality = 80
+                    )
+                    FileUtils.createMultipartFromFile("storeimg", compressed)
+                }
+            } catch (e: Exception) {
+                // If compression fails, try raw copy as fallback
+                val rawFile = FileUtils.createTempFileFromUri(this, uri)
+                rawFile?.let { FileUtils.createMultipartFromFile("storeimg", it) }
+            }
+        }
+
+        myStoreViewModel.updateStoreProfile(
+            storeName = nameBody,
+            storeType = typeBody,
+            description = descBody,
+            isOnLeave = onLeaveBody,
+            storeImage = storeImgPart
+        )
+
+        myStoreViewModel.updateStoreProfileResult.observe(this) {
+            Toast.makeText(this, "Pengajuan ulang berhasil dikirim", Toast.LENGTH_SHORT).show()
+            finish()
+        }
+        myStoreViewModel.errorMessage.observe(this) {
+            if (!it.isNullOrEmpty()) {
+                Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
+            }
         }
     }
 

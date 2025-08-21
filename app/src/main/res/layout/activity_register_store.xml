@@ -69,6 +69,35 @@
 
             </LinearLayout>
 
+            <LinearLayout
+                android:id="@+id/layout_rejected"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:background="@drawable/bg_product_active"
+                android:padding="8dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    style="@style/label_small"
+                    android:textAlignment="center"
+                    android:text="Permintaan Buka Toko Anda sebelumnya ditolak! Silahkan lakukan penyesuaian berdasarkan alasan berikut:"/>
+
+                <TextView
+                    android:id="@+id/tv_rejected_reason"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    style="@style/body_medium"
+                    android:fontFamily="@font/dmsans_bold"
+                    android:layout_marginTop="8dp"
+                    android:text="KTP tidak sesuai"/>
+
+            </LinearLayout>
+
             <!-- Nama Toko -->
             <LinearLayout
                 android:layout_width="match_parent"
