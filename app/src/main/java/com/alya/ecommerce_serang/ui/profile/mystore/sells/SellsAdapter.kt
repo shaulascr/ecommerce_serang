@@ -17,6 +17,7 @@ import com.alya.ecommerce_serang.ui.profile.mystore.sells.shipment.DetailShipmen
 import com.alya.ecommerce_serang.utils.viewmodel.SellsViewModel
 import com.bumptech.glide.Glide
 import com.google.gson.Gson
+import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -96,7 +97,7 @@ class SellsAdapter(
             val product = order.orderItems?.firstOrNull()
             tvSellsProductName.text = product?.productName
             tvSellsProductQty.text = "x${product?.quantity}"
-            tvSellsProductPrice.text = formatPrice(product?.price.toString())
+            tvSellsProductPrice.text = product?.price?.let { formatPrice(it.toInt()) }
 
             val fullImageUrl = when (val img = product?.productImage) {
                 is String -> {
@@ -169,7 +170,7 @@ class SellsAdapter(
                     val product = order.orderItems?.firstOrNull()
                     tvSellsProductName.text = product?.productName
                     tvSellsProductQty.text = "x${product?.quantity}"
-                    tvSellsProductPrice.text = formatPrice(product?.price.toString())
+                    tvSellsProductPrice.text = product?.price?.let { formatPrice(it.toInt()) }
 
                     val fullImageUrl = when (val img = product?.productImage) {
                         is String -> {
@@ -185,7 +186,7 @@ class SellsAdapter(
                         .into(ivSellsProduct)
 
                     tvSellsQty.text = "${order.orderItems?.size} produk"
-                    tvSellsPrice.text = formatPrice(order.totalAmount.toString())
+                    tvSellsPrice.text = order.totalAmount?.let { formatPrice(it.toInt()) }
                 }
                 "paid" -> {
                     layoutOrders.visibility = View.GONE
@@ -308,10 +309,9 @@ class SellsAdapter(
             }
         }
 
-        private fun formatPrice(price: String): String {
-            val priceDouble = price.toDoubleOrNull() ?: 0.0
-            val formattedPrice = String.format(Locale("id", "ID"), "Rp%,.0f", priceDouble)
-            return formattedPrice
+        private fun formatPrice(amount: Int): String {
+            val formatter = NumberFormat.getCurrencyInstance(Locale("in", "ID"))
+            return formatter.format(amount.toLong()).replace(",00", "")
         }
     }
 }

@@ -155,19 +155,20 @@ class RegisterStep1Fragment : Fragment() {
                         "email" -> {
                             isEmailValid = isValid
                             if (!isValid) {
-                                Toast.makeText(requireContext(), "Email is already registered", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(requireContext(), "Email sudah digunakan. Gunakan email lainnya.", Toast.LENGTH_SHORT).show()
                             }
                         }
                         "phone" -> {
                             isPhoneValid = isValid
                             if (!isValid) {
-                                Toast.makeText(requireContext(), "Phone number is already registered", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(requireContext(), "Nomor handphone sudah digunakan. Gunakan nomor lainnya. ", Toast.LENGTH_SHORT).show()
                             }
                         }
                     }
                 }
                 is com.alya.ecommerce_serang.data.repository.Result.Error -> {
-                    Toast.makeText(requireContext(), "Validation failed: ${result.exception.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Gagal melakukan validasi", Toast.LENGTH_SHORT).show()
+                    Log.e(TAG, "Validation failed: ${result.exception.message}")
                 }
             }
         }
@@ -200,7 +201,8 @@ class RegisterStep1Fragment : Fragment() {
                 is Result.Error -> {
                     binding.progressBar.visibility = View.GONE
                     binding.btnNext.isEnabled = true
-                    Toast.makeText(requireContext(), "OTP Request Failed: ${result.exception.message}", Toast.LENGTH_SHORT).show()
+                    Log.e(TAG, "OTP Request Failed: ${result.exception.message}")
+                    Toast.makeText(requireContext(), "Gagal mendapatkan OTP. Kirim ulang OTP", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -229,13 +231,13 @@ class RegisterStep1Fragment : Fragment() {
         // Check if all fields are filled
         if (email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty() || phone.isEmpty() ||
             username.isEmpty() || fullName.isEmpty() || birthDate.isEmpty()) {
-            Toast.makeText(requireContext(), "Please fill all required fields", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Silahkan lengkapi seluruh isian", Toast.LENGTH_SHORT).show()
             return
         }
 
         // Check if passwords match
         if (password != confirmPassword) {
-            Toast.makeText(requireContext(), "Passwords do not match", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Konfirmasi kata sandi tidak sesua. Periksa kembali", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -253,7 +255,7 @@ class RegisterStep1Fragment : Fragment() {
         if (isEmailValid && isPhoneValid) {
             requestOtp(email)
         } else {
-            Toast.makeText(requireContext(), "Please fix validation errors before proceeding", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Silahkan perbaiki data yang dimasukkan", Toast.LENGTH_SHORT).show()
         }
     }
 

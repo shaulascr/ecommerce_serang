@@ -96,7 +96,7 @@ class CheckoutViewModel(private val repository: OrderRepository) : ViewModel() {
     fun initializeFromCart(
         cartItemIds: List<Int>,
         isWholesaleMap: Map<Int, Boolean> = emptyMap(),
-        wholesalePriceMap: Map<Int, Int> = emptyMap() // new
+        wholesalePriceMap: Map<Int, Int> = emptyMap()
     ) {
         viewModelScope.launch {
             _isLoading.value = true
@@ -111,13 +111,21 @@ class CheckoutViewModel(private val repository: OrderRepository) : ViewModel() {
                     for (store in cartResult.data) {
                         val storeItems = store.cartItems.filter { it.cartItemId in cartItemIds }
                         if (storeItems.isNotEmpty()) {
-                            // ✅ Override price with wholesale price if exists
+                            // ✅ Apply wholesale prices - Replace item prices with wholesale prices
                             val updatedItems = storeItems.map { item ->
                                 val wholesalePrice = wholesalePriceMap[item.cartItemId]
-                                if (wholesalePrice != null) {
-                                    item.copy(price = wholesalePrice.toInt())
-                                } else item
+                                val isWholesale = isWholesaleMap[item.cartItemId] ?: false
+
+                                // Use wholesale price if item is wholesale and price exists
+                                if (isWholesale && wholesalePrice != null) {
+                                    Log.d(TAG, "Applying wholesale price for item ${item.cartItemId}: ${item.price} -> $wholesalePrice")
+                                    item.copy(price = wholesalePrice)
+                                } else {
+                                    Log.d(TAG, "Using regular price for item ${item.cartItemId}: ${item.price}")
+                                    item
+                                }
                             }
+
                             matchingItems.addAll(updatedItems)
                             storeData = store
                             break
@@ -143,16 +151,17 @@ class CheckoutViewModel(private val repository: OrderRepository) : ViewModel() {
                             sellerName = storeData.storeName,
                             sellerId = storeData.storeId,
                             isBuyNow = false,
-                            cartItems = matchingItems,
+                            cartItems = matchingItems, // These now have updated wholesale prices
                             cartItemWholesaleMap = isWholesaleMap
                         )
-                        Log.d(TAG, "CheckoutData initialized: ${_checkoutData.value}")
 
-                        Log.d(TAG, "Matching cart items: ${matchingItems.size}")
-                        Log.d(TAG, "Cart items: ${matchingItems.map { it.productName to it.price }}")
-                        Log.d(TAG, "IsWholesaleMap passed: $isWholesaleMap")
-                        Log.d(TAG, "WholesalePriceMap passed: $wholesalePriceMap")
+                        Log.d(TAG, "CheckoutData initialized with ${matchingItems.size} items")
+                        matchingItems.forEachIndexed { index, item ->
+                            val isWholesale = isWholesaleMap[item.cartItemId] ?: false
+                            Log.d(TAG, "Item $index: ${item.productName}, Price: ${item.price}, IsWholesale: $isWholesale")
+                        }
 
+                        // Calculate totals with updated prices
                         calculateSubtotal()
                         calculateTotal()
                     } else {
@@ -163,11 +172,11 @@ class CheckoutViewModel(private val repository: OrderRepository) : ViewModel() {
                 }
             } catch (e: Exception) {
                 _errorMessage.value = "Error: ${e.message}"
+                Log.e(TAG, "Error in initializeFromCart", e)
             } finally {
                 _isLoading.value = false
             }
         }
-
     }
 
     fun getPaymentMethods() {
@@ -417,8 +426,6 @@ class CheckoutViewModel(private val repository: OrderRepository) : ViewModel() {
             (data.orderRequest as OrderRequest).shipPrice.toDouble()
         }
     }
-
-
 
     companion object {
         private const val TAG = "CheckoutViewModel"

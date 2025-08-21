@@ -122,7 +122,6 @@ class AddEvidencePaymentActivity : AppCompatActivity() {
 
         } catch (e: Exception) {
             Log.e(TAG, "ERROR in AddEvidencePaymentActivity onCreate: ${e.message}", e)
-            Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -288,7 +287,7 @@ class AddEvidencePaymentActivity : AppCompatActivity() {
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error handling selected image", e)
-            Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Terjadi kendala", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -367,7 +366,7 @@ class AddEvidencePaymentActivity : AppCompatActivity() {
                     viewModel.uploadPaymentProof(request)
                 } catch (e: Exception) {
                     Log.e(TAG, "Error creating upload request: ${e.message}", e)
-                    Toast.makeText(this, "Error preparing upload: ${e.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Gagal mengunggah foto", Toast.LENGTH_SHORT).show()
                 }
             }
         }

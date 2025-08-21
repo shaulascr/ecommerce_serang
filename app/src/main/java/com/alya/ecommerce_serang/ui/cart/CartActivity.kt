@@ -41,11 +41,16 @@ class CartActivity : AppCompatActivity() {
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        sessionManager = SessionManager(this)
+        apiService = ApiConfig.getApiService(sessionManager)
+
+
         binding = ActivityCartBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        sessionManager = SessionManager(this)
-        apiService = ApiConfig.getApiService(sessionManager)
+        if (!sessionManager.isLoggedIn()){
+            binding.emptyCart.text = "Silahkan masuk terlebih dahulu"
+        }
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
@@ -118,7 +123,7 @@ class CartActivity : AppCompatActivity() {
                             // Start checkout with the prepared items
                             startCheckoutWithWholesaleInfo(selectedItems)
                         } else {
-                            Toast.makeText(this, "Please select items from a single store only", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this, "Pilih produk yang sama dengan toko", Toast.LENGTH_SHORT).show()
                         }
                     }
                 } else {
@@ -151,7 +156,7 @@ class CartActivity : AppCompatActivity() {
 
             // Debug log
             Log.d(
-                    TAG,
+                TAG,
                 "cartItemId: ${updatedCartItem.cartItemId}, " +
                         "isWholesale: ${info.isWholesale}, " +
                         "wholesalePrice: $wholesalePrice, " +
@@ -164,7 +169,17 @@ class CartActivity : AppCompatActivity() {
         val cartItemIds = updatedItems.map { it.cartItem.cartItemId }
         val wholesaleArray = updatedItems.map { it.isWholesale }.toBooleanArray()
 
-        CheckoutActivity.startForCart(this, cartItemIds, wholesaleArray)
+        // FIX: Pass wholesale prices as IntArray
+        val wholesalePricesArray = updatedItems.map { info ->
+            if (info.isWholesale) {
+                val wholesalePrice = wholesalePriceMap[info.cartItem.cartItemId]
+                wholesalePrice?.toInt() ?: info.cartItem.price
+            } else {
+                info.cartItem.price
+            }
+        }.toIntArray()
+
+        CheckoutActivity.startForCart(this, cartItemIds, wholesaleArray, wholesalePricesArray)
     }
 
     private fun observeViewModel() {

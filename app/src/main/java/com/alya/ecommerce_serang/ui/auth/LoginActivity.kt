@@ -72,7 +72,7 @@ class LoginActivity : AppCompatActivity() {
             val password = binding.etLoginPassword.text.toString()
 
             if (email.isEmpty() || password.isEmpty()) {
-                Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Mohon masukkan email atau password dengan benar", Toast.LENGTH_SHORT).show()
             } else {
                 loginViewModel.login(email, password)
             }
@@ -100,14 +100,14 @@ class LoginActivity : AppCompatActivity() {
                     retrieveFCMToken()
 //                    sessionManager.saveUserId(response.userId)
 
-                    Toast.makeText(this, "Login Successful", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Berhasil masuk", Toast.LENGTH_SHORT).show()
 
                     startActivity(Intent(this, MainActivity::class.java))
                     finish()
                 }
                 is com.alya.ecommerce_serang.data.repository.Result.Error -> {
                     Log.e("LoginActivity", "Login Failed: ${result.exception.message}")
-                    Toast.makeText(this, "Login Failed: ${result.exception.message}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, "Gagal masuk", Toast.LENGTH_LONG).show()
                 }
                 is Result.Loading -> {
                     // Show loading state

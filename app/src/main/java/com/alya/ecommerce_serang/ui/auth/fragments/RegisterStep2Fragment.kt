@@ -1,5 +1,6 @@
 package com.alya.ecommerce_serang.ui.auth.fragments
 
+import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -13,6 +14,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.alya.ecommerce_serang.R
+import com.alya.ecommerce_serang.data.api.dto.FcmReq
 import com.alya.ecommerce_serang.data.api.dto.RegisterRequest
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.repository.OrderRepository
@@ -24,6 +26,7 @@ import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
 import com.alya.ecommerce_serang.utils.viewmodel.RegisterViewModel
 import com.google.android.material.progressindicator.LinearProgressIndicator
+import com.google.firebase.messaging.FirebaseMessaging
 
 class RegisterStep2Fragment : Fragment() {
     private var _binding: FragmentRegisterStep2Binding? = null
@@ -109,6 +112,10 @@ class RegisterStep2Fragment : Fragment() {
             }
         }
 
+        binding.btnBack.setOnClickListener {
+            parentFragmentManager.popBackStack()
+        }
+
         observeRegistrationState()
         observeLoginState()
         Log.d(TAG, "Registration and login state observers set up")
@@ -128,11 +135,6 @@ class RegisterStep2Fragment : Fragment() {
             val updatedUserData = it.copy(otp = otp)
             Log.d(TAG, "Updating user data with OTP: $otp")
             registerViewModel.updateUserData(updatedUserData)
-
-            // For demo purposes, we're just proceeding to Step 3
-            // In a real app, you would verify the OTP with the server first
-//            registerViewModel.setStep(3)
-//            (activity as? RegisterActivity)?.navigateToStep(3, updatedUserData)
 
             registerViewModel.registerUser(updatedUserData)
         }  ?: Log.e(TAG, "userData is null, cannot proceed with verification")
@@ -250,6 +252,8 @@ class RegisterStep2Fragment : Fragment() {
                     // Save the token in fragment
                     val accessToken = result.data.accessToken
                     sessionManager.saveToken(accessToken)
+                    retrieveFCMToken()
+
                     Log.d(TAG, "Token saved to SessionManager: $accessToken")
 
                     // Proceed to Step 3
@@ -277,6 +281,37 @@ class RegisterStep2Fragment : Fragment() {
                 }
             }
         }
+    }
+
+    private fun retrieveFCMToken() {
+        FirebaseMessaging.getInstance().token
+            .addOnCompleteListener { task ->
+                if (!task.isSuccessful) {
+                    Log.e(TAG, "Failed to get FCM token", task.exception)
+                    return@addOnCompleteListener
+                }
+
+                val token = task.result
+//                tokenTes = token
+                Log.d(TAG, "FCM token retrieved: $token")
+
+                // Save token locally
+                val sharedPreferences = requireContext().getSharedPreferences("FCM_PREFS", Context.MODE_PRIVATE)
+                sharedPreferences.edit().putString("FCM_TOKEN", token).apply()
+
+                // Send to your server
+                sendTokenToServer(token)
+            }
+    }
+
+    private fun sendTokenToServer(token: String) {
+        Log.d(TAG, "Would send token to server: $token")
+        val tokenFcm=FcmReq(
+            fcmToken = token
+        )
+        registerViewModel.sendFcm(tokenFcm)
+        Log.d(TAG, "Sent token fcm: $token")
+
     }
 
     override fun onDestroyView() {

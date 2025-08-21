@@ -50,8 +50,9 @@
                 android:id="@+id/et_otp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Enter OTP"
+                android:hint="Masukkan OTP"
                 android:inputType="number"
+                android:textSize="16dp"
                 android:textAlignment="center"
                 android:maxLength="6" />
         </com.google.android.material.textfield.TextInputLayout>
@@ -61,8 +62,19 @@
             android:id="@+id/btn_verify"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Verify"
+            android:text="Kirim kode OTP"
+            style="@style/button.large.active.medium"
             app:cornerRadius="8dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_back"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:visibility="gone"
+            style="@style/Widget.Material3.Button.OutlinedButton.Icon"
+            android:text="Kembali"
+            app:cornerRadius="8dp"/>
 
         <!-- Resend OTP -->
         <LinearLayout
@@ -81,7 +93,7 @@
                 android:id="@+id/tv_resend_otp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Resend"
+                android:text="Kirim Ulang"
                 android:textColor="@color/blue1"
                 android:textStyle="bold" />
         </LinearLayout>

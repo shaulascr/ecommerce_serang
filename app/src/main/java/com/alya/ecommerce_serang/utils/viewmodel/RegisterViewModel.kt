@@ -7,9 +7,11 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.alya.ecommerce_serang.data.api.dto.CreateAddressRequest
+import com.alya.ecommerce_serang.data.api.dto.FcmReq
 import com.alya.ecommerce_serang.data.api.dto.RegisterRequest
 import com.alya.ecommerce_serang.data.api.dto.ResetPassReq
 import com.alya.ecommerce_serang.data.api.dto.VerifRegisReq
+import com.alya.ecommerce_serang.data.api.response.auth.FcmTokenResponse
 import com.alya.ecommerce_serang.data.api.response.auth.LoginResponse
 import com.alya.ecommerce_serang.data.api.response.auth.OtpResponse
 import com.alya.ecommerce_serang.data.api.response.auth.RegisterResponse
@@ -386,6 +388,34 @@ class RegisterViewModel(private val repository: UserRepository, private val orde
 
     fun resetPass(request: ResetPassReq){
 
+    }
+
+    fun sendFcm(token: FcmReq) {
+        viewModelScope.launch {
+            _otpState.value = Result.Loading // Indicating API call in progress
+
+            try {
+                // Call the repository function to request OTP
+                val authenticatedApiService = getAuthenticatedApiService()
+                val authenticatedOrderRepo = UserRepository(authenticatedApiService)
+                val response: FcmTokenResponse = authenticatedOrderRepo.sendFcm(token)
+
+                // Log and store success message
+                Log.d("LoginViewModel", "OTP Response: ${response.message}")
+                _message.value = response.message ?: "berhasil" // Store the message for UI feedback
+
+                // Update state to indicate success
+                _otpState.value = Result.Success(Unit)
+
+            } catch (exception: Exception) {
+                // Handle any errors and update state
+                _otpState.value = Result.Error(exception)
+                _message.value = exception.localizedMessage ?: "Failed to request OTP"
+
+                // Log the error for debugging
+                Log.e("LoginViewModel", "OTP request failed for: $token", exception)
+            }
+        }
     }
 
     companion object {

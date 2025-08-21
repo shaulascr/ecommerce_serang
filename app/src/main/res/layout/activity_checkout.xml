@@ -257,6 +257,15 @@
                     android:textSize="14sp"
                     android:layout_marginBottom="8dp" />
 
+                <TextView
+                    android:id="@+id/tvEmptyPayment"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    android:textSize="12sp"
+                    android:text="Pilih alamat terlebih dahulu"
+                    android:layout_marginBottom="8dp"/>
+
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rv_payment_info"
                     android:layout_width="match_parent"

@@ -371,19 +371,35 @@ class EditAddressActivity : AppCompatActivity() {
     private fun createNewAddressFromInputs(oldAddress: AddressDetail): AddressDetail {
         val selectedProvinceId = getSelectedProvinceId()
         val selectedCityId = getSelectedCityId()
-        val selectedSubdistrictId = getSelectedSubdistrictId()
+        val selectedSubdistrictName = getSelectedSubdistrictName()
         val selectedVillageId = getSelectedVillageId()
+        val selectedSubdistrictId = getSelectedSubdistrictId()
+        val selectedVillageName = getSelectedVillageName()
+        val selectedProvinceName = getSelectedProvinceName()
 
-        return oldAddress.copy(
+        Log.d(TAG, "Old subdistrict: ${oldAddress.subdistrict}")
+        Log.d(TAG, "Selected subdistrictId: $selectedSubdistrictName")
+
+        val newAddress = oldAddress.copy(
             recipient = binding.etNamaPenerima.text.toString().trim(),
             phone = binding.etNomorHp.text.toString().trim(),
             detail = binding.etDetailAlamat.text.toString().trim(),
             postalCode = binding.etKodePos.text.toString().trim(),
-            provinceId = selectedProvinceId.toString(),
-            cityId = selectedCityId.toString(),
-            subdistrict = selectedSubdistrictId.toString(),
-            villageId = selectedVillageId
+            provinceId = selectedProvinceId?.toString() ?: oldAddress.provinceId,
+            cityId = selectedCityId ?: oldAddress.cityId,
+            subdistrict = selectedSubdistrictName ?: oldAddress.subdistrict,
+            villageId = selectedVillageId,
+            subdistrictId = selectedSubdistrictId ?: oldAddress.subdistrictId,
+            villageName = selectedVillageName ?: oldAddress.villageName,
+            provinceName = selectedProvinceName ?: oldAddress.provinceName
         )
+
+        // 🔎 Debug logs
+        Log.d(TAG, "New subdistrict: ${newAddress.subdistrict}")
+        Log.d(TAG, "New village name: ${newAddress.villageName}")
+
+
+        return newAddress
     }
 
     private fun getSelectedProvinceId(): Int? {
@@ -392,10 +408,28 @@ class EditAddressActivity : AppCompatActivity() {
         return if (position >= 0) provinceAdapter.getProvinceId(position) else null
     }
 
+    private fun getSelectedProvinceName(): String? {
+        val selectedText = binding.autoCompleteProvinsi.text.toString()
+        val position = provincesList.indexOfFirst { it.province == selectedText }
+        return if (position >= 0) provinceAdapter.getProvinceName(position) else null
+    }
+
     private fun getSelectedCityId(): String? {
         val selectedText = binding.autoCompleteKabupaten.text.toString()
         val position = citiesList.indexOfFirst { it.cityName == selectedText }
         return if (position >= 0) cityAdapter.getCityId(position) else null
+    }
+
+    private fun getSelectedCityName(): String? {
+        val selectedText = binding.autoCompleteKabupaten.text.toString()
+        val position = citiesList.indexOfFirst { it.cityName == selectedText }
+        return if (position >= 0) cityAdapter.getCityName(position) else null
+    }
+
+    private fun getSelectedSubdistrictName(): String? {
+        val selectedText = binding.autoCompleteKecamatan.text.toString()
+        val position = subdistrictsList.indexOfFirst { it.subdistrictName == selectedText }
+        return if (position >= 0) subdistrictAdapter.getSubdistrictName(position) else null
     }
 
     private fun getSelectedSubdistrictId(): String? {
@@ -408,6 +442,12 @@ class EditAddressActivity : AppCompatActivity() {
         val selectedText = binding.autoCompleteDesa.text.toString()
         val position = villagesList.indexOfFirst { it.villageName == selectedText }
         return if (position >= 0) villageAdapter.getVillageId(position) else null
+    }
+
+    private fun getSelectedVillageName(): String? {
+        val selectedText = binding.autoCompleteDesa.text.toString()
+        val position = villagesList.indexOfFirst { it.villageName == selectedText }
+        return if (position >= 0) villageAdapter.getVillageName(position) else null
     }
 
     companion object {

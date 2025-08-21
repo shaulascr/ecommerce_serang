@@ -90,7 +90,7 @@ class CreateReviewActivity : AppCompatActivity() {
                     )
                 })
             } catch (e: Exception) {
-                Toast.makeText(this, "Error loading review items", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Gagal memuat ulasan", Toast.LENGTH_SHORT).show()
                 finish()
             }
         } else {
@@ -110,7 +110,7 @@ class CreateReviewActivity : AppCompatActivity() {
                     )
                 )
             } else {
-                Toast.makeText(this, "No items to review", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Tidak ada produk untuk direview", Toast.LENGTH_SHORT).show()
                 finish()
             }
         }

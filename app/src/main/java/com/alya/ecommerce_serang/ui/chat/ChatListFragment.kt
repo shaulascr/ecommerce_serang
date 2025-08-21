@@ -5,7 +5,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
@@ -80,8 +79,10 @@ class ChatListFragment : Fragment() {
                     }
                 }
                 is Result.Error -> {
-                    binding.tvEmptyChat.visibility = View.VISIBLE
-                    Toast.makeText(requireContext(), "Failed to load chats", Toast.LENGTH_SHORT).show()
+//                    binding.tvEmptyChat.visibility = View.VISIBLE
+                    binding.progressBarChat.visibility = View.VISIBLE
+//                    Toast.makeText(requireContext(), "Failed to load chats", Toast.LENGTH_SHORT).show()
+                    Log.e(TAG, "Failed to load chats")
                 }
                 Result.Loading -> {
                     binding.progressBarChat.visibility = View.VISIBLE

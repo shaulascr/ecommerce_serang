@@ -446,7 +446,7 @@ class RegisterStoreActivity : AppCompatActivity() {
         viewModel.errorMessage.observe(this) { errorMsg ->
             if (errorMsg.isNotEmpty()) {
                 Log.e(TAG, "setupStoreTypesObserver: Error loading store types: $errorMsg")
-                Toast.makeText(this, "Error loading store types: $errorMsg", Toast.LENGTH_SHORT).show()
+//                Toast.makeText(this, "Error loading store types: $errorMsg", Toast.LENGTH_SHORT).show()
             }
         }
 

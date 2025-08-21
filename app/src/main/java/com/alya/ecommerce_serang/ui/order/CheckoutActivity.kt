@@ -79,9 +79,6 @@ class CheckoutActivity : AppCompatActivity() {
         // Determine if this is Buy Now or Cart checkout
         val isBuyNow = intent.hasExtra(EXTRA_PRODUCT_ID) && !intent.hasExtra(EXTRA_CART_ITEM_IDS)
         val isWholesaleNow = intent.getBooleanExtra(EXTRA_ISWHOLESALE, false)
-        val wholesalePricesArray = intent.getIntArrayExtra(EXTRA_CART_ITEM_WHOLESALE_PRICES)
-
-
 
         if (isBuyNow) {
             // Process Buy Now flow
@@ -99,8 +96,7 @@ class CheckoutActivity : AppCompatActivity() {
             // Process Cart checkout flow
             val cartItemIds = intent.getIntArrayExtra(EXTRA_CART_ITEM_IDS)?.toList() ?: emptyList()
             val isWholesaleArray = intent.getBooleanArrayExtra(EXTRA_CART_ITEM_WHOLESALE)
-
-
+            val wholesalePricesArray = intent.getIntArrayExtra(EXTRA_CART_ITEM_WHOLESALE_PRICES)
 
             if (cartItemIds.isNotEmpty()) {
                 // Build map of cartItemId -> isWholesale
@@ -108,17 +104,18 @@ class CheckoutActivity : AppCompatActivity() {
                     cartItemIds.mapIndexed { index, id ->
                         id to isWholesaleArray[index]
                     }.toMap()
-
-
                 } else {
                     emptyMap()
                 }
 
-
-                // Build wholesalePriceMap
-                val wholesalePriceMap = cartItemIds.mapIndexed { index, id ->
-                    id to (wholesalePricesArray?.get(index) ?: 0)
-                }.toMap()
+                // Build wholesalePriceMap - FIX: Map cartItemId to wholesale price
+                val wholesalePriceMap = if (wholesalePricesArray != null && wholesalePricesArray.size == cartItemIds.size) {
+                    cartItemIds.mapIndexed { index, id ->
+                        id to wholesalePricesArray[index]
+                    }.toMap()
+                } else {
+                    emptyMap()
+                }
 
                 viewModel.initializeFromCart(
                     cartItemIds,
@@ -199,7 +196,7 @@ class CheckoutActivity : AppCompatActivity() {
         // Observe order creation
         viewModel.orderCreated.observe(this) { created ->
             if (created) {
-                Toast.makeText(this, "Order successfully created!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Berhasil membuat pesanan", Toast.LENGTH_SHORT).show()
                 setResult(RESULT_OK)
                 finish()
             }
@@ -209,10 +206,12 @@ class CheckoutActivity : AppCompatActivity() {
     private fun setupPaymentMethodsRecyclerView(paymentMethods: List<DetailPaymentItem>) {
         if (paymentMethods.isEmpty()) {
             Log.e("CheckoutActivity", "Payment methods list is empty")
-            Toast.makeText(this, "No payment methods available", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Tidak ditemukan metode pembayaran", Toast.LENGTH_SHORT).show()
+            binding.tvEmptyPayment.visibility = View.VISIBLE
             return
         }
 
+        binding.tvEmptyPayment.visibility = View.GONE
         // Debug logging
         Log.d("CheckoutActivity", "Setting up payment methods: ${paymentMethods.size} methods available")
 
@@ -316,7 +315,7 @@ class CheckoutActivity : AppCompatActivity() {
         binding.layoutShippingMethod.setOnClickListener {
             val addressId = viewModel.addressDetails.value?.id ?: 0
             if (addressId <= 0) {
-                Toast.makeText(this, "Please select delivery address first", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Silahkan pilih metode pengiriman dahulu", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
@@ -366,7 +365,7 @@ class CheckoutActivity : AppCompatActivity() {
                 viewModel.setSelectedAddress(addressId)
 
                 // You might want to show a toast or some UI feedback
-                Toast.makeText(this, "Address selected successfully", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Berhasil memilih alamat", Toast.LENGTH_SHORT).show()
             }
         }
     }

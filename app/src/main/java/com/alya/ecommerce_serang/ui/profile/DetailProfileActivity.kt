@@ -106,7 +106,8 @@ class DetailProfileActivity : AppCompatActivity() {
                 }
                 editProfileLauncher.launch(intent)
             } ?: run {
-                Toast.makeText(this, "Profile data is not available", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Akun tidak ditemukan", Toast.LENGTH_SHORT).show()
+                Log.e("DetailProfileActivity", "Profile data is not available")
             }
         }
     }

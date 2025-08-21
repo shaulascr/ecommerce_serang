@@ -530,7 +530,7 @@ interface ApiService {
         @Body request: ResetPassReq
     ): Response<ResetPassResponse>
 
-    @GET("address/detail/{id}")
+    @GET("profile/address/detail/{id}")
     suspend fun getDetailAddress(
         @Path("id") addressId: Int
     ): Response<AddressDetailResponse>

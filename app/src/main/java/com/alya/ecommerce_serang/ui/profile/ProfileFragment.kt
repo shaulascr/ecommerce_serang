@@ -20,10 +20,10 @@ import com.alya.ecommerce_serang.data.repository.MyStoreRepository
 import com.alya.ecommerce_serang.data.repository.UserRepository
 import com.alya.ecommerce_serang.databinding.FragmentProfileBinding
 import com.alya.ecommerce_serang.ui.auth.LoginActivity
-import com.alya.ecommerce_serang.ui.profile.mystore.RegisterStoreActivity
 import com.alya.ecommerce_serang.ui.order.address.AddressActivity
 import com.alya.ecommerce_serang.ui.order.history.HistoryActivity
 import com.alya.ecommerce_serang.ui.profile.mystore.MyStoreActivity
+import com.alya.ecommerce_serang.ui.profile.mystore.RegisterStoreActivity
 import com.alya.ecommerce_serang.ui.profile.mystore.StoreOnReviewActivity
 import com.alya.ecommerce_serang.ui.profile.mystore.StoreSuspendedActivity
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
@@ -58,7 +58,6 @@ class ProfileFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        sessionManager = SessionManager(requireContext())
     }
 
     override fun onCreateView(
@@ -71,6 +70,30 @@ class ProfileFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        sessionManager = SessionManager(requireContext())
+
+        if (!sessionManager.isLoggedIn()) {
+            // Redirect to LoginActivity
+            binding.tvName.text = "Selamat Datang"
+            binding.tvUsername.text = "Silahkan masuk"
+            binding.btnDetailProfile.text = "Masuk"
+            binding.btnDetailProfile.setOnClickListener {
+                val intent = Intent(requireContext(), LoginActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                startActivity(intent)
+
+                // ✅ Finish the host activity so user can’t go back
+                requireActivity().finish()
+            }
+
+            binding.containerBukaToko.visibility = View.GONE
+            binding.cardPesanan.visibility = View.GONE
+            binding.tvPengaturanAkun.visibility = View.GONE
+            binding.containerSettings.visibility = View.GONE
+            binding.cardAbout.visibility = View.GONE
+            binding.cardLogout.visibility = View.GONE
+        }
 
         observeUserProfile()
 
@@ -140,7 +163,8 @@ class ProfileFragment : Fragment() {
             user?.let { updateUI(it) }
         }
         viewModel.errorMessage.observe(viewLifecycleOwner) { errorMessage ->
-            Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show()
+//            Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show()
+            Log.e("Profile Fragment", "Failed to load profile: $errorMessage")
         }
     }
 
@@ -196,6 +220,8 @@ class ProfileFragment : Fragment() {
                 sessionManager.clearAll()
                 val intent = Intent(requireContext(), LoginActivity::class.java)
                 startActivity(intent)
+                requireActivity().finish()
+
             } catch (e: Exception) {
                 Toast.makeText(
                     requireContext(),

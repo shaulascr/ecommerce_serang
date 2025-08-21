@@ -23,13 +23,13 @@ data class AddressDetail(
 	val latitude: String,
 
 	@field:SerializedName("province_name")
-	val provinceName: String,
+	val provinceName: String?,
 
 	@field:SerializedName("subdistrict_id")
-	val subdistrictId: String,
+	val subdistrictId: String?,
 
 	@field:SerializedName("city_name")
-	val cityName: String,
+	val cityName: String?,
 
 	@field:SerializedName("user_id")
 	val userId: Int,

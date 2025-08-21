@@ -104,11 +104,20 @@ class RegisterStep3Fragment : Fragment() {
         // Set up button listeners
         binding.btnPrevious.setOnClickListener {
             // Go back to the previous step
-            parentFragmentManager.popBackStack()
+//            parentFragmentManager.popBackStack()
+//            (activity as? RegisterActivity)?.navigateToStep(2, null)
+//            (activity as? RegisterActivity)?.goBackToPreviousStep()
+
+            // Option 2: Direct navigation to step 1
+            val step2Fragment = RegisterStep2Fragment()
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, step2Fragment)
+                .commit()
         }
 
         binding.btnRegister.setOnClickListener {
             submitAddress()
+            sessionManager.clearAll()
         }
 
         // If user skips address entry
@@ -503,7 +512,7 @@ class RegisterStep3Fragment : Fragment() {
 
     private fun showRegistrationSuccess() {
         // Now we can show the success message for the overall registration process
-        Toast.makeText(requireContext(), "Registration completed successfully!", Toast.LENGTH_LONG).show()
+        Toast.makeText(requireContext(), "Berhasil mendaftarkan akun", Toast.LENGTH_LONG).show()
 
         // Navigate to login screen
         startActivity(Intent(requireContext(), LoginActivity::class.java))
@@ -521,4 +530,5 @@ class RegisterStep3Fragment : Fragment() {
         ViewCompat.setWindowInsetsAnimationCallback(binding.root, null)
         _binding = null
     }
+
 }

@@ -32,6 +32,10 @@ class ProvinceAdapter(
     fun getProvinceId(position: Int): Int? {
         return provinces.getOrNull(position)?.provinceId?.toIntOrNull()
     }
+
+    fun getProvinceName(position: Int): String? {
+        return provinces.getOrNull(position)?.province?.toString()
+    }
 }
 
 class CityAdapter(
@@ -52,6 +56,10 @@ class CityAdapter(
 
     fun getCityId(position: Int): String? {
         return cities.getOrNull(position)?.cityId?.toString()
+    }
+
+    fun getCityName(position: Int): String? {
+        return cities.getOrNull(position)?.cityName?.toString()
     }
 }
 
@@ -98,6 +106,10 @@ class VillagesAdapter(
 
     fun getVillageId(position: Int): String? {
         return villages.getOrNull(position)?.villageId?.toString()
+    }
+
+    fun getVillageName(position: Int): String? {
+        return villages.getOrNull(position)?.villageName.toString()
     }
     fun getPostalCode(position: Int): String?{
         return villages.getOrNull(position)?.postalCode
