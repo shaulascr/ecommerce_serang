@@ -382,35 +382,3 @@ class RegisterStep2Fragment : Fragment() {
         stopTimer()
     }
 }
-
-//    override fun onDestroyView() {
-//        super.onDestroyView()
-//        countDownTimer?.cancel()
-//        _binding = null
-//    }
-
-//    private fun startResendCooldown() {
-//        Log.d(TAG, "startResendCooldown called")
-//        timeRemaining = 30
-//        binding.tvResendOtp.isEnabled = false
-//        binding.tvResendOtp.setTextColor(ContextCompat.getColor(requireContext(), R.color.soft_gray))
-//
-//        countDownTimer?.cancel()
-//        countDownTimer = object : CountDownTimer(30000, 1000) {
-//            override fun onTick(millisUntilFinished: Long) {
-//                timeRemaining = (millisUntilFinished / 1000).toInt()
-//                binding.tvTimer.text = "Kirim ulang OTP dalam waktu 00:${String.format("%02d", timeRemaining)}"
-//                if (timeRemaining % 5 == 0) {
-//                    Log.d(TAG, "Cooldown remaining: $timeRemaining seconds")
-//                }
-//            }
-//
-//            override fun onFinish() {
-//                Log.d(TAG, "Cooldown finished, enabling resend button")
-//                binding.tvTimer.text = "Dapat mengirim ulang kode OTP"
-//                binding.tvResendOtp.isEnabled = true
-//                binding.tvResendOtp.setTextColor(ContextCompat.getColor(requireContext(), R.color.blue1))
-//                timeRemaining = 0
-//            }
-//        }.start()
-//    }
