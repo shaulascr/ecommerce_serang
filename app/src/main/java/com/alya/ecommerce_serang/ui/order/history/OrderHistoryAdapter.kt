@@ -547,15 +547,6 @@ class OrderHistoryAdapter(
             // Use ViewModel to fetch order details
             viewModel.getOrderDetails(order.orderId)
 
-            // Create loading dialog
-//            val loadingDialog = Dialog(itemView.context).apply {
-//                requestWindowFeature(Window.FEATURE_NO_TITLE)
-//                setContentView(R.layout.dialog_loading)
-//                window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-//                setCancelable(false)
-//            }
-//            loadingDialog.show()
-
             viewModel.error.observe(itemView.findViewTreeLifecycleOwner()!!) { errorMsg ->
                 if (!errorMsg.isNullOrEmpty()) {
                     Toast.makeText(itemView.context, errorMsg, Toast.LENGTH_SHORT).show()
