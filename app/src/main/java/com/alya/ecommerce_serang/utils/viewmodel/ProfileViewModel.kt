@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.alya.ecommerce_serang.data.api.dto.UserProfile
+import com.alya.ecommerce_serang.data.api.response.auth.ChangePassResponse
 import com.alya.ecommerce_serang.data.api.response.auth.HasStoreResponse
 import com.alya.ecommerce_serang.data.api.response.customer.profile.EditProfileResponse
 import com.alya.ecommerce_serang.data.repository.Result
@@ -26,7 +27,7 @@ class ProfileViewModel(private val userRepository: UserRepository) : ViewModel()
 
     private val _checkStore = MutableLiveData<Boolean>()
     val checkStore: LiveData<Boolean> = _checkStore
-
+    val changePasswordResult = MutableLiveData<Result<ChangePassResponse>>()
     private val _logout = MutableLiveData<Boolean>()
     val logout : LiveData<Boolean> = _logout
 
@@ -110,6 +111,20 @@ class ProfileViewModel(private val userRepository: UserRepository) : ViewModel()
         }
     }
 
+    fun changePassword(currentPassword: String, newPassword: String) {
+        viewModelScope.launch {
+            try {
+                // Call the repository to change the password
+                val result = userRepository.changePassword(currentPassword, newPassword)
+
+                // Post the result (success or error) to LiveData
+                changePasswordResult.postValue(result)
+            } catch (e: Exception) {
+                // Handle any unexpected errors
+                changePasswordResult.postValue(Result.Error(e))
+            }
+        }
+    }
 
     companion object {
         private const val TAG = "ProfileViewModel"

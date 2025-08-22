@@ -5,6 +5,7 @@ import com.alya.ecommerce_serang.data.api.dto.AddEvidenceRequest
 import com.alya.ecommerce_serang.data.api.dto.AddPaymentInfoResponse
 import com.alya.ecommerce_serang.data.api.dto.CancelOrderReq
 import com.alya.ecommerce_serang.data.api.dto.CartItem
+import com.alya.ecommerce_serang.data.api.dto.ChangePasswordRequest
 import com.alya.ecommerce_serang.data.api.dto.CityResponse
 import com.alya.ecommerce_serang.data.api.dto.CompletedOrderRequest
 import com.alya.ecommerce_serang.data.api.dto.ConfirmPaymentRequest
@@ -27,6 +28,7 @@ import com.alya.ecommerce_serang.data.api.dto.StoreAddressResponse
 import com.alya.ecommerce_serang.data.api.dto.UpdateCart
 import com.alya.ecommerce_serang.data.api.dto.UpdateChatRequest
 import com.alya.ecommerce_serang.data.api.dto.VerifRegisReq
+import com.alya.ecommerce_serang.data.api.response.auth.ChangePassResponse
 import com.alya.ecommerce_serang.data.api.response.auth.CheckStoreResponse
 import com.alya.ecommerce_serang.data.api.response.auth.FcmTokenResponse
 import com.alya.ecommerce_serang.data.api.response.auth.HasStoreResponse
@@ -529,6 +531,11 @@ interface ApiService {
     suspend fun postResetPass(
         @Body request: ResetPassReq
     ): Response<ResetPassResponse>
+
+    @POST("changepass")
+    suspend fun changePassword(
+        @Body request: ChangePasswordRequest
+    ): Response<ChangePassResponse>
 
     @GET("profile/address/detail/{id}")
     suspend fun getDetailAddress(

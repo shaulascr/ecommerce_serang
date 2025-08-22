@@ -3,6 +3,7 @@ package com.alya.ecommerce_serang.data.repository
 import android.content.Context
 import android.net.Uri
 import android.util.Log
+import com.alya.ecommerce_serang.data.api.dto.ChangePasswordRequest
 import com.alya.ecommerce_serang.data.api.dto.FcmReq
 import com.alya.ecommerce_serang.data.api.dto.LoginRequest
 import com.alya.ecommerce_serang.data.api.dto.OtpRequest
@@ -10,6 +11,7 @@ import com.alya.ecommerce_serang.data.api.dto.RegisterRequest
 import com.alya.ecommerce_serang.data.api.dto.ResetPassReq
 import com.alya.ecommerce_serang.data.api.dto.UserProfile
 import com.alya.ecommerce_serang.data.api.dto.VerifRegisReq
+import com.alya.ecommerce_serang.data.api.response.auth.ChangePassResponse
 import com.alya.ecommerce_serang.data.api.response.auth.FcmTokenResponse
 import com.alya.ecommerce_serang.data.api.response.auth.HasStoreResponse
 import com.alya.ecommerce_serang.data.api.response.auth.ListStoreTypeResponse
@@ -516,6 +518,29 @@ class UserRepository(private val apiService: ApiService) {
             Result.Error(e)
         }
     }
+
+    suspend fun changePassword(currentPassword: String, newPassword: String): Result<ChangePassResponse> {
+        return try {
+            val request = ChangePasswordRequest(currentPassword, newPassword)
+            val response = apiService.changePassword(request)  // Make the API call
+
+            if (response.isSuccessful) {
+                val changePassResponse = response.body()
+                if (changePassResponse != null) {
+                    Result.Success(changePassResponse)  // Return success with the response message
+                } else {
+                    Result.Error(Exception("Empty response from server"))
+                }
+            } else {
+                val errorBody = response.errorBody()?.string() ?: "Unknown error"
+                Log.e(TAG, "Error changing password: $errorBody")
+                Result.Error(Exception(errorBody))
+            }
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
+    }
+
     companion object{
         private const val TAG = "UserRepository"
     }
