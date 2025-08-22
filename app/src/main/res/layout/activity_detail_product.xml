@@ -231,6 +231,18 @@
                             android:textSize="14sp" />
                     </LinearLayout>
 
+                    <TextView
+                        android:id="@+id/empty_review"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Belum ada ulasan"
+                        android:textSize="16sp"
+                        android:textColor="@color/black_200"
+                        android:gravity="center"
+                        android:visibility="gone"
+                        android:fontFamily="@font/dmsans_mediumitalic"
+                        android:layout_marginTop="8dp"/>
+
                     <!-- RecyclerView for Reviews -->
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/recyclerViewReviews"
@@ -385,6 +397,13 @@
                     android:orientation="horizontal"
                     android:padding="16dp">
 
+                    <ProgressBar
+                        android:id="@+id/progress_bar_detail_store"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"
+                        android:layout_gravity="center"/>
+
                     <de.hdodenhof.circleimageview.CircleImageView
                         android:id="@+id/ivSellerImage"
                         android:layout_width="48dp"
@@ -476,6 +495,18 @@
                             android:textColor="@color/blue_500"
                             android:textSize="14sp" />
                     </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/empty_other_products"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Belum ada ulasan"
+                        android:textSize="16sp"
+                        android:textColor="@color/black_200"
+                        android:gravity="center"
+                        android:visibility="gone"
+                        android:fontFamily="@font/dmsans_mediumitalic"
+                        android:layout_marginTop="8dp"/>
 
                     <!-- RecyclerView for Other Products -->
                     <androidx.recyclerview.widget.RecyclerView

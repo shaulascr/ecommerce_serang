@@ -88,15 +88,18 @@ class StoreDetailActivity : AppCompatActivity() {
         viewModel.storeDetail.observe(this) { result ->
             when (result) {
                 is Result.Success -> {
+                    binding.progressBarDetailProdItem.visibility = View.GONE
                     updateStoreInfo(result.data)
                     viewModel.loadOtherProducts(result.data.storeId)
                 }
                 is Result.Error -> {
                     // Show error message, maybe a Toast or Snackbar
+                    binding.progressBarDetailProdItem.visibility = View.GONE
                     Toast.makeText(this, "Failed to load store: ${result.exception.message}", Toast.LENGTH_SHORT).show()
                 }
                 is Result.Loading -> {
                     // Show loading indicator if needed
+                    binding.progressBarDetailProdItem.visibility = View.VISIBLE
                 }
             }
         }
@@ -109,6 +112,9 @@ class StoreDetailActivity : AppCompatActivity() {
             val products = viewModel.otherProducts.value.orEmpty()
             if (products.isNotEmpty()) {
                 updateProducts(products, storeMap)
+            } else {
+                binding.progressBarDetailProdItem.visibility = View.VISIBLE
+                binding.rvProducts.visibility = View.GONE
             }
         }
     }
@@ -146,7 +152,7 @@ class StoreDetailActivity : AppCompatActivity() {
                 .into(binding.ivStoreImage)
 
             val ratingStr = it.storeRating
-            val ratingValue = ratingStr?.toFloatOrNull()
+            val ratingValue = ratingStr.toFloatOrNull()
 
             if (ratingValue != null && ratingValue > 0f) {
                 binding.tvStoreRating.text = String.format("%.1f", ratingValue)
@@ -161,10 +167,12 @@ class StoreDetailActivity : AppCompatActivity() {
     private fun updateProducts(products: List<ProductsItem>, storeMap: Map<Int, StoreItem>) {
         if (products.isEmpty()) {
             binding.rvProducts.visibility = View.GONE
+            binding.progressBarDetailProdItem.visibility = View.VISIBLE
             Log.d("StoreDetailActivity", "Product list is empty, hiding RecyclerView")
         } else {
             Log.d("StoreDetailActivity", "Displaying product list in RecyclerView")
 
+            binding.progressBarDetailProdItem.visibility = View.GONE
             binding.rvProducts.visibility = View.VISIBLE
             productAdapter = HorizontalProductAdapter(products, onClick = { product ->
                 handleProductClick(product)
