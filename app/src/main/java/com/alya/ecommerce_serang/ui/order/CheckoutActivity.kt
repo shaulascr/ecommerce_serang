@@ -154,8 +154,18 @@ class CheckoutActivity : AppCompatActivity() {
 
         // Observe address details
         viewModel.addressDetails.observe(this) { address ->
-            binding.tvPlacesAddress.text = address?.recipient
-            binding.tvAddress.text = "${address?.street}, ${address?.subdistrict}"
+            if (address != null) {
+                // Show selected address
+                binding.containerEmptyAddress.visibility = View.GONE
+                binding.containerAddress.visibility = View.VISIBLE
+
+                binding.tvPlacesAddress.text = address.recipient
+                binding.tvAddress.text = "${address.street}, ${address.subdistrict}"
+            } else {
+                // Show empty address state
+                binding.containerEmptyAddress.visibility = View.VISIBLE
+                binding.containerAddress.visibility = View.GONE
+            }
         }
 
         viewModel.availablePaymentMethods.observe(this) { paymentMethods ->
@@ -172,9 +182,7 @@ class CheckoutActivity : AppCompatActivity() {
 
                 // Update the adapter ONLY if it exists
                 paymentAdapter?.let { adapter ->
-                    // This line was causing issues - using setSelectedPayment instead of setSelectedPaymentName
                     adapter.setSelectedPaymentId(selectedPayment.id)
-
                     Log.d("CheckoutActivity", "Updated adapter with selected payment: ${selectedPayment.id}")
                 }
             }
@@ -183,13 +191,13 @@ class CheckoutActivity : AppCompatActivity() {
         // Observe loading state
         viewModel.isLoading.observe(this) { isLoading ->
             binding.btnPay.isEnabled = !isLoading
-
         }
 
         // Observe error messages
         viewModel.errorMessage.observe(this) { message ->
             if (message.isNotEmpty()) {
-                Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Terdapat kendala di pemesanan", Toast.LENGTH_SHORT).show()
+                Log.e("CheckoutActivity", "Error from errorMessage: $message")
             }
         }
 
@@ -207,11 +215,16 @@ class CheckoutActivity : AppCompatActivity() {
         if (paymentMethods.isEmpty()) {
             Log.e("CheckoutActivity", "Payment methods list is empty")
             Toast.makeText(this, "Tidak ditemukan metode pembayaran", Toast.LENGTH_SHORT).show()
-            binding.tvEmptyPayment.visibility = View.VISIBLE
+
+            // Show empty payment state
+            binding.containerEmptyPayment.visibility = View.VISIBLE
+            binding.rvPaymentInfo.visibility = View.GONE
             return
         }
 
-        binding.tvEmptyPayment.visibility = View.GONE
+        binding.containerEmptyPayment.visibility = View.GONE
+        binding.rvPaymentInfo.visibility = View.VISIBLE
+
         // Debug logging
         Log.d("CheckoutActivity", "Setting up payment methods: ${paymentMethods.size} methods available")
 
@@ -257,6 +270,16 @@ class CheckoutActivity : AppCompatActivity() {
     }
 
     private fun setupProductRecyclerView(checkoutData: CheckoutData) {
+        if (checkoutData.cartItems.isEmpty()) {
+            // Show empty products state
+            binding.containerEmptyProducts.visibility = View.VISIBLE
+            binding.rvProductItems.visibility = View.GONE
+            return
+        }
+
+        binding.containerEmptyProducts.visibility = View.GONE
+        binding.rvProductItems.visibility = View.VISIBLE
+
         val adapter = if (checkoutData.isBuyNow || checkoutData.cartItems.size <= 1) {
             CheckoutSellerAdapter(checkoutData)
         } else {
@@ -292,7 +315,8 @@ class CheckoutActivity : AppCompatActivity() {
 
     private fun updateShippingUI(shipName: String, shipService: String, shipEtd: String, shipPrice: Int) {
         if (shipName.isNotEmpty() && shipService.isNotEmpty()) {
-            // Display shipping name and service in one line
+            // Hide empty state and show selected shipping
+            binding.containerEmptyShipping.visibility = View.GONE
             binding.cardShipment.visibility = View.VISIBLE
 
             binding.tvCourierName.text = "$shipName $shipService"
@@ -300,6 +324,8 @@ class CheckoutActivity : AppCompatActivity() {
             binding.tvShippingPrice.text = formatCurrency(shipPrice.toDouble())
             binding.rbJne.isChecked = true
         } else {
+            // Show empty shipping state
+            binding.containerEmptyShipping.visibility = View.VISIBLE
             binding.cardShipment.visibility = View.GONE
         }
     }
@@ -312,10 +338,10 @@ class CheckoutActivity : AppCompatActivity() {
         }
 
         // Shipping method selection
-        binding.layoutShippingMethod.setOnClickListener {
+        binding.tvShippingOption.setOnClickListener {
             val addressId = viewModel.addressDetails.value?.id ?: 0
             if (addressId <= 0) {
-                Toast.makeText(this, "Silahkan pilih metode pengiriman dahulu", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Silahkan pilih alamat dahulu", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 

@@ -34,69 +34,50 @@
             android:orientation="vertical">
 
             <!-- Delivery Address Section -->
-            <androidx.cardview.widget.CardView
+            <com.google.android.material.card.MaterialCardView
                 android:id="@+id/card_delivery_address"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="0dp"
-                android:layout_marginTop="0dp"
-                app:cardElevation="0dp">
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="16dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="@color/white"
+                app:strokeColor="#E0E0E0"
+                app:strokeWidth="1dp">
 
-                <LinearLayout
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp"
-                    android:background="@color/white">
+                    android:padding="20dp">
 
+                    <!-- Header Row -->
                     <LinearLayout
-                        android:layout_width="match_parent"
+                        android:id="@+id/address_header"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal">
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent">
 
                         <ImageView
                             android:id="@+id/iv_location_icon"
                             android:layout_width="24dp"
                             android:layout_height="24dp"
                             android:src="@drawable/baseline_location_pin_24"
-                            android:layout_gravity="center_vertical"
-                            app:tint="#3D84FF" />
+                            app:tint="@color/blue_300" />
 
                         <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Alamat Pengiriman"
-                            android:textSize="16sp"
-                            android:fontFamily="@font/dmsans_medium"
-                            android:layout_marginStart="8dp" />
-                    </LinearLayout>
-
-                    <TextView
-                        android:id="@+id/tv_places_address"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="-"
-                        android:textColor="#5A5A5A"
-                        android:paddingHorizontal="8dp"
-                        android:paddingVertical="2dp"
-                        android:textSize="12sp"
-                        android:layout_marginTop="8dp"
-                        android:layout_marginStart="32dp" />
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginTop="8dp">
-
-                        <TextView
-                            android:id="@+id/tv_address"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="-"
-                            android:textSize="14sp"
-                            android:layout_marginStart="32dp" />
+                            android:text="Alamat Pengiriman"
+                            android:textSize="16sp"
+                            android:textColor="@android:color/black"
+                            android:fontFamily="@font/dmsans_medium"
+                            android:layout_marginStart="12dp" />
 
                         <TextView
                             android:id="@+id/tv_change_address"
@@ -104,178 +85,441 @@
                             android:layout_height="wrap_content"
                             android:text="Pilih Alamat"
                             android:textColor="#3D84FF"
-                            android:textSize="14sp" />
+                            android:textSize="14sp"
+                            android:fontFamily="@font/dmsans_medium"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:paddingHorizontal="8dp"
+                            android:paddingVertical="4dp" />
                     </LinearLayout>
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="8dp"
-                android:background="@color/black_50" />
+                    <!-- Empty Address State -->
+                    <LinearLayout
+                        android:id="@+id/container_empty_address"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginTop="4dp"
+                        android:gravity="center"
+                        android:padding="8dp"
+                        app:layout_constraintTop_toBottomOf="@id/address_header"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="Belum ada alamat dipilih"
+                            android:fontFamily="@font/dmsans_medium"
+                            android:textColor="#757575"
+                            android:textSize="14sp"
+                            android:gravity="center" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="Pilih alamat pengiriman untuk melanjutkan"
+                            android:textColor="#BDBDBD"
+                            android:textSize="12sp"
+                            android:gravity="center" />
+                    </LinearLayout>
+
+                    <!-- Selected Address Content -->
+                    <LinearLayout
+                        android:id="@+id/container_address"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginTop="4dp"
+                        android:visibility="gone"
+                        app:layout_constraintTop_toBottomOf="@id/address_header"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent">
+
+                        <!-- Address Label -->
+                        <TextView
+                            android:id="@+id/tv_places_address"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Rumah"
+                            android:textColor="#3D84FF"
+                            android:textSize="12sp"
+                            android:fontFamily="@font/dmsans_medium"
+                            android:background="@drawable/bg_edit_text_background"
+                            android:paddingHorizontal="8dp"
+                            android:paddingVertical="4dp"
+                            tools:text="Rumah" />
+
+                        <!-- Full Address -->
+                        <TextView
+                            android:id="@+id/tv_address"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="Jl. Raya Serang No. 123, Kecamatan Serang, Kabupaten Serang, Banten 42111"
+                            android:textSize="14sp"
+                            android:textColor="@android:color/black"
+                            android:lineSpacingExtra="2dp"
+                            tools:text="Jl. Raya Serang No. 123, Kecamatan Serang, Kabupaten Serang, Banten 42111" />
+                    </LinearLayout>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </com.google.android.material.card.MaterialCardView>
+
 
             <!-- Product Items Section -->
-            <androidx.cardview.widget.CardView
+            <com.google.android.material.card.MaterialCardView
                 android:id="@+id/card_product"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardElevation="0dp">
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="8dp"
+                app:cardBackgroundColor="@color/white"
+                app:strokeColor="#E0E0E0"
+                app:strokeWidth="1dp">
 
-                <LinearLayout
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:background="@color/white"
-                    android:padding="16dp">
+                    android:padding="20dp">
 
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/rv_product_items"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        tools:listitem="@layout/item_order_seller" />
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="8dp"
-                android:background="#F5F5F5" />
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="8dp"
-                android:background="@color/black_50" />
-
-            <!-- Shipping Method Section -->
-            <LinearLayout
-                android:id="@+id/layout_shipping_method"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:background="@color/white"
-                android:padding="16dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <TextView
+                    <!-- Header Row -->
+                    <LinearLayout
+                        android:id="@+id/product_header"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Metode Pengiriman"
-                        android:textSize="14sp" />
-
-                    <TextView
-                        android:id="@+id/tv_shipping_option"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Opsi Pengiriman"
-                        android:textColor="#3D84FF"
-                        android:textSize="14sp" />
-                </LinearLayout>
-
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/card_shipment"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:visibility="gone"
-                    app:cardCornerRadius="8dp"
-                    app:cardElevation="0dp"
-                    app:cardBackgroundColor="#F5F5F5">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:padding="12dp">
+                        android:gravity="center_vertical"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent">
 
-                        <RadioButton
-                            android:id="@+id/rb_jne"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:checked="true" />
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@drawable/baseline_local_grocery_store_24"
+                            app:tint="@color/blue_300" />
 
-                        <LinearLayout
+                        <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:orientation="vertical"
-                            android:layout_marginStart="8dp">
+                            android:text="Produk Pesanan"
+                            android:textSize="16sp"
+                            android:textColor="@android:color/black"
+                            android:fontFamily="@font/dmsans_medium"
+                            android:layout_marginStart="12dp" />
+                    </LinearLayout>
 
-                            <TextView
-                                android:id="@+id/tv_courier_name"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="JNE"
-                                android:textSize="16sp"
-                                android:fontFamily="@font/dmsans_medium" />
+                    <!-- Empty Product State -->
+                    <LinearLayout
+                        android:id="@+id/container_empty_products"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginTop="4dp"
+                        android:gravity="center"
+                        android:padding="8dp"
+                        android:visibility="visible"
+                        app:layout_constraintTop_toBottomOf="@id/product_header"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent">
 
-                            <TextView
-                                android:id="@+id/tv_delivery_estimate"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="3 - 4 hari kerja"
-                                android:textSize="14sp"
-                                android:textColor="#757575" />
-                        </LinearLayout>
 
                         <TextView
-                            android:id="@+id/tv_shipping_price"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Rp15.000"
-                            android:textSize="16sp"
+                            android:layout_marginTop="4dp"
+                            android:text="Tidak ada produk"
                             android:fontFamily="@font/dmsans_medium"
-                            android:layout_gravity="center_vertical" />
+                            android:textColor="#757575"
+                            android:textSize="14sp"
+                            android:gravity="center" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="Keranjang belanja kosong"
+                            android:textColor="#BDBDBD"
+                            android:textSize="12sp"
+                            android:gravity="center" />
                     </LinearLayout>
-                </androidx.cardview.widget.CardView>
-            </LinearLayout>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="8dp"
-                android:background="@color/black_50" />
+                    <!-- Products RecyclerView -->
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rv_product_items"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:visibility="gone"
+                        app:layout_constraintTop_toBottomOf="@id/product_header"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        tools:listitem="@layout/item_order_seller" />
 
-            <!-- Payment Method Section -->
-            <LinearLayout
-                android:id="@+id/layout_payment_method"
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_shipping_method"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:background="@color/white"
-                android:padding="16dp">
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="8dp"
+                app:cardBackgroundColor="@color/white"
+                app:strokeColor="#E0E0E0"
+                app:strokeWidth="1dp">
 
-                <TextView
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Metode Pembayaran"
-                    android:textSize="14sp"
-                    android:layout_marginBottom="8dp" />
+                    android:padding="20dp">
 
-                <TextView
-                    android:id="@+id/tvEmptyPayment"
+                    <!-- Header Row -->
+                    <LinearLayout
+                        android:id="@+id/shipping_header"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Metode Pengiriman"
+                            android:textSize="16sp"
+                            android:textColor="@android:color/black"
+                            android:fontFamily="@font/dmsans_medium"
+                            android:layout_marginStart="12dp" />
+
+                        <TextView
+                            android:id="@+id/tv_shipping_option"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Pilih"
+                            android:textColor="#3D84FF"
+                            android:textSize="14sp"
+                            android:fontFamily="@font/dmsans_medium"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:paddingHorizontal="8dp"
+                            android:paddingVertical="4dp" />
+                    </LinearLayout>
+
+                    <!-- Empty Shipping State -->
+                    <LinearLayout
+                        android:id="@+id/container_empty_shipping"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginTop="4dp"
+                        android:gravity="center"
+                        android:padding="12dp"
+                        app:layout_constraintTop_toBottomOf="@id/shipping_header"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:text="Belum ada metode pengiriman"
+                            android:fontFamily="@font/dmsans_medium"
+                            android:textColor="#757575"
+                            android:textSize="14sp"
+                            android:gravity="center" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="Pilih alamat terlebih dahulu"
+                            android:textColor="#BDBDBD"
+                            android:textSize="12sp"
+                            android:gravity="center" />
+                    </LinearLayout>
+
+                    <!-- Selected Shipping Content -->
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/card_shipment"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:visibility="gone"
+                        app:cardCornerRadius="8dp"
+                        app:cardElevation="0dp"
+                        app:cardBackgroundColor="#F5F5F5"
+                        app:layout_constraintTop_toBottomOf="@id/shipping_header"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:padding="12dp">
+
+                            <RadioButton
+                                android:id="@+id/rb_jne"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:checked="true" />
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical"
+                                android:layout_marginStart="8dp">
+
+                                <TextView
+                                    android:id="@+id/tv_courier_name"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="JNE"
+                                    android:textSize="16sp"
+                                    android:fontFamily="@font/dmsans_medium" />
+
+                                <TextView
+                                    android:id="@+id/tv_delivery_estimate"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="3 - 4 hari kerja"
+                                    android:textSize="14sp"
+                                    android:textColor="#757575" />
+                            </LinearLayout>
+
+                            <TextView
+                                android:id="@+id/tv_shipping_price"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Rp15.000"
+                                android:textSize="16sp"
+                                android:fontFamily="@font/dmsans_medium"
+                                android:layout_gravity="center_vertical" />
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+
+            <!-- Payment Method Section -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_payment_method"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="8dp"
+                app:cardBackgroundColor="@color/white"
+                app:strokeColor="#E0E0E0"
+                app:strokeWidth="1dp">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:visibility="gone"
-                    android:textSize="12sp"
-                    android:text="Pilih alamat terlebih dahulu"
-                    android:layout_marginBottom="8dp"/>
+                    android:padding="20dp">
 
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rv_payment_info"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    tools:listitem="@layout/item_payment_method" />
-            </LinearLayout>
+                    <!-- Header Row -->
+                    <LinearLayout
+                        android:id="@+id/payment_header"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@drawable/baseline_payment_24"
+                            app:tint="@color/blue_300" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Metode Pembayaran"
+                            android:textSize="16sp"
+                            android:textColor="@android:color/black"
+                            android:fontFamily="@font/dmsans_medium"
+                            android:layout_marginStart="12dp" />
+
+                        <TextView
+                            android:id="@+id/tv_payment_option"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Pilih"
+                            android:textColor="#3D84FF"
+                            android:textSize="14sp"
+                            android:fontFamily="@font/dmsans_medium"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:paddingHorizontal="8dp"
+                            android:paddingVertical="4dp"
+                            android:visibility="gone" />
+                    </LinearLayout>
+
+                    <!-- Empty Payment State -->
+                    <LinearLayout
+                        android:id="@+id/container_empty_payment"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginTop="4dp"
+                        android:gravity="center"
+                        android:padding="12dp"
+                        app:layout_constraintTop_toBottomOf="@id/payment_header"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:text="Belum ada metode pembayaran"
+                            android:fontFamily="@font/dmsans_medium"
+                            android:textColor="#757575"
+                            android:textSize="14sp"
+                            android:gravity="center" />
+
+                        <TextView
+                            android:id="@+id/tvEmptyPayment"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="Pilih alamat terlebih dahulu"
+                            android:textColor="#BDBDBD"
+                            android:textSize="12sp"
+                            android:gravity="center" />
+                    </LinearLayout>
+
+                    <!-- Payment Methods RecyclerView -->
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rv_payment_info"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:visibility="gone"
+                        app:layout_constraintTop_toBottomOf="@id/payment_header"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        tools:listitem="@layout/item_payment_method" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </com.google.android.material.card.MaterialCardView>
 
             <View
                 android:layout_width="match_parent"
                 android:layout_height="8dp"
+                android:layout_marginVertical="8dp"
                 android:background="@color/black_50" />
 
             <!-- Price Summary Section -->
@@ -303,7 +547,7 @@
                         android:id="@+id/tv_item_total"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Rp65.000"
+                        android:text="Rp0"
                         android:textSize="14sp" />
                 </LinearLayout>
 
@@ -324,7 +568,7 @@
                         android:id="@+id/tv_shipping_fee"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Rp15.000"
+                        android:text="Rp0"
                         android:textSize="14sp" />
                 </LinearLayout>
 
@@ -351,8 +595,8 @@
                         android:id="@+id/tv_total"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Rp75.000"
-                        android:textColor="#3D84FF"
+                        android:text="Rp0"
+                        android:textColor="@color/blue_400"
                         android:textSize="16sp"
                         android:fontFamily="@font/dmsans_bold" />
                 </LinearLayout>
@@ -388,7 +632,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Rp75.000"
-                android:textColor="#3D84FF"
+                android:textColor="@color/blue_400"
                 android:textSize="18sp"
                 android:fontFamily="@font/dmsans_bold" />
         </LinearLayout>
@@ -401,7 +645,7 @@
             android:textAllCaps="false"
             android:paddingHorizontal="32dp"
             app:cornerRadius="8dp"
-            android:backgroundTint="#3D84FF" />
+            android:backgroundTint="@color/blue_500" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
