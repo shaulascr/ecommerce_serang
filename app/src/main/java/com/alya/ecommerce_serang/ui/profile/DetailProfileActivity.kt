@@ -90,6 +90,8 @@ class DetailProfileActivity : AppCompatActivity() {
             Log.e("DetailProfileActivity", "Error from ViewModel: $error")
             Toast.makeText(this, error, Toast.LENGTH_SHORT).show()
         }
+
+
     }
 
     private fun setupClickListeners() {

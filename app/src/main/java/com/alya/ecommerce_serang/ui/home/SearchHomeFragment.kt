@@ -7,12 +7,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
+import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.dto.ProductsItem
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.repository.ProductRepository
@@ -105,6 +108,11 @@ class SearchHomeFragment : Fragment() {
                     return true
                 }
             })
+
+            val searchText = findViewById<TextView>(androidx.appcompat.R.id.search_src_text)
+            searchText.textSize = 14f   // in sp
+            searchText.setHintTextColor(ContextCompat.getColor(context, R.color.black_200))
+            searchText.setTextColor(ContextCompat.getColor(context, R.color.black))
 
             if (args.query.isNullOrEmpty()) {
                 requestFocus()

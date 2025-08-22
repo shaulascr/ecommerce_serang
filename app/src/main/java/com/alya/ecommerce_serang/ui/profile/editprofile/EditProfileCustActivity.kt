@@ -2,6 +2,7 @@ package com.alya.ecommerce_serang.ui.profile.editprofile
 
 import android.Manifest
 import android.app.Activity
+import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -24,7 +25,6 @@ import com.alya.ecommerce_serang.BuildConfig.BASE_URL
 import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.dto.UserProfile
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
-import com.alya.ecommerce_serang.data.api.retrofit.ApiService
 import com.alya.ecommerce_serang.data.repository.Result
 import com.alya.ecommerce_serang.data.repository.UserRepository
 import com.alya.ecommerce_serang.databinding.ActivityEditProfileCustBinding
@@ -33,7 +33,6 @@ import com.alya.ecommerce_serang.utils.SessionManager
 import com.alya.ecommerce_serang.utils.viewmodel.ProfileViewModel
 import com.bumptech.glide.Glide
 import com.google.gson.Gson
-import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -41,9 +40,9 @@ import java.util.TimeZone
 
 class EditProfileCustActivity : AppCompatActivity() {
     private lateinit var binding: ActivityEditProfileCustBinding
-    private lateinit var apiService: ApiService
     private lateinit var sessionManager: SessionManager
     private var selectedImageUri: Uri? = null
+    private var currentUser: UserProfile? = null
 
     private val viewModel: ProfileViewModel by viewModels {
         BaseViewModelFactory {
@@ -54,7 +53,7 @@ class EditProfileCustActivity : AppCompatActivity() {
     }
 
     private val getContent = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
+        if (result.resultCode == RESULT_OK) {
             val data: Intent? = result.data
             data?.data?.let {
                 selectedImageUri = it
@@ -105,8 +104,8 @@ class EditProfileCustActivity : AppCompatActivity() {
         }
 
         userProfile?.let {
+            currentUser = it
             populateFields(it)
-
             setupClickListeners()
             observeViewModel()
         }
@@ -118,7 +117,7 @@ class EditProfileCustActivity : AppCompatActivity() {
         binding.etNumberPhoneUser.setText(profile.phone)
 
         // Format birth date for display
-        profile.birthDate?.let {
+        profile.birthDate.let {
             binding.etDateBirth.setText(formatDate(it))
         }
 
@@ -156,7 +155,7 @@ class EditProfileCustActivity : AppCompatActivity() {
         }
 
         binding.btnSave.setOnClickListener {
-            saveProfile()
+            if (hasChanged()) confirmUpdate() else finish()
         }
     }
 
@@ -213,25 +212,38 @@ class EditProfileCustActivity : AppCompatActivity() {
         datePickerDialog.show()
     }
 
+    private fun confirmUpdate() {
+        AlertDialog.Builder(this)
+            .setTitle("Konfirmasi Perubahan")
+            .setMessage("Apakah Anda yakin ingin menyimpan perubahan profil toko Anda?")
+            .setPositiveButton("Ya") { _, _ -> saveProfile() }
+            .setNegativeButton("Batal", null)
+            .show()
+    }
+
+    private fun hasChanged(): Boolean {
+        val name = binding.etNameUser.text.toString() != currentUser?.name
+        val username = binding.etUsername.text.toString() != currentUser?.username
+        val email = binding.etEmailUser.text.toString() != currentUser?.email
+        val phone = binding.etNumberPhoneUser.text.toString() != currentUser?.phone
+        val displayDate = binding.etDateBirth.text.toString() != currentUser?.birthDate.toString()
+        val imgProfile = selectedImageUri != null
+        return name || username || email || phone || displayDate || imgProfile
+    }
+
     private fun saveProfile() {
         val name = binding.etNameUser.text.toString()
         val username = binding.etUsername.text.toString()
         val email = binding.etEmailUser.text.toString()
         val phone = binding.etNumberPhoneUser.text.toString()
         val displayDate = binding.etDateBirth.text.toString()
+        val imgProfile = selectedImageUri
 
-        if (name.isEmpty() || username.isEmpty() || email.isEmpty() || phone.isEmpty() || displayDate.isEmpty()) {
-            Toast.makeText(this, "Semua field harus diisi", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        // Convert date to server format
         val serverBirthDate = convertToServerDateFormat(displayDate)
 
         Log.d(TAG, "Starting profile save with direct method")
         Log.d(TAG, "Selected image URI: $selectedImageUri")
 
-        // Disable the button to prevent multiple clicks
         binding.btnSave.isEnabled = false
 
         // Call the repository method via ViewModel
@@ -242,80 +254,8 @@ class EditProfileCustActivity : AppCompatActivity() {
             phone = phone,
             birthDate = serverBirthDate,
             email = email,
-            imageUri = selectedImageUri
+            imageUri = imgProfile
         )
-    }
-
-    private fun getRealPathFromURI(uri: Uri): String? {
-        Log.d(TAG, "Getting real path from URI: $uri")
-
-        // Handle different URI schemes
-        when {
-            // File URI
-            uri.scheme == "file" -> {
-                val path = uri.path
-                Log.d(TAG, "URI is file scheme, path: $path")
-                return path
-            }
-
-            // Content URI
-            uri.scheme == "content" -> {
-                try {
-                    val projection = arrayOf(MediaStore.Images.Media.DATA)
-                    contentResolver.query(uri, projection, null, null, null)?.use { cursor ->
-                        if (cursor.moveToFirst()) {
-                            val columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
-                            val path = cursor.getString(columnIndex)
-                            Log.d(TAG, "Found path from content URI: $path")
-                            return path
-                        } else {
-                            Log.e(TAG, "Cursor is empty")
-                        }
-                    } ?: Log.e(TAG, "Cursor is null")
-
-                    // If the above fails, try the documented API way
-                    contentResolver.openInputStream(uri)?.use { inputStream ->
-                        // Create a temp file
-                        val fileName = getFileName(uri) ?: "temp_img_${System.currentTimeMillis()}.jpg"
-                        val tempFile = File(cacheDir, fileName)
-                        tempFile.outputStream().use { outputStream ->
-                            inputStream.copyTo(outputStream)
-                        }
-                        Log.d(TAG, "Created temporary file: ${tempFile.absolutePath}")
-                        return tempFile.absolutePath
-                    }
-                } catch (e: Exception) {
-                    Log.e(TAG, "Error getting real path: ${e.message}", e)
-                }
-            }
-        }
-
-        Log.e(TAG, "Could not get real path for URI: $uri")
-        return null
-    }
-
-    private fun getFileName(uri: Uri): String? {
-        var result: String? = null
-        if (uri.scheme == "content") {
-            contentResolver.query(uri, null, null, null, null)?.use { cursor ->
-                if (cursor.moveToFirst()) {
-                    val columnIndex = cursor.getColumnIndex(MediaStore.Images.Media.DISPLAY_NAME)
-                    if (columnIndex >= 0) {
-                        result = cursor.getString(columnIndex)
-                        Log.d(TAG, "Found filename from content URI: $result")
-                    }
-                }
-            }
-        }
-        if (result == null) {
-            result = uri.path
-            val cut = result?.lastIndexOf('/') ?: -1
-            if (cut != -1) {
-                result = result?.substring(cut + 1)
-            }
-            Log.d(TAG, "Extracted filename from path: $result")
-        }
-        return result
     }
 
     private fun formatDate(dateString: String?): String {

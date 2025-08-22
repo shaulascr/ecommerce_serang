@@ -15,156 +15,207 @@
         android:layout_marginTop="16dp"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Store Information -->
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/storeInfoContainer"
-        android:layout_width="match_parent"
+    <!-- Store Information Card -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/storeInfoCard"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@color/blue_50"
-        android:layout_marginTop="16dp"
-        android:padding="24dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="16dp"
+        app:cardBackgroundColor="@android:color/white"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="4dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/searchContainer">
 
-        <ImageView
-            android:id="@+id/ivStoreImage"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:background="@drawable/circle_background"
-            android:scaleType="centerCrop"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:src="@drawable/placeholder_image" />
-
-        <TextView
-            android:id="@+id/tvStoreName"
-            android:layout_width="0dp"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/storeInfoContainer"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:textColor="@android:color/black"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/ivStoreImage"
-            app:layout_constraintTop_toTopOf="@id/ivStoreImage"
-            tools:text="SnackEnak" />
+            android:padding="24dp">
 
-        <TextView
-            android:id="@+id/tvStoreType"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:textSize="14sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/ivStoreImage"
-            app:layout_constraintTop_toBottomOf="@id/tvStoreName"
-            tools:text="Makanan Ringan" />
+            <!-- Store Image with Material Card wrapper -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/storeImageCard"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
 
-        <LinearLayout
-            android:id="@+id/storeRatingContainer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="4dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            app:layout_constraintStart_toEndOf="@id/ivStoreImage"
-            app:layout_constraintTop_toBottomOf="@id/tvStoreType">
+                <ImageView
+                    android:id="@+id/ivStoreImage"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    tools:src="@drawable/placeholder_image" />
+            </com.google.android.material.card.MaterialCardView>
 
-            <ImageView
-                android:id="@+id/ivStoreRatingStar"
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:src="@drawable/ic_star"
-                app:tint="@color/yellow" />
-
+            <!-- Store Name -->
             <TextView
-                android:id="@+id/tvStoreRating"
-                android:layout_width="wrap_content"
+                android:id="@+id/tvStoreName"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="16dp"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:textColor="@android:color/black"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/storeImageCard"
+                app:layout_constraintTop_toTopOf="@id/storeImageCard"
+                tools:text="SnackEnak Store" />
+
+            <!-- Store Type -->
+            <TextView
+                android:id="@+id/tvStoreType"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginEnd="16dp"
+                android:background="@drawable/search_background"
+                android:paddingStart="12dp"
+                android:paddingTop="4dp"
+                android:paddingEnd="12dp"
+                android:paddingBottom="4dp"
+                android:textColor="@color/blue_500"
                 android:textSize="12sp"
                 android:textStyle="bold"
-                tools:text="5.0" />
-        </LinearLayout>
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/storeImageCard"
+                app:layout_constraintTop_toBottomOf="@id/tvStoreName"
+                tools:text="Makanan Ringan" />
 
-        <TextView
-            android:id="@+id/tvStoreLocation"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="4dp"
-            android:layout_marginEnd="16dp"
-            android:textSize="12sp"
-            app:layout_constraintEnd_toStartOf="@id/tvActiveStatus"
-            app:layout_constraintStart_toEndOf="@id/ivStoreImage"
-            app:layout_constraintTop_toBottomOf="@id/storeRatingContainer"
-            tools:text="Kabupaten Serang" />
+            <!-- Rating Container -->
+            <LinearLayout
+                android:id="@+id/storeRatingContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="8dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                app:layout_constraintStart_toEndOf="@id/storeImageCard"
+                app:layout_constraintTop_toBottomOf="@id/tvStoreType">
 
-        <TextView
-            android:id="@+id/tvActiveStatus"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingStart="4dp"
-            android:paddingEnd="4dp"
-            android:text="Aktif"
-            android:textColor="@android:color/black"
-            android:textSize="12sp"
-            app:layout_constraintBottom_toBottomOf="@id/tvStoreLocation"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/tvStoreLocation" />
+                <ImageView
+                    android:id="@+id/ivStoreRatingStar"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_star"
+                    app:tint="@color/yellow" />
 
-<!--        <ImageButton-->
-<!--            android:id="@+id/btnChevron"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:background="?attr/selectableItemBackgroundBorderless"-->
-<!--            android:contentDescription="More"-->
-<!--            android:src="@drawable/ic_chevron_right"-->
-<!--            app:layout_constraintBottom_toBottomOf="parent"-->
-<!--            app:layout_constraintEnd_toEndOf="parent"-->
-<!--            app:layout_constraintTop_toTopOf="parent" />-->
-    </androidx.constraintlayout.widget.ConstraintLayout>
+                <TextView
+                    android:id="@+id/tvStoreRating"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:textColor="@android:color/black"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    tools:text="4.8" />
+            </LinearLayout>
+
+            <!-- Location and Status Row -->
+            <LinearLayout
+                android:id="@+id/locationStatusContainer"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="6dp"
+                android:layout_marginEnd="16dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/storeImageCard"
+                app:layout_constraintTop_toBottomOf="@id/storeRatingContainer">
+
+                <!-- Location with Icon -->
+                <ImageView
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:src="@drawable/ic_location"
+                    app:tint="@color/black_300" />
+
+                <TextView
+                    android:id="@+id/tvStoreLocation"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:layout_weight="1"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textColor="@color/blue_400"
+                    android:textSize="13sp"
+                    tools:text="Kabupaten Serang" />
+
+                <!-- Status Indicator -->
+                <View
+                    android:id="@+id/statusDot"
+                    android:layout_width="6dp"
+                    android:layout_height="6dp"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginEnd="6dp"
+                    android:background="@drawable/baseline_circle_24"
+                    android:backgroundTint="@color/black_300"/>
+
+                <TextView
+                    android:id="@+id/tvActiveStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/blue_500"
+                    android:textSize="12sp"
+                    android:fontFamily="@font/dmsans_semibold"
+                    tools:text="Aktif" />
+            </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Divider -->
     <com.google.android.material.divider.MaterialDivider
         android:id="@+id/divider_product"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/storeInfoContainer"/>
+        android:layout_marginTop="24dp"
+        app:dividerColor="@color/black_200"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/storeInfoCard" />
 
-
-    <!-- Tab Layout: TO DO implement after review -->
-<!--    <com.google.android.material.tabs.TabLayout-->
-<!--        android:id="@+id/tabLayout"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        app:layout_constraintTop_toBottomOf="@id/storeInfoContainer"-->
-<!--        app:tabIndicatorColor="@color/colorPrimary"-->
-<!--        app:tabSelectedTextColor="@color/colorPrimary"-->
-<!--        app:tabTextColor="@android:color/darker_gray">-->
-
-<!--        <com.google.android.material.tabs.TabItem-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:text="Produk" />-->
-
-<!--        <com.google.android.material.tabs.TabItem-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:text="Kategori" />-->
-<!--    </com.google.android.material.tabs.TabLayout>-->
+    <ProgressBar
+        android:id="@+id/progress_bar_detail_prod_item"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:layout_gravity="center"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/divider_product"/>
 
     <!-- Products RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_products"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
+        android:clipToPadding="false"
+        android:paddingBottom="16dp"
         app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/divider_product"
         app:spanCount="2"
         tools:listitem="@layout/item_product_grid" />
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -97,7 +97,7 @@ class SellsAdapter(
             val product = order.orderItems?.firstOrNull()
             tvSellsProductName.text = product?.productName
             tvSellsProductQty.text = "x${product?.quantity}"
-            tvSellsProductPrice.text = product?.price?.let { formatPrice(it.toInt()) }
+            tvSellsProductPrice.text = product?.price?.let { formatPrice(it.toDouble().toInt()) }
 
             val fullImageUrl = when (val img = product?.productImage) {
                 is String -> {
@@ -170,7 +170,7 @@ class SellsAdapter(
                     val product = order.orderItems?.firstOrNull()
                     tvSellsProductName.text = product?.productName
                     tvSellsProductQty.text = "x${product?.quantity}"
-                    tvSellsProductPrice.text = product?.price?.let { formatPrice(it.toInt()) }
+                    tvSellsProductPrice.text = product?.price?.let { formatPrice(it.toDouble().toInt()) }
 
                     val fullImageUrl = when (val img = product?.productImage) {
                         is String -> {
@@ -186,7 +186,7 @@ class SellsAdapter(
                         .into(ivSellsProduct)
 
                     tvSellsQty.text = "${order.orderItems?.size} produk"
-                    tvSellsPrice.text = order.totalAmount?.let { formatPrice(it.toInt()) }
+                    tvSellsPrice.text = order.totalAmount?.let { formatPrice(it.toDouble().toInt()) }
                 }
                 "paid" -> {
                     layoutOrders.visibility = View.GONE

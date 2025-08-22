@@ -86,19 +86,72 @@ class RegisterActivity : AppCompatActivity() {
         }
     }
 
+    // In RegisterActivity, add debug to navigateToStep:
+
     fun navigateToStep(step: Int, userData: RegisterRequest?) {
-        val fragment = when (step) {
-            1 -> RegisterStep1Fragment.newInstance()
-            2 -> RegisterStep2Fragment.newInstance(userData)
-            3 -> RegisterStep3Fragment.newInstance()
-            else -> null
+        Log.d("RegisterActivity", "=== NAVIGATE TO STEP START ===")
+        Log.d("RegisterActivity", "Target step: $step")
+        Log.d("RegisterActivity", "Current fragment count: ${supportFragmentManager.fragments.size}")
+        Log.d("RegisterActivity", "UserData: ${userData?.email}")
+
+        Log.d("RegisterActivity", "Navigation called from:")
+        Thread.currentThread().stackTrace.take(10).forEach { element ->
+            Log.d("RegisterActivity", "  at ${element.className}.${element.methodName}(${element.fileName}:${element.lineNumber})")
         }
 
-        fragment?.let {
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, it)
-                .addToBackStack(null)
-                .commit()
+
+        try {
+            val fragment = when (step) {
+                1 -> {
+                    Log.d("RegisterActivity", "Creating RegisterStep1Fragment")
+                    RegisterStep1Fragment.newInstance()
+                }
+                2 -> {
+                    Log.d("RegisterActivity", "Creating RegisterStep2Fragment")
+                    RegisterStep2Fragment.newInstance(userData)
+                }
+                3 -> {
+                    Log.d("RegisterActivity", "Creating RegisterStep3Fragment")
+                    RegisterStep3Fragment.newInstance()
+                }
+                else -> {
+                    Log.e("RegisterActivity", "Invalid step: $step")
+                    return
+                }
+            }
+
+            Log.d("RegisterActivity", "Fragment created, starting transaction")
+
+            val transaction = supportFragmentManager.beginTransaction()
+            transaction.replace(R.id.fragment_container, fragment)
+
+            Log.d("RegisterActivity", "About to commit transaction")
+            transaction.commit()
+
+            Log.d("RegisterActivity", "Transaction committed")
+
+            // Update ViewModel step
+            registerViewModel.setStep(step)
+            Log.d("RegisterActivity", "ViewModel step updated to: $step")
+
+        } catch (e: Exception) {
+            Log.e("RegisterActivity", "Exception in navigateToStep: ${e.message}", e)
+            e.printStackTrace()
+        }
+
+        Log.d("RegisterActivity", "=== NAVIGATE TO STEP END ===")
+    }
+
+    // Handle Android back button - close activity or go to step 1
+    override fun onBackPressed() {
+        val currentStep = registerViewModel.currentStep.value ?: 1
+
+        if (currentStep == 1) {
+            // On step 1, exit the activity
+            super.onBackPressed()
+        } else {
+            // On other steps, go back to step 1
+            navigateToStep(1, null)
         }
     }
 }

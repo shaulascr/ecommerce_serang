@@ -59,12 +59,13 @@ class MyStoreActivity : AppCompatActivity() {
             finish()
         }
 
-        viewModel.loadMyStore()
-        viewModel.loadMyStoreProducts()
-
         viewModel.myStoreProfile.observe(this){ user ->
             user?.let { myStoreProfileOverview(it.store) }
         }
+
+        viewModel.loadMyStore()
+        viewModel.loadMyStoreProducts()
+        viewModel.fetchBalance()
 
         viewModel.errorMessage.observe(this) { error ->
             Toast.makeText(this, error, Toast.LENGTH_SHORT).show()
@@ -72,7 +73,6 @@ class MyStoreActivity : AppCompatActivity() {
         setUpClickListeners()
         getCountOrder()
         observeViewModel()
-        viewModel.fetchBalance()
         fetchBalance()
     }
 
@@ -204,6 +204,13 @@ class MyStoreActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.loadMyStore()
+        viewModel.loadMyStoreProducts()
+        viewModel.fetchBalance()
     }
 
     companion object {

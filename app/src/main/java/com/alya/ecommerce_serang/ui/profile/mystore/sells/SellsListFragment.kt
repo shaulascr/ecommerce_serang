@@ -83,10 +83,10 @@ class SellsListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        loadSells()
         setupRecyclerView()
         observeSellsList()
         observePaymentConfirmation()
-        loadSells()
 //        getAllOrderCountsAndNavigate()
     }
 
@@ -209,6 +209,12 @@ class SellsListFragment : Fragment() {
                 Log.e(TAG, "Error getting order counts: ${e.message}")
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.getSellList(status)
+        observeSellsList()
     }
 
     override fun onDestroyView() {

@@ -112,13 +112,17 @@ class DetailProductActivity : AppCompatActivity() {
             when (result) {
                 is Result.Success -> {
                     updateStoreInfo(result.data)
+                    binding.progressBarDetailStore.visibility = View.GONE
                 }
                 is Result.Error -> {
                     // Show error message, maybe a Toast or Snackbar
-                    Toast.makeText(this, "Failed to load store: ${result.exception.message}", Toast.LENGTH_SHORT).show()
+                    binding.progressBarDetailStore.visibility = View.GONE
+                    Log.e("DetailProfileActivity", "Failed to load store: ${result.exception.message}")
+                    Toast.makeText(this, "Kendala memuat toko", Toast.LENGTH_SHORT).show()
                 }
                 is Result.Loading -> {
                     // Show loading indicator if needed
+                    binding.progressBarDetailStore.visibility = View.VISIBLE
                 }
             }
         }
@@ -160,6 +164,10 @@ class DetailProductActivity : AppCompatActivity() {
             val products = viewModel.otherProducts.value.orEmpty()
             if (products.isNotEmpty()) {
                 updateOtherProducts(products, storeMap)
+            } else {
+                binding.emptyOtherProducts.visibility = View.VISIBLE
+                binding.recyclerViewOtherProducts.visibility = View.GONE
+                binding.tvViewAllProducts.visibility = View.GONE
             }
         }
     }
@@ -190,12 +198,14 @@ class DetailProductActivity : AppCompatActivity() {
     private fun updateOtherProducts(products: List<ProductsItem>, storeMap: Map<Int, StoreItem>) {
         if (products.isEmpty()) {
             Log.d("DetailProductActivity", "Product list is empty, hiding RecyclerView")
-            binding.recyclerViewOtherProducts.visibility = View.VISIBLE
+            binding.recyclerViewOtherProducts.visibility = View.GONE
+            binding.emptyOtherProducts.visibility = View.VISIBLE
             binding.tvViewAllProducts.visibility = View.GONE
         } else {
             Log.d("DetailProductActivity", "Displaying product list in RecyclerView")
             binding.recyclerViewOtherProducts.visibility = View.VISIBLE
             binding.tvViewAllProducts.visibility = View.VISIBLE
+            binding.emptyOtherProducts.visibility = View.GONE
 
             productAdapter = OtherProductAdapter(products, onClick = { product ->
                 handleProductClick(product)
@@ -316,11 +326,13 @@ class DetailProductActivity : AppCompatActivity() {
         val limitedReviewList = if (reviewList.isNotEmpty()) listOf(reviewList.first()) else emptyList()
         if (reviewList.isEmpty()) {
             binding.recyclerViewReviews.visibility = View.GONE
+            binding.emptyReview.visibility = View.VISIBLE
             binding.tvViewAllReviews.visibility = View.GONE
 //            binding.tvNoReviews.visibility = View.VISIBLE
         } else {
             binding.recyclerViewReviews.visibility = View.VISIBLE
             binding.tvViewAllReviews.visibility = View.VISIBLE
+            binding.emptyReview.visibility = View.GONE
         }
 //            binding.tvNoReviews.visibility = View.GONE
         reviewsAdapter = ReviewsAdapter(
@@ -519,7 +531,11 @@ class DetailProductActivity : AppCompatActivity() {
             attachProduct = true // This will auto-attach the product!
 
         )
+    }
 
+    override fun onResume() {
+        super.onResume()
+        loadData()
     }
 
     companion object {

@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -32,6 +33,7 @@ import com.alya.ecommerce_serang.utils.SessionManager
 import com.alya.ecommerce_serang.utils.setLightStatusBar
 import com.alya.ecommerce_serang.utils.viewmodel.HomeUiState
 import com.alya.ecommerce_serang.utils.viewmodel.HomeViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 //@AndroidEntryPoint
@@ -140,12 +142,13 @@ class HomeFragment : Fragment() {
                 viewModel.uiState.collect { state ->
                     when (state) {
                         is HomeUiState.Loading -> {
-                            binding.loading.root.isVisible = true
+                            binding.loadingAll.root.visibility = View.VISIBLE
                             binding.error.root.isVisible = false
                             binding.home.isVisible = false
+                            delay(5000)
                         }
                         is HomeUiState.Success -> {
-                            binding.loading.root.isVisible = false
+                            binding.loadingAll.root.visibility = View.GONE
                             binding.error.root.isVisible = false
                             binding.home.isVisible = true
                             val products = state.products
@@ -154,10 +157,12 @@ class HomeFragment : Fragment() {
                             productAdapter?.updateLimitedProducts(products)
                         }
                         is HomeUiState.Error -> {
-                            binding.loading.root.isVisible = false
+                            binding.loadingAll.root.visibility = View.GONE
                             binding.error.root.isVisible = true
                             binding.home.isVisible = false
-                            binding.error.errorMessage.text = state.message
+//                            binding.error.errorMessage.text = state.message
+                            Log.e("HomeFragment", "Error load data: ${state.message}")
+                            Toast.makeText(requireContext(), "Terjadi kendala. Muat ulang halaman", Toast.LENGTH_SHORT) .show()
                             binding.error.retryButton.setOnClickListener {
                                 viewModel.retry()
                             }
