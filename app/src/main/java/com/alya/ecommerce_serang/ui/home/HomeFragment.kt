@@ -145,7 +145,7 @@ class HomeFragment : Fragment() {
                             binding.loadingAll.root.visibility = View.VISIBLE
                             binding.error.root.isVisible = false
                             binding.home.isVisible = false
-                            delay(3000)
+                            delay(5000)
                         }
                         is HomeUiState.Success -> {
                             binding.loadingAll.root.visibility = View.GONE

@@ -282,12 +282,12 @@ class CheckoutActivity : AppCompatActivity() {
             isNestedScrollingEnabled = false
         }
 
-        if (checkoutData.cartItems.isEmpty()) {
-            // Show empty products state
-            binding.containerEmptyProducts.visibility = View.VISIBLE
-            binding.rvProductItems.visibility = View.GONE
-            return
-        }
+//        if (checkoutData.cartItems.isEmpty()) {
+//            // Show empty products state
+//            binding.containerEmptyProducts.visibility = View.VISIBLE
+//            binding.rvProductItems.visibility = View.GONE
+//            return
+//        }
 
         binding.containerEmptyProducts.visibility = View.GONE
         binding.rvProductItems.visibility = View.VISIBLE

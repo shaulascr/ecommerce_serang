@@ -61,8 +61,8 @@ class AddEvidencePaymentActivity : AppCompatActivity() {
     }
 
     private val paymentMethods = arrayOf(
+        "Pilih Metode Pembayaran",
         "Transfer Bank",
-        "QRIS",
     )
 
 //    private val getContent = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
@@ -313,10 +313,10 @@ class AddEvidencePaymentActivity : AppCompatActivity() {
             return
         }
 
-        if (binding.spinnerPaymentMethod.selectedItemPosition == 0) {
-            Toast.makeText(this, "Silahkan pilih metode pembayaran", Toast.LENGTH_SHORT).show()
-            return
-        }
+//        if (binding.spinnerPaymentMethod.selectedItemPosition == 0) {
+//            Toast.makeText(this, "Silahkan pilih metode pembayaran", Toast.LENGTH_SHORT).show()
+//            return
+//        }
         binding.etAccountNumber.visibility = View.GONE
 
 //        if (binding.etAccountNumber.text.toString().trim().isEmpty()) {
@@ -324,10 +324,10 @@ class AddEvidencePaymentActivity : AppCompatActivity() {
 //            return
 //        }
 
-        if (binding.tvPaymentDate.text.toString() == "Pilih tanggal") {
-            Toast.makeText(this, "Silahkan pilih tanggal pembayaran", Toast.LENGTH_SHORT).show()
-            return
-        }
+//        if (binding.tvPaymentDate.text.toString() == "Pilih tanggal") {
+//            Toast.makeText(this, "Silahkan pilih tanggal pembayaran", Toast.LENGTH_SHORT).show()
+//            return
+//        }
 
         // All validations passed, proceed with upload
         uploadPaymentProof()
