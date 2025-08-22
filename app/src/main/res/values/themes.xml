@@ -269,7 +269,7 @@
             </style>
 
             <style name="button.small.active.short">
-                <item name="android:layout_width">144dp</item>
+                <item name="android:layout_width">100dp</item>
             </style>
 
                 <style name="button.small.active.short.only_icon">

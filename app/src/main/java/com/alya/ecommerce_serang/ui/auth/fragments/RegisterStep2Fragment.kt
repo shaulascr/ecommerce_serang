@@ -1,6 +1,7 @@
 package com.alya.ecommerce_serang.ui.auth.fragments
 
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -32,6 +33,9 @@ class RegisterStep2Fragment : Fragment() {
     private var _binding: FragmentRegisterStep2Binding? = null
     private val binding get() = _binding!!
     private lateinit var sessionManager: SessionManager
+    private var countDownTimer: CountDownTimer? = null
+    private var timeRemaining = 30
+    private var isTimerRunning = false
 
     // In RegisterStep2Fragment AND RegisterStep3Fragment:
     private val registerViewModel: RegisterViewModel by activityViewModels {
@@ -42,8 +46,8 @@ class RegisterStep2Fragment : Fragment() {
             RegisterViewModel(userRepository, orderRepository, requireContext())
         }
     }
-    private var countDownTimer: CountDownTimer? = null
-    private var timeRemaining = 30 // 30 seconds cooldown for resend
+//    private var countDownTimer: CountDownTimer? = null
+//    private var timeRemaining = 30 // 30 seconds cooldown for resend
 
     companion object {
 
@@ -112,13 +116,23 @@ class RegisterStep2Fragment : Fragment() {
             }
         }
 
-        binding.btnBack.setOnClickListener {
-            parentFragmentManager.popBackStack()
-        }
-
         observeRegistrationState()
         observeLoginState()
         Log.d(TAG, "Registration and login state observers set up")
+        binding.btnBack.setOnClickListener {
+            Log.d(TAG, "Back button clicked - cleaning up timer and going to step 1")
+
+            // Stop the timer before navigating
+            stopTimer()
+            // Small delay to ensure timer is properly canceled
+            binding.root.postDelayed({
+//                (activity as? RegisterActivity)?.navigateToStep(1, null)
+                val intent = Intent(requireContext(), RegisterActivity::class.java)
+                startActivity(intent)
+                requireActivity().finish()
+
+            }, 100)
+        }
     }
 
     private fun verifyOtp(userData: RegisterRequest?) {
@@ -172,37 +186,9 @@ class RegisterStep2Fragment : Fragment() {
         } ?: Log.e(TAG, "Cannot resend OTP: email is null")
     }
 
-    private fun startResendCooldown() {
-        Log.d(TAG, "startResendCooldown called")
-        timeRemaining = 30
-        binding.tvResendOtp.isEnabled = false
-        binding.tvResendOtp.setTextColor(ContextCompat.getColor(requireContext(), R.color.soft_gray))
-
-        countDownTimer?.cancel()
-        countDownTimer = object : CountDownTimer(30000, 1000) {
-            override fun onTick(millisUntilFinished: Long) {
-                timeRemaining = (millisUntilFinished / 1000).toInt()
-                binding.tvTimer.text = "Kirim ulang OTP dalam waktu 00:${String.format("%02d", timeRemaining)}"
-                if (timeRemaining % 5 == 0) {
-                    Log.d(TAG, "Cooldown remaining: $timeRemaining seconds")
-                }
-            }
-
-            override fun onFinish() {
-                Log.d(TAG, "Cooldown finished, enabling resend button")
-                binding.tvTimer.text = "Dapat mengirim ulang kode OTP"
-                binding.tvResendOtp.isEnabled = true
-                binding.tvResendOtp.setTextColor(ContextCompat.getColor(requireContext(), R.color.blue1))
-                timeRemaining = 0
-            }
-        }.start()
-    }
-
     private fun observeRegistrationState() {
         registerViewModel.message.observe(viewLifecycleOwner) { message ->
             Log.d(TAG, "Message from server: $message")
-            // You can use the message here if needed, e.g., for showing in a specific UI element
-            // or for storing for later use
         }
         registerViewModel.registerState.observe(viewLifecycleOwner) { result ->
             when (result) {
@@ -314,9 +300,117 @@ class RegisterStep2Fragment : Fragment() {
 
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
+    private fun startResendCooldown() {
+        Log.d(TAG, "startResendCooldown called")
+
+        // Cancel any existing timer first
+        stopTimer()
+
+        timeRemaining = 30
+        isTimerRunning = true
+        binding.tvResendOtp.isEnabled = false
+        binding.tvResendOtp.setTextColor(ContextCompat.getColor(requireContext(), R.color.soft_gray))
+
+        countDownTimer = object : CountDownTimer(30000, 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+                if (!isTimerRunning) {
+                    cancel()
+                    return
+                }
+
+                timeRemaining = (millisUntilFinished / 1000).toInt()
+
+                // Check if fragment is still attached before updating UI
+                if (isAdded && _binding != null) {
+                    binding.tvTimer.text = "Kirim ulang OTP dalam waktu 00:${String.format("%02d", timeRemaining)}"
+                    if (timeRemaining % 5 == 0) {
+                        Log.d(TAG, "Cooldown remaining: $timeRemaining seconds")
+                    }
+                }
+            }
+
+            override fun onFinish() {
+                if (!isTimerRunning) return
+
+                Log.d(TAG, "Cooldown finished, enabling resend button")
+
+                // Check if fragment is still attached before updating UI
+                if (isAdded && _binding != null) {
+                    binding.tvTimer.text = "Dapat mengirim ulang kode OTP"
+                    binding.tvResendOtp.isEnabled = true
+                    binding.tvResendOtp.setTextColor(ContextCompat.getColor(requireContext(), R.color.blue1))
+                    timeRemaining = 0
+                }
+                isTimerRunning = false
+            }
+        }.start()
+    }
+
+    private fun stopTimer() {
+        Log.d(TAG, "stopTimer called")
+        isTimerRunning = false
         countDownTimer?.cancel()
+        countDownTimer = null
+    }
+
+
+    override fun onPause() {
+        super.onPause()
+        Log.d(TAG, "onPause - stopping timer")
+        stopTimer()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Log.d(TAG, "onStop - stopping timer")
+        stopTimer()
+    }
+
+    override fun onDestroyView() {
+        Log.d(TAG, "onDestroyView - cleaning up")
+        super.onDestroyView()
+
+        // Ensure timer is stopped
+        stopTimer()
+
         _binding = null
     }
+
+    override fun onDetach() {
+        super.onDetach()
+        Log.d(TAG, "onDetach - final cleanup")
+        stopTimer()
+    }
 }
+
+//    override fun onDestroyView() {
+//        super.onDestroyView()
+//        countDownTimer?.cancel()
+//        _binding = null
+//    }
+
+//    private fun startResendCooldown() {
+//        Log.d(TAG, "startResendCooldown called")
+//        timeRemaining = 30
+//        binding.tvResendOtp.isEnabled = false
+//        binding.tvResendOtp.setTextColor(ContextCompat.getColor(requireContext(), R.color.soft_gray))
+//
+//        countDownTimer?.cancel()
+//        countDownTimer = object : CountDownTimer(30000, 1000) {
+//            override fun onTick(millisUntilFinished: Long) {
+//                timeRemaining = (millisUntilFinished / 1000).toInt()
+//                binding.tvTimer.text = "Kirim ulang OTP dalam waktu 00:${String.format("%02d", timeRemaining)}"
+//                if (timeRemaining % 5 == 0) {
+//                    Log.d(TAG, "Cooldown remaining: $timeRemaining seconds")
+//                }
+//            }
+//
+//            override fun onFinish() {
+//                Log.d(TAG, "Cooldown finished, enabling resend button")
+//                binding.tvTimer.text = "Dapat mengirim ulang kode OTP"
+//                binding.tvResendOtp.isEnabled = true
+//                binding.tvResendOtp.setTextColor(ContextCompat.getColor(requireContext(), R.color.blue1))
+//                timeRemaining = 0
+//            }
+//        }.start()
+//    }
