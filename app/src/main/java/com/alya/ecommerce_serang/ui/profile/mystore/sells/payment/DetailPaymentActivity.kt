@@ -2,7 +2,6 @@ package com.alya.ecommerce_serang.ui.profile.mystore.sells.payment
 
 import android.app.Dialog
 import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
@@ -16,6 +15,8 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.graphics.drawable.toDrawable
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.alya.ecommerce_serang.BuildConfig.BASE_URL
 import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.response.store.sells.Orders
@@ -38,9 +39,6 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 import java.util.TimeZone
-import androidx.core.graphics.drawable.toDrawable
-import androidx.recyclerview.widget.LinearLayoutManager
-import com.alya.ecommerce_serang.ui.profile.mystore.sells.DetailSellsActivity
 
 class DetailPaymentActivity : AppCompatActivity() {
 
@@ -139,6 +137,7 @@ class DetailPaymentActivity : AppCompatActivity() {
             tvOrderSubtotal.text = formatPrice(sell.totalAmount.toString())
             tvOrderShipPrice.text = formatPrice(sell.shipmentPrice.toString())
             tvOrderPrice.text = formatPrice(sell.totalAmount.toString())
+            tvOrderDue.text = formatDueDate(sell.updatedAt.toString(), 2)
             tvOrderRecipient.text = sell.recipient ?: "-"
             tvOrderRecipientNum.text = sell.receiptNum?.toString() ?: "-"
 
@@ -193,6 +192,28 @@ class DetailPaymentActivity : AppCompatActivity() {
             date?.let {
                 val calendar = Calendar.getInstance()
                 calendar.time = it
+                outputFormat.format(calendar.time)
+            } ?: dateString
+        } catch (e: Exception) {
+            Log.e("DateFormatting", "Error formatting date: ${e.message}")
+            dateString
+        }
+    }
+
+    private fun formatDueDate(dateString: String, dueDay: Int): String {
+        return try {
+            val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
+            inputFormat.timeZone = TimeZone.getTimeZone("UTC")
+
+            val outputFormat = SimpleDateFormat("dd MMM; HH.mm", Locale("id", "ID"))
+
+            val date = inputFormat.parse(dateString)
+
+            date?.let {
+                val calendar = Calendar.getInstance()
+                calendar.time = it
+                calendar.add(Calendar.DATE, dueDay)
+
                 outputFormat.format(calendar.time)
             } ?: dateString
         } catch (e: Exception) {

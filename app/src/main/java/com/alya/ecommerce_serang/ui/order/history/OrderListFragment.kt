@@ -3,6 +3,7 @@ package com.alya.ecommerce_serang.ui.order.history
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -84,8 +85,6 @@ class OrderListFragment : Fragment(), OrderHistoryAdapter.OrderActionCallbacks {
         setupRecyclerView()
         observeOrderList()
         observeViewModel()
-//        observeOrderCompletionStatus()
-//        loadOrders()
     }
 
     private fun setupRecyclerView() {
@@ -106,31 +105,6 @@ class OrderListFragment : Fragment(), OrderHistoryAdapter.OrderActionCallbacks {
     }
 
     private fun observeOrderList() {
-        // Now we only need to observe one LiveData for all cases
-//        viewModel.orders.observe(viewLifecycleOwner) { result ->
-//            when (result) {
-//                is ViewState.Success -> {
-//                    binding.progressBar.visibility = View.GONE
-//
-//                    if (result.data.isNullOrEmpty()) {
-//                        binding.tvEmptyState.visibility = View.VISIBLE
-//                        binding.rvOrders.visibility = View.GONE
-//                    } else {
-//                        binding.tvEmptyState.visibility = View.GONE
-//                        binding.rvOrders.visibility = View.VISIBLE
-//                        orderAdapter.submitList(result.data)
-//                    }
-//                }
-//                is ViewState.Error -> {
-//                    binding.progressBar.visibility = View.GONE
-//                    binding.tvEmptyState.visibility = View.VISIBLE
-//                    Toast.makeText(requireContext(), result.message, Toast.LENGTH_SHORT).show()
-//                }
-//                is ViewState.Loading -> {
-//                    binding.progressBar.visibility = View.VISIBLE
-//                }
-//            }
-//        }
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             viewModel.orders.collect { state ->
                 when (state) {
@@ -141,7 +115,7 @@ class OrderListFragment : Fragment(), OrderHistoryAdapter.OrderActionCallbacks {
                         binding.progressBar.isVisible = false
                         binding.tvEmptyState.isVisible = true
                         binding.rvOrders.isVisible = false
-                        Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
+                        Log.e("OrderListFragment", "Error in order list: ${state.message}")
                     }
                     is ViewState.Success -> {
                         binding.progressBar.isVisible = false
@@ -157,47 +131,19 @@ class OrderListFragment : Fragment(), OrderHistoryAdapter.OrderActionCallbacks {
     }
 
     private fun observeViewModel() {
-        // Observe order completion
-//        viewModel.orderCompletionStatus.observe(viewLifecycleOwner) { result ->
-//            when (result) {
-//                is Result.Success -> {
-//                    Toast.makeText(requireContext(), "Order completed successfully!", Toast.LENGTH_SHORT).show()
-////                    loadOrders() // Refresh here
-//                }
-//                is Result.Error -> {
-//                    Toast.makeText(requireContext(), "Failed: ${result.exception.message}", Toast.LENGTH_SHORT).show()
-//                }
-//                is Result.Loading -> {
-//                    // Show loading if needed
-//                }
-//            }
-//        }
-//
-//        // Observe cancel order status
-//        viewModel.cancelOrderStatus.observe(viewLifecycleOwner) { result ->
-//            when (result) {
-//                is Result.Success -> {
-//                    Toast.makeText(requireContext(), "Order cancelled successfully!", Toast.LENGTH_SHORT).show()
-//                    loadOrders() // Refresh here
-//                }
-//                is Result.Error -> {
-//                    Toast.makeText(requireContext(), "Failed to cancel: ${result.exception.message}", Toast.LENGTH_SHORT).show()
-//                }
-//                is Result.Loading -> {
-//                    // Show loading if needed
-//                }
-//            }
-//        }
         viewModel.orderCompletionStatus.observe(viewLifecycleOwner) { result ->
             when (result) {
                 is Result.Success -> {
                     Toast.makeText(requireContext(),
-                        "Order completed!", Toast.LENGTH_SHORT).show()
+                        "Pesanan Selesai", Toast.LENGTH_SHORT).show()
+                    Log.d("OrderListFragment", "Order selesai")
                     viewModel.updateStatus(status, forceRefresh = true)
                 }
                 is Result.Error ->
-                    Toast.makeText(requireContext(),
-                        "Failed: ${result.exception.message}", Toast.LENGTH_SHORT).show()
+//                    Toast.makeText(requireContext(),
+//                        "Failed: ${result.exception.message}", Toast.LENGTH_SHORT).show()
+                    Log.e("OrderListFragment", "Failed: ${result.exception.message}")
+
                 else -> { /* Loading → no UI change */ }
             }
         }
@@ -206,30 +152,18 @@ class OrderListFragment : Fragment(), OrderHistoryAdapter.OrderActionCallbacks {
             when (result) {
                 is Result.Success -> {
                     Toast.makeText(requireContext(),
-                        "Order cancelled!", Toast.LENGTH_SHORT).show()
+                        "Pesanan Dibatalkan", Toast.LENGTH_SHORT).show()
+                    Log.d("OrderListFragment", "Order dibatalkan")
                     viewModel.updateStatus(status, forceRefresh = true)
                 }
                 is Result.Error ->
-                    Toast.makeText(requireContext(),
-                        "Failed: ${result.exception.message}", Toast.LENGTH_SHORT).show()
+                    Log.e("OrderListFragment", "Failed: ${result.exception.message}")
+//                    Toast.makeText(requireContext(),
+//                        "Failed: ${result.exception.message}", Toast.LENGTH_SHORT).show()
                 else -> { /* Loading */ }
             }
         }
     }
-
-//    private fun loadOrders() {
-//        // Simple - just call getOrderList for any status including "all"
-//        viewModel.getOrderList(status)
-//    }
-
-//    private val detailOrderLauncher = registerForActivityResult(
-//        ActivityResultContracts.StartActivityForResult()
-//    ) { result ->
-//        if (result.resultCode == Activity.RESULT_OK) {
-//            // Refresh order list when returning with OK result
-////            loadOrders()
-//        }
-//    }
 
     private fun navigateToOrderDetail(order: OrdersItem) {
         val intent = Intent(requireContext(), DetailOrderStatusActivity::class.java).apply {
@@ -239,11 +173,10 @@ class OrderListFragment : Fragment(), OrderHistoryAdapter.OrderActionCallbacks {
         detailOrderLauncher.launch(intent)
     }
 
-
-
     override fun onOrderCancelled(orderId: String, success: Boolean, message: String) {
         if (success) {
-            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Berhasil batalkan pesanan", Toast.LENGTH_SHORT).show()
+            Log.d("OrderListFragment", "Order cancel success: $message")
 //            loadOrders() // Refresh the list
             if (success) viewModel.updateStatus(status, forceRefresh = true)
 
@@ -254,11 +187,13 @@ class OrderListFragment : Fragment(), OrderHistoryAdapter.OrderActionCallbacks {
 
     override fun onOrderCompleted(orderId: Int, success: Boolean, message: String) {
         if (success) {
-            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Pesanan selesai", Toast.LENGTH_SHORT).show()
+            Log.d("OrderListFragment", "Pesanan selesai: $message")
 //            loadOrders() // Refresh the list
             if (success) viewModel.updateStatus(status, forceRefresh = true)
         } else {
-            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+            Log.e("OrderListFragment", "Error Order Complete: $message")
+            Toast.makeText(requireContext(), "Terdapat kendala di pesanan selesai", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -271,20 +206,8 @@ class OrderListFragment : Fragment(), OrderHistoryAdapter.OrderActionCallbacks {
         _binding = null
     }
 
-//    private fun observeOrderCompletionStatus() {
-//        viewModel.orderCompletionStatus.observe(viewLifecycleOwner) { result ->
-//            when (result) {
-//                is Result.Loading -> {
-//                    // Handle loading state if needed
-//                }
-//                is Result.Success -> {
-//                    Toast.makeText(requireContext(), "Order completed successfully!", Toast.LENGTH_SHORT).show()
-////                    loadOrders()
-//                }
-//                is Result.Error -> {
-//                    Toast.makeText(requireContext(), "Failed to complete order: ${result.exception.message}", Toast.LENGTH_SHORT).show()
-//                }
-//            }
-//        }
-//    }
+    override fun onResume() {
+        super.onResume()
+        observeOrderList()
+    }
 }

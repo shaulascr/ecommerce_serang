@@ -17,6 +17,9 @@ import com.alya.ecommerce_serang.ui.order.address.ViewState
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -51,6 +54,9 @@ class SellsViewModel(private val repository: SellsRepository) : ViewModel() {
 
     private val _error = MutableLiveData<String>()
     val error: LiveData<String> get() = _error
+
+    private val _selectedStatus = MutableStateFlow("all")
+    val selectedStatus: StateFlow<String> = _selectedStatus.asStateFlow()
 
     fun getSellList(status: String) {
         Log.d(TAG, "========== Starting getSellList ==========")
@@ -319,5 +325,41 @@ class SellsViewModel(private val repository: SellsRepository) : ViewModel() {
         getSellList(status)
 
         Log.d(TAG, "========== refreshOrders method completed ==========")
+    }
+
+    fun updateStatus(status: String, forceRefresh: Boolean = false) {
+        Log.d(TAG, "↪️  updateStatus(status = $status, forceRefresh = $forceRefresh)")
+
+        // No‑op guard (optional): skip if user re‑selects same tab and no refresh asked
+        if (_selectedStatus.value == status && !forceRefresh) {
+            Log.d(TAG, "🔸  Status unchanged & forceRefresh = false → skip update")
+            return
+        }
+
+        _selectedStatus.value = status
+        Log.d(TAG, "✅  _selectedStatus set to \"$status\"")
+
+        if (forceRefresh) {
+            Log.d(TAG, "🔄  forceRefresh = true → launching refresh()")
+            viewModelScope.launch { refresh(status) }
+        }
+    }
+
+    private suspend fun refresh(status: String) {
+        Log.d(TAG, "⏳  refresh(\"$status\") started")
+
+        try {
+            if (status == "all") {
+                Log.d(TAG, "🌐  Calling getAllOrdersCombined()")
+                getAllStatusCounts()                    // network → cache
+            } else {
+                Log.d(TAG, "🌐  repository.getOrderList(\"$status\")")
+                repository.getSellList(status)            // network → cache
+            }
+            Log.d(TAG, "✅  refresh(\"$status\") completed (repository updated)")
+            // Flow that watches DB/cache will emit automatically
+        } catch (e: Exception) {
+            Log.e(TAG, "❌  refresh(\"$status\") failed: ${e.message}", e)
+        }
     }
 }

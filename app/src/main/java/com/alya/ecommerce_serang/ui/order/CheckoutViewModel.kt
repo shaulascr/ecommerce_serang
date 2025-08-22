@@ -145,6 +145,8 @@ class CheckoutViewModel(private val repository: OrderRepository) : ViewModel() {
                             isReseller = isWholesaleMap.any { it.value }
                         )
 
+                        Log.d(TAG, "Cek is reseller: ${orderRequest.isReseller}")
+
                         _checkoutData.value = CheckoutData(
                             orderRequest = orderRequest,
                             productName = matchingItems.first().productName,
@@ -378,6 +380,7 @@ class CheckoutViewModel(private val repository: OrderRepository) : ViewModel() {
                 } else {
                     // For Cart checkout, use the standard order endpoint
                     val cartRequest = data.orderRequest as OrderRequest
+                    Log.d(TAG, "data: ${cartRequest.cartItemId}")
                     repository.createOrder(cartRequest)
                 }
 

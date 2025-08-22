@@ -43,27 +43,10 @@ class LoginActivity : AppCompatActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         enableEdgeToEdge()
 
-//        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, windowInsets ->
-//            val systemBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-//            view.setPadding(
-//                systemBars.left,
-//                systemBars.top,
-//                systemBars.right,
-//                systemBars.bottom
-//            )
-//            windowInsets
-//        }
-
-//        onBackPressedDispatcher.addCallback(this) {
-//            // Handle the back button event
-//        }
-
         setupListeners()
         observeLoginState()
 
         FirebaseApp.initializeApp(this)
-
-        // Request FCM token at app startup
     }
 
     private fun setupListeners() {
