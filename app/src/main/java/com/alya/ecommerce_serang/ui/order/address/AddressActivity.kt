@@ -52,12 +52,12 @@ class AddressActivity : AppCompatActivity() {
             windowInsets
         }
 
+        viewModel.fetchAddresses()
 
         setupToolbar()
         setupRecyclerView()
         setupObservers()
 
-        viewModel.fetchAddresses()
     }
 
 
@@ -124,6 +124,11 @@ class AddressActivity : AppCompatActivity() {
         intent.putExtra(EXTRA_ADDRESS_ID, addressId)
         setResult(RESULT_OK, intent)
         finish()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.fetchAddresses()
     }
 
     companion object {

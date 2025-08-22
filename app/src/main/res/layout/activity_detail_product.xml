@@ -500,7 +500,7 @@
                         android:id="@+id/empty_other_products"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Belum ada ulasan"
+                        android:text="Belum ada produk lainnya"
                         android:textSize="16sp"
                         android:textColor="@color/black_200"
                         android:gravity="center"

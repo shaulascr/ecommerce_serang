@@ -95,12 +95,14 @@ class ProfileFragment : Fragment() {
             binding.cardLogout.visibility = View.GONE
         }
 
+
+        viewModel.loadUserProfile()
+        viewModel.checkStoreUser()
+
         observeUserProfile()
 
         observeStoreStatus()
 
-        viewModel.loadUserProfile()
-        viewModel.checkStoreUser()
 
         binding.cardBukaToko.setOnClickListener{
 //            if (hasStore == true) startActivity(Intent(requireContext(), MyStoreActivity::class.java))

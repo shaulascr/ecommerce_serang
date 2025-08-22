@@ -64,10 +64,9 @@ class StoreDetailActivity : AppCompatActivity() {
             )
             windowInsets
         }
-
+        loadData()
         setupUI()
         setupObservers()
-        loadData()
     }
 
     private fun setupUI() {

@@ -33,6 +33,7 @@ import com.alya.ecommerce_serang.utils.SessionManager
 import com.alya.ecommerce_serang.utils.setLightStatusBar
 import com.alya.ecommerce_serang.utils.viewmodel.HomeUiState
 import com.alya.ecommerce_serang.utils.viewmodel.HomeViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 //@AndroidEntryPoint
@@ -141,12 +142,13 @@ class HomeFragment : Fragment() {
                 viewModel.uiState.collect { state ->
                     when (state) {
                         is HomeUiState.Loading -> {
-                            binding.loadingAll.visibility = View.VISIBLE
+                            binding.loadingAll.root.visibility = View.VISIBLE
                             binding.error.root.isVisible = false
                             binding.home.isVisible = false
+                            delay(3000)
                         }
                         is HomeUiState.Success -> {
-                            binding.loadingAll.visibility = View.GONE
+                            binding.loadingAll.root.visibility = View.GONE
                             binding.error.root.isVisible = false
                             binding.home.isVisible = true
                             val products = state.products
@@ -155,7 +157,7 @@ class HomeFragment : Fragment() {
                             productAdapter?.updateLimitedProducts(products)
                         }
                         is HomeUiState.Error -> {
-                            binding.loadingAll.visibility = View.GONE
+                            binding.loadingAll.root.visibility = View.GONE
                             binding.error.root.isVisible = true
                             binding.home.isVisible = false
 //                            binding.error.errorMessage.text = state.message

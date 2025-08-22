@@ -270,16 +270,6 @@ class CheckoutActivity : AppCompatActivity() {
     }
 
     private fun setupProductRecyclerView(checkoutData: CheckoutData) {
-        if (checkoutData.cartItems.isEmpty()) {
-            // Show empty products state
-            binding.containerEmptyProducts.visibility = View.VISIBLE
-            binding.rvProductItems.visibility = View.GONE
-            return
-        }
-
-        binding.containerEmptyProducts.visibility = View.GONE
-        binding.rvProductItems.visibility = View.VISIBLE
-
         val adapter = if (checkoutData.isBuyNow || checkoutData.cartItems.size <= 1) {
             CheckoutSellerAdapter(checkoutData)
         } else {
@@ -291,6 +281,16 @@ class CheckoutActivity : AppCompatActivity() {
             this.adapter = adapter
             isNestedScrollingEnabled = false
         }
+
+        if (checkoutData.cartItems.isEmpty()) {
+            // Show empty products state
+            binding.containerEmptyProducts.visibility = View.VISIBLE
+            binding.rvProductItems.visibility = View.GONE
+            return
+        }
+
+        binding.containerEmptyProducts.visibility = View.GONE
+        binding.rvProductItems.visibility = View.VISIBLE
     }
 
     private fun updateOrderSummary() {
