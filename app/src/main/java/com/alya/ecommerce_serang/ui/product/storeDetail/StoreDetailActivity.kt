@@ -151,7 +151,7 @@ class StoreDetailActivity : AppCompatActivity() {
                 .into(binding.ivStoreImage)
 
             val ratingStr = it.storeRating
-            val ratingValue = ratingStr.toFloatOrNull()
+            val ratingValue = ratingStr?.toFloatOrNull() ?: 0f
 
             if (ratingValue != null && ratingValue > 0f) {
                 binding.tvStoreRating.text = String.format("%.1f", ratingValue)

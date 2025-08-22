@@ -45,11 +45,11 @@ class StoreDetailViewModel (private val repository: ProductRepository
                     } // Filter by storeId and exclude current product
                     _otherProducts.value = filteredProducts // Update LiveData
                 } else if (result is Result.Error) {
-                    Log.e("ProductViewModel", "Error loading other products: ${result.exception.message}")
+                    Log.e("StoreDetailViewModel", "Error loading other products: ${result.exception.message}")
                     _otherProducts.value = emptyList() // Set empty list on failure
                 }
             } catch (e: Exception) {
-                Log.e("ProductViewModel", "Exception loading other products: ${e.message}")
+                Log.e("StoreDetailViewModel", "Exception loading other products: ${e.message}")
                 _otherProducts.value = emptyList()
             }
         }
@@ -67,7 +67,7 @@ class StoreDetailViewModel (private val repository: ProductRepository
                     loadStoreDetail(storeId)
                 }
             } catch (e: Exception) {
-                Log.e("ProductViewModel", "Error loading product details: ${e.message}")
+                Log.e("StoreDetailViewModel", "Error loading product details: ${e.message}")
                 _error.value = "Failed to load product details: ${e.message}"
             } finally {
                 _isLoading.value = false
@@ -82,7 +82,7 @@ class StoreDetailViewModel (private val repository: ProductRepository
                 val result = repository.fetchStoreDetail(storeId)
                 _storeDetail.value = result
             } catch (e: Exception) {
-                Log.e("ProductViewModel", "Error loading store details: ${e.message}")
+                Log.e("StoreDetailViewModel", "Error loading store details: ${e.message}")
                 _storeDetail.value = Result.Error(e)
             }
         }
@@ -99,10 +99,10 @@ class StoreDetailViewModel (private val repository: ProductRepository
                     if (result is Result.Success) {
                         map[storeId] = result.data
                     } else if (result is Result.Error) {
-                        Log.e("ProductViewModel", "Failed to load storeId $storeId", result.exception)
+                        Log.e("StoreDetailViewModel", "Failed to load storeId $storeId", result.exception)
                     }
                 } catch (e: Exception) {
-                    Log.e("ProductViewModel", "Exception fetching storeId $storeId", e)
+                    Log.e("StoreDetailViewModel", "Exception fetching storeId $storeId", e)
                 }
             }
 
