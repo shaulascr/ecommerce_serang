@@ -4,7 +4,7 @@ import android.util.Log
 import com.alya.ecommerce_serang.data.api.dto.ProductsItem
 import com.alya.ecommerce_serang.data.api.dto.Store
 import com.alya.ecommerce_serang.data.api.response.auth.ListStoreTypeResponse
-import com.alya.ecommerce_serang.data.api.response.customer.product.StoreResponse
+import com.alya.ecommerce_serang.data.api.response.store.StoreResponse
 import com.alya.ecommerce_serang.data.api.response.store.profile.StoreDataResponse
 import com.alya.ecommerce_serang.data.api.response.store.sells.OrderListResponse
 import com.alya.ecommerce_serang.data.api.retrofit.ApiService
@@ -15,13 +15,13 @@ import retrofit2.Response
 import java.io.IOException
 
 class MyStoreRepository(private val apiService: ApiService) {
-    suspend fun fetchMyStoreProfile(): Result<Store?> {
+    suspend fun fetchMyStoreProfile(): Result<StoreResponse?> {
         return try {
-            val response = apiService.getStore()
+            val response = apiService.getMyStoreData()
 
             if (response.isSuccessful) {
-                val storeResponse: StoreResponse? = response.body()
-                Result.Success(storeResponse?.store)
+                val storeResponse = response.body()
+                Result.Success(storeResponse)
             } else {
                 val errorMessage = response.errorBody()?.string() ?: "Unknown API error"
                 Log.e("MyStoreRepository", "Error: $errorMessage")

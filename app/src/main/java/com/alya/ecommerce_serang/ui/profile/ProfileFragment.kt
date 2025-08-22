@@ -109,14 +109,19 @@ class ProfileFragment : Fragment() {
 //            else startActivity(Intent(requireContext(), RegisterStoreActivity::class.java))
             if (viewModel.checkStore.value == true) {
                 myStoreViewModel.loadMyStore()
-                myStoreViewModel.myStoreProfile.observe(viewLifecycleOwner) { store ->
-                    store?.let {
-                        when (store.storeStatus) {
+                myStoreViewModel.myStoreProfile.observe(viewLifecycleOwner) { storeDataResponse ->
+                    storeDataResponse?.let { storeResponse ->
+                        val store = storeResponse.store
+                        when (store.approvalStatus) {
                             "process" -> startActivity(Intent(requireContext(), StoreOnReviewActivity::class.java))
-                            "active" -> startActivity(Intent(requireContext(), MyStoreActivity::class.java))
-                            "inactive" -> startActivity(Intent(requireContext(), MyStoreActivity::class.java))
-                            "suspended" -> startActivity(Intent(requireContext(), StoreSuspendedActivity::class.java))
-                            else -> startActivity(Intent(requireContext(), RegisterStoreActivity::class.java))
+                            "rejected" -> startActivity(
+                                Intent(requireContext(), RegisterStoreActivity::class.java).putExtra("REAPPLY", true))
+                            else -> {
+                                when(store.storeStatus){
+                                    "suspended" -> startActivity(Intent(requireContext(), StoreSuspendedActivity::class.java))
+                                    else -> startActivity(Intent(requireContext(), MyStoreActivity::class.java))
+                                }
+                            }
                         }
                     } ?: run {
                         Toast.makeText(requireContext(), "Gagal memuat data toko", Toast.LENGTH_SHORT).show()
@@ -137,6 +142,11 @@ class ProfileFragment : Fragment() {
 
         binding.cardPesanan.setOnClickListener{
             val intent = Intent(requireContext(), HistoryActivity::class.java)
+            startActivity(intent)
+        }
+
+        binding.cardChangePass.setOnClickListener{
+            val intent = Intent(requireContext(), ChangePasswordActivity::class.java)
             startActivity(intent)
         }
 

@@ -10,6 +10,8 @@ import com.alya.ecommerce_serang.data.api.dto.ProductsItem
 import com.alya.ecommerce_serang.data.api.dto.Store
 import com.alya.ecommerce_serang.data.api.response.auth.StoreTypesItem
 import com.alya.ecommerce_serang.data.api.response.store.StoreResponse
+import com.alya.ecommerce_serang.data.api.response.store.profile.Payment
+import com.alya.ecommerce_serang.data.api.response.store.profile.Shipping
 import com.alya.ecommerce_serang.data.api.response.store.profile.StoreDataResponse
 import com.alya.ecommerce_serang.data.repository.MyStoreRepository
 import com.alya.ecommerce_serang.data.repository.Result
@@ -23,11 +25,17 @@ import java.util.Locale
 class MyStoreViewModel(private val repository: MyStoreRepository): ViewModel() {
     private var TAG = "MyStoreViewModel"
 
-    private val _myStoreProfile = MutableLiveData<Store?>()
-    val myStoreProfile: LiveData<Store?> = _myStoreProfile
+    private val _myStoreProfile = MutableLiveData<StoreResponse?>()
+    val myStoreProfile: LiveData<StoreResponse?> = _myStoreProfile
 
     private val _storeTypes = MutableLiveData<List<StoreTypesItem>>()
     val storeTypes: LiveData<List<StoreTypesItem>> = _storeTypes
+
+    private val _shipping = MutableLiveData<List<Shipping>>()
+    val shipping: LiveData<List<Shipping>> = _shipping
+
+    private val _payment = MutableLiveData<List<Payment>>()
+    val payment: LiveData<List<Payment>> = _payment
 
     private val _isLoadingType = MutableLiveData<Boolean>()
     val isLoadingType: LiveData<Boolean> = _isLoadingType
@@ -47,7 +55,12 @@ class MyStoreViewModel(private val repository: MyStoreRepository): ViewModel() {
     fun loadMyStore(){
         viewModelScope.launch {
             when (val result = repository.fetchMyStoreProfile()){
-                is Result.Success -> _myStoreProfile.postValue(result.data)
+                is Result.Success -> {
+                    val storeData = result.data
+                    _myStoreProfile.postValue(storeData)
+                    _shipping.postValue(storeData?.shipping)
+                    _payment.postValue(storeData?.payment)
+                }
                 is Result.Error -> _errorMessage.postValue(result.exception.message ?: "Unknown Error")
                 is Result.Loading -> null
             }

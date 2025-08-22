@@ -10,9 +10,6 @@ data class Store(
     @field:SerializedName("store_status")
     val storeStatus: String,
 
-    @field:SerializedName("sppirt")
-    val sppirt: String,
-
     @field:SerializedName("user_name")
     val userName: String,
 
@@ -36,9 +33,6 @@ data class Store(
 
     @field:SerializedName("user_phone")
     val userPhone: String,
-
-    @field:SerializedName("halal")
-    val halal: String,
 
     @field:SerializedName("id")
     val id: Int,

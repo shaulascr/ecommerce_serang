@@ -91,10 +91,10 @@ class DetailStoreProfileActivity : AppCompatActivity() {
         viewModel.fetchStoreTypes()
 
         viewModel.myStoreProfile.observe(this) {
-            currentStore = it
+            currentStore = it?.store
             currentStoreLoaded = true
             if (storeTypesLoaded) setupStoreTypeSpinner(storeTypesList)
-            updateUI(it)
+            updateUI(it?.store)
         }
 
         viewModel.storeTypes.observe(this) {
