@@ -39,6 +39,12 @@ class ChangePasswordActivity : AppCompatActivity() {
 
         sessionManager = SessionManager(this)
 
+        binding.header.headerTitle.text = "Ubah Kata Sandi"
+        binding.header.headerLeftIcon.setOnClickListener {
+            onBackPressedDispatcher.onBackPressed()
+            finish()
+        }
+
         // Listen for the result of the password change
         viewModel.changePasswordResult.observe(this, Observer { result ->
             when (result) {

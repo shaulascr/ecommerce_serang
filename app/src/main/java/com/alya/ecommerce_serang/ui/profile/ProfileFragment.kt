@@ -115,7 +115,9 @@ class ProfileFragment : Fragment() {
                         when (store.approvalStatus) {
                             "process" -> startActivity(Intent(requireContext(), StoreOnReviewActivity::class.java))
                             "rejected" -> startActivity(
-                                Intent(requireContext(), RegisterStoreActivity::class.java).putExtra("REAPPLY", true))
+                                Intent(requireContext(), RegisterStoreActivity::class.java)
+                                    .putExtra("REAPPLY", true)
+                            )
                             else -> {
                                 when(store.storeStatus){
                                     "suspended" -> startActivity(Intent(requireContext(), StoreSuspendedActivity::class.java))
