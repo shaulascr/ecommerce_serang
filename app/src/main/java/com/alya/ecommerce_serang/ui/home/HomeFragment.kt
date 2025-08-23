@@ -69,12 +69,10 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-
         initUi()
         setupRecyclerView()
         observeData()
         setupSearchView()
-
     }
 
     private fun setupRecyclerView() {
@@ -145,15 +143,14 @@ class HomeFragment : Fragment() {
                             binding.loadingAll.root.visibility = View.VISIBLE
                             binding.error.root.isVisible = false
                             binding.home.isVisible = false
-                            delay(5000)
                         }
                         is HomeUiState.Success -> {
+                            val products = state.products
+                            viewModel.loadStoresForProducts(products)
+                            delay(2000)
                             binding.loadingAll.root.visibility = View.GONE
                             binding.error.root.isVisible = false
                             binding.home.isVisible = true
-                            val products = state.products
-                            viewModel.loadStoresForProducts(products) // << add this here
-
                             productAdapter?.updateLimitedProducts(products)
                         }
                         is HomeUiState.Error -> {
@@ -171,7 +168,6 @@ class HomeFragment : Fragment() {
                 }
 
             }
-
         }
 
         viewLifecycleOwner.lifecycleScope.launch {

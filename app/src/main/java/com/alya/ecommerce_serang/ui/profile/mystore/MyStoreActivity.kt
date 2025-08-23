@@ -208,6 +208,9 @@ class MyStoreActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        lifecycleScope.launch {
+            viewModel.getAllStatusCounts()
+        }
         viewModel.loadMyStore()
         viewModel.loadMyStoreProducts()
         viewModel.fetchBalance()

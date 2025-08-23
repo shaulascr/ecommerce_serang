@@ -96,19 +96,11 @@ class RegisterStep3Fragment : Fragment() {
             Log.d(TAG, "Auto-filled name: ${it.name}, phone: ${it.phone}")
         }
 
-        // Set up province and city dropdowns
         setupAutoComplete()
-
         setupEdgeToEdge()
 
         // Set up button listeners
         binding.btnPrevious.setOnClickListener {
-            // Go back to the previous step
-//            parentFragmentManager.popBackStack()
-//            (activity as? RegisterActivity)?.navigateToStep(2, null)
-//            (activity as? RegisterActivity)?.goBackToPreviousStep()
-
-            // Option 2: Direct navigation to step 1
             val step2Fragment = RegisterStep2Fragment()
             parentFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, step2Fragment)
@@ -117,13 +109,7 @@ class RegisterStep3Fragment : Fragment() {
 
         binding.btnRegister.setOnClickListener {
             submitAddress()
-            sessionManager.clearAll()
         }
-
-        // If user skips address entry
-//        binding.btnSkip.setOnClickListener {
-//            showRegistrationSuccess()
-//        }
 
         // Observe address submission state
         observeAddressSubmissionState()
@@ -513,6 +499,7 @@ class RegisterStep3Fragment : Fragment() {
     private fun showRegistrationSuccess() {
         // Now we can show the success message for the overall registration process
         Toast.makeText(requireContext(), "Berhasil mendaftarkan akun", Toast.LENGTH_LONG).show()
+        sessionManager.clearAll()
 
         // Navigate to login screen
         startActivity(Intent(requireContext(), LoginActivity::class.java))

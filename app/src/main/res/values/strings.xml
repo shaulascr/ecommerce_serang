@@ -147,29 +147,112 @@
     <string name="buka_toko_desc">Mohon untuk melengkapi formulir pendaftaran ini agar dapat mengakses fitur penjual pada aplikasi.</string>
 
     <!-- List Bank -->
-    <string-array name="bank_name_array">
+    <string-array name="bank_names">
+        <item>Bank of America</item>
+        <item>Bank of China (Hong Kong)</item>
+        <item>Citibank</item>
+        <item>Deutsche Bank Ag</item>
+        <item>JP Morgan Chase Bank</item>
+        <item>MUFG Bank</item>
         <item>Allo Bank Indonesia</item>
-        <item>Bank Digital BCA</item>
-        <item>Bank Central Asia (BCA)</item>
+        <item>Bank Aceh Syariah</item>
+        <item>Bank Aladin Syariah</item>
+        <item>Bank Amar Indonesia</item>
+        <item>Bank ANZ Indonesia</item>
+        <item>Bank Artha Graha Internasional</item>
         <item>Bank BCA Syariah</item>
-        <item>Bank Jago</item>
-        <item>Bank Mandiri </item>
-        <item>Bank Kb Bukopi</item>
+        <item>Bank BNP Paribas Indonesia</item>
+        <item>Bank BTPN Syariah</item>
+        <item>Bank Bumi Arta</item>
+        <item>Bank Capital Indonesia</item>
+        <item>Bank Central Asia (BCA)</item>
+        <item>Bank China Construction Bank Indonesia</item>
+        <item>Bank CIMB Niaga</item>
+        <item>Bank CTBC Indonesia</item>
+        <item>Bank Danamon Indonesia</item>
+        <item>Bank DBS Indonesia</item>
+        <item>Bank Digital BCA</item>
+        <item>Bank Ganesha</item>
+        <item>Bank Hibank Indonesia</item>
+        <item>Bank HSBC Indonesia</item>
+        <item>Bank IBK Indonesia</item>
+        <item>Bank ICBC Indonesia</item>
+        <item>Bank Ina Perdana</item>
+        <item>Bank Index Selindo</item>
         <item>Bank Jabar Banten Syariah</item>
-        <item> Bank Mandiri Taspen</item>
-        <item>Bank Maybank Indonesia </item>
+        <item>Bank Jago</item>
+        <item>Bank JTrust Indonesia</item>
+        <item>Bank Kb Bukopin Syariah</item>
+        <item>Bank Kb Bukopin</item>
+        <item>Bank Keb Hana Indonesia</item>
+        <item>Bank Mandiri</item>
+        <item>Bank Mandiri Taspen</item>
+        <item>Bank Maspion Indonesia</item>
+        <item>Bank Mayapada International</item>
+        <item>Bank Maybank Indonesia</item>
+        <item>Bank Mega Syariah</item>
+        <item>Bank Mega</item>
+        <item>Bank Mestika Dharma</item>
+        <item>Bank Mizuho Indonesia</item>
+        <item>Bank MNC Internasional</item>
+        <item>Bank Muamalat Indonesia</item>
+        <item>Bank Multiarta Sentosa</item>
+        <item>Bank Nagari</item>
+        <item>Bank Nano Syariah</item>
+        <item>Bank Nationalnobu</item>
         <item>Bank Negara Indonesia (BNI)</item>
+        <item>Bank Neo Commerce</item>
+        <item>Bank NTB Syariah</item>
+        <item>Bank OCBC NISP</item>
+        <item>Bank of India Indonesia</item>
+        <item>Bank Oke Indonesia</item>
+        <item>Bank PAN Indonesia</item>
+        <item>Bank Panin Dubai Syariah</item>
+        <item>Bank Pembangunan Daerah (BPD) Bali</item>
         <item>Bank Permata</item>
+        <item>Bank QNB Indonesia</item>
         <item>Bank Rakyat Indonesia (BRI)</item>
+        <item>Bank Raya Indonesia</item>
+        <item>Bank Resona Perdania</item>
+        <item>Bank Sahabat Sampoerna</item>
         <item>Bank Saqu Indonesia</item>
+        <item>Bank SBI Indonesia</item>
         <item>Bank Seabank Indonesia</item>
-        <item>Bank Sinarmas </item>
+        <item>Bank Shinhan Indonesia</item>
+        <item>Bank Sinarmas</item>
+        <item>Bank SMBC Indonesia</item>
         <item>Bank Syariah Indonesia (BSI)</item>
         <item>Bank Tabungan Negara (BTN)</item>
         <item>Bank UOB Indonesia</item>
+        <item>Bank Victoria International</item>
+        <item>Bank Victoria Syariah</item>
+        <item>Bank Woori Saudara Indonesia 1906</item>
+        <item>BPD Banten</item>
+        <item>BPD Bengkulu</item>
+        <item>BPD Daerah Istimewa Yogyakarta</item>
+        <item>BPD DKI</item>
+        <item>BPD Jambi</item>
         <item>BPD Jawa Barat dan Banten</item>
+        <item>BPD Jawa Tengah</item>
+        <item>BPD Jawa Timur</item>
+        <item>BPD Kalimantan Barat</item>
+        <item>BPD Kalimantan Selatan</item>
+        <item>BPD Kalimantan Tengah</item>
+        <item>BPD Kalimantan Timur dan Kalimantan Utara</item>
+        <item>BPD Lampung</item>
+        <item>BPD Maluku dan Maluku Utara</item>
+        <item>BPD Nusa Tenggara Timur</item>
+        <item>BPD Papua</item>
+        <item>BPD Riau Kepri Syariah</item>
+        <item>BPD Sulawesi Selatan dan Sulawesi Barat</item>
+        <item>BPD Sulawesi Tengah</item>
+        <item>BPD Sulawesi Tenggara</item>
+        <item>BPD Sulawesi Utara dan Gorontalo</item>
+        <item>BPD Sumatera Selatan dan Bangka Belitung</item>
+        <item>BPD Sumatera Utara</item>
+        <item>Krom Bank Indonesia</item>
         <item>Super Bank Indonesia</item>
-
+        <item>Standard Chartered Bank</item>
     </string-array>
 
 </resources>

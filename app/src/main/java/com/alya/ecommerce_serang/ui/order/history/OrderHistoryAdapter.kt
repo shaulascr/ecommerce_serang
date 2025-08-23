@@ -200,10 +200,6 @@ class OrderHistoryAdapter(
 //                            viewModel.refreshOrders()
                         }
                     }
-//                    deadlineDate.apply {
-//                        visibility = View.VISIBLE
-//                        text = formatDatePay(order.updatedAt)
-//                    }
                 }
                 "processed" -> {
                     // Untuk status processed, tampilkan "Hubungi Penjual"
@@ -215,15 +211,6 @@ class OrderHistoryAdapter(
                         visibility = View.VISIBLE
                         text = itemView.context.getString(R.string.dl_processed)
                     }
-                    // gabisa complaint
-//                    btnLeft.apply {
-//                        visibility = View.VISIBLE
-//                        text = itemView.context.getString(R.string.canceled_order_btn)
-//                        setOnClickListener {
-//                            showCancelOrderDialog(order.orderId.toString())
-//                            viewModel.refreshOrders()
-//                        }
-//                    }
                 }
                 "shipped" -> {
                     // Untuk status shipped, tampilkan "Lacak Pengiriman" dan "Terima Barang"
@@ -517,14 +504,14 @@ class OrderHistoryAdapter(
                     } else {
                         // Log error and show a Toast instead if we can't get a FragmentManager
                         Log.e("OrderHistoryAdapter", "Cannot show bottom sheet: Context is not a FragmentActivity")
-                        Toast.makeText(context, "Terjadi kendala", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Terjadi kendala di batalkan pesanan", Toast.LENGTH_SHORT).show()
                         return
                     }
                 }
                 else -> {
                     // Log error and show a Toast instead if we can't get a FragmentManager
                     Log.e("OrderHistoryAdapter", "Cannot show bottom sheet: Context is not a FragmentActivity")
-                    Toast.makeText(context, "Terjadi kendala", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Terjadi kendala di batalkan pesanan", Toast.LENGTH_SHORT).show()
                     return
                 }
             }
@@ -549,7 +536,8 @@ class OrderHistoryAdapter(
 
             viewModel.error.observe(itemView.findViewTreeLifecycleOwner()!!) { errorMsg ->
                 if (!errorMsg.isNullOrEmpty()) {
-                    Toast.makeText(itemView.context, errorMsg, Toast.LENGTH_SHORT).show()
+                    Log.e("OrderHistoryAdapter", "Error $errorMsg")
+                    Toast.makeText(itemView.context, "Terdapat kendala di tambah ulasan", Toast.LENGTH_SHORT).show()
                 }
             }
 
@@ -585,7 +573,7 @@ class OrderHistoryAdapter(
                 } else {
                     Toast.makeText(
                         itemView.context,
-                        "No items to review",
+                        "Tidak ada produk untuk direview",
                         Toast.LENGTH_SHORT
                     ).show()
                 }

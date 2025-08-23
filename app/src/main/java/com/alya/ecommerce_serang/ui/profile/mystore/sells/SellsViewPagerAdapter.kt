@@ -9,7 +9,7 @@ class SellsViewPagerAdapter(
 ) : FragmentStateAdapter(fragmentActivity) {
 
     // Define all possible sells statuses - keeping your original list
-    private val sellsStatuses = listOf(
+    val sellsStatuses = listOf(
         "all",
         "unpaid",
         "paid",

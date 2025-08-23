@@ -87,7 +87,6 @@ class SellsListFragment : Fragment() {
         setupRecyclerView()
         observeSellsList()
         observePaymentConfirmation()
-//        getAllOrderCountsAndNavigate()
     }
 
     private fun setupRecyclerView() {
@@ -121,8 +120,8 @@ class SellsListFragment : Fragment() {
                     Log.d(TAG, "Data received: ${result.data?.size ?: 0} items")
 
                     if (result.data.isNullOrEmpty()) {
-                        binding.tvEmptyState.visibility = View.VISIBLE
                         binding.rvSells.visibility = View.GONE
+                        binding.tvEmptyState.visibility = View.VISIBLE
                         Log.d(TAG, "Showing empty state")
 
                     } else {

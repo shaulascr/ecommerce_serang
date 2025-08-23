@@ -44,8 +44,6 @@ class OrderHistoryFragment : Fragment() {
         sessionManager = SessionManager(requireContext())
 
         setupViewPager()
-
-
     }
 
     private fun setupViewPager() {
@@ -67,15 +65,23 @@ class OrderHistoryFragment : Fragment() {
             }
         }.attach()
 
+        statusPage()
+    }
+
+    private fun statusPage(){
         binding.viewPager.registerOnPageChangeCallback(
             object : ViewPager2.OnPageChangeCallback() {
                 override fun onPageSelected(position: Int) {
                     val status = viewPagerAdapter.orderStatuses[position]
-                    /* setStatus() is the API we added earlier; TRUE → always re‑query */
                     historyVm.updateStatus(status, forceRefresh = true)
                 }
             }
         )
+    }
+
+    override fun onResume() {
+        super.onResume()
+        statusPage()
     }
 
     override fun onDestroyView() {

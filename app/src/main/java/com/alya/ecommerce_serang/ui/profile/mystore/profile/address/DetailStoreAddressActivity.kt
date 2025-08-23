@@ -322,19 +322,6 @@ class DetailStoreAddressActivity : AppCompatActivity() {
                 villageId = oldAddress.villageId
             )
             viewModel.saveStoreAddress(oldAddress, newAddress)
-            // Save address
-//            viewModel.saveStoreAddress(
-//                provinceId = selectedProvinceId!!,
-//                provinceName = province?.provinceName ?: "",
-//                cityId = city.cityId,
-//                cityName = city.cityName,
-//                street = street,
-//                subdistrict = subdistrict,
-//                detail = detail,
-//                postalCode = postalCode,
-//                latitude = latitude,
-//                longitude = longitude
-//            )
         }
     }
 
@@ -360,11 +347,13 @@ class DetailStoreAddressActivity : AppCompatActivity() {
                 it.isEnabled = true
                 it.setBackgroundResource(R.drawable.bg_button_active)
                 it.setTextColor(getColor(R.color.white))
+                binding.btnSaveAddress.text = "Simpan Perubahan"
+
             } else {
                 it.isEnabled = false
                 it.setBackgroundResource(R.drawable.bg_button_disabled)
                 it.setTextColor(getColor(R.color.black_300))
-                Toast.makeText(this, "Periksa dan lenkapi alamat anda", Toast.LENGTH_SHORT).show()
+                binding.btnSaveAddress.text = "Lengkapi alamat anda"
             }
         }
     }

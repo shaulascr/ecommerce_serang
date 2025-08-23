@@ -5,9 +5,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.viewpager2.widget.ViewPager2
 import com.alya.ecommerce_serang.R
+import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
+import com.alya.ecommerce_serang.data.repository.SellsRepository
 import com.alya.ecommerce_serang.databinding.FragmentSellsBinding
+import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
+import com.alya.ecommerce_serang.utils.viewmodel.SellsViewModel
 import com.google.android.material.tabs.TabLayoutMediator
 
 class SellsFragment : Fragment() {
@@ -17,6 +23,13 @@ class SellsFragment : Fragment() {
     private lateinit var sessionManager: SessionManager
 
     private lateinit var viewPagerAdapter: SellsViewPagerAdapter
+
+    private val sellsVm: SellsViewModel by activityViewModels {
+        BaseViewModelFactory {
+            val api = ApiConfig.getApiService(SessionManager(requireContext()))
+            SellsViewModel(SellsRepository(api))
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -53,8 +66,25 @@ class SellsFragment : Fragment() {
                 else -> "Tab $position"
             }
         }.attach()
+
+        statusPage()
     }
 
+    private fun statusPage(){
+        binding.viewPagerSells.registerOnPageChangeCallback(
+            object : ViewPager2.OnPageChangeCallback() {
+                override fun onPageSelected(position: Int) {
+                    val status = viewPagerAdapter.sellsStatuses[position]
+                    sellsVm.updateStatus(status, forceRefresh = true)
+                }
+            }
+        )
+    }
+
+    override fun onResume() {
+        super.onResume()
+        statusPage()
+    }
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

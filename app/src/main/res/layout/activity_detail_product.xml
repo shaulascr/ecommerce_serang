@@ -14,7 +14,6 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -167,7 +166,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textColor="@color/soft_gray"
-                            android:textSize="14sp"
+                            android:textSize="12sp"
                             tools:text="@string/item_sold" />
 
                         <View
@@ -186,7 +185,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="4dp"
-                            android:textSize="14sp"
+                            android:textSize="12sp"
                             tools:text="4.5" />
                     </LinearLayout>
                 </LinearLayout>
@@ -219,7 +218,7 @@
                             android:layout_weight="1"
                             android:text="@string/ulasan_pembeli"
                             android:textColor="@color/black"
-                            android:textSize="16sp"
+                            android:textSize="14sp"
                             android:textStyle="bold" />
 
                         <TextView
@@ -236,7 +235,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Belum ada ulasan"
-                        android:textSize="16sp"
+                        android:textSize="12sp"
                         android:textColor="@color/black_200"
                         android:gravity="center"
                         android:visibility="gone"
@@ -277,7 +276,7 @@
                         android:layout_height="wrap_content"
                         android:text="@string/detail_produk"
                         android:textColor="@color/black"
-                        android:textSize="16sp"
+                        android:textSize="14sp"
                         android:textStyle="bold" />
 
                     <TableLayout
@@ -296,7 +295,7 @@
                                 android:layout_weight="1"
                                 android:text="@string/berat_produk"
                                 android:fontFamily="@font/dmsans_semibold"
-                                android:textSize="14sp" />
+                                android:textSize="12sp" />
 
                             <TextView
                                 android:id="@+id/tvWeight"
@@ -304,7 +303,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
                                 android:textColor="@color/blue_500"
-                                android:textSize="14sp"
+                                android:textSize="12sp"
                                 tools:text="200 gram" />
                         </TableRow>
 
@@ -319,7 +318,7 @@
                                 android:layout_weight="1"
                                 android:text="@string/stock_product"
                                 android:fontFamily="@font/dmsans_semibold"
-                                android:textSize="14sp" />
+                                android:textSize="12sp" />
 
                             <TextView
                                 android:id="@+id/tvStock"
@@ -327,7 +326,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
                                 android:textColor="@color/blue_500"
-                                android:textSize="14sp"
+                                android:textSize="12sp"
                                 tools:text="100 buah" />
                         </TableRow>
 
@@ -358,8 +357,8 @@
                         android:layout_height="wrap_content"
                         android:text="@string/deskripsi_produk"
                         android:textColor="@color/black"
-                        android:textSize="16sp"
-                        android:layout_marginTop="8dp"
+                        android:textSize="14sp"
+                        android:layout_marginTop="16dp"
                         android:textStyle="bold" />
 
                     <TextView
@@ -368,7 +367,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:textColor="@color/black"
-                        android:textSize="14sp"
+                        android:textSize="12sp"
                         tools:text="Terbuat dari tepung dan ikan tenggiri asli Serang Banten. Tahan selama 25 hari." />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -422,7 +421,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textColor="@color/black"
-                            android:textSize="16sp"
+                            android:textSize="14sp"
                             android:textStyle="bold"
                             tools:text="SnackEnak" />
 
@@ -430,8 +429,9 @@
                             android:id="@+id/tvSellerLocation"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:fontFamily="@font/dmsans_semibold"
-                            android:textSize="14sp"
+                            android:fontFamily="@font/dmsans_regular"
+                            android:textColor="@color/black_300"
+                            android:textSize="12sp"
                             tools:text="Jakarta Selatan" />
 
                         <RatingBar
@@ -450,7 +450,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
-                            android:textSize="14sp"
+                            android:textSize="12sp"
                             android:textStyle="bold"
                             tools:text="5.0" />
                     </LinearLayout>
@@ -484,7 +484,7 @@
                             android:layout_weight="1"
                             android:text="@string/produk_lainnya"
                             android:textColor="@color/black"
-                            android:textSize="16sp"
+                            android:textSize="14sp"
                             android:textStyle="bold" />
 
                         <TextView
@@ -501,7 +501,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Belum ada produk lainnya"
-                        android:textSize="16sp"
+                        android:textSize="12sp"
                         android:textColor="@color/black_200"
                         android:gravity="center"
                         android:visibility="gone"
@@ -574,6 +574,7 @@
                 android:insetBottom="0dp"
                 android:text="@string/add_to_cart"
                 android:textColor="@color/blue_500"
+                android:textSize="14sp"
                 app:cornerRadius="4dp"
                 app:icon="@drawable/baseline_add_24"
                 app:iconGravity="textStart"
@@ -591,6 +592,7 @@
                 android:insetTop="0dp"
                 android:insetBottom="0dp"
                 android:text="@string/beli_sekarang"
+                android:textSize="14sp"
                 android:textColor="@color/white"
                 app:cornerRadius="4dp" />
         </LinearLayout>

@@ -14,7 +14,6 @@ import com.alya.ecommerce_serang.data.repository.AddressRepository
 import com.alya.ecommerce_serang.data.repository.SellsRepository
 import com.alya.ecommerce_serang.databinding.ActivityDetailShipmentBinding
 import com.alya.ecommerce_serang.ui.profile.mystore.sells.SellsProductAdapter
-import com.alya.ecommerce_serang.ui.profile.mystore.sells.payment.DetailPaymentActivity
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
 import com.alya.ecommerce_serang.utils.viewmodel.AddressViewModel
@@ -24,7 +23,6 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 import java.util.TimeZone
-import kotlin.getValue
 
 class DetailShipmentActivity : AppCompatActivity() {
 
@@ -106,6 +104,7 @@ class DetailShipmentActivity : AppCompatActivity() {
             tvOrderSubtotal.text = formatPrice(sell.totalAmount.toString())
             tvOrderShipPrice.text = formatPrice(sell.shipmentPrice.toString())
             tvOrderPrice.text = formatPrice(sell.totalAmount.toString())
+            tvOrderDue.text = formatDueDate(sell.updatedAt.toString(), 2)
             tvOrderRecipient.text = sell.recipient ?: "-"
             tvOrderRecipientNum.text = sell.receiptNum?.toString() ?: "-"
 
@@ -160,6 +159,28 @@ class DetailShipmentActivity : AppCompatActivity() {
             date?.let {
                 val calendar = Calendar.getInstance()
                 calendar.time = it
+                outputFormat.format(calendar.time)
+            } ?: dateString
+        } catch (e: Exception) {
+            Log.e("DateFormatting", "Error formatting date: ${e.message}")
+            dateString
+        }
+    }
+
+    private fun formatDueDate(dateString: String, dueDay: Int): String {
+        return try {
+            val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
+            inputFormat.timeZone = TimeZone.getTimeZone("UTC")
+
+            val outputFormat = SimpleDateFormat("dd MMM; HH.mm", Locale("id", "ID"))
+
+            val date = inputFormat.parse(dateString)
+
+            date?.let {
+                val calendar = Calendar.getInstance()
+                calendar.time = it
+                calendar.add(Calendar.DATE, dueDay)
+
                 outputFormat.format(calendar.time)
             } ?: dateString
         } catch (e: Exception) {

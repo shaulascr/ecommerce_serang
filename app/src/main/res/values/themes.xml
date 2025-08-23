@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Theme.Ecommerce_serang" parent="Theme.Material3.Light.NoActionBar">
         <!-- Primary Color Customization -->
@@ -330,4 +330,12 @@
         <item name="cornerSize">5dp</item>
     </style>
 
-</resources>
+
+    <style name="Theme.App.SplashScreen" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/white</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/logo_bisa_umkm</item>
+        <item name="windowSplashScreenAnimationDuration">1000</item>
+        <item name="android:windowSplashScreenBehavior" tools:targetApi="33">icon_preferred</item>
+        <item name="postSplashScreenTheme">@style/Theme.Ecommerce_serang</item>
+    </style>
+ </resources>
