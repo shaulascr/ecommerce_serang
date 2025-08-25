@@ -1,7 +1,6 @@
 package com.alya.ecommerce_serang.data.api.retrofit
 
 
-import com.alya.ecommerce_serang.data.api.dto.AddEvidenceRequest
 import com.alya.ecommerce_serang.data.api.dto.AddPaymentInfoResponse
 import com.alya.ecommerce_serang.data.api.dto.CancelOrderReq
 import com.alya.ecommerce_serang.data.api.dto.CartItem
@@ -17,7 +16,6 @@ import com.alya.ecommerce_serang.data.api.dto.LoginRequest
 import com.alya.ecommerce_serang.data.api.dto.OrderRequest
 import com.alya.ecommerce_serang.data.api.dto.OrderRequestBuy
 import com.alya.ecommerce_serang.data.api.dto.OtpRequest
-import com.alya.ecommerce_serang.data.api.dto.PaymentConfirmRequest
 import com.alya.ecommerce_serang.data.api.dto.ProvinceResponse
 import com.alya.ecommerce_serang.data.api.dto.RegisterRequest
 import com.alya.ecommerce_serang.data.api.dto.ResetPassReq
@@ -29,7 +27,6 @@ import com.alya.ecommerce_serang.data.api.dto.UpdateCart
 import com.alya.ecommerce_serang.data.api.dto.UpdateChatRequest
 import com.alya.ecommerce_serang.data.api.dto.VerifRegisReq
 import com.alya.ecommerce_serang.data.api.response.auth.ChangePassResponse
-import com.alya.ecommerce_serang.data.api.response.auth.CheckStoreResponse
 import com.alya.ecommerce_serang.data.api.response.auth.FcmTokenResponse
 import com.alya.ecommerce_serang.data.api.response.auth.HasStoreResponse
 import com.alya.ecommerce_serang.data.api.response.auth.ListNotifResponse
@@ -83,12 +80,10 @@ import com.alya.ecommerce_serang.data.api.response.store.product.UpdateProductRe
 import com.alya.ecommerce_serang.data.api.response.store.product.ViewStoreProductsResponse
 import com.alya.ecommerce_serang.data.api.response.store.profile.StoreDataResponse
 import com.alya.ecommerce_serang.data.api.response.store.review.ProductReviewResponse
-import com.alya.ecommerce_serang.data.api.response.store.sells.PaymentConfirmationResponse
 import com.alya.ecommerce_serang.data.api.response.store.topup.BalanceTopUpResponse
 import com.alya.ecommerce_serang.data.api.response.store.topup.TopUpResponse
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
-import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -99,7 +94,6 @@ import retrofit2.http.PUT
 import retrofit2.http.Part
 import retrofit2.http.PartMap
 import retrofit2.http.Path
-import retrofit2.http.Query
 
 interface ApiService {
     @POST("registeruser")
@@ -111,9 +105,6 @@ interface ApiService {
     suspend fun verifValue (
         @Body verifRegisReq: VerifRegisReq
     ):VerifRegisterResponse
-
-    @GET("checkstore")
-    suspend fun checkStore (): Response<CheckStoreResponse>
 
     @Multipart
     @POST("registerstore")
@@ -204,11 +195,6 @@ interface ApiService {
         @Path("id") orderId: Int
     ): Response<OrderDetailResponse>
 
-    @POST("order/addevidence")
-    suspend fun addEvidence(
-        @Body request : AddEvidenceRequest,
-    ): Response<AddEvidenceResponse>
-
     @Multipart
     @POST("order/addevidence")
     suspend fun addEvidenceMultipart(
@@ -256,14 +242,8 @@ interface ApiService {
     @GET("mystore")
     suspend fun getMyStoreData(): Response<com.alya.ecommerce_serang.data.api.response.store.StoreResponse>
 
-    @GET("mystore")
-    suspend fun getStoreAddress(): Response<StoreAddressResponse>
-
     @GET("mystore/product") // Replace with actual endpoint
     suspend fun getStoreProduct(): Response<ViewStoreProductsResponse>
-
-    @GET("category")
-    fun getCategories(): Call<CategoryResponse>
 
     @Multipart
     @POST("store/createproduct")
@@ -374,9 +354,6 @@ interface ApiService {
     @GET("store/topup")
     suspend fun getTopUpHistory(): Response<TopUpResponse>
 
-    @GET("store/topup")
-    suspend fun getFilteredTopUpHistory(@Query("date") date: String): Response<TopUpResponse>
-
     @Multipart
     @POST("store/createtopup")
     suspend fun addBalanceTopUp(
@@ -387,11 +364,6 @@ interface ApiService {
         @Part("bank_name") bankName: RequestBody,
         @Part("bank_num") bankNum: RequestBody
     ): Response<BalanceTopUpResponse>
-
-    @PUT("store/payment/update")
-    suspend fun paymentConfirmation(
-        @Body confirmPaymentReq : PaymentConfirmRequest
-    ): Response<PaymentConfirmationResponse>
 
     @Multipart
     @PUT("mystore/edit")
@@ -404,13 +376,26 @@ interface ApiService {
     ): Response<StoreDataResponse>
 
     @Multipart
-    @POST("mystore/payment/add")
-    suspend fun addPaymentInfo(
-        @Part("bank_name") bankName: RequestBody,
-        @Part("bank_num") bankNum: RequestBody,
-        @Part("account_name") accountName: RequestBody,
-        @Part qris: MultipartBody.Part?
-    ): Response<GenericResponse>
+    @PUT("mystore/edit")
+    suspend fun updateStoreApprovalMultipart(
+        @Part("store_name") storeName: RequestBody,
+        @Part("store_description") storeDescription: RequestBody,
+        @Part("store_type_id") storeTypeId: RequestBody,
+        @Part("latitude") storeLatitude: RequestBody,
+        @Part("longitude") storeLongitude: RequestBody,
+        @Part("province_id") storeProvince: RequestBody,
+        @Part("city_id") storeCity: RequestBody,
+        @Part("subdistrict") storeSubdistrict: RequestBody,
+        @Part("village_id") storeVillage: RequestBody,
+        @Part("street") storeStreet: RequestBody,
+        @Part("postal_code") storePostalCode: RequestBody,
+        @Part("detail") storeAddressDetail: RequestBody,
+        @Part("user_phone") storeUserPhone: RequestBody,
+        @Part storeimg: MultipartBody.Part?,
+        @Part ktp: MultipartBody.Part?,
+        @Part npwp: MultipartBody.Part?,
+        @Part nib: MultipartBody.Part?
+    ): Response<StoreDataResponse>
 
     @Multipart
     @POST("mystore/payment/add")
@@ -420,6 +405,16 @@ interface ApiService {
         @Part("account_name") accountName: RequestBody,
         @Part qris: MultipartBody.Part?
     ): Response<AddPaymentInfoResponse>
+
+    @Multipart
+    @PUT("mystore/payment/edit")
+    suspend fun updatePaymentInfo(
+        @Part("payment_info_id") paymentInfoId: RequestBody,
+        @Part("account_name") accountName: RequestBody,
+        @Part("bank_name") bankName: RequestBody,
+        @Part("bank_num") bankNum: RequestBody,
+        @Part qris: MultipartBody.Part? = null
+    ): Response<GenericResponse>
 
     @DELETE("mystore/payment/delete/{id}")
     suspend fun deletePaymentInfo(
@@ -463,15 +458,6 @@ interface ApiService {
 
     @GET("search")
     suspend fun getSearchHistory(): Response<SearchHistoryResponse>
-
-    @Multipart
-    @POST("sendchat")
-    suspend fun sendChatLine(
-        @Part("store_id") storeId: RequestBody,
-        @Part("message") message: RequestBody,
-        @Part("product_id") productId: RequestBody?,
-        @Part chatimg: MultipartBody.Part?
-    ): Response<SendChatResponse>
 
     @Multipart
     @POST("store/sendchat")

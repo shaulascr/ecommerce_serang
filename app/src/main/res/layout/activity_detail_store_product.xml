@@ -371,6 +371,7 @@
                     android:background="@drawable/bg_text_field"
                     android:hint="Isi stok produk di sini"
                     android:padding="8dp"
+                    android:inputType="number"
                     style="@style/body_small" />
 
             </LinearLayout>
@@ -413,6 +414,7 @@
                     android:hint="Isi minimum pemesanan produk di sini"
                     android:padding="8dp"
                     style="@style/body_small"
+                    android:inputType="number"
                     android:layout_marginTop="10dp" />
 
             </LinearLayout>
@@ -711,6 +713,7 @@
                     android:background="@drawable/bg_text_field"
                     android:hint="Isi minimum produk untuk mendapatkan harga grosir di sini"
                     android:padding="8dp"
+                    android:inputType="number"
                     style="@style/body_small" />
 
             </LinearLayout>

@@ -543,49 +543,6 @@
 
             </LinearLayout>
 
-            <!-- Bank -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginBottom="24dp"
-                android:visibility="gone">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="10. Bank"
-                        style="@style/body_medium"
-                        android:layout_marginEnd="4dp"/>
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="*"
-                        style="@style/body_medium"
-                        android:textColor="@color/red_required"
-                        android:layout_gravity="end"/>
-
-                </LinearLayout>
-
-                <EditText
-                    android:id="@+id/et_bank_name"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/bg_text_field"
-                    android:hint="Isi nama bank untuk toko Anda di sini"
-                    android:padding="8dp"
-                    style="@style/body_small"
-                    android:layout_marginTop="10dp"/>
-
-            </LinearLayout>
-
             <!-- Nama Bank-->
             <LinearLayout
                 android:layout_width="match_parent"
@@ -654,6 +611,48 @@
 
             </LinearLayout>
 
+            <!-- Nama Pemilik Rekening -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginBottom="24dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="12. Nama Pemilik Rekening"
+                        style="@style/body_medium"
+                        android:layout_marginEnd="4dp"/>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="*"
+                        style="@style/body_medium"
+                        android:textColor="@color/red_required"
+                        android:layout_gravity="end"/>
+
+                </LinearLayout>
+
+                <EditText
+                    android:id="@+id/et_account_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_text_field"
+                    android:hint="Isi nama pemilik rekening"
+                    android:padding="8dp"
+                    style="@style/body_small"
+                    android:layout_marginTop="10dp"/>
+
+            </LinearLayout>
+
             <!-- Nomor Rekening -->
             <LinearLayout
                 android:layout_width="match_parent"
@@ -694,48 +693,6 @@
                     style="@style/body_small"
                     android:layout_marginTop="10dp"
                     android:inputType="number"/>
-
-            </LinearLayout>
-
-            <!-- Nama Pemilik Rekening -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginBottom="24dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="12. Nama Pemilik Rekening"
-                        style="@style/body_medium"
-                        android:layout_marginEnd="4dp"/>
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="*"
-                        style="@style/body_medium"
-                        android:textColor="@color/red_required"
-                        android:layout_gravity="end"/>
-
-                </LinearLayout>
-
-                <EditText
-                    android:id="@+id/et_account_name"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/bg_text_field"
-                    android:hint="Isi nama pemilik rekening"
-                    android:padding="8dp"
-                    style="@style/body_small"
-                    android:layout_marginTop="10dp"/>
 
             </LinearLayout>
 
@@ -915,73 +872,6 @@
 
             </LinearLayout>
 
-            <!-- NIB -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginBottom="24dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="16. Dokumen NIB"
-                        style="@style/body_medium"
-                        android:layout_marginEnd="4dp"/>
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="*"
-                        style="@style/body_medium"
-                        android:textColor="@color/red_required"
-                        android:layout_gravity="end"/>
-
-                </LinearLayout>
-
-                <FrameLayout
-                    android:id="@+id/container_nib"
-                    android:layout_width="match_parent"
-                    android:layout_height="100dp"
-                    android:layout_marginTop="8dp"
-                    android:background="@android:drawable/editbox_background">
-
-                    <ImageView
-                        android:id="@+id/img_nib"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:scaleType="centerInside"
-                        android:visibility="gone" />
-
-                    <LinearLayout
-                        android:id="@+id/layout_upload_nib"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center"
-                        android:orientation="vertical">
-
-                        <ImageView
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
-                            android:src="@android:drawable/ic_menu_upload" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:text="Unggah dokumen Anda di sini"
-                            android:textColor="#777777" />
-                    </LinearLayout>
-                </FrameLayout>
-
-            </LinearLayout>
-
             <!-- NPWP -->
             <LinearLayout
                 android:layout_width="match_parent"
@@ -1028,6 +918,73 @@
 
                     <LinearLayout
                         android:id="@+id/layout_upload_npwp"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="vertical">
+
+                        <ImageView
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:src="@android:drawable/ic_menu_upload" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="Unggah dokumen Anda di sini"
+                            android:textColor="#777777" />
+                    </LinearLayout>
+                </FrameLayout>
+
+            </LinearLayout>
+
+            <!-- NIB -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginBottom="24dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="16. Dokumen NIB"
+                        style="@style/body_medium"
+                        android:layout_marginEnd="4dp"/>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="*"
+                        style="@style/body_medium"
+                        android:textColor="@color/red_required"
+                        android:layout_gravity="end"/>
+
+                </LinearLayout>
+
+                <FrameLayout
+                    android:id="@+id/container_nib"
+                    android:layout_width="match_parent"
+                    android:layout_height="100dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@android:drawable/editbox_background">
+
+                    <ImageView
+                        android:id="@+id/img_nib"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerInside"
+                        android:visibility="gone" />
+
+                    <LinearLayout
+                        android:id="@+id/layout_upload_nib"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:gravity="center"

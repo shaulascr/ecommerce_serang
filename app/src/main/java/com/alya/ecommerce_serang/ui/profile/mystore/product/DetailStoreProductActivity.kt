@@ -49,6 +49,9 @@ class DetailStoreProductActivity : AppCompatActivity() {
     private var productId: Int? = null
     private var hasImage: Boolean = false
 
+    private var isEditing = false
+    private var hasExistingImage = false
+
     private val viewModel: ProductViewModel by viewModels {
         BaseViewModelFactory {
             sessionManager = SessionManager(this)
@@ -98,7 +101,7 @@ class DetailStoreProductActivity : AppCompatActivity() {
         binding = ActivityDetailStoreProductBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val isEditing = intent.getBooleanExtra("is_editing", false)
+        isEditing = intent.getBooleanExtra("is_editing", false)
         productId = intent.getIntExtra("product_id", -1)
 
         binding.headerStoreProduct.headerTitle.text = if (isEditing) "Ubah Produk" else "Tambah Produk"
@@ -179,6 +182,7 @@ class DetailStoreProductActivity : AppCompatActivity() {
         binding.btnRemoveFoto.setOnClickListener {
             imageUri = null
             hasImage = false
+            hasExistingImage = false
             binding.switcherFotoProduk.showPrevious()
             validateForm()
         }
@@ -236,7 +240,9 @@ class DetailStoreProductActivity : AppCompatActivity() {
         } else product.image
         Glide.with(this).load(imageUrl).into(binding.ivPreviewFoto)
         binding.switcherFotoProduk.showNext()
+
         hasImage = true
+        hasExistingImage = true
 
         // SPPIRT
         product.sppirt?.let {
@@ -331,9 +337,17 @@ class DetailStoreProductActivity : AppCompatActivity() {
         val duration = binding.edtDurasi.text.toString().trim()
         val wholesaleMinItem = binding.edtMinPesanGrosir.text.toString().trim()
         val wholesalePrice = binding.edtHargaGrosir.text.toString().trim()
-        val category = binding.spinnerKategoriProduk.selectedItemPosition != -1
+        val categorySelected = binding.spinnerKategoriProduk.selectedItemPosition != -1
         val isPreOrderChecked = binding.switchIsPreOrder.isChecked
         val isWholesaleChecked = binding.switchIsWholesale.isChecked
+
+        val hasRequiredImage = if (isEditing) {
+            // In edit mode: allow existing server image OR newly picked image
+            hasImage || hasExistingImage
+        } else {
+            // In create mode: must have a picked image
+            hasImage
+        }
 
         val valid = name.isNotEmpty() &&
                 description.isNotEmpty() &&
@@ -343,8 +357,8 @@ class DetailStoreProductActivity : AppCompatActivity() {
                 weight.isNotEmpty() &&
                 (!isPreOrderChecked || duration.isNotEmpty()) &&
                 (!isWholesaleChecked || (wholesaleMinItem.isNotEmpty() && wholesalePrice.isNotEmpty())) &&
-                category &&
-                hasImage
+                categorySelected &&
+                hasRequiredImage
 
         binding.btnSaveProduct.isEnabled = valid
         binding.btnSaveProduct.setTextColor(

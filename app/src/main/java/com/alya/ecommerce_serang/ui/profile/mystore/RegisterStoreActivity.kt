@@ -47,6 +47,7 @@ import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
 import androidx.core.net.toUri
+import com.alya.ecommerce_serang.data.api.dto.PaymentUpdate
 
 class RegisterStoreActivity : AppCompatActivity() {
 
@@ -57,6 +58,21 @@ class RegisterStoreActivity : AppCompatActivity() {
     private lateinit var cityAdapter: CityAdapter
     private lateinit var subdistrictAdapter: SubdsitrictAdapter
     private lateinit var bankAdapter: BankAdapter
+
+    // pending values (filled from myStoreProfile once)
+    private var wantedProvinceId: Int? = null
+    private var wantedCityId: String? = null
+    private var wantedSubdistrictId: String? = null
+    private var wantedBankName: String? = null
+
+    // one-shot guards so we don't re-apply repeatedly
+    private var provinceApplied = false
+    private var cityApplied = false
+    private var subdistrictApplied = false
+    private var bankApplied = false
+
+    // avoid clearing/overriding while restoring
+    private var isRestoringSelections = false
 
     // Request codes for file picking
     private val PICK_STORE_IMAGE_REQUEST = 1001
@@ -122,6 +138,10 @@ class RegisterStoreActivity : AppCompatActivity() {
 
         setupSpinners() // Location spinners
         Log.d(TAG, "onCreate: Spinners setup completed")
+
+        binding.checkboxApprove.setOnCheckedChangeListener { _, _ ->
+            validateRequiredFields()
+        }
 
         // Setup observers
         setupStoreTypesObserver() // Store type observer
@@ -209,12 +229,27 @@ class RegisterStoreActivity : AppCompatActivity() {
                     // Prefill spinner for store types
                     preselectStoreType(store.storeTypeId)
 
-                    // Prefill province, city, and subdistrict
-                    preselectProvinceCitySubdistrict(
-                        provinceId = store.provinceId,
-                        cityId = store.cityId,
-                        subdistrictId = store.subdistrict
-                    )
+                    // Cache what we want to select later (after data arrives)
+                    wantedProvinceId    = store.provinceId
+                    wantedCityId        = store.cityId
+                    wantedSubdistrictId = store.subdistrict
+                    wantedBankName      = storeResponse.payment.firstOrNull()?.bankName
+
+                    // Cache what we want to select later (after data arrives)
+                    wantedProvinceId    = store.provinceId
+                    wantedCityId        = store.cityId
+                    wantedSubdistrictId = store.subdistrict
+                    wantedBankName      = storeResponse.payment.firstOrNull()?.bankName
+
+                    // Mark restoring flow on
+                    isRestoringSelections = true
+
+                    // Try to apply immediately (if adapters already have data), otherwise
+                    // observers below will apply when data is ready.
+                    tryApplyProvince()
+                    tryApplyCity()
+                    tryApplySubdistrict()
+                    tryApplyBank()
 
                     validateRequiredFields()
                 }
@@ -229,61 +264,75 @@ class RegisterStoreActivity : AppCompatActivity() {
                 else Toast.makeText(this, "Harap lengkapi semua field yang wajib diisi", Toast.LENGTH_SHORT).show()
             }
         }
+        validateRequiredFields()
     }
 
     private fun preselectStoreType(storeTypeId: Int) {
         // The adapter is created in setupStoreTypeSpinner(...)
-        val adapter = binding.spinnerStoreType.adapter
-        if (adapter != null) {
-            val count = adapter.count
-            for (i in 0 until count) {
-                val item = adapter.getItem(i) as? StoreTypesItem
-                if (item?.id == storeTypeId) {
-                    binding.spinnerStoreType.setSelection(i, false)
-                    break
-                }
+        val adapter = binding.spinnerStoreType.adapter ?: return
+        for (i in 0 until adapter.count) {
+            val item = adapter.getItem(i) as? StoreTypesItem
+            if (item?.id == storeTypeId) {
+                binding.spinnerStoreType.setSelection(i, false)
+                viewModel.storeTypeId.value = storeTypeId
+                validateRequiredFields()
+                break
             }
         }
     }
 
-    private fun preselectProvinceCitySubdistrict(
-        provinceId: Int,
-        cityId: String,
-        subdistrictId: String
-    ) {
-        // Province first (this will trigger cities fetch)
-        val provCount = provinceAdapter.count
-        for (i in 0 until provCount) {
-            if (provinceAdapter.getProvinceId(i) == provinceId) {
+    private fun tryApplyProvince() {
+        if (provinceApplied) return
+        val target = wantedProvinceId ?: return
+        val count = provinceAdapter.count
+        for (i in 0 until count) {
+            if (provinceAdapter.getProvinceId(i) == target) {
                 binding.spinnerProvince.setSelection(i, false)
-                break
+                provinceApplied = true
+                maybeFinishRestoring()
+                return
             }
         }
+    }
 
-        // When cities arrive, select the city, then load subdistricts
-        viewModel.citiesState.observe(this) { state ->
-            if (state is Result.Success) {
-                val cityCount = cityAdapter.count
-                for (i in 0 until cityCount) {
-                    if (cityAdapter.getCityId(i) == cityId) {
-                        binding.spinnerCity.setSelection(i, false)
-                        break
-                    }
-                }
+    private fun tryApplyCity() {
+        if (cityApplied) return
+        val target = wantedCityId ?: return
+        val count = cityAdapter.count
+        for (i in 0 until count) {
+            if (cityAdapter.getCityId(i) == target) {
+                binding.spinnerCity.setSelection(i, false)
+                cityApplied = true
+                maybeFinishRestoring()
+                return
             }
         }
+    }
 
-        // When subdistricts arrive, select the subdistrict
-        viewModel.subdistrictState.observe(this) { state ->
-            if (state is Result.Success) {
-                val subCount = subdistrictAdapter.count
-                for (i in 0 until subCount) {
-                    if (subdistrictAdapter.getSubdistrictId(i) == subdistrictId) {
-                        binding.spinnerSubdistrict.setSelection(i, false)
-                        break
-                    }
-                }
+    private fun tryApplySubdistrict() {
+        if (subdistrictApplied) return
+        val target = wantedSubdistrictId ?: return
+        val count = subdistrictAdapter.count
+        for (i in 0 until count) {
+            if (subdistrictAdapter.getSubdistrictId(i) == target) {
+                binding.spinnerSubdistrict.setSelection(i, false)
+                subdistrictApplied = true
+                maybeFinishRestoring()
+                return
             }
+        }
+    }
+
+    private fun tryApplyBank() {
+        if (bankApplied) return
+        val targetName = wantedBankName ?: return
+        val pos = bankAdapter.findPositionByName(targetName)
+        if (pos >= 0) {
+            binding.spinnerBankName.setSelection(pos, false)
+            viewModel.bankName.value = targetName
+            viewModel.selectedBankName = targetName
+            validateRequiredFields()
+            bankApplied = true
         }
     }
 
@@ -301,31 +350,42 @@ class RegisterStoreActivity : AppCompatActivity() {
     }
 
     private fun validateRequiredFields() {
-        val isFormValid = !viewModel.storeName.value.isNullOrBlank() &&
-                !viewModel.street.value.isNullOrBlank() &&
-                (viewModel.postalCode.value ?: 0) > 0 &&
-                !viewModel.subdistrict.value.isNullOrBlank() &&
-                !viewModel.bankName.value.isNullOrBlank() &&
-                (viewModel.bankNumber.value ?: 0) > 0 &&
-                (viewModel.provinceId.value ?: 0) > 0 &&
-                !viewModel.cityId.value.isNullOrBlank() &&
-                (viewModel.storeTypeId.value ?: 0) > 0 &&
-                viewModel.ktpUri != null &&
-                viewModel.nibUri != null &&
-                viewModel.npwpUri != null &&
-                viewModel.selectedCouriers.isNotEmpty() &&
-                !viewModel.accountName.value.isNullOrBlank()
+        val bankName = viewModel.bankName.value?.trim().orEmpty()
+        val bankSelected = bankName.isNotEmpty() && !bankName.equals("Pilih Bank", ignoreCase = true)
 
-        binding.btnRegister.isEnabled = true
-        if (isFormValid) {
-            binding.btnRegister.setBackgroundResource(R.drawable.bg_button_active)
-            binding.btnRegister.setTextColor(ContextCompat.getColor(this, R.color.white))
-            binding.btnRegister.isEnabled = true
-        } else {
-            binding.btnRegister.setBackgroundResource(R.drawable.bg_button_disabled)
-            binding.btnRegister.setTextColor(ContextCompat.getColor(this, R.color.black_300))
-            binding.btnRegister.isEnabled = false
+        val provinceSelected    = viewModel.provinceId.value != null
+        val citySelected        = !viewModel.cityId.value.isNullOrBlank()
+        val subdistrictSelected = !viewModel.subdistrict.value.isNullOrBlank()
+
+        val currentStoreType = binding.spinnerStoreType.selectedItem as? StoreTypesItem
+        val storeTypeSelected = when {
+            currentStoreType != null -> currentStoreType.id != 0 &&
+                    !currentStoreType.name.equals("Pilih Jenis UMKM", true)
+            else -> (viewModel.storeTypeId.value ?: -1) > 0
         }
+
+        val isFormValid =
+            !viewModel.storeName.value.isNullOrBlank() &&
+                    !viewModel.street.value.isNullOrBlank() &&
+                    (viewModel.postalCode.value ?: 0) > 0 &&
+                    provinceSelected && citySelected && subdistrictSelected &&
+                    storeTypeSelected &&
+                    bankSelected &&
+                    (viewModel.bankNumber.value ?: 0) > 0 &&
+                    viewModel.ktpUri != null &&
+                    viewModel.nibUri != null &&
+                    viewModel.npwpUri != null &&
+                    viewModel.selectedCouriers.isNotEmpty() &&
+                    !viewModel.accountName.value.isNullOrBlank() &&
+                    binding.checkboxApprove.isChecked
+
+        binding.btnRegister.isEnabled = isFormValid
+        binding.btnRegister.setBackgroundResource(
+            if (isFormValid) R.drawable.bg_button_active else R.drawable.bg_button_disabled
+        )
+        binding.btnRegister.setTextColor(
+            ContextCompat.getColor(this, if (isFormValid) R.color.white else R.color.black_300)
+        )
     }
 
     private fun setupObservers() {
@@ -340,12 +400,10 @@ class RegisterStoreActivity : AppCompatActivity() {
                     binding.spinnerProvince.isEnabled = false
                 }
                 is Result.Success -> {
-                    Log.d(TAG, "setupObservers: Provinces loaded successfully: ${state.data.size} provinces")
                     binding.provinceProgressBar.visibility = View.GONE
                     binding.spinnerProvince.isEnabled = true
-
-                    // Update adapter with data
                     provinceAdapter.updateData(state.data)
+                    tryApplyProvince()
                 }
                 is Result.Error -> {
                     Log.e(TAG, "setupObservers: Error loading provinces: ${state.exception.message}")
@@ -364,12 +422,10 @@ class RegisterStoreActivity : AppCompatActivity() {
                     binding.spinnerCity.isEnabled = false
                 }
                 is Result.Success -> {
-                    Log.d(TAG, "setupObservers: Cities loaded successfully: ${state.data.size} cities")
                     binding.cityProgressBar.visibility = View.GONE
                     binding.spinnerCity.isEnabled = true
-
-                    // Update adapter with data
                     cityAdapter.updateData(state.data)
+                    tryApplyCity()
                 }
                 is Result.Error -> {
                     Log.e(TAG, "setupObservers: Error loading cities: ${state.exception.message}")
@@ -387,11 +443,20 @@ class RegisterStoreActivity : AppCompatActivity() {
                     binding.spinnerSubdistrict.isEnabled = false
                 }
                 is Result.Success -> {
-                    Log.d(TAG, "setupobservers: Subdistrict loaded successfullti: ${state.data.size} subdistrict")
                     binding.subdistrictProgressBar.visibility = View.GONE
                     binding.spinnerSubdistrict.isEnabled = true
-
                     subdistrictAdapter.updateData(state.data)
+
+                    // If you’re not restoring a specific subdistrict, select the first real item
+                    if (!isRestoringSelections && state.data.isNotEmpty()) {
+                        binding.spinnerSubdistrict.setSelection(0, false)
+                        val id0 = subdistrictAdapter.getSubdistrictId(0)
+                        viewModel.subdistrict.value = id0 ?: ""
+                        viewModel.selectedSubdistrict = id0
+                        validateRequiredFields()
+                    }
+
+                    tryApplySubdistrict()
                 }
                 is Result.Error -> {
                     Log.e(TAG, "setupObservers: Error loading subdistrict: ${state.exception.message}")
@@ -466,6 +531,7 @@ class RegisterStoreActivity : AppCompatActivity() {
 
                 // Setup spinner with API data
                 setupStoreTypeSpinner(displayList)
+                tryApplyBank()
             } else {
                 Log.w(TAG, "setupStoreTypesObserver: Received empty store types list")
             }
@@ -510,17 +576,10 @@ class RegisterStoreActivity : AppCompatActivity() {
 
         // Set item selection listener
         binding.spinnerStoreType.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                val selectedItem = adapter.getItem(position)
-                Log.d(TAG, "Store type selected: position=$position, item=${selectedItem?.name}, id=${selectedItem?.id}")
-
-                if (selectedItem != null && selectedItem.id > 0) {
-                    // Store the actual ID from the API, not just position
-                    viewModel.storeTypeId.value = selectedItem.id
-                    Log.d(TAG, "Set storeTypeId to ${selectedItem.id}")
-                } else {
-                    Log.d(TAG, "Default or null store type selected, not setting storeTypeId")
-                }
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, pos: Int, id: Long) {
+                val item = (binding.spinnerStoreType.adapter.getItem(pos) as? StoreTypesItem)
+                if (item != null && item.id > 0) viewModel.storeTypeId.value = item.id
+                validateRequiredFields()
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
@@ -539,22 +598,12 @@ class RegisterStoreActivity : AppCompatActivity() {
         // Setup province spinner
         binding.spinnerProvince.adapter = provinceAdapter
         binding.spinnerProvince.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                Log.d(TAG, "Province selected at position: $position")
-                val provinceId = provinceAdapter.getProvinceId(position)
-                if (provinceId != null) {
-                    Log.d(TAG, "Setting province ID: $provinceId")
-                    viewModel.provinceId.value = provinceId
-                    Log.d(TAG, "Fetching cities for province ID: $provinceId")
-                    viewModel.getCities(provinceId)
-
-                    // Reset city selection when province changes
-                    Log.d(TAG, "Clearing city adapter for new province selection")
-                    cityAdapter.clear()
-                    binding.spinnerCity.setSelection(0)
-                } else {
-                    Log.e(TAG, "Invalid province ID for position: $position")
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, pos: Int, id: Long) {
+                provinceAdapter.getProvinceId(pos)?.let {
+                    viewModel.provinceId.value = it
+                    viewModel.getCities(it)
                 }
+                validateRequiredFields()
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
@@ -565,21 +614,13 @@ class RegisterStoreActivity : AppCompatActivity() {
         // Setup city spinner
         binding.spinnerCity.adapter = cityAdapter
         binding.spinnerCity.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                Log.d(TAG, "City selected at position: $position")
-                val cityId = cityAdapter.getCityId(position)
-                if (cityId != null) {
-                    Log.d(TAG, "Setting city ID: $cityId")
-                    viewModel.cityId.value = cityId
-                    Log.d(TAG, "Fetching subdistrict for city ID: $cityId")
-                    viewModel.getSubdistrict(cityId)
-
-                    subdistrictAdapter.clear()
-                    binding.spinnerSubdistrict.setSelection(0)
-                    viewModel.selectedCityId = cityId
-                } else {
-                    Log.e(TAG, "Invalid city ID for position: $position")
+            override fun onItemSelected(p: AdapterView<*>?, v: View?, pos: Int, id: Long) {
+                cityAdapter.getCityId(pos)?.let {
+                    viewModel.cityId.value = it
+                    viewModel.getSubdistrict(it)
+                    viewModel.selectedCityId = it
                 }
+                validateRequiredFields()
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
@@ -590,16 +631,11 @@ class RegisterStoreActivity : AppCompatActivity() {
         //Setup Subdistrict spinner
         binding.spinnerSubdistrict.adapter = subdistrictAdapter
         binding.spinnerSubdistrict.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                Log.d(TAG, "Subdistrict selected at position: $position")
-                val subdistrictId = subdistrictAdapter.getSubdistrictId(position)
-                if (subdistrictId != null) {
-                    Log.d(TAG, "Setting subdistrict ID: $subdistrictId")
-                    viewModel.subdistrict.value = subdistrictId
-                    viewModel.selectedSubdistrict = subdistrictId
-                } else {
-                    Log.e(TAG, "Invalid subdistrict ID for position: $position")
-                }
+            override fun onItemSelected(p: AdapterView<*>?, v: View?, pos: Int, id: Long) {
+                val selectedId = subdistrictAdapter.getSubdistrictId(pos)
+                viewModel.subdistrict.value = selectedId ?: ""     // empty => not selected
+                viewModel.selectedSubdistrict = selectedId
+                validateRequiredFields()
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
@@ -609,61 +645,29 @@ class RegisterStoreActivity : AppCompatActivity() {
 
         binding.spinnerBankName.adapter = bankAdapter
         binding.spinnerBankName.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(
-                parent: AdapterView<*>?,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-                Log.d(TAG, "Bank selected at position: $position")
-                val bankName = bankAdapter.getBankName(position)
-                if (bankName != null) {
-                    Log.d(TAG, "Setting bank name: $bankName")
-                    viewModel.bankName.value = bankName
-                    viewModel.selectedBankName = bankName
-
-                    // Optional: Log the selected bank details
-                    val selectedBank = bankAdapter.getBankItem(position)
-                    selectedBank?.let {
-                        Log.d(TAG, "Selected bank: ${it.bankName} (Code: ${it.bankCode})")
-                    }
-
-                    // Hide progress bar if it was showing
-                    binding.bankNameProgressBar.visibility = View.GONE
-
-                } else {
-                    Log.e(TAG, "Invalid bank name for position: $position")
-                }
+            override fun onItemSelected(p: AdapterView<*>?, v: View?, pos: Int, id: Long) {
+                val bankName = bankAdapter.getBankName(pos)
+                viewModel.bankName.value = bankName
+                viewModel.selectedBankName = bankName
+                validateRequiredFields()
             }
-
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                Log.d(TAG, "No bank selected")
-                viewModel.selectedBankName = null
-            }
+            override fun onNothingSelected(parent: AdapterView<*>?) { /* no-op */ }
         }
+        tryApplyBank()
 
-        // Add initial hints to the spinners
-        if (provinceAdapter.isEmpty) {
-            Log.d(TAG, "Adding default province hint")
-            provinceAdapter.add("Pilih Provinsi")
-        }
-
-        if (cityAdapter.isEmpty) {
-            Log.d(TAG, "Adding default city hint")
-            cityAdapter.add("Pilih Kabupaten/Kota")
-        }
-
-        if (subdistrictAdapter.isEmpty) {
-            Log.d(TAG, "Adding default kecamatan hint")
-            subdistrictAdapter.add("Pilih Kecamatan")
-        }
-
-        if (bankAdapter.isEmpty) {
-            Log.d(TAG, "Adding default bank hint")
-            bankAdapter.add("Pilih Bank")
-        }
+//        // Add initial hints to the spinners
+//        if (provinceAdapter.isEmpty)    provinceAdapter.add("Pilih Provinsi")
+//        if (cityAdapter.isEmpty)        cityAdapter.add("Pilih Kabupaten/Kota")
+//        if (subdistrictAdapter.isEmpty) subdistrictAdapter.add("Pilih Kecamatan")
+//        if (bankAdapter.isEmpty)        bankAdapter.add("Pilih Bank")
 
         Log.d(TAG, "setupSpinners: Province and city spinners setup completed")
+    }
+
+    private fun maybeFinishRestoring() {
+        if (provinceApplied && cityApplied && subdistrictApplied) {
+            isRestoringSelections = false
+        }
     }
 
     private fun setupDocumentUploads() {
@@ -805,6 +809,7 @@ class RegisterStoreActivity : AppCompatActivity() {
             override fun afterTextChanged(s: Editable?) {
                 viewModel.storeDescription.value = s.toString()
                 Log.d(TAG, "Store description updated: ${s.toString().take(20)}${if ((s?.length ?: 0) > 20) "..." else ""}")
+                validateRequiredFields()
             }
         })
 
@@ -822,14 +827,8 @@ class RegisterStoreActivity : AppCompatActivity() {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
-                try {
-                    viewModel.postalCode.value = s.toString().toInt()
-                    Log.d(TAG, "Postal code updated: ${s.toString()}")
-                } catch (e: NumberFormatException) {
-                    // Handle invalid input
-                    Log.e(TAG, "Invalid postal code input: ${s.toString()}, error: $e")
-                    validateRequiredFields()
-                }
+                viewModel.postalCode.value = s.toString().toIntOrNull() ?: 0
+                validateRequiredFields()
             }
         })
 
@@ -839,6 +838,7 @@ class RegisterStoreActivity : AppCompatActivity() {
             override fun afterTextChanged(s: Editable?) {
                 viewModel.addressDetail.value = s.toString()
                 Log.d(TAG, "Address detail updated: ${s.toString()}")
+                validateRequiredFields()
             }
         })
 
@@ -993,30 +993,41 @@ class RegisterStoreActivity : AppCompatActivity() {
     }
 
     private fun doUpdateStoreProfile() {
-        val nameBody: RequestBody    = (viewModel.storeName.value ?: "")
-            .toRequestBody("text/plain".toMediaTypeOrNull())
-        val typeBody: RequestBody    = ((viewModel.storeTypeId.value ?: 0).toString())
-            .toRequestBody("text/plain".toMediaTypeOrNull())
-        val descBody: RequestBody    = (viewModel.storeDescription.value ?: "")
-            .toRequestBody("text/plain".toMediaTypeOrNull())
-        val onLeaveBody: RequestBody = "false"
-            .toRequestBody("text/plain".toMediaTypeOrNull())
+        // --- Text parts ---
+        val nameBody: RequestBody        = (viewModel.storeName.value ?: "").toRequestBody("text/plain".toMediaTypeOrNull())
+        val typeBody: RequestBody        = ((viewModel.storeTypeId.value ?: 0).toString()).toRequestBody("text/plain".toMediaTypeOrNull())
+        val descBody: RequestBody        = (viewModel.storeDescription.value ?: "").toRequestBody("text/plain".toMediaTypeOrNull())
+        // NOTE: is_on_leave is NOT part of approval multipart; keep separate if needed
 
-        // --- Build Multipart for store image (optional) ---
-        // Prefer compressing images to keep payload small; fall back to raw copy if needed.
+        val latBody: RequestBody         = (viewModel.latitude.value ?: "").toRequestBody("text/plain".toMediaTypeOrNull())
+        val longBody: RequestBody        = (viewModel.longitude.value ?: "").toRequestBody("text/plain".toMediaTypeOrNull())
+        val provBody: RequestBody        = ((viewModel.provinceId.value ?: 0).toString()).toRequestBody("text/plain".toMediaTypeOrNull())
+        val cityBody: RequestBody        = (viewModel.cityId.value ?: "").toRequestBody("text/plain".toMediaTypeOrNull())
+        val subdistrictBody: RequestBody = (viewModel.selectedSubdistrict ?: viewModel.subdistrict.value ?: "").toRequestBody("text/plain".toMediaTypeOrNull())
+
+        // If you don't have village picker yet, send empty string or reuse subdistrict
+        val villageBody: RequestBody     = "".toRequestBody("text/plain".toMediaTypeOrNull())
+
+        val streetBody: RequestBody      = (viewModel.street.value ?: "").toRequestBody("text/plain".toMediaTypeOrNull())
+        val postalBody: RequestBody      = ((viewModel.postalCode.value ?: 0).toString()).toRequestBody("text/plain".toMediaTypeOrNull())
+        val detailBody: RequestBody      = (viewModel.addressDetail.value ?: "").toRequestBody("text/plain".toMediaTypeOrNull())
+
+        // You can read user phone from current store profile when reapply
+        val currentPhone = myStoreViewModel.myStoreProfile.value?.store?.userPhone ?: ""
+        val userPhoneBody: RequestBody   = currentPhone.toRequestBody("text/plain".toMediaTypeOrNull())
+
+        // --- Multipart images/docs (safe compress/copy) ---
         val storeImgPart: MultipartBody.Part? = viewModel.storeImageUri?.let { uri ->
             try {
-                // (A) Optional safety check: only allow jpg/png/webp
                 val allowed = Regex("^(jpg|jpeg|png|webp)$", RegexOption.IGNORE_CASE)
                 if (!ImageUtils.isAllowedFileType(this, uri, allowed)) {
                     Toast.makeText(this, "Format gambar tidak didukung", Toast.LENGTH_SHORT).show()
                     null
                 } else {
-                    // (B) Compress for upload (ke cacheDir), then build multipart
                     val compressed: File = ImageUtils.compressImage(
                         context = this,
                         uri = uri,
-                        filename = "storeimg",  // prefix
+                        filename = "storeimg",
                         maxWidth = 1024,
                         maxHeight = 1024,
                         quality = 80
@@ -1024,18 +1035,76 @@ class RegisterStoreActivity : AppCompatActivity() {
                     FileUtils.createMultipartFromFile("storeimg", compressed)
                 }
             } catch (e: Exception) {
-                // If compression fails, try raw copy as fallback
                 val rawFile = FileUtils.createTempFileFromUri(this, uri)
                 rawFile?.let { FileUtils.createMultipartFromFile("storeimg", it) }
             }
         }
 
-        myStoreViewModel.updateStoreProfile(
+        val ktpPart: MultipartBody.Part? = viewModel.ktpUri?.let { uri ->
+            val file = FileUtils.createTempFileFromUri(this, uri)
+            file?.let { FileUtils.createMultipartFromFile("ktp", it) }
+        }
+
+        val npwpPart: MultipartBody.Part? = viewModel.npwpUri?.let { uri ->
+            val file = FileUtils.createTempFileFromUri(this, uri)
+            file?.let { FileUtils.createMultipartFromFile("npwp", it) }
+        }
+
+        val nibPart: MultipartBody.Part? = viewModel.nibUri?.let { uri ->
+            val file = FileUtils.createTempFileFromUri(this, uri)
+            file?.let { FileUtils.createMultipartFromFile("nib", it) }
+        }
+
+        // --- Couriers desired (sync to exactly this set) ---
+        val desiredCouriers = viewModel.selectedCouriers.toList()
+
+        // --- (Optional) Payment upsert from UI fields ---
+        // If you want to send the bank from the form during re-apply:
+        val paymentsToUpsert = buildList {
+            val bankName = viewModel.bankName.value
+            val bankNum  = viewModel.bankNumber.value?.toString()
+            val accName  = viewModel.accountName.value
+
+            if (!bankName.isNullOrBlank() && !bankNum.isNullOrBlank() && !accName.isNullOrBlank()) {
+                // If you want to update the first existing payment instead of adding new:
+                val existingId = myStoreViewModel.payment.value?.firstOrNull()?.id
+                add(
+                    PaymentUpdate(
+                        id = existingId,            // null => add; id!=null => update
+                        bankName = bankName,
+                        bankNum = bankNum,
+                        accountName = accName,
+                        qrisImage = null             // attach File if you have new QRIS to upload
+                    )
+                )
+            }
+        }
+
+        // --- Delete list (empty if none) ---
+        val paymentIdToDelete = emptyList<Int>()
+
+        // --- Fire the update ---
+        myStoreViewModel.updateStoreApproval(
             storeName = nameBody,
-            storeType = typeBody,
             description = descBody,
-            isOnLeave = onLeaveBody,
-            storeImage = storeImgPart
+            storeType = typeBody,
+            latitude = latBody,
+            longitude = longBody,
+            storeProvince = provBody,
+            storeCity = cityBody,
+            storeSubdistrict = subdistrictBody,
+            storeVillage = villageBody,
+            storeStreet = streetBody,
+            storePostalCode = postalBody,
+            storeAddressDetail = detailBody,
+            userPhone = userPhoneBody,
+            paymentsToUpdate = paymentsToUpsert,
+            paymentIdToDelete = paymentIdToDelete,
+            storeCourier = desiredCouriers,
+            storeImage = storeImgPart,
+            ktpImage = ktpPart,
+            npwpDocument = npwpPart,
+            nibDocument = nibPart
         )
 
         myStoreViewModel.updateStoreProfileResult.observe(this) {
@@ -1048,6 +1117,7 @@ class RegisterStoreActivity : AppCompatActivity() {
             }
         }
     }
+
 
     companion object {
         private const val TAG = "RegisterStoreActivity"

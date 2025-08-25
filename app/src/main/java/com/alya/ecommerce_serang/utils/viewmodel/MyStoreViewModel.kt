@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
+import com.alya.ecommerce_serang.data.api.dto.PaymentUpdate
 import com.alya.ecommerce_serang.data.api.dto.ProductsItem
 import com.alya.ecommerce_serang.data.api.dto.Store
 import com.alya.ecommerce_serang.data.api.response.auth.StoreTypesItem
@@ -19,6 +20,7 @@ import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -199,6 +201,80 @@ class MyStoreViewModel(private val repository: MyStoreRepository): ViewModel() {
         }
     }
 
-    private fun String.toRequestBody(): RequestBody =
-        RequestBody.create("text/plain".toMediaTypeOrNull(), this)
+    private fun String.toPlain(): RequestBody =
+        this.toRequestBody("text/plain".toMediaTypeOrNull())
+
+    fun updateStoreApproval(
+        storeName: RequestBody,
+        description: RequestBody,
+        storeType: RequestBody,
+        latitude: RequestBody,
+        longitude: RequestBody,
+        storeProvince: RequestBody,
+        storeCity: RequestBody,
+        storeSubdistrict: RequestBody,
+        storeVillage: RequestBody,
+        storeStreet: RequestBody,
+        storePostalCode: RequestBody,
+        storeAddressDetail: RequestBody,
+        userPhone: RequestBody,
+        paymentsToUpdate: List<PaymentUpdate> = emptyList(),
+        paymentIdToDelete: List<Int> = emptyList(),
+        storeCourier: List<String>? = null,
+        storeImage: MultipartBody.Part?,
+        ktpImage: MultipartBody.Part?,
+        npwpDocument: MultipartBody.Part?,
+        nibDocument: MultipartBody.Part?
+    ) {
+        viewModelScope.launch {
+            try {
+                val store = myStoreProfile.value
+
+                if (store == null) {
+                    _errorMessage.postValue("Data toko tidak tersedia")
+                    Log.e(TAG, "Store data is null")
+                    return@launch
+                }
+
+                val response = repository.updateStoreApproval(
+                    storeName = storeName,
+                    description = description,
+                    storeType = storeType,
+                    latitude = latitude,
+                    longitude = longitude,
+                    storeProvince = storeProvince,
+                    storeCity = storeCity,
+                    storeSubdistrict = storeSubdistrict,
+                    storeVillage = storeVillage,
+                    storeStreet = storeStreet,
+                    storePostalCode = storePostalCode,
+                    storeAddressDetail = storeAddressDetail,
+                    userPhone = userPhone,
+                    paymentsToUpdate = paymentsToUpdate,
+                    paymentIdToDelete = paymentIdToDelete,
+                    storeCourier = storeCourier,
+                    storeImage = storeImage,
+                    ktpImage = ktpImage,
+                    npwpDocument = npwpDocument,
+                    nibDocument = nibDocument
+                )
+
+                if (response != null) {
+                    if (response.isSuccessful) {
+                        _updateStoreProfileResult.postValue(response.body())
+                        Log.d(TAG, "Update successful: ${response.body()}")
+                    } else {
+                        _errorMessage.postValue("Gagal memperbarui profil")
+                        Log.e(TAG, "Update failed: ${response.errorBody()?.string()}")
+                    }
+                } else {
+                    _errorMessage.postValue("Terjadi kesalahan jaringan atau server")
+                    Log.e(TAG, "Repository returned null response")
+                }
+            } catch (e: Exception) {
+                _errorMessage.postValue(e.message ?: "Unexpected error")
+                Log.e(TAG, "Exception updating store profile", e)
+            }
+        }
+    }
 }
