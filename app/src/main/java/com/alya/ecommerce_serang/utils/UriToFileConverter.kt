@@ -7,7 +7,6 @@ import android.provider.OpenableColumns
 import android.util.Log
 import java.io.File
 import java.io.FileOutputStream
-import java.io.IOException
 import java.io.InputStream
 import kotlin.random.Random
 
@@ -122,24 +121,5 @@ object UriToFileConverter {
         } else {
             null
         }
-    }
-
-    fun getFilePathFromUri(uri: Uri, context: Context): String? {
-        // For Media Gallery
-        val projection = arrayOf(MediaStore.Images.Media.DATA)
-        try {
-            val cursor = context.contentResolver.query(uri, projection, null, null, null)
-            cursor?.use {
-                if (it.moveToFirst()) {
-                    val columnIndex = it.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
-                    return it.getString(columnIndex)
-                }
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Error getting file path from URI", e)
-        }
-
-        // If the above method fails, try direct conversion
-        return uri.path
     }
 }

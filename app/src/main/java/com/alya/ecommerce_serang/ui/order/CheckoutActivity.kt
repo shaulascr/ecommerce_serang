@@ -26,6 +26,7 @@ import com.alya.ecommerce_serang.data.repository.OrderRepository
 import com.alya.ecommerce_serang.databinding.ActivityCheckoutBinding
 import com.alya.ecommerce_serang.ui.order.address.AddressActivity
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
+import com.alya.ecommerce_serang.utils.PopUpDialog
 import com.alya.ecommerce_serang.utils.SessionManager
 import java.text.NumberFormat
 import java.util.Locale
@@ -372,7 +373,16 @@ class CheckoutActivity : AppCompatActivity() {
         // Create order button
         binding.btnPay.setOnClickListener {
             if (validateOrder()) {
-                viewModel.createOrder()
+                PopUpDialog.showConfirmDialog(
+                    context = this,
+                    title = "Apakah anda yakin inging membuat pesanan?",
+                    message = "Pastikan data yang dimasukkan sudah benar",
+                    positiveText = "Ya",
+                    negativeText = "Tidak",
+                    onYesClicked = {
+                        viewModel.createOrder()
+                    }
+                )
             }
         }
 

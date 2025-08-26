@@ -40,8 +40,6 @@ class CheckoutViewModel(private val repository: OrderRepository) : ViewModel() {
     private val _orderCreated = MutableLiveData<Boolean>()
     val orderCreated: LiveData<Boolean> = _orderCreated
 
-
-
     // Initialize "Buy Now" checkout
     fun initializeBuyNow(
         storeId: Int,

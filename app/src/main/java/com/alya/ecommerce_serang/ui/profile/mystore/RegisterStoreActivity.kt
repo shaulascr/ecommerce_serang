@@ -21,15 +21,16 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toDrawable
+import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import com.alya.ecommerce_serang.R
+import com.alya.ecommerce_serang.data.api.dto.PaymentUpdate
 import com.alya.ecommerce_serang.data.api.response.auth.StoreTypesItem
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.repository.MyStoreRepository
 import com.alya.ecommerce_serang.data.repository.Result
-import com.alya.ecommerce_serang.data.repository.UserRepository
 import com.alya.ecommerce_serang.databinding.ActivityRegisterStoreBinding
 import com.alya.ecommerce_serang.ui.order.address.BankAdapter
 import com.alya.ecommerce_serang.ui.order.address.CityAdapter
@@ -38,6 +39,8 @@ import com.alya.ecommerce_serang.ui.order.address.SubdsitrictAdapter
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.FileUtils
 import com.alya.ecommerce_serang.utils.ImageUtils
+import com.alya.ecommerce_serang.utils.PopUpDialog
+import com.alya.ecommerce_serang.utils.RegisterStoreViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
 import com.alya.ecommerce_serang.utils.viewmodel.MyStoreViewModel
 import com.alya.ecommerce_serang.utils.viewmodel.RegisterStoreViewModel
@@ -46,8 +49,6 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
-import androidx.core.net.toUri
-import com.alya.ecommerce_serang.data.api.dto.PaymentUpdate
 
 class RegisterStoreActivity : AppCompatActivity() {
 
@@ -85,11 +86,7 @@ class RegisterStoreActivity : AppCompatActivity() {
     private val LOCATION_PERMISSION_REQUEST = 2001
 
     private val viewModel: RegisterStoreViewModel by viewModels {
-        BaseViewModelFactory {
-            val apiService = ApiConfig.Companion.getApiService(sessionManager)
-            val orderRepository = UserRepository(apiService)
-            RegisterStoreViewModel(orderRepository)
-        }
+        RegisterStoreViewModelFactory(this, intent.extras)
     }
 
     private val myStoreViewModel: MyStoreViewModel by viewModels {
@@ -260,8 +257,21 @@ class RegisterStoreActivity : AppCompatActivity() {
             }
         } else {
             binding.btnRegister.setOnClickListener {
-                if (viewModel.validateForm()) viewModel.registerStore(this)
-                else Toast.makeText(this, "Harap lengkapi semua field yang wajib diisi", Toast.LENGTH_SHORT).show()
+                if (viewModel.validateForm()){
+                    PopUpDialog.showConfirmDialog(
+                        context = this,
+                        title = "Apakah anda yakin ingin mendaftar toko?",
+                        message = "Pastikan data yang dimasukkan sudah benar",
+                        positiveText = "Ya",
+                        negativeText = "Tidak",
+                        onYesClicked = {
+                            viewModel.registerStore(this)
+                        }
+                    )
+                }
+                else {
+                    Toast.makeText(this, "Harap lengkapi semua field yang wajib diisi", Toast.LENGTH_SHORT).show()
+                }
             }
         }
         validateRequiredFields()
@@ -797,11 +807,20 @@ class RegisterStoreActivity : AppCompatActivity() {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
-                viewModel.storeName.value = s.toString()
+                if (viewModel.storeName.value != s.toString()) {
+                    viewModel.storeName.value = s.toString()
+                }
                 Log.d(TAG, "Store name updated: ${s.toString()}")
                 validateRequiredFields()
             }
         })
+
+        viewModel.storeName.observe(this) { value ->
+            if (binding.etStoreName.text.toString() != value) {
+                binding.etStoreName.setText(value)
+                binding.etStoreName.setSelection(value.length) // Set cursor to end
+            }
+        }
 
         binding.etStoreDescription.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -817,48 +836,80 @@ class RegisterStoreActivity : AppCompatActivity() {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
-                viewModel.street.value = s.toString()
+                if (viewModel.street.value != s.toString()) {
+                    viewModel.street.value = s.toString()
+                }
                 Log.d(TAG, "Street address updated: ${s.toString()}")
                 validateRequiredFields()
             }
         })
 
+        viewModel.street.observe(this) { value ->
+            if (binding.etStreet.text.toString() != value) {
+                binding.etStreet.setText(value)
+                binding.etStreet.setSelection(value.length)
+            }
+        }
+
         binding.etPostalCode.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
-                viewModel.postalCode.value = s.toString().toIntOrNull() ?: 0
+                val newValue = s.toString().toIntOrNull() ?: 0
+                if (viewModel.postalCode.value != newValue) {
+                    viewModel.postalCode.value = newValue
+                }
                 validateRequiredFields()
             }
         })
+
+        viewModel.postalCode.observe(this) { value ->
+            val currentText = binding.etPostalCode.text.toString()
+            val valueString = if (value == 0) "" else value.toString()
+            if (currentText != valueString) {
+                binding.etPostalCode.setText(valueString)
+                binding.etPostalCode.setSelection(valueString.length)
+            }
+        }
 
         binding.etAddressDetail.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
-                viewModel.addressDetail.value = s.toString()
+                if (viewModel.addressDetail.value != s.toString()) {
+                    viewModel.addressDetail.value = s.toString()
+                }
                 Log.d(TAG, "Address detail updated: ${s.toString()}")
                 validateRequiredFields()
             }
         })
+
+        viewModel.addressDetail.observe(this) { value ->
+            if (binding.etAddressDetail.text.toString() != value) {
+                binding.etAddressDetail.setText(value)
+                binding.etAddressDetail.setSelection(value.length)
+            }
+        }
 
         binding.etBankNumber.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
                 val input = s.toString()
-                if (input.isNotEmpty()) {
+                val newValue = if (input.isNotEmpty()) {
                     try {
-                        viewModel.bankNumber.value = input.toInt()
-                        Log.d(TAG, "Bank number updated: $input")
+                        input.toInt()
                     } catch (e: NumberFormatException) {
-                        // Handle invalid input if needed
                         Log.e(TAG, "Failed to parse bank number. Input: $input, Error: $e")
+                        0
                     }
                 } else {
-                    // Handle empty input - perhaps set to 0 or null depending on your requirements
-                    viewModel.bankNumber.value = 0 // or 0
-                    Log.d(TAG, "Bank number set to default: 0")
+                    0
+                }
+
+                if (viewModel.bankNumber.value != newValue) {
+                    viewModel.bankNumber.value = newValue
+                    Log.d(TAG, "Bank number updated: $newValue")
                 }
                 validateRequiredFields()
             }
@@ -888,15 +939,26 @@ class RegisterStoreActivity : AppCompatActivity() {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
-                viewModel.accountName.value = s.toString()
+                if (viewModel.accountName.value != s.toString()) {
+                    viewModel.accountName.value = s.toString()
+                }
                 Log.d(TAG, "Account Name updated: ${s.toString()}")
                 validateRequiredFields()
             }
 
         })
 
+        viewModel.accountName.observe(this) { value ->
+            if (binding.etAccountName.text.toString() != value) {
+                binding.etAccountName.setText(value)
+                binding.etAccountName.setSelection(value.length)
+            }
+        }
+
         Log.d(TAG, "setupDataBinding: Text field data binding setup completed")
     }
+
+
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)

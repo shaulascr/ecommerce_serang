@@ -5,6 +5,7 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.alya.ecommerce_serang.data.api.response.auth.RegisterStoreResponse
@@ -19,7 +20,8 @@ import com.alya.ecommerce_serang.utils.ImageUtils
 import kotlinx.coroutines.launch
 
 class RegisterStoreViewModel(
-    private val repository: UserRepository
+    private val repository: UserRepository,
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     // LiveData for UI state
@@ -56,20 +58,20 @@ class RegisterStoreViewModel(
     var selectedBankName: String? = null
 
     // Form fields
-    val storeName = MutableLiveData<String>()
-    val storeDescription = MutableLiveData<String>()
-    val storeTypeId = MutableLiveData<Int>()
-    val latitude = MutableLiveData<String>()
-    val longitude = MutableLiveData<String>()
-    val street = MutableLiveData<String>()
-    val subdistrict = MutableLiveData<String>()
-    val cityId = MutableLiveData<String>()
-    val provinceId = MutableLiveData<Int>()
-    val postalCode = MutableLiveData<Int>()
-    val addressDetail = MutableLiveData<String>()
-    val bankName = MutableLiveData<String>()
-    val bankNumber = MutableLiveData<Int>()
-    val accountName = MutableLiveData<String>()
+    val storeName: MutableLiveData<String> = savedStateHandle.getLiveData("storeName", "")
+    val storeDescription: MutableLiveData<String> = savedStateHandle.getLiveData("storeDescription", "")
+    val storeTypeId: MutableLiveData<Int> = savedStateHandle.getLiveData("storeTypeId", 0)
+    val latitude: MutableLiveData<String> = savedStateHandle.getLiveData("latitude", "")
+    val longitude: MutableLiveData<String> = savedStateHandle.getLiveData("longitude", "")
+    val street: MutableLiveData<String> = savedStateHandle.getLiveData("street", "")
+    val subdistrict: MutableLiveData<String> = savedStateHandle.getLiveData("subdistrict", "")
+    val cityId: MutableLiveData<String> = savedStateHandle.getLiveData("cityId", "")
+    val provinceId: MutableLiveData<Int> = savedStateHandle.getLiveData("provinceId", 0)
+    val postalCode: MutableLiveData<Int> = savedStateHandle.getLiveData("postalCode", 0)
+    val addressDetail: MutableLiveData<String> = savedStateHandle.getLiveData("addressDetail", "")
+    val bankName: MutableLiveData<String> = savedStateHandle.getLiveData("bankName", "")
+    val bankNumber: MutableLiveData<Int> = savedStateHandle.getLiveData("bankNumber", 0)
+    val accountName: MutableLiveData<String> = savedStateHandle.getLiveData("accountName", "")
 
     // Files
     var storeImageUri: Uri? = null
@@ -78,6 +80,15 @@ class RegisterStoreViewModel(
     var nibUri: Uri? = null
     var persetujuanUri: Uri? = null
     var qrisUri: Uri? = null
+
+    fun getFieldValue(key: String): String {
+        return savedStateHandle.get<String>(key) ?: ""
+    }
+
+    // Helper function to update any field
+    fun updateField(key: String, value: String) {
+        savedStateHandle[key] = value
+    }
 
     // Selected couriers
     val selectedCouriers = mutableListOf<String>()

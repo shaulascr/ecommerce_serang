@@ -27,6 +27,7 @@ import com.alya.ecommerce_serang.data.repository.SellsRepository
 import com.alya.ecommerce_serang.databinding.ActivityDetailPaymentBinding
 import com.alya.ecommerce_serang.ui.profile.mystore.sells.SellsProductAdapter
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
+import com.alya.ecommerce_serang.utils.PopUpDialog
 import com.alya.ecommerce_serang.utils.SessionManager
 import com.alya.ecommerce_serang.utils.viewmodel.AddressViewModel
 import com.alya.ecommerce_serang.utils.viewmodel.SellsViewModel
@@ -109,8 +110,18 @@ class DetailPaymentActivity : AppCompatActivity() {
 
         binding.btnConfirmPayment.setOnClickListener {
             sells?.orderId?.let {
-                viewModel.confirmPayment(it, "confirmed")
-                Toast.makeText(this, "Pembayaran dikonfirmasi", Toast.LENGTH_SHORT).show()
+
+                PopUpDialog.showConfirmDialog(
+                    context = this,
+                    title = "Apakah anda yakin?",
+                    message = "Pastikan data pembayaran sudah sesuai",
+                    positiveText = "Ya",
+                    negativeText = "Tidak",
+                    onYesClicked = {
+                        viewModel.confirmPayment(it, "confirmed")
+                        Toast.makeText(this, "Pembayaran dikonfirmasi", Toast.LENGTH_SHORT).show()
+                    }
+                )
             } ?: run {
                 Log.e("DetailPaymentActivity", "No order passed in intent")
             }
