@@ -326,6 +326,7 @@
         <item name="cornerSize">5dp</item>
     </style>
 
+    <!--Splash screen themes-->
     <style name="Theme.App.SplashScreen" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/white</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/logo_psb</item>
@@ -333,4 +334,13 @@
         <item name="android:windowSplashScreenBehavior" tools:targetApi="33">icon_preferred</item>
         <item name="postSplashScreenTheme">@style/Theme.Ecommerce_serang</item>
     </style>
+
+    <style name="ThemeOverlay.MyApp.AlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <!-- Rounded corners -->
+        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.MyApp.MediumComponent</item>
+        <!-- Dialog background color -->
+        <item name="materialAlertDialogBodyTextStyle">@font/dmsans_regular</item>
+    </style>
+
+    <style name="ShapeAppearance.MyApp.MediumComponent" parent="ShapeAppearance.Material3.Corner.Medium" />
  </resources>
