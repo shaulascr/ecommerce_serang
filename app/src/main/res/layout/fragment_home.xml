@@ -7,12 +7,27 @@
     android:theme="@style/Theme.Ecommerce_serang"
     tools:context=".ui.home.HomeFragment">
 
+    <ImageView
+        android:id="@+id/logo_psb_home"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginBottom="4dp"
+        android:src="@drawable/logo_home"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintHorizontal_chainStyle="spread_inside"
+        app:layout_constraintEnd_toStartOf="@id/searchContainer" />
+
     <include
         android:id="@+id/searchContainer"
         layout="@layout/view_search"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
+        app:layout_constraintStart_toEndOf="@id/logo_psb_home"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.core.widget.NestedScrollView
