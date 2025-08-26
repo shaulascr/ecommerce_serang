@@ -1,18 +1,26 @@
 package com.alya.ecommerce_serang.ui.product
 
+import android.app.Dialog
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.view.ViewGroup
+import android.view.Window
 import android.widget.Button
 import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
+import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -36,6 +44,9 @@ import com.alya.ecommerce_serang.ui.product.storeDetail.StoreDetailActivity
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.transition.Transition
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import java.text.NumberFormat
 import java.util.Locale
@@ -50,6 +61,8 @@ class DetailProductActivity : AppCompatActivity() {
     private var isWholesaleAvailable: Boolean = false
     private var isWholesaleSelected: Boolean = false
     private var minOrder: Int = 0
+
+    private var TAG = "DetailProductActivity"
 
     private val viewModel: ProductUserViewModel by viewModels {
         BaseViewModelFactory {
@@ -292,6 +305,16 @@ class DetailProductActivity : AppCompatActivity() {
             .placeholder(R.drawable.placeholder_image)
             .into(binding.ivProductImage)
 
+        binding.ivProductImage.setOnClickListener {
+            val img = product.image
+            if (!img.isNullOrEmpty()){
+                showDetailProduct(img)
+            }else {
+                Toast.makeText(this, "Gambar tidak tersedia", Toast.LENGTH_SHORT).show()
+                Log.e(TAG, "There is no photo product")
+            }
+        }
+
         val ratingStr = product.rating
         val ratingValue = ratingStr?.toFloatOrNull()
 
@@ -531,6 +554,59 @@ class DetailProductActivity : AppCompatActivity() {
             attachProduct = true // This will auto-attach the product!
 
         )
+    }
+
+    private fun showDetailProduct(photoProduct: String) {
+        val dialog = Dialog(this)
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        dialog.setContentView(R.layout.dialog_image_viewer)
+        dialog.setCancelable(true)
+
+        // Set dialog to fullscreen
+        val window = dialog.window
+        window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+        window?.setBackgroundDrawable(Color.WHITE.toDrawable())
+
+        // Get views from dialog
+        val imageView = dialog.findViewById<ImageView>(R.id.iv_payment_evidence)
+        val btnClose = dialog.findViewById<ImageButton>(R.id.btn_close)
+        val tvTitle = dialog.findViewById<TextView>(R.id.tv_title)
+        val progressBar = dialog.findViewById<ProgressBar>(R.id.progress_bar)
+
+        tvTitle.text = "Gambar Produk"
+        val fullImageUrl =
+            if (photoProduct.startsWith("/")) BASE_URL + photoProduct.substring(1)
+            else photoProduct
+
+        progressBar.visibility = View.VISIBLE
+
+        Glide.with(this)
+            .load(fullImageUrl)
+            .placeholder(R.drawable.placeholder_image)
+            .error(R.drawable.placeholder_image)
+            .diskCacheStrategy(DiskCacheStrategy.ALL)
+            .into(object : CustomTarget<Drawable>() {
+                override fun onResourceReady(resource: Drawable, transition: Transition<in Drawable>?) {
+                    progressBar.visibility = View.GONE
+                    imageView.setImageDrawable(resource)
+                }
+
+                override fun onLoadCleared(placeholder: Drawable?) {
+                    progressBar.visibility = View.GONE
+                    imageView.setImageDrawable(placeholder)
+                }
+
+                override fun onLoadFailed(errorDrawable: Drawable?) {
+                    progressBar.visibility = View.GONE
+                    imageView.setImageDrawable(errorDrawable)
+                    Toast.makeText(this@DetailProductActivity, "Gagal memuat gambar", Toast.LENGTH_SHORT).show()
+                }
+            })
+
+        btnClose.setOnClickListener { dialog.dismiss() }
+        imageView.setOnClickListener { dialog.dismiss() }
+
+        dialog.show()
     }
 
     override fun onResume() {

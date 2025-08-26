@@ -1,6 +1,5 @@
 <resources>
-    <string name="app_name">PasarKlik</string>
-
+    <string name="app_name">Plaza Serang Bahagia</string>
 
     <!--Placeholder-->
     <string name="fragment_home_search">Cari produk</string>

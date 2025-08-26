@@ -194,7 +194,7 @@ class ProductRepository(private val apiService: ApiService) {
             if (response.isSuccessful) {
                 Result.Success(response.body()!!)
             } else {
-                Result.Error(Exception("Failed to create product: ${response.code()}"))
+                Result.Error(Exception("Failed to create product: ${response.code()} message:${response.message()}"))
             }
         } catch (e: Exception) {
             Result.Error(e)

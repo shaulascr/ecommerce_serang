@@ -1,12 +1,17 @@
 package com.alya.ecommerce_serang.utils
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Log
 import android.webkit.MimeTypeMap
+import com.tom_roush.pdfbox.pdmodel.PDDocument
+import com.tom_roush.pdfbox.rendering.PDFRenderer
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -135,4 +140,115 @@ object FileUtils {
             else -> "application/octet-stream"
         }
     }
+
+    // for Uri format
+//    fun compressFileToMax1MB(context: Context, uri: Uri): File? {
+//        val mimeType = context.contentResolver.getType(uri)
+//
+//        return if (mimeType?.startsWith("image/") == true) {
+//            // Handle images (jpg/png)
+//            compressImageToMax1MB(context, uri)
+//        } else if (mimeType == "application/pdf") {
+//            // Handle PDFs
+//            val file = createTempFileFromUri(context, uri, "pdf")
+//            return if (file != null && file.length() <= 1_048_576) {
+//                file
+//            } else {
+//                // 🚨 Without a PDF compression lib, you can only reject if > 1 MB
+//                null
+//            }
+//        } else {
+//            // Unsupported type
+//            null
+//        }
+//    }
+
+    fun compressFileToMax1MB(context: Context, uri: Uri): CompressionResult {
+        val mimeType = context.contentResolver.getType(uri) ?: return CompressionResult.Error("Tipe file tidak diketahui")
+
+        return if (mimeType.startsWith("image/")) {
+            val compressed = compressImageToMax1MB(context, uri)
+            if (compressed != null) {
+                CompressionResult.Success(compressed)
+            } else {
+                CompressionResult.Error("Ukuran gambar terlalu besar. Max 1MB.")
+            }
+        } else if (mimeType == "application/pdf") {
+            val file = createTempFileFromUri(context, uri, "pdf")
+            if (file == null) {
+                return CompressionResult.Error("Tidak bisa membaca file pdf")
+            }
+            if (file.length() <= 1_048_576) {
+                return CompressionResult.Success(file)
+            }
+            val compressed = compressPdfToMax1MB(context, file)
+            if (compressed != null) {
+                CompressionResult.Success(compressed)
+            } else {
+                CompressionResult.Error("Ukuran pdf terlalu besar. Max 1MB.")
+            }
+        } else {
+            CompressionResult.Error("Tipe file tidak didukung: $mimeType")
+        }
+    }
+
+    fun compressImageToMax1MB(context: Context, uri: Uri): File? {
+        val inputStream = context.contentResolver.openInputStream(uri) ?: return null
+        val originalBitmap = BitmapFactory.decodeStream(inputStream)
+
+        var quality = 100
+        var compressedFile: File
+        var outputStream: ByteArrayOutputStream
+
+        do {
+            outputStream = ByteArrayOutputStream()
+            originalBitmap.compress(Bitmap.CompressFormat.JPEG, quality, outputStream)
+
+            val compressedBytes = outputStream.toByteArray()
+            compressedFile = File(context.cacheDir, "compressed_${System.currentTimeMillis()}.jpg")
+            FileOutputStream(compressedFile).use { it.write(compressedBytes) }
+
+            quality -= 5
+        } while (compressedFile.length() > 1_048_576 && quality > 10)
+
+        return if (compressedFile.length() <= 1_048_576) compressedFile else null
+    }
+
+    fun compressPdfToMax1MB(context: Context, inputFile: File): File? {
+        return try {
+            val document = PDDocument.load(inputFile)
+            val renderer = PDFRenderer(document)
+
+            val compressedDoc = PDDocument()
+
+            for (pageIndex in 0 until document.numberOfPages) {
+                val bitmap = renderer.renderImageWithDPI(pageIndex, 72f) // low DPI → smaller size
+                val outPage = com.tom_roush.pdfbox.pdmodel.PDPage(
+                    com.tom_roush.pdfbox.pdmodel.common.PDRectangle(bitmap.width.toFloat(), bitmap.height.toFloat())
+                )
+                compressedDoc.addPage(outPage)
+
+                val pdImage = com.tom_roush.pdfbox.pdmodel.graphics.image.LosslessFactory.createFromImage(compressedDoc, bitmap)
+                val contentStream = com.tom_roush.pdfbox.pdmodel.PDPageContentStream(compressedDoc, outPage)
+                contentStream.drawImage(pdImage, 0f, 0f, bitmap.width.toFloat(), bitmap.height.toFloat())
+                contentStream.close()
+            }
+
+            val compressedFile = File(context.cacheDir, "compressed_${System.currentTimeMillis()}.pdf")
+            compressedDoc.save(compressedFile)
+            compressedDoc.close()
+            document.close()
+
+            // Check size
+            return if (compressedFile.length() <= 1_048_576) compressedFile else null
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+}
+
+sealed class CompressionResult {
+    data class Success(val file: File) : CompressionResult()
+    data class Error(val reason: String) : CompressionResult()
 }

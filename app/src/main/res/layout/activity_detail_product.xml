@@ -31,8 +31,9 @@
             <ImageView
                 android:id="@+id/ivProductImage"
                 android:layout_width="match_parent"
-                android:layout_height="200dp"
+                android:layout_height="360dp"
                 android:scaleType="centerCrop"
+                android:layout_marginTop="4dp"
                 android:contentDescription="@string/product_image"
                 tools:src="@drawable/placeholder_image" />
 
@@ -218,7 +219,7 @@
                             android:layout_weight="1"
                             android:text="@string/ulasan_pembeli"
                             android:textColor="@color/black"
-                            android:textSize="14sp"
+                            android:textSize="16sp"
                             android:textStyle="bold" />
 
                         <TextView
@@ -276,7 +277,7 @@
                         android:layout_height="wrap_content"
                         android:text="@string/detail_produk"
                         android:textColor="@color/black"
-                        android:textSize="14sp"
+                        android:textSize="16sp"
                         android:textStyle="bold" />
 
                     <TableLayout
@@ -357,7 +358,7 @@
                         android:layout_height="wrap_content"
                         android:text="@string/deskripsi_produk"
                         android:textColor="@color/black"
-                        android:textSize="14sp"
+                        android:textSize="16sp"
                         android:layout_marginTop="16dp"
                         android:textStyle="bold" />
 
@@ -421,7 +422,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textColor="@color/black"
-                            android:textSize="14sp"
+                            android:textSize="16sp"
                             android:textStyle="bold"
                             tools:text="SnackEnak" />
 
@@ -484,7 +485,7 @@
                             android:layout_weight="1"
                             android:text="@string/produk_lainnya"
                             android:textColor="@color/black"
-                            android:textSize="14sp"
+                            android:textSize="16sp"
                             android:textStyle="bold" />
 
                         <TextView

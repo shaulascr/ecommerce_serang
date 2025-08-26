@@ -27,7 +27,8 @@ import com.alya.ecommerce_serang.data.repository.ProductRepository
 import com.alya.ecommerce_serang.data.repository.Result
 import com.alya.ecommerce_serang.databinding.ActivityDetailStoreProductBinding
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
-import com.alya.ecommerce_serang.utils.FileUtils.compressFile
+import com.alya.ecommerce_serang.utils.CompressionResult
+import com.alya.ecommerce_serang.utils.FileUtils.compressFileToMax1MB
 import com.alya.ecommerce_serang.utils.ImageUtils.compressImage
 import com.alya.ecommerce_serang.utils.SessionManager
 import com.alya.ecommerce_serang.utils.viewmodel.ProductViewModel
@@ -48,6 +49,8 @@ class DetailStoreProductActivity : AppCompatActivity() {
     private var halalUri: Uri? = null
     private var productId: Int? = null
     private var hasImage: Boolean = false
+
+    private var TAG="DetailStoreProduct"
 
     private var isEditing = false
     private var hasExistingImage = false
@@ -78,20 +81,32 @@ class DetailStoreProductActivity : AppCompatActivity() {
 
     private val sppirtLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         if (uri != null && isValidFile(uri)) {
-            compressFile(this, uri).let { compressedFile ->
-                sppirtUri = compressedFile?.toUri()
-                binding.tvSppirtName.text = getFileName(sppirtUri!!)
-                binding.switcherSppirt.showNext()
+            when (val result = compressFileToMax1MB(this, uri)) {
+                is CompressionResult.Success -> {
+                    sppirtUri = result.file.toUri()
+                    binding.tvSppirtName.text = getFileName(sppirtUri!!)
+                    binding.switcherSppirt.showNext()
+                }
+                is CompressionResult.Error -> {
+                    Toast.makeText(this, result.reason, Toast.LENGTH_LONG).show()
+                    Log.e(TAG, "Compression failed: ${result.reason}")
+                }
             }
         }
     }
 
     private val halalLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         if (uri != null && isValidFile(uri)) {
-            compressFile(this, uri).let { compressedFile ->
-                halalUri = compressedFile?.toUri()
-                binding.tvHalalName.text = getFileName(halalUri!!)
-                binding.switcherHalal.showNext()
+            when (val result = compressFileToMax1MB(this, uri)) {
+                is CompressionResult.Success -> {
+                    halalUri = result.file.toUri()
+                    binding.tvHalalName.text = getFileName(halalUri!!)
+                    binding.switcherHalal.showNext()
+                }
+                is CompressionResult.Error -> {
+                    Toast.makeText(this, result.reason, Toast.LENGTH_LONG).show()
+                    Log.e(TAG, "Compression failed: ${result.reason}")
+                }
             }
         }
     }
@@ -260,12 +275,12 @@ class DetailStoreProductActivity : AppCompatActivity() {
     }
 
     private fun togglePreOrderVisibility(isChecked: Boolean) {
-        Log.d("DEBUG", "togglePreOrderVisibility: $isChecked")
+        Log.d(TAG, "togglePreOrderVisibility: $isChecked")
         binding.layoutDurasi.visibility = if (isChecked) View.VISIBLE else View.GONE
     }
 
     private fun toggleWholesaleVisibility(isChecked: Boolean) {
-        Log.d("DEBUG", "toggleWholesaleVisibility: $isChecked")
+        Log.d(TAG, "toggleWholesaleVisibility: $isChecked")
         binding.layoutMinPesanGrosir.visibility = if (isChecked) View.VISIBLE else View.GONE
         binding.layoutHargaGrosir.visibility = if (isChecked) View.VISIBLE else View.GONE
     }
@@ -401,8 +416,10 @@ class DetailStoreProductActivity : AppCompatActivity() {
         val sppirtFile = sppirtUri?.let { uriToNamedFile(it, this, "sppirt") }
         val halalFile = halalUri?.let { uriToNamedFile(it, this, "halal") }
 
-        Log.d("File URI", "SPPIRT URI: ${sppirtUri.toString()}")
-        Log.d("File URI", "Halal URI: ${halalUri.toString()}")
+        Log.d(TAG, "SPPIRT URI: ${sppirtUri.toString()}")
+        Log.d(TAG, "Halal URI: ${halalUri.toString()}")
+        logFileInfo("Sppirt Size", sppirtFile!!)
+        logFileInfo("Halal Size", halalFile!!)
 
         val imagePart = imageFile?.let { createPartFromFile("productimg", it) }
         val sppirtPart = sppirtFile?.let { createPartFromFile("sppirt", it) }
@@ -428,7 +445,7 @@ class DetailStoreProductActivity : AppCompatActivity() {
                     finish()
                 }
                 is Result.Error -> {
-                    Log.e("ProductDetailActivity", "Error: ${result.exception.message}")
+                    Log.e(TAG, "Error: ${result.exception.message}")
                     binding.btnSaveProduct.isEnabled = true
                 }
             }
@@ -506,7 +523,7 @@ class DetailStoreProductActivity : AppCompatActivity() {
                     finish()
                 }
                 is Result.Error -> {
-                    Log.e("ProductDetailActivity", "Error: ${result.exception.message}")
+                    Log.e(TAG, "Error: ${result.exception.message}")
                     binding.btnSaveProduct.isEnabled = true
                 }
             }
@@ -515,4 +532,10 @@ class DetailStoreProductActivity : AppCompatActivity() {
 
     private fun toRequestBody(value: String): RequestBody =
         RequestBody.create("text/plain".toMediaTypeOrNull(), value)
+
+    private fun logFileInfo(tag: String, file: File) {
+        val sizeKb = file.length() / 1024.0
+        val sizeMb = sizeKb / 1024.0
+        Log.d(TAG, "$tag → Name: ${file.name}, Size: ${"%.2f".format(sizeKb)} KB (${String.format("%.2f", sizeMb)} MB)")
+    }
 }
