@@ -91,10 +91,11 @@ class CategoryProductsActivity : AppCompatActivity() {
 //                title = category.name
             }
 
-            val fullImageUrl = if (category.image.startsWith("/")) {
-                BASE_URL + category.image.removePrefix("/") // Append base URL if the path starts with "/"
-            } else {
-                category.image // Use as is if it's already a full URL
+            val fullImageUrl = when (val img = category.image) {
+                is String -> {
+                    if (img.startsWith("/")) BASE_URL + img.substring(1) else img
+                }
+                else -> null
             }
 
             // Load category image

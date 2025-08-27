@@ -78,7 +78,6 @@ object PopUpDialog {
             dialog.dismiss()
         }
 
-
         dialog.show()
     }
 }

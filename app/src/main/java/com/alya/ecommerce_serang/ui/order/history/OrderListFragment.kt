@@ -24,7 +24,7 @@ import com.alya.ecommerce_serang.ui.order.history.detailorder.DetailOrderStatusA
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
 
-class OrderListFragment : Fragment(), OrderHistoryAdapter.OrderActionCallbacks {
+class OrderListFragment : Fragment(), OrderHistoryAdapter.OrderActionCallbacks, OnDialogActionListener {
 
     private var _binding: FragmentOrderListBinding? = null
     private val binding get() = _binding!!
@@ -93,7 +93,8 @@ class OrderListFragment : Fragment(), OrderHistoryAdapter.OrderActionCallbacks {
                 navigateToOrderDetail(order)
             },
             viewModel = viewModel,
-            callbacks = this // Pass this fragment as callback
+            callbacks = this,
+            listener = this// Pass this fragment as callback
         )
 
         orderAdapter.setFragmentStatus(status)
@@ -175,7 +176,6 @@ class OrderListFragment : Fragment(), OrderHistoryAdapter.OrderActionCallbacks {
 
     override fun onOrderCancelled(orderId: String, success: Boolean, message: String) {
         if (success) {
-            Toast.makeText(requireContext(), "Berhasil batalkan pesanan", Toast.LENGTH_SHORT).show()
             Log.d("OrderListFragment", "Order cancel success: $message")
 //            loadOrders() // Refresh the list
             if (success) viewModel.updateStatus(status, forceRefresh = true)
@@ -209,5 +209,15 @@ class OrderListFragment : Fragment(), OrderHistoryAdapter.OrderActionCallbacks {
     override fun onResume() {
         super.onResume()
         observeOrderList()
+    }
+
+    override fun onDialogConfirmed() {
+
+        viewModel.refresh(status)
+        // Option 1: refresh seluruh fragment
+        requireActivity().supportFragmentManager.beginTransaction()
+            .detach(this)
+            .attach(this)
+            .commit()
     }
 }

@@ -24,6 +24,7 @@ import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.response.store.profile.Payment
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.utils.ImageUtils.compressImage
+import com.alya.ecommerce_serang.utils.PopUpDialog
 import com.alya.ecommerce_serang.utils.SessionManager
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -374,14 +375,11 @@ class BalanceTopUpActivity : AppCompatActivity() {
 
                     // Show a dialog with the success message
                     runOnUiThread {
-                        AlertDialog.Builder(this@BalanceTopUpActivity)
-                            .setTitle("Berhasil")
-                            .setMessage(successMessage)
-                            .setPositiveButton("OK") { dialog, _ ->
-                                dialog.dismiss()
-                                finish()
-                            }
-                            .show()
+                        PopUpDialog.showConfirmDialog(
+                            context = this@BalanceTopUpActivity,
+                            iconRes = R.drawable.checkmark__1_,
+                            title = "Berhasil melakukan Top-Up"
+                        )
                     }
                 } else {
                     // Get more detailed error information
@@ -408,13 +406,12 @@ class BalanceTopUpActivity : AppCompatActivity() {
 
                     // Show a dialog with the error message
                     runOnUiThread {
-                        AlertDialog.Builder(this@BalanceTopUpActivity)
-                            .setTitle("Error Response")
-                            .setMessage(errorMessage)
-                            .setPositiveButton("OK") { dialog, _ ->
-                                dialog.dismiss()
-                            }
-                            .show()
+
+                        PopUpDialog.showConfirmDialog(
+                            context = this@BalanceTopUpActivity,
+                            iconRes = R.drawable.ic_cancel,
+                            title = "Gagal melakukan Top-Up"
+                        )
                     }
                 }
             } catch (e: Exception) {

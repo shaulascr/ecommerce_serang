@@ -5,13 +5,14 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.repository.Result
 import com.alya.ecommerce_serang.data.repository.UserRepository
 import com.alya.ecommerce_serang.databinding.ActivityResetPassBinding
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
+import com.alya.ecommerce_serang.utils.PopUpDialog
 import com.alya.ecommerce_serang.utils.viewmodel.LoginViewModel
 
 class ResetPassActivity : AppCompatActivity() {
@@ -36,7 +37,7 @@ class ResetPassActivity : AppCompatActivity() {
 
         setupToolbar()
         setupUI()
-
+        observeResetPassword()
     }
 
     private fun setupToolbar(){
@@ -98,26 +99,23 @@ class ResetPassActivity : AppCompatActivity() {
     private fun handleSuccess(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_LONG).show()
 
-        // Show success dialog and navigate back to login
-        AlertDialog.Builder(this)
-            .setTitle("Berhasil Ubah Password")
-            .setMessage(message)
-            .setPositiveButton("OK") { _, _ ->
-                // Navigate back to login activity
-                finish()
-            }
-            .setCancelable(false)
-            .show()
+        PopUpDialog.showConfirmDialog(
+            context = this,
+            iconRes = R.drawable.checkmark__1_,
+            title = "Berhasil Ubah Password",
+            positiveText = "OK"
+        )
     }
 
     private fun handleError(errorMessage: String) {
         Log.e(TAG, "Error: $errorMessage")
 
-        // Optionally show error dialog
-        AlertDialog.Builder(this)
-            .setTitle("Gagal Ubah Password")
-            .setMessage(errorMessage)
-            .setPositiveButton("OK", null)
-            .show()
+        PopUpDialog.showConfirmDialog(
+            context = this,
+            iconRes = R.drawable.ic_cancel,
+            title = "Gagal Ubah Password",
+            message = errorMessage,
+            positiveText = "OK"
+        )
     }
 }

@@ -4,8 +4,8 @@
 
     <!-- Logo with controlled size -->
     <item
-        android:width="200dp"
-        android:height="200dp"
+        android:width="120dp"
+        android:height="120dp"
         android:drawable="@drawable/logo_psb_crop"
         android:gravity="center" />
 </layer-list>

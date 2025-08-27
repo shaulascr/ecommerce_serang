@@ -40,6 +40,11 @@ class CheckoutViewModel(private val repository: OrderRepository) : ViewModel() {
     private val _orderCreated = MutableLiveData<Boolean>()
     val orderCreated: LiveData<Boolean> = _orderCreated
 
+    private val _productImages = MutableLiveData<Map<Int, String>>(emptyMap())
+    val productImages: LiveData<Map<Int, String>> = _productImages
+
+    private val currentImages = mutableMapOf<Int, String>()
+
     // Initialize "Buy Now" checkout
     fun initializeBuyNow(
         storeId: Int,
@@ -156,9 +161,13 @@ class CheckoutViewModel(private val repository: OrderRepository) : ViewModel() {
                         )
 
                         Log.d(TAG, "CheckoutData initialized with ${matchingItems.size} items")
-                        matchingItems.forEachIndexed { index, item ->
-                            val isWholesale = isWholesaleMap[item.cartItemId] ?: false
-                            Log.d(TAG, "Item $index: ${item.productName}, Price: ${item.price}, IsWholesale: $isWholesale")
+                        matchingItems.forEach { item ->
+                            Log.d("CheckoutViewModel", "About to load image for productId: ${item.productId}")
+                            loadProductImage(item.productId)
+                        }
+
+                        matchingItems.forEach { item ->
+                            loadProductImage(item.productId)
                         }
 
                         // Calculate totals with updated prices
@@ -178,6 +187,8 @@ class CheckoutViewModel(private val repository: OrderRepository) : ViewModel() {
             }
         }
     }
+
+
 
     fun getPaymentMethods() {
         viewModelScope.launch {
@@ -417,6 +428,31 @@ class CheckoutViewModel(private val repository: OrderRepository) : ViewModel() {
         }
     }
 
+    fun loadProductImage(productId: Int) {
+        Log.d("CheckoutViewModel", "loadProductImage called for productId: $productId")
+        viewModelScope.launch {
+            try {
+                Log.d("CheckoutViewModel", "Fetching product detail for productId: $productId")
+                val productDetail = repository.fetchProductDetail(productId)
+                Log.d("CheckoutViewModel", "Product detail result: $productDetail")
+
+                val imageUrl = productDetail?.product?.image
+                Log.d("CheckoutViewModel", "Extracted image URL: $imageUrl")
+
+                currentImages[productId] = imageUrl.toString()
+                Log.d("CheckoutViewModel", "Updated currentImages: $currentImages")
+
+                _productImages.postValue(currentImages.toMap())
+                Log.d("CheckoutViewModel", "Posted to _productImages LiveData")
+            } catch (e: Exception) {
+                Log.e("CheckoutViewModel", "Error loading image for productId $productId", e)
+                // fallback if error
+                currentImages[productId] = ""
+                _productImages.postValue(currentImages.toMap())
+            }
+        }
+    }
+
     // Get shipping price
     private fun getShippingPrice(): Double {
         val data = _checkoutData.value ?: return 0.0
@@ -432,3 +468,4 @@ class CheckoutViewModel(private val repository: OrderRepository) : ViewModel() {
         private const val TAG = "CheckoutViewModel"
     }
 }
+

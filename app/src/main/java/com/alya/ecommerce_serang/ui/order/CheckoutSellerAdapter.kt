@@ -11,31 +11,53 @@ import com.alya.ecommerce_serang.databinding.ItemOrderSellerBinding
 class CheckoutSellerAdapter(private val checkoutData: CheckoutData) :
     RecyclerView.Adapter<CheckoutSellerAdapter.SellerViewHolder>() {
 
+    private var productImages: Map<Int, String> = emptyMap()
+    private var currentViewHolder: SellerViewHolder? = null
+
     class SellerViewHolder(val binding: ItemOrderSellerBinding) : RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SellerViewHolder {
         val binding = ItemOrderSellerBinding.inflate(
             LayoutInflater.from(parent.context), parent, false
         )
-        return SellerViewHolder(binding)
+        val holder = SellerViewHolder(binding)
+        currentViewHolder = holder
+        return holder
     }
 
-    override fun getItemCount(): Int = 1 // Only one seller
+    fun updateProductImages(newImages: Map<Int, String>) {
+        productImages = newImages
+        currentViewHolder?.let { holder ->
+            // Update the nested adapter
+            val adapter = holder.binding.rvSellerOrderProduct.adapter
+            when (adapter) {
+                is SingleCartItemAdapter -> adapter.updateProductImages(newImages)
+                is SingleProductAdapter -> {
+                    // For SingleProductAdapter, you might need to update differently
+                    // since it uses checkoutData.productImageUrl
+                }
+            }
+        }
+    }
+
+    override fun getItemCount(): Int = 1
 
     override fun onBindViewHolder(holder: SellerViewHolder, position: Int) {
+        currentViewHolder = holder
         with(holder.binding) {
-            // Set seller name
             tvStoreName.text = checkoutData.sellerName
 
-            // Set up products RecyclerView
             rvSellerOrderProduct.apply {
                 layoutManager = LinearLayoutManager(context)
                 adapter = if (checkoutData.isBuyNow) {
-                    // Single product for Buy Now
                     SingleProductAdapter(checkoutData)
                 } else {
-                    // Single cart item
-                    SingleCartItemAdapter(checkoutData.cartItems.first())
+                    SingleCartItemAdapter(checkoutData.cartItems.first()).also { adapter ->
+                        // Apply existing images if available
+                        if (productImages.isNotEmpty()) {
+                            adapter.updateProductImages(productImages)
+                        }
+                    }
                 }
                 isNestedScrollingEnabled = false
             }

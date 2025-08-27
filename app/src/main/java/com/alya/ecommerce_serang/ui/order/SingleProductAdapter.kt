@@ -3,6 +3,7 @@ package com.alya.ecommerce_serang.ui.order
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.alya.ecommerce_serang.BuildConfig.BASE_URL
 import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.dto.CheckoutData
 import com.alya.ecommerce_serang.data.api.dto.OrderRequestBuy
@@ -36,9 +37,16 @@ class SingleProductAdapter(private val checkoutData: CheckoutData) :
 
             tvProductPrice.text = formatCurrency(checkoutData.productPrice)
 
+            val fullImageUrl = when (val img = checkoutData.productImageUrl) {
+                is String -> {
+                    if (img.startsWith("/")) BASE_URL + img.substring(1) else img
+                }
+                else -> null
+            }
+
             // Load product image
             Glide.with(ivProduct.context)
-                .load(checkoutData.productImageUrl)
+                .load(fullImageUrl)
                 .apply(
                     RequestOptions()
                     .placeholder(R.drawable.placeholder_image)

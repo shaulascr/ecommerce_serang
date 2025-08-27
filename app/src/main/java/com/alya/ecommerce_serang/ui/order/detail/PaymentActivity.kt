@@ -232,7 +232,6 @@ class PaymentActivity : AppCompatActivity() {
             else -> emptyList()
         }
 
-        // Tampilkan instruksi dalam dialog
         val dialog = AlertDialog.Builder(this)
             .setTitle("Petunjuk Transfer $type")
             .setItems(instructions.toTypedArray(), null)

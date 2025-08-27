@@ -2,7 +2,6 @@ package com.alya.ecommerce_serang.ui.profile.editprofile
 
 import android.Manifest
 import android.app.Activity
-import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -29,6 +28,7 @@ import com.alya.ecommerce_serang.data.repository.Result
 import com.alya.ecommerce_serang.data.repository.UserRepository
 import com.alya.ecommerce_serang.databinding.ActivityEditProfileCustBinding
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
+import com.alya.ecommerce_serang.utils.PopUpDialog
 import com.alya.ecommerce_serang.utils.SessionManager
 import com.alya.ecommerce_serang.utils.viewmodel.ProfileViewModel
 import com.bumptech.glide.Glide
@@ -213,12 +213,17 @@ class EditProfileCustActivity : AppCompatActivity() {
     }
 
     private fun confirmUpdate() {
-        AlertDialog.Builder(this)
-            .setTitle("Konfirmasi Perubahan")
-            .setMessage("Apakah Anda yakin ingin menyimpan perubahan profil toko Anda?")
-            .setPositiveButton("Ya") { _, _ -> saveProfile() }
-            .setNegativeButton("Batal", null)
-            .show()
+
+        PopUpDialog.showConfirmDialog(
+            context = this,
+            title = "Apakah Anda yakin ingin menyimpan perubahan profil?",
+            message = "Pastikan data yang dimasukkan sudah benar",
+            positiveText = "Ya",
+            negativeText = "Tidak",
+            onYesClicked = {
+                saveProfile()
+            }
+        )
     }
 
     private fun hasChanged(): Boolean {

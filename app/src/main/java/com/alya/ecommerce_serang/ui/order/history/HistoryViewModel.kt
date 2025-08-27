@@ -231,19 +231,21 @@ class HistoryViewModel(private val repository: OrderRepository) : ViewModel()  {
         }
     }
 
-    private suspend fun refresh(status: String) {
+    fun refresh(status: String) {
         Log.d(TAG, "⏳  refresh(\"$status\") started")
 
         try {
-            if (status == "all") {
-                Log.d(TAG, "🌐  Calling getAllOrdersCombined()")
-                getAllOrdersCombined()                      // network → cache
-            } else {
-                Log.d(TAG, "🌐  repository.getOrderList(\"$status\")")
-                repository.getOrderList(status)            // network → cache
+            viewModelScope.launch {
+                if (status == "all") {
+                    Log.d(TAG, "🌐  Calling getAllOrdersCombined()")
+                    getAllOrdersCombined()                      // network → cache
+                } else {
+                    Log.d(TAG, "🌐  repository.getOrderList(\"$status\")")
+                    repository.getOrderList(status)            // network → cache
+                }
+                Log.d(TAG, "✅  refresh(\"$status\") completed (repository updated)")
+                // Flow that watches DB/cache will emit automatically
             }
-            Log.d(TAG, "✅  refresh(\"$status\") completed (repository updated)")
-            // Flow that watches DB/cache will emit automatically
         } catch (e: Exception) {
             Log.e(TAG, "❌  refresh(\"$status\") failed: ${e.message}", e)
         }

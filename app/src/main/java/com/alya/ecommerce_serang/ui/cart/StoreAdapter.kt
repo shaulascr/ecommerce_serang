@@ -11,6 +11,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.alya.ecommerce_serang.BuildConfig.BASE_URL
 import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.response.customer.cart.CartItemsItem
 import com.alya.ecommerce_serang.data.api.response.customer.cart.DataItemCart
@@ -30,6 +31,12 @@ class StoreAdapter(
     private var activeStoreId: Int? = null
     private var wholesaleStatusMap: Map<Int, Boolean> = mapOf()
     private var wholesalePriceMap: Map<Int, Double> = mapOf()
+    private var productImages: Map<Int, String> = emptyMap()
+
+    fun updateProductImages(newImages: Map<Int, String>) {
+        productImages = newImages
+        notifyDataSetChanged()
+    }
 
     companion object {
         private const val VIEW_TYPE_STORE = 0
@@ -135,7 +142,8 @@ class StoreAdapter(
                     wholesalePrice,
                     { isChecked -> onItemCheckChanged(cartItem.cartItemId, store.storeId, isChecked) },
                     { quantity -> onItemQuantityChanged(cartItem.cartItemId, quantity) },
-                    { onItemDeleted(cartItem.cartItemId) }
+                    { onItemDeleted(cartItem.cartItemId) },
+                    productImages
                 )
             }
         }
@@ -197,7 +205,8 @@ class StoreAdapter(
             wholesalePrice: Double?,
             onCheckedChange: (Boolean) -> Unit,
             onQuantityChanged: (Int) -> Unit,
-            onDelete: () -> Unit
+            onDelete: () -> Unit,
+            productImages: Map<Int, String>
         ) {
             // Set product name
             tvProductName.text = cartItem.productName
@@ -216,20 +225,6 @@ class StoreAdapter(
             // Set quantity
             tvQuantity.text = cartItem.quantity.toString()
 
-            // Visual indication for wholesale items
-//            if (isWholesale) {
-//                // You can add a background or border to indicate wholesale items
-//                // For example:
-////                itemView.setBackgroundResource(R.drawable.bg_wholesale_item)
-//                // If you don't have this drawable, you can use a simple color tint instead:
-//                 itemView.setBackgroundColor(ContextCompat.getColor(itemView.context, R.color.wholesale_item_bg))
-//            } else {
-//                // Reset to default background
-////                itemView.setBackgroundResource(R.drawable.bg_normal_item)
-//                // Or if you don't have this drawable:
-//                 itemView.setBackgroundColor(ContextCompat.getColor(itemView.context, R.color.normal_item_bg))
-//            }
-
             // Set checkbox state without triggering listener
             cbItem.setOnCheckedChangeListener(null)
             cbItem.isChecked = isSelected
@@ -247,11 +242,16 @@ class StoreAdapter(
                 onCheckedChange(isChecked)
             }
 
-            // Load product image
+            val fullImageUrl = when (val img = productImages[cartItem.productId]) {
+                is String -> {
+                    if (img.startsWith("/")) BASE_URL + img.substring(1) else img
+                }
+                else -> null
+            }
+
             Glide.with(itemView.context)
-                .load("https://example.com/images/${cartItem.productId}.jpg") // Assume image URL based on product ID
+                .load(fullImageUrl)
                 .placeholder(R.drawable.placeholder_image)
-                .error(R.drawable.placeholder_image)
                 .into(ivProduct)
 
             // Quantity control

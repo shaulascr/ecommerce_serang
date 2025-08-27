@@ -27,6 +27,7 @@ import com.alya.ecommerce_serang.ui.order.address.SubdsitrictAdapter
 import com.alya.ecommerce_serang.ui.order.address.ViewState
 import com.alya.ecommerce_serang.ui.order.address.VillagesAdapter
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
+import com.alya.ecommerce_serang.utils.PopUpDialog
 import com.alya.ecommerce_serang.utils.SessionManager
 import com.alya.ecommerce_serang.utils.viewmodel.RegisterViewModel
 import com.google.android.material.progressindicator.LinearProgressIndicator
@@ -108,7 +109,16 @@ class RegisterStep3Fragment : Fragment() {
         }
 
         binding.btnRegister.setOnClickListener {
-            submitAddress()
+            PopUpDialog.showConfirmDialog(
+                context = requireContext(),
+                title = "Apakah anda yakin data anda sudah benar?",
+                message = "Pastikan data yang dimasukkan sudah benar",
+                positiveText = "Ya",
+                negativeText = "Tidak",
+                onYesClicked = {
+                    submitAddress()
+                }
+            )
         }
 
         // Observe address submission state
@@ -498,6 +508,7 @@ class RegisterStep3Fragment : Fragment() {
 
     private fun showRegistrationSuccess() {
         // Now we can show the success message for the overall registration process
+
         Toast.makeText(requireContext(), "Berhasil mendaftarkan akun", Toast.LENGTH_LONG).show()
         sessionManager.clearAll()
 

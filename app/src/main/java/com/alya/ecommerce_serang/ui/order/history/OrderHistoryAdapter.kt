@@ -28,6 +28,7 @@ import com.alya.ecommerce_serang.ui.order.detail.PaymentActivity
 import com.alya.ecommerce_serang.ui.order.history.cancelorder.CancelOrderBottomSheet
 import com.alya.ecommerce_serang.ui.order.review.CreateReviewActivity
 import com.alya.ecommerce_serang.ui.product.ReviewProductActivity
+import com.alya.ecommerce_serang.utils.PopUpDialog
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputLayout
 import com.google.gson.Gson
@@ -41,7 +42,8 @@ import java.util.TimeZone
 class OrderHistoryAdapter(
     private val onOrderClickListener: (OrdersItem) -> Unit,
     private val viewModel: HistoryViewModel,
-    private val callbacks: OrderActionCallbacks
+    private val callbacks: OrderActionCallbacks,
+    private val listener: OnDialogActionListener
 ) : RecyclerView.Adapter<OrderHistoryAdapter.OrderViewHolder>() {
 
     interface OrderActionCallbacks {
@@ -237,9 +239,18 @@ class OrderHistoryAdapter(
                             callbacks.onShowLoading(true)
 
                             // Call ViewModel
-                            viewModel.confirmOrderCompleted(order.orderId, "completed")
+                            PopUpDialog.showConfirmDialog(
+                                context = itemView.context,
+                                title = "Apakah anda yakin pesanan sudah sampai?",
+                                message = "Pastikan pesanan sudah samapi di alamat tujuan",
+                                positiveText = "Ya",
+                                negativeText = "Tidak",
+                                onYesClicked = {
+                                    viewModel.confirmOrderCompleted(order.orderId, "completed")
+                                    listener.onDialogConfirmed()
+                                }
+                            )
 //                            viewModel.refreshOrders()
-
                         }
 
                     }
@@ -520,9 +531,19 @@ class OrderHistoryAdapter(
             val bottomSheet = CancelOrderBottomSheet(
                 orderId = orderId,
                 onOrderCancelled = {
-                    callbacks.onOrderCancelled(orderId.toString(), true, "Order cancelled successfully")
-                    // Show a success message
-                    Toast.makeText(context, "Pesanan berhasil dibatalkan", Toast.LENGTH_SHORT).show()
+
+                    PopUpDialog.showConfirmDialog(
+                        context = itemView.context,
+                        title = "Apakah anda yakin ingin membatalkan pesanan?",
+                        positiveText = "Ya",
+                        negativeText = "Tidak",
+                        onYesClicked = {
+                            callbacks.onOrderCancelled(orderId.toString(), true, "Order cancelled successfully")
+                            // Show a success message
+                            Toast.makeText(context, "Pesanan berhasil dibatalkan", Toast.LENGTH_SHORT).show()
+                            listener.onDialogConfirmed()
+                        }
+                    )
                 }
             )
 
@@ -602,4 +623,8 @@ class OrderHistoryAdapter(
             }
         }
     }
+}
+
+interface OnDialogActionListener {
+    fun onDialogConfirmed()
 }

@@ -142,7 +142,7 @@ class SellsListFragment : Fragment() {
 
                     binding.progressBar.visibility = View.GONE
                     binding.tvEmptyState.visibility = View.VISIBLE
-                    Toast.makeText(requireContext(), result.message, Toast.LENGTH_SHORT).show()
+//                    Toast.makeText(requireContext(), result.message, Toast.LENGTH_SHORT).show()
                 }
                 is ViewState.Loading -> {
                     binding.progressBar.visibility = View.VISIBLE

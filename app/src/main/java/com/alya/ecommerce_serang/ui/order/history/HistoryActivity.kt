@@ -57,6 +57,14 @@ class HistoryActivity : AppCompatActivity() {
         }
     }
 
+//    override fun onDialogConfirmed() {
+//        // Option 1: refresh activity
+//        recreate()
+//
+//        // Or Option 2: reload only data
+//        // viewModel.loadOrders()
+//    }
+
     private fun setupToolbar() {
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayShowTitleEnabled(false)

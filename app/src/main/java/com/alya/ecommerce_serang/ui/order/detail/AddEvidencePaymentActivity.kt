@@ -33,6 +33,7 @@ import com.alya.ecommerce_serang.data.repository.OrderRepository
 import com.alya.ecommerce_serang.data.repository.Result
 import com.alya.ecommerce_serang.databinding.ActivityAddEvidencePaymentBinding
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
+import com.alya.ecommerce_serang.utils.PopUpDialog
 import com.alya.ecommerce_serang.utils.SessionManager
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -166,6 +167,7 @@ class AddEvidencePaymentActivity : AppCompatActivity() {
 
         // Submit button
         binding.btnSubmit.setOnClickListener {
+
             validateAndUpload()
             Log.d(TAG, "AddEvidencePaymentActivity onCreate completed")
         }
@@ -313,12 +315,14 @@ class AddEvidencePaymentActivity : AppCompatActivity() {
             return
         }
 
+        //in case applied metode pembayaran yang lain
 //        if (binding.spinnerPaymentMethod.selectedItemPosition == 0) {
 //            Toast.makeText(this, "Silahkan pilih metode pembayaran", Toast.LENGTH_SHORT).show()
 //            return
 //        }
         binding.etAccountNumber.visibility = View.GONE
 
+        //in case applied nomor rekening
 //        if (binding.etAccountNumber.text.toString().trim().isEmpty()) {
 //            Toast.makeText(this, "Silahkan isi nomor rekening/HP", Toast.LENGTH_SHORT).show()
 //            return
@@ -330,8 +334,16 @@ class AddEvidencePaymentActivity : AppCompatActivity() {
 //        }
 
         // All validations passed, proceed with upload
-        uploadPaymentProof()
-
+        PopUpDialog.showConfirmDialog(
+            context = this,
+            title = "Apakah bukti yang dikirimkan sudah benar?",
+            message = "Pastikan bukti yang dikirimkan valid",
+            positiveText = "Ya",
+            negativeText = "Tidak",
+            onYesClicked = {
+                uploadPaymentProof()
+            }
+        )
     }
 
     private fun uploadPaymentProof() {

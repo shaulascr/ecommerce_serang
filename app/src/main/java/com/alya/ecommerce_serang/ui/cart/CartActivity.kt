@@ -43,8 +43,6 @@ class CartActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         sessionManager = SessionManager(this)
         apiService = ApiConfig.getApiService(sessionManager)
-
-
         binding = ActivityCartBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -201,7 +199,8 @@ class CartActivity : AppCompatActivity() {
 
         viewModel.errorMessage.observe(this) { errorMessage ->
             errorMessage?.let {
-                Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
+                binding.emptyCart.visibility = View.VISIBLE
+                Log.e("CartActivity", "Error message: $it")
             }
         }
 
@@ -254,6 +253,10 @@ class CartActivity : AppCompatActivity() {
                 storeAdapter.updateWholesaleStatus(wholesaleStatusMap, wholesalePriceMap)
             }
         }
+
+        viewModel.productImages.observe(this) { productImages ->
+            storeAdapter.updateProductImages(productImages)
+        }
     }
 
     private fun showEmptyState(isEmpty: Boolean) {
@@ -272,5 +275,5 @@ class CartActivity : AppCompatActivity() {
         val format = NumberFormat.getCurrencyInstance(Locale("id", "ID"))
         return format.format(amount).replace("Rp", "Rp ")
     }
-}
 
+}

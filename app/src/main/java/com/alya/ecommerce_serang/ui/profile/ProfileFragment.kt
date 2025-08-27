@@ -1,6 +1,5 @@
 package com.alya.ecommerce_serang.ui.profile
 
-import android.app.AlertDialog
 import android.app.ProgressDialog
 import android.content.Intent
 import android.os.Bundle
@@ -27,6 +26,7 @@ import com.alya.ecommerce_serang.ui.profile.mystore.RegisterStoreActivity
 import com.alya.ecommerce_serang.ui.profile.mystore.StoreOnReviewActivity
 import com.alya.ecommerce_serang.ui.profile.mystore.StoreSuspendedActivity
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
+import com.alya.ecommerce_serang.utils.PopUpDialog
 import com.alya.ecommerce_serang.utils.SessionManager
 import com.alya.ecommerce_serang.utils.viewmodel.MyStoreViewModel
 import com.alya.ecommerce_serang.utils.viewmodel.ProfileViewModel
@@ -200,14 +200,16 @@ class ProfileFragment : Fragment() {
 
     private fun logout(){
 
-        AlertDialog.Builder(requireContext())
-            .setTitle("Konfirmasi")
-            .setMessage("Apakah anda yakin ingin keluar?")
-            .setPositiveButton("Ya") { _, _ ->
+        PopUpDialog.showConfirmDialog(
+            context = requireContext(),
+            title = "Konfirmasi",
+            message = "Apakah anda yakin ingin keluar?",
+            positiveText = "Ya",
+            negativeText = "Tidak",
+            onYesClicked = {
                 actionLogout()
             }
-            .setNegativeButton("Tidak", null)
-            .show()
+        )
     }
 
     private fun actionLogout(){

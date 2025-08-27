@@ -29,9 +29,10 @@ import com.alya.ecommerce_serang.databinding.DialogStoreImageBinding
 import com.alya.ecommerce_serang.ui.profile.mystore.profile.address.DetailStoreAddressActivity
 import com.alya.ecommerce_serang.ui.profile.mystore.profile.payment_info.PaymentInfoActivity
 import com.alya.ecommerce_serang.ui.profile.mystore.profile.shipping_service.ShippingServiceActivity
-import com.alya.ecommerce_serang.utils.viewmodel.MyStoreViewModel
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
+import com.alya.ecommerce_serang.utils.PopUpDialog
 import com.alya.ecommerce_serang.utils.SessionManager
+import com.alya.ecommerce_serang.utils.viewmodel.MyStoreViewModel
 import com.bumptech.glide.Glide
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -39,7 +40,6 @@ import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
 import java.io.FileOutputStream
-import kotlin.getValue
 
 class DetailStoreProfileActivity : AppCompatActivity() {
     private lateinit var binding: ActivityDetailStoreProfileBinding
@@ -244,12 +244,17 @@ class DetailStoreProfileActivity : AppCompatActivity() {
     }
 
     private fun confirmUpdate() {
-        AlertDialog.Builder(this)
-            .setTitle("Konfirmasi Perubahan")
-            .setMessage("Apakah Anda yakin ingin menyimpan perubahan profil toko Anda?")
-            .setPositiveButton("Ya") { _, _ -> updateStoreProfile() }
-            .setNegativeButton("Batal", null)
-            .show()
+
+        PopUpDialog.showConfirmDialog(
+            context = this,
+            title = "Apakah Anda yakin ingin menyimpan perubahan profil?",
+            message = "Pastikan data yang dimasukkan sudah benar",
+            positiveText = "Ya",
+            negativeText = "Tidak",
+            onYesClicked = {
+                updateStoreProfile()
+            }
+        )
     }
 
     private fun showImageOptions() {

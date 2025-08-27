@@ -36,6 +36,8 @@ class CheckoutActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCheckoutBinding
     private lateinit var sessionManager: SessionManager
     private var paymentAdapter: PaymentMethodAdapter? = null
+    private var cartCheckoutAdapter: CartCheckoutAdapter? = null
+    private var checkoutSellerAdapter: CheckoutSellerAdapter? = null
     private var paymentMethodsLoaded = false
 
     private val viewModel: CheckoutViewModel by viewModels {
@@ -210,6 +212,13 @@ class CheckoutActivity : AppCompatActivity() {
                 finish()
             }
         }
+
+        viewModel.productImages.observe(this) { images ->
+            Log.d("CheckoutActivity", "Product images updated: ${images.keys}")
+            // Update adapter when images arrive
+            cartCheckoutAdapter?.updateProductImages(images)
+            checkoutSellerAdapter?.updateProductImages(images)
+        }
     }
 
     private fun setupPaymentMethodsRecyclerView(paymentMethods: List<DetailPaymentItem>) {
@@ -271,24 +280,44 @@ class CheckoutActivity : AppCompatActivity() {
     }
 
     private fun setupProductRecyclerView(checkoutData: CheckoutData) {
-        val adapter = if (checkoutData.isBuyNow || checkoutData.cartItems.size <= 1) {
-            CheckoutSellerAdapter(checkoutData)
+        if (checkoutData.isBuyNow || checkoutData.cartItems.size <= 1) {
+            Log.d("CheckoutActivity", "Using CheckoutSellerAdapter")
+            val adapter = CheckoutSellerAdapter(checkoutData)
+
+            // Keep reference for image updates - create a field in your activity
+            checkoutSellerAdapter = adapter
+
+            binding.rvProductItems.apply {
+                layoutManager = LinearLayoutManager(this@CheckoutActivity)
+                this.adapter = adapter
+                isNestedScrollingEnabled = false
+            }
+
+            // Load images for cart items
+            if (!checkoutData.isBuyNow) {
+                checkoutData.cartItems.forEach { item ->
+                    viewModel.loadProductImage(item.productId)
+                }
+            }
         } else {
-            CartCheckoutAdapter(checkoutData)
-        }
+            Log.d("CheckoutActivity", "Using CartCheckoutAdapter")
+            Log.d("CheckoutActivity", "Cart items count: ${checkoutData.cartItems.size}")
 
-        binding.rvProductItems.apply {
-            layoutManager = LinearLayoutManager(this@CheckoutActivity)
-            this.adapter = adapter
-            isNestedScrollingEnabled = false
-        }
+            // Create adapter and keep reference
+            cartCheckoutAdapter = CartCheckoutAdapter(checkoutData)
 
-//        if (checkoutData.cartItems.isEmpty()) {
-//            // Show empty products state
-//            binding.containerEmptyProducts.visibility = View.VISIBLE
-//            binding.rvProductItems.visibility = View.GONE
-//            return
-//        }
+            binding.rvProductItems.apply {
+                layoutManager = LinearLayoutManager(this@CheckoutActivity)
+                adapter = cartCheckoutAdapter
+                isNestedScrollingEnabled = false
+            }
+
+            // Load images for each product
+            checkoutData.cartItems.forEach { item ->
+                Log.d("CheckoutActivity", "Loading image for productId: ${item.productId}")
+                viewModel.loadProductImage(item.productId)
+            }
+        }
 
         binding.containerEmptyProducts.visibility = View.GONE
         binding.rvProductItems.visibility = View.VISIBLE
@@ -375,7 +404,7 @@ class CheckoutActivity : AppCompatActivity() {
             if (validateOrder()) {
                 PopUpDialog.showConfirmDialog(
                     context = this,
-                    title = "Apakah anda yakin inging membuat pesanan?",
+                    title = "Apakah anda yakin membuat pesanan?",
                     message = "Pastikan data yang dimasukkan sudah benar",
                     positiveText = "Ya",
                     negativeText = "Tidak",

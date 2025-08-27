@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.alya.ecommerce_serang.data.api.dto.UpdateCart
 import com.alya.ecommerce_serang.data.api.response.customer.cart.DataItemCart
 import com.alya.ecommerce_serang.data.api.response.customer.product.CartItemCheckoutInfo
+import com.alya.ecommerce_serang.data.api.response.customer.product.Product
 import com.alya.ecommerce_serang.data.repository.OrderRepository
 import com.alya.ecommerce_serang.data.repository.Result
 import kotlinx.coroutines.launch
@@ -52,6 +53,12 @@ class CartViewModel(private val repository: OrderRepository) : ViewModel() {
     private val _hasConsistentWholesaleStatus = MutableLiveData<Boolean>(true)
     val hasConsistentWholesaleStatus: LiveData<Boolean> = _hasConsistentWholesaleStatus
 
+    private val _productDetail = MutableLiveData<Product?>()
+    val productDetail: LiveData<Product?> get() = _productDetail
+
+    private val _productImages = MutableLiveData<Map<Int, String>>()
+    val productImages: LiveData<Map<Int, String>> = _productImages
+
     fun getCart() {
         _isLoading.value = true
         _errorMessage.value = null
@@ -61,6 +68,12 @@ class CartViewModel(private val repository: OrderRepository) : ViewModel() {
                 is Result.Success -> {
                     _cartItems.value = result.data
                     _isLoading.value = false
+
+                    result.data.forEach { store ->
+                        store.cartItems.forEach { item ->
+                            loadProductImage(item.productId)
+                        }
+                    }
 
                     // After loading cart items, check wholesale status
                     checkWholesaleStatus()
@@ -404,4 +417,29 @@ class CartViewModel(private val repository: OrderRepository) : ViewModel() {
 
         _hasConsistentWholesaleStatus.value = allSameStatus
     }
+
+    fun loadProductImage(productId: Int) {
+        viewModelScope.launch {
+            try {
+                val result = repository.fetchProductDetail(productId)
+                val imageUrl = result?.product?.image ?: ""
+
+                val currentMap = _productImages.value?.toMutableMap() ?: mutableMapOf()
+                currentMap[productId] = imageUrl
+                _productImages.value = currentMap
+
+            } catch (e: Exception) {
+                Log.e("CartViewModel", "Error loading product image: ${e.message}")
+            }
+        }
+    }
+
+//    fun loadProductDetail(productId: Int) {
+//        viewModelScope.launch {
+//            val result = repository.fetchProductDetail(productId)
+//            val currentMap = _productImages.value?.toMutableMap() ?: mutableMapOf()
+//            currentMap[productId] = result?.product?.image ?: ""
+//            _productImages.value = currentMap
+//        }
+//    }
 }

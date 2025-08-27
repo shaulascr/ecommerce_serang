@@ -130,13 +130,6 @@ class CancelOrderBottomSheet(
                 is Result.Success -> {
                     // Hide loading indicator
                     showLoading(false)
-
-                    // Show success message
-                    Toast.makeText(
-                        context,
-                        "Pesanan berhasil dibatalkan",
-                        Toast.LENGTH_SHORT
-                    ).show()
                     Log.d(TAG, "Cancel order status: SUCCESS, message: ${result.data.message}")
 
                     // Notify callback and close dialog

@@ -5,10 +5,9 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.WindowCompat
+import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.dto.FcmReq
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.repository.Result
@@ -16,6 +15,7 @@ import com.alya.ecommerce_serang.data.repository.UserRepository
 import com.alya.ecommerce_serang.databinding.ActivityLoginBinding
 import com.alya.ecommerce_serang.ui.MainActivity
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
+import com.alya.ecommerce_serang.utils.PopUpDialog
 import com.alya.ecommerce_serang.utils.SessionManager
 import com.alya.ecommerce_serang.utils.viewmodel.LoginViewModel
 import com.google.firebase.FirebaseApp
@@ -39,9 +39,9 @@ class LoginActivity : AppCompatActivity() {
 
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-        enableEdgeToEdge()
+//
+//        WindowCompat.setDecorFitsSystemWindows(window, false)
+//        enableEdgeToEdge()
 
         setupListeners()
         observeLoginState()
@@ -83,6 +83,11 @@ class LoginActivity : AppCompatActivity() {
                     retrieveFCMToken()
 //                    sessionManager.saveUserId(response.userId)
 
+                    PopUpDialog.showConfirmDialog(
+                        context = this,
+                        iconRes = R.drawable.checkmark__1_,
+                        title = "Berhasil Masuk"
+                    )
                     Toast.makeText(this, "Berhasil masuk", Toast.LENGTH_SHORT).show()
 
                     startActivity(Intent(this, MainActivity::class.java))
@@ -90,6 +95,11 @@ class LoginActivity : AppCompatActivity() {
                 }
                 is com.alya.ecommerce_serang.data.repository.Result.Error -> {
                     Log.e("LoginActivity", "Login Failed: ${result.exception.message}")
+                    PopUpDialog.showConfirmDialog(
+                        context = this,
+                        iconRes = R.drawable.ic_cancel,
+                        title = "Gagal Masuk"
+                    )
                     Toast.makeText(this, "Gagal masuk", Toast.LENGTH_LONG).show()
                 }
                 is Result.Loading -> {

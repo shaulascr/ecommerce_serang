@@ -338,7 +338,6 @@
     <style name="ThemeOverlay.MyApp.AlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
         <!-- Rounded corners -->
         <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.MyApp.MediumComponent</item>
-        <!-- Dialog background color -->
         <item name="cardBackgroundColor">@color/white</item>
         <item name="materialAlertDialogBodyTextStyle">@font/dmsans_regular</item>
         <item name="android:windowBackground">@android:color/transparent</item>
