@@ -88,7 +88,7 @@ class CategoryProductsActivity : AppCompatActivity() {
             setSupportActionBar(toolbar)
             supportActionBar?.apply {
                 setDisplayHomeAsUpEnabled(true)
-//                title = category.name
+                title = ""
             }
 
             val fullImageUrl = when (val img = category.image) {

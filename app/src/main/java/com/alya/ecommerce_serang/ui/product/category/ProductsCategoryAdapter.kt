@@ -3,7 +3,7 @@ package com.alya.ecommerce_serang.ui.product.category
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.alya.ecommerce_serang.BuildConfig
+import com.alya.ecommerce_serang.BuildConfig.BASE_URL
 import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.dto.ProductsItem
 import com.alya.ecommerce_serang.databinding.ItemProductGridBinding
@@ -46,8 +46,15 @@ class ProductsCategoryAdapter(
                 val priceValue = product.price.toDoubleOrNull() ?: 0.0
                 tvProductPrice.text = "Rp ${NumberFormat.getNumberInstance(Locale("id", "ID")).format(priceValue.toInt())}"
                 // Load product image
+
+                val fullImageUrl = when (val img = product.image) {
+                    is String -> {
+                        if (img.startsWith("/")) BASE_URL + img.substring(1) else img
+                    }
+                    else -> null
+                }
                 Glide.with(itemView.context)
-                    .load("${BuildConfig.BASE_URL}${product.image}")
+                    .load(fullImageUrl)
                     .placeholder(R.drawable.placeholder_image)
                     .error(R.drawable.placeholder_image)
                     .centerCrop()
@@ -57,15 +64,6 @@ class ProductsCategoryAdapter(
                 root.setOnClickListener {
                     onClick(product)
                 }
-
-//                // Optional: Show stock status
-//                if (product.stock > 0) {
-//                    tvStockStatus.text = "Stock: ${product.stock}"
-//                    tvStockStatus.setTextColor(ContextCompat.getColor(itemView.context, R.color.green))
-//                } else {
-//                    tvStockStatus.text = "Out of Stock"
-//                    tvStockStatus.setTextColor(ContextCompat.getColor(itemView.context, R.color.red))
-//                }
             }
         }
     }

@@ -28,10 +28,10 @@
                 app:layout_collapseMode="parallax"
                 android:contentDescription="Category Header Image" />
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@color/blue_50" />
+<!--            <View-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="match_parent"-->
+<!--                android:background="@color/blue_50" />-->
 
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/toolbar"
