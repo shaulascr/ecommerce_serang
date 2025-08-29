@@ -106,22 +106,23 @@ class MyStoreActivity : AppCompatActivity() {
         }
 
         binding.tvHistory.setOnClickListener {
-            startActivity(Intent(this, SellsActivity::class.java))
+            //startActivity(Intent(this, SellsActivity::class.java))
+            startSellsActivityWithStatus("all")
         }
 
         binding.layoutPerluTagihan.setOnClickListener {
-            startActivity(Intent(this, SellsActivity::class.java))
-            //navigateToSellsFragment("pending")
+            //startActivity(Intent(this, SellsActivity::class.java))
+            startSellsActivityWithStatus("unpaid")
         }
 
         binding.layoutPembayaran.setOnClickListener {
-            startActivity(Intent(this, SellsActivity::class.java))
-            //navigateToSellsFragment("paid")
+            //startActivity(Intent(this, SellsActivity::class.java))
+            startSellsActivityWithStatus("paid")
         }
 
         binding.layoutPerluDikirim.setOnClickListener {
-            startActivity(Intent(this, SellsActivity::class.java))
-            //navigateToSellsFragment("processed")
+            //startActivity(Intent(this, SellsActivity::class.java))
+            startSellsActivityWithStatus("processed")
         }
 
         binding.layoutProductMenu.setOnClickListener {
@@ -203,6 +204,12 @@ class MyStoreActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun startSellsActivityWithStatus(status: String?) {
+        val intent = Intent(this, SellsActivity::class.java)
+        intent.putExtra(SellsActivity.EXTRA_INITIAL_STATUS, status)
+        startActivity(intent)
     }
 
     override fun onResume() {

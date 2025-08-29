@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.commit
 import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
@@ -18,6 +19,9 @@ import com.alya.ecommerce_serang.utils.SessionManager
 import com.alya.ecommerce_serang.utils.viewmodel.SellsViewModel
 
 class SellsActivity : AppCompatActivity() {
+    companion object {
+        const val EXTRA_INITIAL_STATUS = "extra_initial_status"
+    }
     private lateinit var binding: ActivitySellsBinding
     private lateinit var sessionManager: SessionManager
 
@@ -68,11 +72,18 @@ class SellsActivity : AppCompatActivity() {
             onBackPressed()
             finish()
         }
+
+//        binding.edtSearch.doAfterTextChanged {
+//            val q = it?.toString()?.trim().orEmpty()
+//            (supportFragmentManager.findFragmentById(R.id.fragment_container_sells) as? SellsFragment)
+//                ?.onSearchQueryChanged(q)
+//        }
     }
 
     private fun showSellsFragment() {
+        val initialStatus = intent.getStringExtra(EXTRA_INITIAL_STATUS)
         supportFragmentManager.commit {
-            replace(R.id.fragment_container_sells, SellsFragment())
+            replace(R.id.fragment_container_sells, SellsFragment.newInstance(initialStatus))
         }
     }
 }

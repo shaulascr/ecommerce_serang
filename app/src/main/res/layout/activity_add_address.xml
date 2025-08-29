@@ -85,14 +85,45 @@
                 android:id="@+id/etDetailAlamat"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:background="@drawable/edit_text_background"
-                android:gravity="top"
-                android:hint="Isi detail alamat (nomor rumah, lantai, dll)"
-                android:inputType="textMultiLine"
-                android:lines="3"
-                android:padding="12dp"
-                android:textSize="14sp" />
+                android:background="@drawable/bg_text_field"
+                android:padding="8dp"
+                style="@style/body_small"
+                android:hint="Isi detail alamat di sini, contoh: Blok, No. Kavling, dsb."
+                android:layout_marginTop="10dp"/>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_gravity="end"
+                android:layout_marginTop="4dp">
+
+                <TextView
+                    android:id="@+id/tv_count_detail"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    style="@style/label_small"
+                    android:text="0"
+                    android:layout_marginEnd="2dp"
+                    android:textColor="@color/black_300"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    style="@style/label_small"
+                    android:text="/"
+                    android:layout_marginEnd="2dp"
+                    android:textColor="@color/black_300"/>
+
+                <TextView
+                    android:id="@+id/tv_count_detail_max"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    style="@style/label_small"
+                    android:text="100"
+                    android:textColor="@color/black_300"/>
+
+            </LinearLayout>
 
             <!-- Provinsi -->
             <TextView
@@ -200,7 +231,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="Desa"
+                android:text="Desa / Kelurahan"
                 android:textColor="@android:color/black"
                 android:textSize="14sp" />
             <com.google.android.material.textfield.TextInputLayout

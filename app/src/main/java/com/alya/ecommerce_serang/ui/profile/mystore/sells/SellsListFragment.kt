@@ -25,6 +25,7 @@ import com.alya.ecommerce_serang.utils.SessionManager
 import com.alya.ecommerce_serang.utils.viewmodel.SellsViewModel
 import com.google.gson.Gson
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 class SellsListFragment : Fragment() {
 
@@ -41,6 +42,13 @@ class SellsListFragment : Fragment() {
     }
     private lateinit var sellsAdapter: SellsAdapter
     private var status: String = "all"
+//    private var allOrders: List<OrdersItem> = emptyList()
+//    private var currentQuery: String = ""
+//
+//    fun filter(query: String) {
+//        currentQuery = query
+//        applyFilter()
+//    }
 
     companion object {
         private const val TAG = "SellsListFragment"
@@ -89,6 +97,29 @@ class SellsListFragment : Fragment() {
         observePaymentConfirmation()
     }
 
+//    private fun applyFilter() {
+//        val q = currentQuery.lowercase(Locale.getDefault())
+//        val filtered = if (q.isBlank()) {
+//            allOrders
+//        } else {
+//            allOrders.filter { it.matches(q) }
+//        }
+//
+//        sellsAdapter.submitList(filtered)
+//        binding.tvEmptyState.visibility = if (filtered.isEmpty()) View.VISIBLE else View.GONE
+//        binding.rvSells.visibility = if (filtered.isEmpty()) View.GONE else View.VISIBLE
+//    }
+//
+//    private fun OrdersItem.matches(q: String): Boolean {
+//        val id = orderId?.toString()?.lowercase(Locale.getDefault()) ?: ""
+//        val customer = username?.lowercase(Locale.getDefault()) ?: ""
+//        val location = subdistrict?.lowercase(Locale.getDefault()) ?: ""
+//        val productHit = orderItems?.any { it?.productName
+//            ?.lowercase(Locale.getDefault())?.contains(q) == true } == true
+//
+//        return id.contains(q) || customer.contains(q) || location.contains(q) || productHit
+//    }
+
     private fun setupRecyclerView() {
         Log.d(TAG, "Setting up RecyclerView")
         sellsAdapter = SellsAdapter(
@@ -118,6 +149,8 @@ class SellsListFragment : Fragment() {
                 is ViewState.Success -> {
                     binding.progressBar.visibility = View.GONE
                     Log.d(TAG, "Data received: ${result.data?.size ?: 0} items")
+//                    allOrders = result.data ?: emptyList()
+//                    applyFilter() // ← apply current query to fresh data
 
                     if (result.data.isNullOrEmpty()) {
                         binding.rvSells.visibility = View.GONE
@@ -135,7 +168,8 @@ class SellsListFragment : Fragment() {
 
                         sellsAdapter.submitList(result.data)
                         Log.d(TAG, "Data submitted to adapter")
-                        Log.d(TAG, "Adapter item count: ${sellsAdapter.itemCount}")                    }
+                        Log.d(TAG, "Adapter item count: ${sellsAdapter.itemCount}")
+                    }
                 }
                 is ViewState.Error -> {
                     Log.e(TAG, "❌ ViewState.Error received: ${result.message}")
@@ -144,9 +178,7 @@ class SellsListFragment : Fragment() {
                     binding.tvEmptyState.visibility = View.VISIBLE
 //                    Toast.makeText(requireContext(), result.message, Toast.LENGTH_SHORT).show()
                 }
-                is ViewState.Loading -> {
-                    binding.progressBar.visibility = View.VISIBLE
-                }
+                is ViewState.Loading -> binding.progressBar.visibility = View.VISIBLE
             }
         }
     }
@@ -213,7 +245,7 @@ class SellsListFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         viewModel.getSellList(status)
-        observeSellsList()
+        //observeSellsList()
     }
 
     override fun onDestroyView() {

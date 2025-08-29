@@ -26,4 +26,7 @@ class SellsViewPagerAdapter(
         // Create a new instance of SellsListFragment with the appropriate status
         return SellsListFragment.newInstance(sellsStatuses[position])
     }
+//    override fun getItemId(position: Int): Long = sellsStatuses[position].hashCode().toLong()
+//    override fun containsItem(itemId: Long): Boolean =
+//        sellsStatuses.any { it.hashCode().toLong() == itemId }
 }

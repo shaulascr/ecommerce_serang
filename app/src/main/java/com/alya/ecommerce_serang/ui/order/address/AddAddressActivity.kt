@@ -34,6 +34,7 @@ import com.alya.ecommerce_serang.data.repository.UserRepository
 import com.alya.ecommerce_serang.databinding.ActivityAddAddressBinding
 import com.alya.ecommerce_serang.utils.SavedStateViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
+import com.alya.ecommerce_serang.utils.applyLiveCounter
 
 class AddAddressActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAddAddressBinding
@@ -64,6 +65,12 @@ class AddAddressActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityAddAddressBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        applyLiveCounter(
+            binding.etDetailAlamat,
+            binding.tvCountDetail,
+            binding.tvCountDetailMax
+        )
 
         sessionManager = SessionManager(this)
         apiService = ApiConfig.getApiService(sessionManager)
