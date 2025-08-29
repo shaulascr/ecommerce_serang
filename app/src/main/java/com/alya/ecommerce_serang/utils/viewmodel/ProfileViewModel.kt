@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.alya.ecommerce_serang.data.api.dto.UserProfile
 import com.alya.ecommerce_serang.data.api.response.auth.ChangePassResponse
+import com.alya.ecommerce_serang.data.api.response.auth.DeleteFCMResponse
 import com.alya.ecommerce_serang.data.api.response.auth.HasStoreResponse
 import com.alya.ecommerce_serang.data.api.response.customer.profile.EditProfileResponse
 import com.alya.ecommerce_serang.data.repository.Result
@@ -27,6 +28,10 @@ class ProfileViewModel(private val userRepository: UserRepository) : ViewModel()
 
     private val _checkStore = MutableLiveData<Boolean>()
     val checkStore: LiveData<Boolean> = _checkStore
+
+    private val _deleteFCMT = MutableLiveData<String>()
+    val deleteFCMT: LiveData<String> = _deleteFCMT
+
     val changePasswordResult = MutableLiveData<Result<ChangePassResponse>>()
     private val _logout = MutableLiveData<Boolean>()
     val logout : LiveData<Boolean> = _logout
@@ -61,7 +66,25 @@ class ProfileViewModel(private val userRepository: UserRepository) : ViewModel()
         }
     }
 
+    fun deleteFCM(){
+        viewModelScope.launch {
+            try {
+                // Call the repository function to request OTP
+                val response: DeleteFCMResponse = userRepository.deleteFCMToken()
 
+                // Log and store success message
+                Log.d("ProfileViewModel", "Has store: ${response.message}")
+                _deleteFCMT.postValue(response.message) // Store the message for UI feedback
+
+            } catch (exception: Exception) {
+                // Handle any errors and update state
+                _deleteFCMT.postValue(exception.message)
+
+                // Log the error for debugging
+                Log.e(":ProfileViewModel", "Error:", exception)
+            }
+        }
+    }
 
     fun editProfileDirect(
         context: Context,
