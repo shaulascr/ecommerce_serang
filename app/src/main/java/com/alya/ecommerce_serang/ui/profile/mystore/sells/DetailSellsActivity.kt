@@ -2,7 +2,6 @@ package com.alya.ecommerce_serang.ui.profile.mystore.sells
 
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -12,7 +11,6 @@ import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.repository.AddressRepository
 import com.alya.ecommerce_serang.data.repository.SellsRepository
 import com.alya.ecommerce_serang.databinding.ActivityDetailSellsBinding
-import com.alya.ecommerce_serang.ui.profile.mystore.sells.shipment.DetailShipmentActivity
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
 import com.alya.ecommerce_serang.utils.viewmodel.AddressViewModel
@@ -22,7 +20,6 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 import java.util.TimeZone
-import kotlin.getValue
 
 class DetailSellsActivity : AppCompatActivity() {
     private lateinit var binding: ActivityDetailSellsBinding
@@ -100,8 +97,9 @@ class DetailSellsActivity : AppCompatActivity() {
             tvOrderCustomer.text = sell.username
             tvOrderDate.text = formatDate(sell.updatedAt.toString())
             tvOrderTotalProduct.text = "(${sell.orderItems?.size ?: 0} Barang)"
-            tvOrderSubtotal.text = formatPrice(sell.totalAmount.toString())
             tvOrderShipPrice.text = formatPrice(sell.shipmentPrice.toString())
+            val totalPrice = (sell.totalAmount?.toDouble()?.toInt() ?: 0) - (sell.shipmentPrice?.toDouble()?.toInt() ?: 0)
+            tvOrderSubtotal.text = formatPrice(totalPrice.toString())
             tvOrderPrice.text = formatPrice(sell.totalAmount.toString())
             tvOrderRecipient.text = sell.recipient ?: "-"
             tvOrderRecipientNum.text = sell.receiptNum?.toString() ?: "-"

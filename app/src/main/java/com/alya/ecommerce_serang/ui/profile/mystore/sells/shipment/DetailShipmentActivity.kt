@@ -101,7 +101,8 @@ class DetailShipmentActivity : AppCompatActivity() {
             tvOrderCustomer.text = sell.username
             tvOrderDate.text = formatDate(sell.updatedAt.toString())
             tvOrderTotalProduct.text = "(${sell.orderItems?.size ?: 0} Barang)"
-            tvOrderSubtotal.text = formatPrice(sell.totalAmount.toString())
+            val totalPrice = (sell.totalAmount?.toDouble()?.toInt() ?: 0) - (sell.shipmentPrice?.toDouble()?.toInt() ?: 0)
+            tvOrderSubtotal.text = formatPrice(totalPrice.toString())
             tvOrderShipPrice.text = formatPrice(sell.shipmentPrice.toString())
             tvOrderPrice.text = formatPrice(sell.totalAmount.toString())
             tvOrderDue.text = formatDueDate(sell.updatedAt.toString(), 2)

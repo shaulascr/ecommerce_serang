@@ -186,7 +186,9 @@ class SellsAdapter(
                         .into(ivSellsProduct)
 
                     tvSellsQty.text = "${order.orderItems?.size} produk"
-                    tvSellsPrice.text = order.totalAmount?.let { formatPrice(it.toDouble().toInt()) }
+                    val totalPrice = (order.totalAmount?.toDouble()?.toInt() ?: 0) - (order.shipmentPrice?.toDouble()?.toInt() ?: 0)
+                    tvSellsPrice.text =formatPrice(totalPrice).toString()
+                    Log.d("SellsAdapter", "Cek price:$totalPrice" )
                 }
                 "paid" -> {
                     layoutOrders.visibility = View.GONE
@@ -208,7 +210,7 @@ class SellsAdapter(
                     tvSellsDue.text = formatDueDate(order.updatedAt.toString(), 2)
                     val totalPrice = (order.totalAmount?.toDouble()?.toInt() ?: 0) - (order.shipmentPrice?.toDouble()?.toInt() ?: 0)
                     tvSellsPrice.text =formatPrice(totalPrice).toString()
-
+                    tvSellsQty.text = "${order.orderItems?.size} produk"
                 }
                 "processed" -> {
                     layoutOrders.visibility = View.GONE
@@ -237,6 +239,10 @@ class SellsAdapter(
                     tvSellsLocation.text = order.subdistrict
                     tvSellsCustomer.text = order.username
                     tvSellsDue.text = formatDueDate(order.updatedAt.toString(), 2)
+                    tvSellsQty.text = "${order.orderItems?.size} produk"
+                    val totalPrice = (order.totalAmount?.toDouble()?.toInt() ?: 0) - (order.shipmentPrice?.toDouble()?.toInt() ?: 0)
+                    tvSellsPrice.text =formatPrice(totalPrice).toString()
+
                 }
                 "shipped" -> {
                     layoutOrders.visibility = View.GONE
@@ -248,7 +254,11 @@ class SellsAdapter(
 
                     tvSellsDue.text = formatDueDate(order.updatedAt.toString(), 0)
                     tvSellsDue.background = itemView.context.getDrawable(R.drawable.bg_product_inactive)
+                    tvSellsQty.text = "${order.orderItems?.size} produk"
                     btnConfirmPayment.visibility = View.GONE
+
+                    val totalPrice = (order.totalAmount?.toDouble()?.toInt() ?: 0) - (order.shipmentPrice?.toDouble()?.toInt() ?: 0)
+                    tvSellsPrice.text =formatPrice(totalPrice).toString()
                 }
                 "delivered" -> {
                     layoutOrders.visibility = View.GONE
@@ -259,8 +269,13 @@ class SellsAdapter(
                     tvSellsDueDesc.text = "Dikirimkan pada"
 
                     tvSellsDue.text = formatDueDate(order.updatedAt.toString(), 0)
+                    tvSellsQty.text = "${order.orderItems?.size} produk"
+
                     tvSellsDue.background = itemView.context.getDrawable(R.drawable.bg_product_inactive)
                     btnConfirmPayment.visibility = View.GONE
+
+                    val totalPrice = (order.totalAmount?.toDouble()?.toInt() ?: 0) - (order.shipmentPrice?.toDouble()?.toInt() ?: 0)
+                    tvSellsPrice.text =formatPrice(totalPrice).toString()
                 }
                 "completed" -> {
                     layoutOrders.visibility = View.GONE
@@ -271,8 +286,13 @@ class SellsAdapter(
                     tvSellsDueDesc.text = "Selesai pada"
 
                     tvSellsDue.text = formatDueDate(order.updatedAt.toString(), 0)
+                    tvSellsQty.text = "${order.orderItems?.size} produk"
+
                     tvSellsDue.background = itemView.context.getDrawable(R.drawable.bg_product_inactive)
                     btnConfirmPayment.visibility = View.GONE
+
+                    val totalPrice = (order.totalAmount?.toDouble()?.toInt() ?: 0) - (order.shipmentPrice?.toDouble()?.toInt() ?: 0)
+                    tvSellsPrice.text =formatPrice(totalPrice).toString()
                 }
                 "canceled" -> {
                     layoutOrders.visibility = View.GONE
@@ -283,6 +303,10 @@ class SellsAdapter(
                     tvSellsDueDesc.text = "Dibatalkan pada"
 
                     tvSellsDue.text = formatDueDate(order.updatedAt.toString(), 0)
+                    tvSellsQty.text = "${order.orderItems?.size} produk"
+                    val totalPrice = (order.totalAmount?.toDouble()?.toInt() ?: 0) - (order.shipmentPrice?.toDouble()?.toInt() ?: 0)
+                    tvSellsPrice.text =formatPrice(totalPrice).toString()
+
                     tvSellsDue.background = itemView.context.getDrawable(R.drawable.bg_product_inactive)
                     btnConfirmPayment.visibility = View.GONE
                 }
