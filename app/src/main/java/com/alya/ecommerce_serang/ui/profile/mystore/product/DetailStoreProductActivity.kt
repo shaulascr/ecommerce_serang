@@ -31,6 +31,7 @@ import com.alya.ecommerce_serang.utils.CompressionResult
 import com.alya.ecommerce_serang.utils.FileUtils.compressFileToMax1MB
 import com.alya.ecommerce_serang.utils.ImageUtils.compressImage
 import com.alya.ecommerce_serang.utils.SessionManager
+import com.alya.ecommerce_serang.utils.applyLiveCounter
 import com.alya.ecommerce_serang.utils.viewmodel.ProductViewModel
 import com.bumptech.glide.Glide
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -115,6 +116,18 @@ class DetailStoreProductActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityDetailStoreProductBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        applyLiveCounter(
+            binding.edtNamaProduk,
+            binding.tvCountName,
+            binding.tvCountNameMax
+        )
+
+        applyLiveCounter(
+            binding.edtDeskripsiProduk,
+            binding.tvCountDesc,
+            binding.tvCountDescMax
+        )
 
         isEditing = intent.getBooleanExtra("is_editing", false)
         productId = intent.getIntExtra("product_id", -1)
@@ -270,6 +283,9 @@ class DetailStoreProductActivity : AppCompatActivity() {
             binding.tvHalalName.text = getFileName(it.toUri())
             binding.switcherHalal.showNext()
         }
+
+        binding.switchIsActive.isChecked = product.status == "active"
+        binding.switchIsActive.jumpDrawablesToCurrentState()
 
         validateForm()
     }

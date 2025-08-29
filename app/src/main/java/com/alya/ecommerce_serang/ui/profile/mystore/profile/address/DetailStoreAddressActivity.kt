@@ -22,6 +22,7 @@ import com.alya.ecommerce_serang.data.repository.Result
 import com.alya.ecommerce_serang.databinding.ActivityDetailStoreAddressBinding
 import com.alya.ecommerce_serang.utils.BaseViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
+import com.alya.ecommerce_serang.utils.applyLiveCounter
 import com.alya.ecommerce_serang.utils.viewmodel.AddressViewModel
 import com.google.android.material.snackbar.Snackbar
 
@@ -54,6 +55,18 @@ class DetailStoreAddressActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityDetailStoreAddressBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        applyLiveCounter(
+            binding.edtStreet,
+            binding.tvCountStreet,
+            binding.tvCountStreetMax
+        )
+
+        applyLiveCounter(
+            binding.edtDetailAddress,
+            binding.tvCountDetail,
+            binding.tvCountDetailMax
+        )
 
         sessionManager = SessionManager(this)
         apiService = ApiConfig.getApiService(sessionManager)

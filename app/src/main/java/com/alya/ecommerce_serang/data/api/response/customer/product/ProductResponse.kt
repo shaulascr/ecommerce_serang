@@ -62,6 +62,9 @@ data class Product(
 	@field:SerializedName("wholesale_min_item")
 	val wholesaleMinItem: Int? = null,
 
+	@field:SerializedName("status")
+	val status: String,
+
 	@field:SerializedName("min_order")
 	val minOrder: Int,
 

@@ -167,6 +167,40 @@
                     style="@style/body_small"
                     android:layout_marginTop="10dp"/>
 
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_gravity="end"
+                    android:layout_marginTop="4dp">
+
+                    <TextView
+                        android:id="@+id/tv_count_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        style="@style/label_small"
+                        android:text="0"
+                        android:layout_marginEnd="2dp"
+                        android:textColor="@color/black_300"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        style="@style/label_small"
+                        android:text="/"
+                        android:layout_marginEnd="2dp"
+                        android:textColor="@color/black_300"/>
+
+                    <TextView
+                        android:id="@+id/tv_count_name_max"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        style="@style/label_small"
+                        android:text="50"
+                        android:textColor="@color/black_300"/>
+
+                </LinearLayout>
+
             </LinearLayout>
 
             <!-- Kategori Produk -->
@@ -270,6 +304,40 @@
                     android:inputType="text|textMultiLine"
                     android:gravity="top"
                     android:layout_marginTop="10dp"/>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_gravity="end"
+                    android:layout_marginTop="4dp">
+
+                    <TextView
+                        android:id="@+id/tv_count_desc"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        style="@style/label_small"
+                        android:text="0"
+                        android:layout_marginEnd="2dp"
+                        android:textColor="@color/black_300"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        style="@style/label_small"
+                        android:text="/"
+                        android:layout_marginEnd="2dp"
+                        android:textColor="@color/black_300"/>
+
+                    <TextView
+                        android:id="@+id/tv_count_desc_max"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        style="@style/label_small"
+                        android:text="255"
+                        android:textColor="@color/black_300"/>
+
+                </LinearLayout>
 
             </LinearLayout>
 

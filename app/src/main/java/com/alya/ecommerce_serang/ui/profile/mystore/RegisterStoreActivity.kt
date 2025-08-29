@@ -42,6 +42,7 @@ import com.alya.ecommerce_serang.utils.ImageUtils
 import com.alya.ecommerce_serang.utils.PopUpDialog
 import com.alya.ecommerce_serang.utils.RegisterStoreViewModelFactory
 import com.alya.ecommerce_serang.utils.SessionManager
+import com.alya.ecommerce_serang.utils.applyLiveCounter
 import com.alya.ecommerce_serang.utils.viewmodel.MyStoreViewModel
 import com.alya.ecommerce_serang.utils.viewmodel.RegisterStoreViewModel
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -101,6 +102,30 @@ class RegisterStoreActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityRegisterStoreBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        applyLiveCounter(
+            binding.etStoreName,
+            binding.tvCountName,
+            binding.tvCountNameMax
+        )
+
+        applyLiveCounter(
+            binding.etStoreDescription,
+            binding.tvCountDesc,
+            binding.tvCountDescMax
+        )
+
+        applyLiveCounter(
+            binding.etStreet,
+            binding.tvCountStreet,
+            binding.tvCountStreetMax
+        )
+
+        applyLiveCounter(
+            binding.etAddressDetail,
+            binding.tvCountAddressDetail,
+            binding.tvCountAddressDetailMax
+        )
 
         sessionManager = SessionManager(this)
 

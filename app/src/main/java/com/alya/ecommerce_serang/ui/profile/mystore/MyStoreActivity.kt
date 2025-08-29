@@ -51,7 +51,6 @@ class MyStoreActivity : AppCompatActivity() {
 
         enableEdgeToEdge()
 
-
         binding.headerMyStore.headerTitle.text = "Toko Saya"
 
         binding.headerMyStore.headerLeftIcon.setOnClickListener {
