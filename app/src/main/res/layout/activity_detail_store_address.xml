@@ -379,6 +379,10 @@
             <Button
                 android:id="@+id/btn_save_address"
                 android:text="Simpan Perubahan"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:layout_gravity="center"
+                android:gravity="center"
                 style="@style/button.large.active.long"
                 android:enabled="true"
                 android:layout_marginBottom="16dp"/>

@@ -75,7 +75,6 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/dmsans_regular"
             android:theme="@style/body_medium"
-
             android:text="Tidak" />
 
         <com.google.android.material.button.MaterialButton

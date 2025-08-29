@@ -742,7 +742,7 @@ class DetailOrderStatusActivity : AppCompatActivity() {
             inputFormat.timeZone = TimeZone.getTimeZone("UTC")
 
             // Output format
-            val outputFormat = SimpleDateFormat("dd MMMM yyyy", Locale("id", "ID"))
+            val outputFormat = SimpleDateFormat("dd MMM yyyy", Locale("id", "ID"))
 
             // Parse the input date
             val date = inputFormat.parse(dateString)

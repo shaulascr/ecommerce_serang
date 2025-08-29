@@ -39,7 +39,7 @@
                 <TextView
                     android:id="@+id/courier_name_cost"
                     android:fontFamily="@font/dmsans_semibold"
-                    android:textSize="14sp"
+                    android:textSize="16sp"
                     android:paddingHorizontal="2dp"
                     android:paddingTop="4dp"
                     android:ellipsize="end"
@@ -54,7 +54,7 @@
                     android:id="@+id/est_date"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="12sp"
+                    android:textSize="14sp"
                     android:paddingHorizontal="4dp"
                     android:text="Estimasi 3-4 hari"/>
             </LinearLayout>
@@ -65,7 +65,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.3"
-                android:textSize="14sp"
+                android:textSize="16sp"
                 android:gravity="start"
                 android:fontFamily="@font/dmsans_semibold"
                 android:text="Rp15.000"/>

@@ -411,11 +411,25 @@
 
         <Button
             android:id="@+id/btn_hold_payment"
+            android:layout_width="180dp"
+            android:layout_height="wrap_content"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:layout_weight="1"
+            android:scrollHorizontally="false"
+            android:singleLine="false"
             style="@style/button.large.secondary.medium"
             android:text="Tahan Konfirmasi"/>
 
         <Button
             android:id="@+id/btn_confirm_payment"
+            android:layout_width="180dp"
+            android:layout_height="wrap_content"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:layout_weight="1"
+            android:scrollHorizontally="false"
+            android:singleLine="false"
             style="@style/button.large.active.medium"
             android:text="Konfirmasi Terima"
             android:layout_alignParentEnd="true"/>
