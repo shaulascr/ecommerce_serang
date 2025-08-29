@@ -206,6 +206,8 @@ class SellsAdapter(
                     tvSellsTitle.text = "Pesanan Telah Dibayar"
                     tvSellsDueDesc.text = "Konfirmasi pembayaran sebelum:"
                     tvSellsDue.text = formatDueDate(order.updatedAt.toString(), 2)
+                    val totalPrice = (order.totalAmount?.toDouble()?.toInt() ?: 0) - (order.shipmentPrice?.toDouble()?.toInt() ?: 0)
+                    tvSellsPrice.text =formatPrice(totalPrice).toString()
 
                 }
                 "processed" -> {

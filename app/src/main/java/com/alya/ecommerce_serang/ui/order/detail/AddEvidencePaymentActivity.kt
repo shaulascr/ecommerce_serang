@@ -222,8 +222,6 @@ class AddEvidencePaymentActivity : AppCompatActivity() {
         val adapter = object : ArrayAdapter<String>(this, R.layout.item_dialog_add_evidence, R.id.tvOption, options) {
             override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
                 val view = super.getView(position, convertView, parent)
-                val divider = view.findViewById<View>(R.id.divider)
-                divider.visibility = if (position == count - 1) View.GONE else View.VISIBLE
                 return view
             }
         }
@@ -454,9 +452,6 @@ class AddEvidencePaymentActivity : AppCompatActivity() {
             year, month, day
         ).show()
     }
-
-
-
 
     companion object {
         private const val PERMISSION_REQUEST_CODE = 100

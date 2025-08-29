@@ -418,8 +418,8 @@ class DetailStoreProductActivity : AppCompatActivity() {
 
         Log.d(TAG, "SPPIRT URI: ${sppirtUri.toString()}")
         Log.d(TAG, "Halal URI: ${halalUri.toString()}")
-        logFileInfo("Sppirt Size", sppirtFile!!)
-        logFileInfo("Halal Size", halalFile!!)
+        sppirtFile?.let { logFileInfo("Sppirt Size", it) }
+        halalFile?.let { logFileInfo("Halal Size", it) }
 
         val imagePart = imageFile?.let { createPartFromFile("productimg", it) }
         val sppirtPart = sppirtFile?.let { createPartFromFile("sppirt", it) }
