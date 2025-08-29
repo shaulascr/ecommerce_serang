@@ -12,6 +12,7 @@ import com.alya.ecommerce_serang.data.api.dto.ResetPassReq
 import com.alya.ecommerce_serang.data.api.dto.UserProfile
 import com.alya.ecommerce_serang.data.api.dto.VerifRegisReq
 import com.alya.ecommerce_serang.data.api.response.auth.ChangePassResponse
+import com.alya.ecommerce_serang.data.api.response.auth.DeleteFCMResponse
 import com.alya.ecommerce_serang.data.api.response.auth.FcmTokenResponse
 import com.alya.ecommerce_serang.data.api.response.auth.HasStoreResponse
 import com.alya.ecommerce_serang.data.api.response.auth.ListStoreTypeResponse
@@ -539,6 +540,10 @@ class UserRepository(private val apiService: ApiService) {
         } catch (e: Exception) {
             Result.Error(e)
         }
+    }
+
+    suspend fun deleteFCMToken(): DeleteFCMResponse{
+        return apiService.deleteFCMToken()
     }
 
     companion object{

@@ -224,6 +224,7 @@ class ProfileFragment : Fragment() {
                 delay(500)
                 loadingDialog.dismiss()
                 sessionManager.clearAll()
+                viewModel.deleteFCM()
                 val intent = Intent(requireContext(), LoginActivity::class.java)
                 startActivity(intent)
                 requireActivity().finish()
