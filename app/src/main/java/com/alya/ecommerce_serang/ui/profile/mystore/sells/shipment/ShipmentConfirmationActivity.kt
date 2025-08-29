@@ -4,6 +4,9 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.core.widget.doAfterTextChanged
+import com.alya.ecommerce_serang.R
 import com.alya.ecommerce_serang.data.api.response.store.sells.Orders
 import com.alya.ecommerce_serang.data.api.retrofit.ApiConfig
 import com.alya.ecommerce_serang.data.repository.SellsRepository
@@ -47,6 +50,8 @@ class ShipmentConfirmationActivity : AppCompatActivity() {
         binding.edtKurir.setText(sells?.courier ?: "")
         binding.edtLayananKirim.setText(sells?.service ?: "")
 
+        setupValidation()
+
         binding.btnConfirm.setOnClickListener {
             val receiptNum = binding.edtNoResi.text.toString().trim()
             val orderId = sells?.orderId
@@ -68,4 +73,32 @@ class ShipmentConfirmationActivity : AppCompatActivity() {
             if (success) finish()
         }
     }
+
+    private fun setupValidation() {
+        // Re-validate whenever any field changes
+        listOf(
+            binding.edtKurir,
+            binding.edtLayananKirim,
+            binding.edtNoResi
+        ).forEach { edit ->
+            edit.doAfterTextChanged { validateForm() }
+        }
+        // Initial state
+        validateForm()
+    }
+
+    private fun validateForm() {
+        val allFilled = binding.edtKurir.text?.toString()?.trim()?.isNotEmpty() == true &&
+                binding.edtLayananKirim.text?.toString()?.trim()?.isNotEmpty() == true &&
+                binding.edtNoResi.text?.toString()?.trim()?.isNotEmpty() == true
+
+        binding.btnConfirm.isEnabled = allFilled
+        binding.btnConfirm.setBackgroundResource(
+            if (allFilled) R.drawable.bg_button_active else R.drawable.bg_button_disabled
+        )
+        binding.btnConfirm.setTextColor(
+            ContextCompat.getColor(this, if (allFilled) R.color.white else R.color.black_300)
+        )
+    }
+
 }
